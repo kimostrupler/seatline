@@ -1,7 +1,9 @@
 # CLAUDE.md — Seatline
 
 ## What we are building
+
 Seatline is a multi-tenant SaaS for **office seat management**:
+
 - Companies build their own **floor plans** (buildings → floors → rooms → seats)
 - They **assign people to seats** (long-term seating, not hot-desk booking)
 - Every move is kept as **history** (who sat where, from when to when, changed by whom)
@@ -12,24 +14,26 @@ Target customers: Swiss/EU companies using Microsoft 365. Data must stay in Swit
 (Azure Switzerland North). Swiss data protection law (nDSG) applies — seat history is personal data.
 
 ## Tech stack
-| Area | Choice |
-|---|---|
-| Monorepo | pnpm workspaces + Turborepo |
-| Frontend | Next.js (App Router), TypeScript, Tailwind CSS, shadcn/ui |
-| Floor map / editor | react-konva (Konva.js) |
-| Backend API | NestJS, TypeScript |
-| Database | PostgreSQL + Prisma |
-| Validation | zod (shared schemas in `packages/shared`) |
-| Jobs | **pg-boss** (queue stored in Postgres — no Redis for now, see Hosting) |
-| File storage | Azure Blob Storage (Azurite locally) |
-| Auth | Microsoft Entra ID (multi-tenant app registration) |
-| People sync | Microsoft Graph API |
-| Plan engine | Python (FastAPI worker), ezdxf for DXF, AI vision for images |
-| Payments | Stripe (later) |
-| Errors | Sentry (later) |
-| i18n | German, English, French (Swiss market) |
+
+| Area               | Choice                                                                 |
+| ------------------ | ---------------------------------------------------------------------- |
+| Monorepo           | pnpm workspaces + Turborepo                                            |
+| Frontend           | Next.js (App Router), TypeScript, Tailwind CSS, shadcn/ui              |
+| Floor map / editor | react-konva (Konva.js)                                                 |
+| Backend API        | NestJS, TypeScript                                                     |
+| Database           | PostgreSQL + Prisma                                                    |
+| Validation         | zod (shared schemas in `packages/shared`)                              |
+| Jobs               | **pg-boss** (queue stored in Postgres — no Redis for now, see Hosting) |
+| File storage       | Azure Blob Storage (Azurite locally)                                   |
+| Auth               | Microsoft Entra ID (multi-tenant app registration)                     |
+| People sync        | Microsoft Graph API                                                    |
+| Plan engine        | Python (FastAPI worker), ezdxf for DXF, AI vision for images           |
+| Payments           | Stripe (later)                                                         |
+| Errors             | Sentry (later)                                                         |
+| i18n               | German, English, French (Swiss market)                                 |
 
 ## Hosting (Plan A — lean Azure, ~CHF 20–30/month)
+
 - Azure Switzerland North only.
 - Postgres Flexible Server **B1ms**, Azure Container Apps (scale to zero), Blob Storage.
 - **No Redis**: background jobs use pg-boss in Postgres. Keep job code behind a small
@@ -37,6 +41,7 @@ Target customers: Swiss/EU companies using Microsoft 365. Data must stay in Swit
 - Scaling up = bigger SKUs, not code changes.
 
 ## Repo structure
+
 ```
 /apps
   /web            Next.js frontend
@@ -49,6 +54,7 @@ Target customers: Swiss/EU companies using Microsoft 365. Data must stay in Swit
 ```
 
 ## Data model (first version)
+
 All tables except `tenants` have a `tenant_id`.
 
 - **tenants**: id, name, slug, entra_tenant_id, data_region, created_at
@@ -61,6 +67,7 @@ All tables except `tenants` have a `tenant_id`.
 - **audit_log**: id, tenant_id, actor_id, action, entity_type, entity_id, before (jsonb), after (jsonb), created_at
 
 ## Hard rules
+
 1. **Tenant isolation**: every query is scoped by `tenant_id`. PostgreSQL **Row-Level Security**
    is the second safety net (`app.tenant_id` set per transaction). The API connects as a
    non-owner role so RLS can't be bypassed. Tests prove tenant A cannot read tenant B.
@@ -74,6 +81,7 @@ All tables except `tenants` have a `tenant_id`.
 8. Write tests for business logic (assignments, history, tenant isolation).
 
 ## Build phases
+
 1. **Foundation**: monorepo, docker-compose, Prisma schema + migrations, RLS, seed data, NestJS modules for buildings/floors/rooms/seats/assignments, tests
 2. **UI**: app shell, floor map (view mode), seat details panel, people search, drag-and-drop assign/move, history view
 3. **Layout editor**: draw rooms, place seats, upload plan image as background
@@ -84,13 +92,16 @@ All tables except `tenants` have a `tenant_id`.
 Until Phase 4, the API trusts dev headers `x-tenant-id` / `x-user-id` (dev only).
 
 ## UI direction
+
 Clean and light, similar to Linear / Notion — not like classic facility software.
+
 - Left: building/floor picker + people search
 - Center: zoomable floor map (green = free, grey = taken, yellow = reserved)
 - Right: details of the selected seat (person, since when, history)
 - Toggle between **View** and **Edit layout** mode
 
 ## Working style
+
 - Plan before coding larger steps; show the plan first.
 - Small, focused commits with clear messages.
 - Keep `README.md` current with how to run everything locally.
