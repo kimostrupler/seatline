@@ -11,10 +11,8 @@ say() { printf '\n\033[1m%s\033[0m\n' "$*"; }
 
 SUB=$(az account show --query id -o tsv)
 KV="seatline-$(printf '%s' "$SUB$RG" | sha256sum | cut -c1-10)"
-# own domain (custom-domain.sh) if there is one, else the Azure address
-WEB_HOST=$(az containerapp show -n web -g "$RG" --query "properties.configuration.ingress.customDomains[0].name" -o tsv 2>/dev/null || true)
-[ -n "$WEB_HOST" ] || WEB_HOST=$(az containerapp show -n web -g "$RG" --query properties.configuration.ingress.fqdn -o tsv)
-WEB_URL="https://$WEB_HOST"
+# the app's address (its own domain from custom-domain.sh, else the Azure address)
+WEB_URL=$(az containerapp show -n web -g "$RG" --query "properties.template.containers[0].env[?name=='APP_URL'].value | [0]" -o tsv)
 kv_get() { az keyvault secret show --vault-name "$KV" -n "$1" --query value -o tsv 2>/dev/null || true; }
 
 say "1/4 Stripe secret key"

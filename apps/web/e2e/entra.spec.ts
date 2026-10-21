@@ -18,6 +18,16 @@ test('pages need a Microsoft sign-in; the sign-in button goes to Microsoft and b
   await expect(page).toHaveURL(/\/onboarding$/);
 });
 
+test('the website and legal pages need no sign-in', async ({ page }) => {
+  await page.goto('/legal/privacy');
+  await expect(page.getByRole('heading', { name: 'Privacy policy' })).toBeVisible();
+  await page.goto('/welcome');
+  await expect(page.getByRole('link', { name: 'Start 30 days free' }).first()).toBeVisible();
+  await page.goto('/signin');
+  await page.getByRole('link', { name: 'terms of service' }).click();
+  await expect(page.getByRole('heading', { name: 'Terms of service' })).toBeVisible();
+});
+
 test('a new organisation creates its workspace; a colleague joins as viewer', async ({
   page,
   browser,

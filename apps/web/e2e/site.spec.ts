@@ -1,0 +1,25 @@
+import { expect, test } from '@playwright/test';
+
+test('the landing page links to sign-in and the legal pages', async ({ page }) => {
+  await page.goto('/welcome');
+  await expect(
+    page.getByRole('heading', { name: 'Who sits where — always up to date.' }),
+  ).toBeVisible();
+  await expect(page.getByText('CHF 2', { exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Start 30 days free' }).first()).toHaveAttribute(
+    'href',
+    /\/signin$/,
+  );
+  await page.getByRole('link', { name: 'Privacy policy' }).click();
+  await expect(page.getByRole('heading', { name: 'Privacy policy' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '5. Where your data is stored' })).toBeVisible();
+});
+
+test('legal pages follow the chosen language', async ({ page, context }) => {
+  await context.addCookies([{ name: 'seatline-language', value: 'de', url: 'http://localhost' }]);
+  await page.goto('/legal/terms');
+  await expect(page.getByRole('heading', { name: 'Nutzungsbedingungen' })).toBeVisible();
+  await page.goto('/legal/imprint');
+  await expect(page.getByRole('heading', { name: 'Impressum' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'hello@seatline.ch' }).first()).toBeVisible();
+});

@@ -163,6 +163,15 @@ The database enforces the hard rules itself, so a bug in the API can't break the
   their seat; their history stays. A customer's Microsoft 365 admin approves Seatline once.
 - **People & access** (admins): roles, who can open Seatline, sync status.
 
+## Website and legal pages
+
+- `seatline.ch` / `www` show the landing page (`app/welcome`), the app runs on `app.seatline.ch`
+  — same web app; `middleware.ts` picks by host (`lib/site.ts`: the app address's parent domain).
+  Locally: http://localhost:3000/welcome.
+- Terms, privacy policy, imprint: `/legal/terms|privacy|imprint`, public on both addresses,
+  linked from the sign-in page, the account menu and the website footer. Operator details in
+  `apps/web/lib/legal/operator.ts`; see [docs/legal.md](docs/legal.md).
+
 ## Billing (Stripe)
 
 - Off unless `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` and `STRIPE_PRICE_ID` are set (online:

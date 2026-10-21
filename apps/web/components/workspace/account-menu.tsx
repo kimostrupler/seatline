@@ -1,6 +1,7 @@
 'use client';
 
-import { ChevronsUpDown, LogOut } from 'lucide-react';
+import { ChevronsUpDown, FileText, LogOut } from 'lucide-react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { LanguageSelect } from '@/components/common/language-select';
 import { NavLinks } from '@/components/common/nav-links';
@@ -52,6 +53,14 @@ export function AccountMenu({ withNav = true }: { withNav?: boolean }) {
             <DropdownMenuLabel className="truncate font-normal text-muted-foreground">
               {me.data?.person.email}
             </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {(['terms', 'privacy', 'imprint'] as const).map((doc) => (
+              <DropdownMenuItem key={doc} asChild>
+                <Link href={`/legal/${doc}`}>
+                  <FileText /> {t(`legal.${doc}`)}
+                </Link>
+              </DropdownMenuItem>
+            ))}
             <DropdownMenuSeparator />
             <form action="/auth/logout" method="post">
               <DropdownMenuItem asChild>

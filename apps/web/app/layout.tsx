@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
-import { getLocale, getTranslations } from 'next-intl/server';
+import { getLocale, getMessages, getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { webConfig } from '@/lib/server/config';
 import { Providers } from './providers';
@@ -16,10 +16,12 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const locale = await getLocale();
+  // the website's texts are only used on the server: keep them out of every app page
+  const { site: _site, ...messages } = await getMessages();
   return (
     <html lang={locale}>
       <body>
-        <NextIntlClientProvider>
+        <NextIntlClientProvider messages={messages}>
           <Providers authMode={webConfig().AUTH_MODE}>{children}</Providers>
         </NextIntlClientProvider>
       </body>

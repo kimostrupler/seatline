@@ -38,6 +38,9 @@ param customDomain string = ''
 @description('Managed certificate of customDomain (custom-domain.sh creates it).')
 param customDomainCertificateId string = ''
 
+@description('Website domains (site-domain.sh), e.g. [{ name: \'example.ch\', certificateId: \'…\' }].')
+param siteDomains array = []
+
 @secure()
 @description('Stripe billing (stripe-setup.sh stores these in Key Vault). Empty = billing off.')
 param stripeSecretKey string = ''
@@ -232,9 +235,12 @@ resource web 'Microsoft.App/containerApps@2024-03-01' = {
       ingress: {
         external: true
         targetPort: 3000
-        customDomains: empty(customDomain)
-          ? []
-          : [{ name: customDomain, certificateId: customDomainCertificateId, bindingType: 'SniEnabled' }]
+        customDomains: concat(
+          empty(customDomain)
+            ? []
+            : [{ name: customDomain, certificateId: customDomainCertificateId, bindingType: 'SniEnabled' }],
+          map(siteDomains, d => { name: d.name, certificateId: d.certificateId, bindingType: 'SniEnabled' })
+        )
       }
       registries: registries
       secrets: [

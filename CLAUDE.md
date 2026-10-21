@@ -237,6 +237,17 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - Seat count = active seats; the nightly job syncs it (`list_billed_tenants`). Tests use
   `test/fake-stripe.ts` via `STRIPE_API_BASE`. Keys online: `infra/azure/stripe-setup.sh`.
 
+## Website and legal pages
+
+- Landing page `app/welcome` + `app/legal/[doc]` (terms, privacy, imprint) are public. The
+  site domain = parent of the app's `APP_URL` host (`siteHosts` in `lib/site.ts`): there `/`
+  rewrites to `/welcome`, other paths redirect to the app. robots: index the site, never the app.
+- Website texts are `site.*` messages, used only server-side (`app/layout.tsx` keeps them out
+  of the client). Legal texts live in `lib/legal/docs.ts` (same sections in all languages,
+  tested); the operator's details in `lib/legal/operator.ts` — never invent them.
+- A new sub-processor, tracking or retention change must be reflected in the privacy policy
+  (`docs/legal.md`). Infra: `infra/azure/site-domain.sh`, bicep `siteDomains`.
+
 ## Operations
 
 - Browser errors are posted to the web app's `/client-errors` (sanitized, rate-limited) and
