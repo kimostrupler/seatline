@@ -9,7 +9,14 @@ export class ApiError extends Error {
   }
 }
 
+let devHeaders = true;
+/** Microsoft sign-in uses the session cookie instead of the dev identity headers. */
+export function setDevHeaders(enabled: boolean) {
+  devHeaders = enabled;
+}
+
 function authHeaders(): Record<string, string> {
+  if (!devHeaders) return {};
   const { tenantId, userId } = currentIdentity();
   return { 'x-tenant-id': tenantId, 'x-user-id': userId };
 }

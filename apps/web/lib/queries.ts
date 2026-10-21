@@ -11,6 +11,8 @@ import type {
   HistoryEntry,
   Me,
   Person,
+  DirectoryPerson,
+  TenantInfo,
 } from './types';
 
 export const keys = {
@@ -195,5 +197,48 @@ export function useRemovePlan() {
   return useMutation({
     mutationFn: (floorId: string) => api<void>(`/floors/${floorId}/plan`, { method: 'DELETE' }),
     onSettled: invalidate,
+  });
+}
+
+// ---- People & access (admins) ------------------------------------------------
+
+export const useTenant = (options?: { refetchInterval?: number | false }) =>
+  useQuery({
+    queryKey: ['tenant'],
+    queryFn: () => api<TenantInfo>('/tenant'),
+    refetchInterval: options?.refetchInterval,
+  });
+
+export const useDirectory = () =>
+  useQuery({ queryKey: ['directory'], queryFn: () => api<DirectoryPerson[]>('/people/directory') });
+
+export function useSetRole() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, appRole }: { id: string; appRole: DirectoryPerson['appRole'] }) =>
+      api<{ id: string; appRole: DirectoryPerson['appRole'] }>(`/people/${id}/role`, {
+        method: 'PATCH',
+        body: { appRole },
+      }),
+    onSettled: () =>
+      Promise.all([
+        qc.invalidateQueries({ queryKey: ['directory'] }),
+        qc.invalidateQueries({ queryKey: ['me'] }),
+      ]),
+  });
+}
+
+export function useUpdateTenant() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { defaultAppRole?: TenantInfo['defaultAppRole']; name?: string }) =>
+      api<TenantInfo>('/tenant', { method: 'PATCH', body: input }),
+    onSettled: () => qc.invalidateQueries({ queryKey: ['tenant'] }),
+  });
+}
+
+export function useSyncNow() {
+  return useMutation({
+    mutationFn: () => api<{ queued: boolean }>('/people/sync', { method: 'POST' }),
   });
 }
