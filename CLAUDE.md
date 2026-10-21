@@ -105,3 +105,5 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - Plan before coding larger steps; show the plan first.
 - Small, focused commits with clear messages.
 - Keep `README.md` current with how to run everything locally.
+- **Always merge finished work to `main`**: once `pnpm check` is green, push the working
+  branch, open a PR to `main` and merge it (no need to ask each time).
