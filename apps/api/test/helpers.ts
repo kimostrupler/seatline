@@ -1,6 +1,8 @@
 import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import { PrismaClient, type Prisma } from '@prisma/client';
+import { SignJWT } from 'jose';
+import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 
@@ -97,4 +99,32 @@ export async function createApp(): Promise<INestApplication> {
 
 export function api(app: INestApplication) {
   return request(app.getHttpServer());
+}
+
+/** What the web app sends after Microsoft sign-in: a short-lived signed identity token. */
+export async function msToken(
+  identity: { tid: string; oid: string; name?: string; email?: string },
+  options: { secret?: string; expiresIn?: string; audience?: string } = {},
+) {
+  const token = await new SignJWT({
+    tid: identity.tid,
+    oid: identity.oid,
+    name: identity.name ?? 'Test Person',
+    email: identity.email ?? `${identity.oid.slice(0, 8)}@example.com`,
+  })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuer('seatline-web')
+    .setAudience(options.audience ?? 'seatline-api')
+    .setIssuedAt()
+    .setExpirationTime(options.expiresIn ?? '60s')
+    .sign(new TextEncoder().encode(options.secret ?? process.env.INTERNAL_AUTH_SECRET!));
+  return { authorization: `Bearer ${token}` };
+}
+
+export const newMsIdentity = (tid = randomUUID()) => ({ tid, oid: randomUUID() });
+
+/** Connect a fixture tenant to a Microsoft 365 tenant id. */
+export async function connectMicrosoft(f: Fixture, tid = randomUUID()) {
+  await owner.tenant.update({ where: { id: f.tenantId }, data: { entraTenantId: tid } });
+  return tid;
 }

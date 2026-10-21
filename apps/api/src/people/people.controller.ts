@@ -1,7 +1,12 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
-import { listPeopleQuerySchema, type ListPeopleQuery } from '@seatline/shared';
+import { Body, Controller, Get, Param, Patch, Query } from '@nestjs/common';
+import {
+  listPeopleQuerySchema,
+  setRoleSchema,
+  type ListPeopleQuery,
+  type SetRoleInput,
+} from '@seatline/shared';
 import { AssignmentsService } from '../assignments/assignments.service';
-import { Ctx } from '../auth/decorators';
+import { AdminOnly, Ctx } from '../auth/decorators';
 import type { RequestContext } from '../auth/request-context';
 import { IdPipe, ZodPipe } from '../common/zod.pipe';
 import { PeopleService } from './people.service';
@@ -19,6 +24,23 @@ export class PeopleController {
     @Query(new ZodPipe(listPeopleQuerySchema)) query: ListPeopleQuery,
   ) {
     return this.people.list(ctx, query);
+  }
+
+  /** Admins: everyone, incl. people who left, with roles. (Declared before :id.) */
+  @AdminOnly()
+  @Get('directory')
+  directory(@Ctx() ctx: RequestContext) {
+    return this.people.directory(ctx);
+  }
+
+  @AdminOnly()
+  @Patch(':id/role')
+  setRole(
+    @Ctx() ctx: RequestContext,
+    @Param('id', IdPipe) id: string,
+    @Body(new ZodPipe(setRoleSchema)) body: SetRoleInput,
+  ) {
+    return this.people.setRole(ctx, id, body);
   }
 
   @Get(':id')

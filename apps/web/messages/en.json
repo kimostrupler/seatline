@@ -29,7 +29,8 @@
     "create": "Create",
     "cancel": "Cancel",
     "createFirstBuilding": "Create your first building",
-    "created": "{name} created"
+    "created": "{name} created",
+    "createFirstFloor": "Create the first floor"
   },
   "people": {
     "title": "People",
@@ -197,5 +198,57 @@
     "scaleDialogBody": "The line is {units} units long on the plan. Enter its real length to set the floor’s scale.",
     "meters": "Length in metres",
     "setScale": "Set scale"
+  },
+  "auth": {
+    "signInTitle": "Sign in to Seatline",
+    "signInBody": "Use your work account. Seatline works with Microsoft 365.",
+    "signInButton": "Sign in with Microsoft",
+    "signedOut": "You’ve signed out.",
+    "errors": {
+      "expired": "That sign-in took too long. Please try again.",
+      "access_denied": "Sign-in was cancelled.",
+      "invalid": "Microsoft’s answer couldn’t be verified. Please try again.",
+      "failed": "Sign-in didn’t work. Please try again."
+    },
+    "signOut": "Sign out",
+    "onboardingTitle": "Set up Seatline for your organisation",
+    "onboardingBody": "Nobody from your organisation uses Seatline yet. Create its workspace — you’ll be its first admin, and colleagues who sign in later join automatically.",
+    "companyName": "Organisation name",
+    "createWorkspace": "Create workspace",
+    "noAccessTitle": "No access yet",
+    "noAccessBody": "Your organisation uses Seatline, but you don’t have access. Ask one of its Seatline admins to give you a role.",
+    "inactiveTitle": "Your account is inactive",
+    "inactiveBody": "Your account is marked as no longer with the organisation. If this is wrong, ask a Seatline admin.",
+    "privacy": "Seatline stores your name, e-mail, department and job title from Microsoft 365, in Switzerland."
+  },
+  "admin": {
+    "link": "People & access",
+    "title": "People & access",
+    "back": "Back to the map",
+    "accessTitle": "Who can open Seatline",
+    "accessViewer": "Everyone in the organisation can view the map",
+    "accessInvited": "Only people you give a role",
+    "accessHint": "Applies to people who join from now on. Change existing people below.",
+    "microsoftTitle": "Microsoft 365",
+    "notConnected": "This workspace isn’t connected to Microsoft 365 (demo or local workspace).",
+    "neverSynced": "People haven’t been synced yet.",
+    "lastSync": "Last synced {when}",
+    "syncCounts": "{created} new · {updated} changed · {deactivated} left · {seatsFreed} seats freed",
+    "syncNow": "Sync now",
+    "syncing": "Syncing…",
+    "syncQueued": "Sync started",
+    "syncFailed": "The last sync failed: {message}",
+    "consentNeeded": "Seatline needs permission to read your organisation’s directory. A Microsoft 365 admin approves this once.",
+    "consentButton": "Approve in Microsoft",
+    "syncHint": "Syncs every night. Only name, e-mail, department and job title are copied. People who leave lose their seat; their history stays.",
+    "peopleTitle": "People",
+    "search": "Search people",
+    "columnName": "Name",
+    "columnDepartment": "Department",
+    "columnRole": "Role",
+    "left": "Left",
+    "roleNone": "No access",
+    "roleChanged": "{name} is now {role}",
+    "onlyAdmins": "Only admins can open this page."
   }
 }

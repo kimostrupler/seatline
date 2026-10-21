@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ROOM_TYPES, SEAT_STATUSES, SEAT_TYPES } from './enums';
+import { APP_ROLES, ROOM_TYPES, SEAT_STATUSES, SEAT_TYPES } from './enums';
 
 const id = z.uuid();
 const name = z.string().trim().min(1).max(200);
@@ -126,6 +126,21 @@ export const endAssignmentSchema = z.strictObject({
 
 // ---- People ----------------------------------------------------------------
 
+/** First sign-in from a new organisation: create its Seatline workspace. */
+export const onboardingSchema = z.strictObject({
+  companyName: z.string().trim().min(2).max(200),
+});
+
+export const updateTenantSchema = z.strictObject({
+  name: z.string().trim().min(2).max(200).optional(),
+  /** what people get when they sign in without a role; null = only invited people */
+  defaultAppRole: z.enum(APP_ROLES).nullable().optional(),
+});
+
+export const setRoleSchema = z.strictObject({
+  appRole: z.enum(APP_ROLES).nullable(),
+});
+
 export const listPeopleQuerySchema = z.strictObject({
   search: z.string().trim().max(200).optional(),
   limit: z.coerce.number().int().min(1).max(100).default(50),
@@ -147,4 +162,7 @@ export type LayoutSeat = z.infer<typeof layoutSeat>;
 export type AssignSeatInput = z.infer<typeof assignSeatSchema>;
 export type ReserveSeatInput = z.infer<typeof reserveSeatSchema>;
 export type EndAssignmentInput = z.infer<typeof endAssignmentSchema>;
+export type OnboardingInput = z.infer<typeof onboardingSchema>;
+export type UpdateTenantInput = z.infer<typeof updateTenantSchema>;
+export type SetRoleInput = z.infer<typeof setRoleSchema>;
 export type ListPeopleQuery = z.infer<typeof listPeopleQuerySchema>;

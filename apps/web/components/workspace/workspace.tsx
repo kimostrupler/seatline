@@ -8,7 +8,7 @@ import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { useBuildings, useFloorMap, useFloors, useMe, usePerson } from '@/lib/queries';
 import { useMediaQuery } from '@/lib/use-media-query';
 import { usePlanOpacity } from '@/lib/use-plan-opacity';
-import { DevLogin } from './dev-login';
+import { AccountMenu } from './account-menu';
 import { ModeToggle } from './mode-toggle';
 import { PeopleList } from './people-list';
 import { PersonPanel } from './person-panel';
@@ -67,7 +67,7 @@ export function Workspace() {
 
   const sidebar = (
     <div className="flex h-full min-h-0 flex-col gap-4 p-3">
-      <DevLogin />
+      <AccountMenu />
       <PlacePicker
         buildings={buildings.data ?? []}
         floors={floors.data ?? []}
@@ -175,9 +175,23 @@ export function Workspace() {
             action={{ label: t('map.retry'), onClick: () => map.refetch() }}
           />
         ) : buildings.data?.length === 0 ? (
-          <MapMessage text={t('place.noBuildings')} />
+          <MapMessage
+            text={t('place.noBuildings')}
+            action={
+              canEdit
+                ? { label: t('place.createFirstBuilding'), onClick: () => setDialog('building') }
+                : undefined
+            }
+          />
         ) : floors.data?.length === 0 ? (
-          <MapMessage text={t('place.noFloors')} />
+          <MapMessage
+            text={t('place.noFloors')}
+            action={
+              canEdit
+                ? { label: t('place.createFirstFloor'), onClick: () => setDialog('floor') }
+                : undefined
+            }
+          />
         ) : !map.data ? (
           <MapMessage text={t('map.loading')} />
         ) : map.data.seats.length === 0 && !map.data.floor.planFileKey ? (

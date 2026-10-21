@@ -34,7 +34,11 @@ export function PlacePicker({
 }) {
   const t = useTranslations('place');
   if (buildings.length === 0)
-    return <p className="px-1 text-sm text-muted-foreground">{t('noBuildings')}</p>;
+    return (
+      <div className="grid gap-2 px-1">
+        <p className="text-sm text-muted-foreground">{t('noBuildings')}</p>
+      </div>
+    );
   return (
     <div className="grid gap-2">
       <div className="grid gap-1">

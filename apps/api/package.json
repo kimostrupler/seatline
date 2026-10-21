@@ -26,6 +26,8 @@
     "@prisma/client": "6.19.3",
     "@seatline/shared": "workspace:*",
     "image-size": "2.0.4",
+    "jose": "6.2.13",
+    "pg-boss": "12.38.0",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.2",
     "zod": "4.6.7"

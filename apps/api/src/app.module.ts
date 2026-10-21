@@ -2,7 +2,9 @@ import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { AssignmentsController } from './assignments/assignments.controller';
 import { AssignmentsService } from './assignments/assignments.service';
-import { DevAuthGuard } from './auth/dev-auth.guard';
+import { AuthController } from './auth/auth.controller';
+import { AuthGuard } from './auth/auth.guard';
+import { IdentityService } from './auth/identity.service';
 import { BuildingsController } from './buildings/buildings.controller';
 import { BuildingsService } from './buildings/buildings.service';
 import { PrismaExceptionFilter } from './common/prisma-exception.filter';
@@ -19,12 +21,20 @@ import { RoomsService } from './rooms/rooms.service';
 import { SeatsController } from './seats/seats.controller';
 import { SeatsService } from './seats/seats.service';
 import { StorageService } from './storage/storage.service';
+import { TenantController } from './tenant/tenant.controller';
+import { JobQueue } from './jobs/job-queue.service';
+import { GraphClient } from './sync/graph.client';
+import { PeopleSyncController } from './sync/people-sync.controller';
+import { PeopleSyncService } from './sync/people-sync.service';
 
 @Module({
   imports: [DbModule],
   controllers: [
     HealthController,
     MeController,
+    AuthController,
+    TenantController,
+    PeopleSyncController,
     BuildingsController,
     FloorsController,
     RoomsController,
@@ -41,7 +51,11 @@ import { StorageService } from './storage/storage.service';
     PeopleService,
     StorageService,
     LayoutService,
-    { provide: APP_GUARD, useClass: DevAuthGuard },
+    IdentityService,
+    GraphClient,
+    PeopleSyncService,
+    JobQueue,
+    { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_FILTER, useClass: PrismaExceptionFilter },
   ],
 })

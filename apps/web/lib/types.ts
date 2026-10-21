@@ -111,3 +111,31 @@ export interface AssignResult {
   assignment: Assignment;
   closed: Assignment[];
 }
+
+export interface TenantInfo {
+  id: string;
+  name: string;
+  defaultAppRole: AppRole | null;
+  entraTenantId: string | null;
+  peopleSyncedAt: string | null;
+  peopleSyncStatus: {
+    ok: boolean;
+    at: string;
+    error?: 'not_connected' | 'not_configured' | 'consent_required' | 'failed';
+    message?: string;
+    created?: number;
+    updated?: number;
+    deactivated?: number;
+    seatsFreed?: number;
+  } | null;
+}
+
+export interface DirectoryPerson {
+  id: string;
+  displayName: string;
+  email: string;
+  department: string | null;
+  jobTitle: string | null;
+  appRole: AppRole | null;
+  active: boolean;
+}
