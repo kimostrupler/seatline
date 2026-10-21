@@ -311,3 +311,6 @@ export interface MovePlanDetail extends Omit<MovePlanSummary, 'moves'> {
   placed?: number;
   unplaced?: number;
 }
+
+/** A plan the plan engine read: suggestions in the pixels of its new background image. */
+export type PlanImport = import('@seatline/shared').PlanDraft & { importId: string };

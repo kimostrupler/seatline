@@ -33,6 +33,13 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: apps/plan-engine/requirements*.txt
+      - name: Install the plan engine (Python)
+        run: pip install -r apps/plan-engine/requirements-dev.txt
       - name: Create the API role and e2e database (same as infra/postgres/init.sql)
         run: |
           psql postgresql://seatline:seatline@localhost:5432/seatline_test -c "CREATE ROLE seatline_app LOGIN PASSWORD 'seatline_app'"

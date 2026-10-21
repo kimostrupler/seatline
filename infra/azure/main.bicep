@@ -11,6 +11,7 @@ param prefix string = 'seatline'
 @description('Container images. The placeholder is used until the first deploy pushes real ones.')
 param apiImage string = 'mcr.microsoft.com/k8se/quickstart:latest'
 param webImage string = 'mcr.microsoft.com/k8se/quickstart:latest'
+param planEngineImage string = 'mcr.microsoft.com/k8se/quickstart:latest'
 
 @secure()
 @description('PostgreSQL admin password (owner of the tables; used only by the migration job).')
@@ -171,6 +172,7 @@ var storageConnection = 'DefaultEndpointsProtocol=https;AccountName=${storage.na
 var azureWebUrl = 'https://web.${env.properties.defaultDomain}'
 var webUrl = empty(customDomain) ? azureWebUrl : 'https://${customDomain}'
 var apiUrl = 'https://api.internal.${env.properties.defaultDomain}'
+var planEngineUrl = 'https://plan-engine.internal.${env.properties.defaultDomain}'
 
 var identity = {
   type: 'UserAssigned'
@@ -214,9 +216,39 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
               { name: 'INTERNAL_AUTH_SECRET', secretRef: 'internal-auth-secret' }
               { name: 'ENTRA_CLIENT_ID', value: entraClientId }
               { name: 'ENTRA_CLIENT_SECRET', secretRef: 'entra-client-secret' }
+              { name: 'PLAN_ENGINE_URL', value: planEngineUrl }
+              { name: 'PLAN_ENGINE_TOKEN', secretRef: 'internal-auth-secret' }
             ],
             stripeEnv
           )
+        }
+      ]
+      scale: { minReplicas: 0, maxReplicas: 2 }
+    }
+  }
+}
+
+// Reads architect plans (DXF, PDF, images) for the API; parses untrusted files, so it has no
+// secrets besides the token the API sends, and no access to the database or storage.
+resource planEngine 'Microsoft.App/containerApps@2024-03-01' = {
+  name: 'plan-engine'
+  location: location
+  identity: identity
+  dependsOn: [acrPull]
+  properties: {
+    managedEnvironmentId: env.id
+    configuration: {
+      ingress: { external: false, targetPort: 8000 } // only reachable from inside the environment
+      registries: registries
+      secrets: [{ name: 'internal-auth-secret', value: internalAuthSecret }]
+    }
+    template: {
+      containers: [
+        {
+          name: 'plan-engine'
+          image: planEngineImage
+          resources: { cpu: json('1.0'), memory: '2Gi' }
+          env: [{ name: 'PLAN_ENGINE_TOKEN', secretRef: 'internal-auth-secret' }]
         }
       ]
       scale: { minReplicas: 0, maxReplicas: 2 }

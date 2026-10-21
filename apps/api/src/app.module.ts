@@ -25,6 +25,7 @@ import { PrismaExceptionFilter } from './common/prisma-exception.filter';
 import { DbModule } from './db/db.module';
 import { FloorsController } from './floors/floors.controller';
 import { FloorsService } from './floors/floors.service';
+import { PlanImportService } from './floors/plan-import.service';
 import { HealthController } from './health.controller';
 import { LayoutService } from './layout/layout.service';
 import { MeController } from './me.controller';
@@ -73,6 +74,7 @@ import { PeopleSyncService } from './sync/people-sync.service';
     OverviewService,
     BuildingsService,
     FloorsService,
+    PlanImportService,
     RoomsService,
     SeatsService,
     AssignmentsService,

@@ -241,7 +241,8 @@
     "distributeX": "Gleichmässig von links nach rechts verteilen",
     "distributeY": "Gleichmässig von oben nach unten verteilen",
     "duplicateFloor": "Stockwerk duplizieren",
-    "duplicateFloorHint": "Ein neues Stockwerk mit denselben Räumen, Plätzen und dem Grundriss, ohne Personen."
+    "duplicateFloorHint": "Ein neues Stockwerk mit denselben Räumen, Plätzen und dem Grundriss, ohne Personen.",
+    "importPlan": "Architektenplan importieren"
   },
   "auth": {
     "signInTitle": "Bei Seatline anmelden",
@@ -457,7 +458,8 @@
       "privacyPurge": "hat Verlauf gelöscht, der älter als {months} Monate ist (Datenschutz)",
       "billingCheckout": "hat den Abo-Checkout geöffnet",
       "billingSubscription": "Abo ist jetzt «{status}»",
-      "billingSeats": "verrechnet jetzt {seats} Plätze"
+      "billingSeats": "verrechnet jetzt {seats} Plätze",
+      "planImported": "hat einen Grundriss für {floor} importiert"
     },
     "showPlan": "Plan öffnen"
   },
@@ -819,5 +821,47 @@
     "copyright": "© {year} Seatline",
     "mapFloor": "Zürich · 3. OG",
     "cardSince": "Platz 3.12 · seit 3. März"
+  },
+  "planImport": {
+    "title": "Architektenplan importieren",
+    "intro": "Seatline liest den Plan und schlägt Räume und Plätze vor. Sie prüfen alles, bevor etwas gespeichert wird.",
+    "kindDxf": "DXF aus dem CAD: am besten — Räume, Namen, Plätze und Massstab. (DWG: zuerst als DXF speichern.)",
+    "kindPdf": "PDF aus dem CAD: Räume, Namen und Plätze; der Massstab, wenn «1:100» draufsteht.",
+    "kindImage": "Scan oder Foto (PDF, PNG, JPG): der Hintergrund und die Räume.",
+    "existing": "Diese Etage hat schon {rooms} Räume und {seats} Plätze. Sie bleiben; importierte kommen dazu.",
+    "replacesPlan": "Der importierte Plan ersetzt das aktuelle Hintergrundbild.",
+    "choose": "Datei wählen",
+    "reading": "Plan wird gelesen…",
+    "readingHint": "Das kann bis zu einer Minute dauern.",
+    "reviewHint": "Tippen Sie auf einen Raum oder Platz, um ihn wegzulassen. Gespeichert wird erst beim Import.",
+    "rooms": "Räume: {picked} von {total}",
+    "seats": "Plätze: {picked} von {total}",
+    "scaleFound": "Massstab aus dem Plan: 1 m = {px} px. Grössen auf dem Plan sind in Metern.",
+    "scaleMissing": "Der Plan hat keinen Massstab. Legen Sie ihn danach mit dem Lineal fest.",
+    "unnamed": "Raum ohne Namen",
+    "roomName": "Raum {n}",
+    "cancel": "Abbrechen",
+    "other": "Andere Datei wählen",
+    "confirm": "{rooms} Räume und {seats} Plätze importieren",
+    "done": "{rooms} Räume und {seats} Plätze importiert. Rückgängig entfernt sie wieder.",
+    "warnings": {
+      "units_guessed": "Die Zeichnung hat keine Einheit; Seatline hat sie aus der Grösse geschätzt. Prüfen Sie den Massstab.",
+      "no_rooms": "Keine Räume gefunden. Zeichnen Sie sie mit dem Raum-Werkzeug.",
+      "no_seats": "Keine Plätze gefunden. Fügen Sie sie mit dem Platz-Werkzeug oder «Platzreihe» hinzu.",
+      "scan": "Das ist ein Scan: Räume werden an den Wänden erkannt, Namen und Plätze aber nicht.",
+      "first_page_only": "Nur die erste Seite des PDFs wird verwendet."
+    },
+    "errors": {
+      "plan_dwg": "DWG-Dateien können nicht direkt gelesen werden. Speichern Sie den Plan im CAD als DXF und importieren Sie diese Datei.",
+      "plan_unsupported": "Dieser Dateityp wird nicht unterstützt. Verwenden Sie DXF, PDF, PNG oder JPG.",
+      "plan_unreadable": "Die Datei konnte nicht gelesen werden. Ist sie beschädigt oder passwortgeschützt?",
+      "plan_empty": "Die Zeichnung ist leer.",
+      "plan_too_complex": "Der Plan ist zu gross. Exportieren Sie nur diese Etage.",
+      "plan_too_large": "Die Datei ist grösser als 25 MB.",
+      "plan_timeout": "Das Lesen hat zu lange gedauert. Exportieren Sie nur diese Etage.",
+      "plan_engine_off": "Der Planimport ist hier nicht verfügbar.",
+      "plan_engine_unreachable": "Der Planleser startet gerade. Bitte versuchen Sie es in einer Minute nochmals.",
+      "failed": "Der Plan konnte nicht gelesen werden. Bitte versuchen Sie eine andere Datei."
+    }
   }
 }

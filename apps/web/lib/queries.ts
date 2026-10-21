@@ -17,6 +17,7 @@ import type {
   Building,
   DashboardData,
   Floor,
+  PlanImport,
   FloorMap,
   HistoryEntry,
   Me,
@@ -242,6 +243,40 @@ export function useUploadPlan() {
     onSettled: invalidate,
   });
 }
+
+/** Architect plan → suggested background, rooms and desks (nothing is saved yet). */
+export function useAnalyzePlan() {
+  return useMutation({
+    mutationFn: ({ floorId, file }: { floorId: string; file: File }) =>
+      apiUpload<PlanImport>(`/floors/${floorId}/imports`, file),
+  });
+}
+
+/** The import's image becomes the floor's plan (rooms and desks follow as an editor action). */
+export function useApplyPlanImport() {
+  const invalidate = useInvalidatePlaces();
+  return useMutation({
+    mutationFn: ({
+      floorId,
+      importId,
+      scale,
+    }: {
+      floorId: string;
+      importId: string;
+      scale: number | null;
+    }) =>
+      api<Floor>(`/floors/${floorId}/imports/${importId}/apply`, {
+        method: 'POST',
+        body: { scale },
+      }),
+    onSettled: invalidate,
+  });
+}
+
+export const discardPlanImport = (floorId: string, importId: string) =>
+  api<void>(`/floors/${floorId}/imports/${importId}`, { method: 'DELETE' }).catch(() => {
+    // best effort: a leftover image is harmless
+  });
 
 export function useRemovePlan() {
   const invalidate = useInvalidatePlaces();

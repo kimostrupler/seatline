@@ -241,7 +241,8 @@
     "distributeX": "Répartir de gauche à droite",
     "distributeY": "Répartir de haut en bas",
     "duplicateFloor": "Dupliquer l’étage",
-    "duplicateFloorHint": "Un nouvel étage avec les mêmes pièces, places et plan, sans les personnes."
+    "duplicateFloorHint": "Un nouvel étage avec les mêmes pièces, places et plan, sans les personnes.",
+    "importPlan": "Importer un plan d’architecte"
   },
   "auth": {
     "signInTitle": "Se connecter à Seatline",
@@ -457,7 +458,8 @@
       "privacyPurge": "a supprimé l’historique de plus de {months} mois (protection des données)",
       "billingCheckout": "a ouvert le paiement de l’abonnement",
       "billingSubscription": "l’abonnement est maintenant « {status} »",
-      "billingSeats": "facture maintenant {seats} places"
+      "billingSeats": "facture maintenant {seats} places",
+      "planImported": "a importé un plan pour {floor}"
     },
     "showPlan": "Ouvrir le plan"
   },
@@ -819,5 +821,47 @@
     "copyright": "© {year} Seatline",
     "mapFloor": "Zurich · 3e étage",
     "cardSince": "Place 3.12 · depuis le 3 mars"
+  },
+  "planImport": {
+    "title": "Importer un plan d’architecte",
+    "intro": "Seatline lit le plan et propose des salles et des places. Vous vérifiez tout avant l’enregistrement.",
+    "kindDxf": "DXF issu du CAO : meilleur résultat — salles, noms, places et échelle. (DWG : enregistrez d’abord en DXF.)",
+    "kindPdf": "PDF exporté du CAO : salles, noms et places ; l’échelle si « 1:100 » y figure.",
+    "kindImage": "Scan ou photo (PDF, PNG, JPG) : le fond et les salles.",
+    "existing": "Cet étage a déjà {rooms} salles et {seats} places. Elles restent ; les éléments importés s’ajoutent.",
+    "replacesPlan": "Le plan importé remplace l’image de fond actuelle.",
+    "choose": "Choisir un fichier",
+    "reading": "Lecture du plan…",
+    "readingHint": "Cela peut prendre jusqu’à une minute.",
+    "reviewHint": "Touchez une salle ou une place pour l’exclure. Rien n’est enregistré avant l’import.",
+    "rooms": "Salles : {picked} sur {total}",
+    "seats": "Places : {picked} sur {total}",
+    "scaleFound": "Échelle du plan : 1 m = {px} px. Les dimensions sont en mètres.",
+    "scaleMissing": "Le plan n’a pas d’échelle. Définissez-la ensuite avec la règle.",
+    "unnamed": "Salle sans nom",
+    "roomName": "Salle {n}",
+    "cancel": "Annuler",
+    "other": "Choisir un autre fichier",
+    "confirm": "Importer {rooms} salles et {seats} places",
+    "done": "{rooms} salles et {seats} places importées. Annuler les retire.",
+    "warnings": {
+      "units_guessed": "Le dessin n’a pas d’unité ; Seatline l’a estimée d’après sa taille. Vérifiez l’échelle.",
+      "no_rooms": "Aucune salle trouvée. Dessinez-les avec l’outil salle.",
+      "no_seats": "Aucune place trouvée. Ajoutez-les avec l’outil place ou « Rangée de places ».",
+      "scan": "C’est un scan : les salles sont trouvées d’après les murs, mais pas leurs noms ni les places.",
+      "first_page_only": "Seule la première page du PDF est utilisée."
+    },
+    "errors": {
+      "plan_dwg": "Les fichiers DWG ne peuvent pas être lus directement. Enregistrez le plan en DXF dans votre CAO et importez ce fichier.",
+      "plan_unsupported": "Ce type de fichier n’est pas pris en charge. Utilisez DXF, PDF, PNG ou JPG.",
+      "plan_unreadable": "Le fichier n’a pas pu être lu. Est-il endommagé ou protégé par un mot de passe ?",
+      "plan_empty": "Le dessin est vide.",
+      "plan_too_complex": "Le plan est trop grand. Exportez uniquement cet étage.",
+      "plan_too_large": "Le fichier dépasse 25 Mo.",
+      "plan_timeout": "La lecture a pris trop de temps. Exportez uniquement cet étage.",
+      "plan_engine_off": "L’import de plans n’est pas disponible ici.",
+      "plan_engine_unreachable": "Le lecteur de plans démarre. Veuillez réessayer dans une minute.",
+      "failed": "La lecture du plan a échoué. Veuillez essayer un autre fichier."
+    }
   }
 }

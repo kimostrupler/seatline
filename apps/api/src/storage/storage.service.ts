@@ -51,6 +51,17 @@ export class StorageService {
     };
   }
 
+  /** The whole file, or null if there is none. */
+  async read(key: string): Promise<Buffer | null> {
+    const container = await this.client();
+    try {
+      return await container.getBlockBlobClient(key).downloadToBuffer();
+    } catch (error) {
+      if ((error as { statusCode?: number }).statusCode === 404) return null;
+      throw error;
+    }
+  }
+
   /** Copy a stored file to a new key (e.g. a floor plan for a copied floor). */
   async copy(from: string, to: string): Promise<void> {
     const container = await this.client();

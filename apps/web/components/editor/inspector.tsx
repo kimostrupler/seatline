@@ -20,6 +20,7 @@ import {
   RotateCw,
   Trash2,
   Upload,
+  FileInput,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useId, useRef, useState, type ReactNode } from 'react';
@@ -75,6 +76,7 @@ import { CreateFloorDialog } from '@/components/workspace/place-dialogs';
 import { platformKeys } from '@/lib/platform-keys';
 import { usePlanOpacity } from '@/lib/use-plan-opacity';
 import { CommitInput } from './commit-input';
+import { ImportPlanDialog } from './import-plan-dialog';
 import type { ClipboardActions } from './use-clipboard';
 
 const errorText = (error: unknown) => (error instanceof Error ? error.message : String(error));
@@ -104,6 +106,7 @@ export function Inspector({
     return (
       <FloorSettings
         map={map}
+        editor={editor}
         building={building}
         onFloorDeleted={onFloorDeleted}
         onBuildingDeleted={onBuildingDeleted}
@@ -576,12 +579,14 @@ function DuplicateFloor({
 
 function FloorSettings({
   map,
+  editor,
   building,
   onFloorDeleted,
   onBuildingDeleted,
   onFloorCreated,
 }: {
   map: FloorMap;
+  editor: LayoutEditorState;
   building: Building | undefined;
   onFloorDeleted: () => void;
   onBuildingDeleted: () => void;
@@ -597,6 +602,7 @@ function FloorSettings({
   const deleteBuilding = useDeleteBuilding();
   const [opacity, setOpacity] = usePlanOpacity();
   const fileInput = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
 
   const run = (promise: Promise<unknown>, success?: string) =>
     promise.then(
@@ -649,6 +655,9 @@ function FloorSettings({
           >
             <Upload /> {floor.planFileKey ? t('replacePlan') : t('uploadPlan')}
           </Button>
+          <Button variant="outline" onClick={() => setImporting(true)} data-testid="import-plan">
+            <FileInput /> {t('importPlan')}
+          </Button>
           {floor.planFileKey && (
             <Button
               variant="ghost"
@@ -660,6 +669,7 @@ function FloorSettings({
           )}
         </div>
       </Field>
+      <ImportPlanDialog open={importing} onOpenChange={setImporting} map={map} editor={editor} />
       {floor.planFileKey && (
         <Field label={t('planOpacity')}>
           <Slider
