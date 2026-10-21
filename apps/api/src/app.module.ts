@@ -10,6 +10,7 @@ import { DbModule } from './db/db.module';
 import { FloorsController } from './floors/floors.controller';
 import { FloorsService } from './floors/floors.service';
 import { HealthController } from './health.controller';
+import { LayoutService } from './layout/layout.service';
 import { MeController } from './me.controller';
 import { PeopleController } from './people/people.controller';
 import { PeopleService } from './people/people.service';
@@ -17,6 +18,7 @@ import { RoomsController } from './rooms/rooms.controller';
 import { RoomsService } from './rooms/rooms.service';
 import { SeatsController } from './seats/seats.controller';
 import { SeatsService } from './seats/seats.service';
+import { StorageService } from './storage/storage.service';
 
 @Module({
   imports: [DbModule],
@@ -37,6 +39,8 @@ import { SeatsService } from './seats/seats.service';
     SeatsService,
     AssignmentsService,
     PeopleService,
+    StorageService,
+    LayoutService,
     { provide: APP_GUARD, useClass: DevAuthGuard },
     { provide: APP_FILTER, useClass: PrismaExceptionFilter },
   ],
