@@ -1,0 +1,32 @@
+# Local development services. Dev-only credentials — never reuse them anywhere else.
+name: seatline
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: seatline
+      POSTGRES_PASSWORD: seatline
+      POSTGRES_DB: seatline
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U seatline']
+      interval: 5s
+      retries: 10
+
+  # Local stand-in for Azure Blob Storage (floor plan files).
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    command: azurite-blob --blobHost 0.0.0.0 --loose
+    ports:
+      - '10000:10000'
+    volumes:
+      - azurite-data:/data
+
+volumes:
+  postgres-data:
+  azurite-data:
