@@ -1,15 +1,24 @@
 import type { Metadata } from 'next';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
+import { Providers } from './providers';
+import './globals.css';
 
-export const metadata: Metadata = {
-  title: 'Seatline',
-  description: 'Office seat management',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('app');
+  return { title: t('name'), description: t('tagline') };
+}
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const locale = await getLocale();
   return (
-    <html lang="en">
-      <body style={{ fontFamily: 'system-ui, sans-serif', margin: 0 }}>{children}</body>
+    <html lang={locale}>
+      <body>
+        <NextIntlClientProvider>
+          <Providers>{children}</Providers>
+        </NextIntlClientProvider>
+      </body>
     </html>
   );
 }

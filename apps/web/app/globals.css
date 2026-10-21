@@ -1,0 +1,146 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/* Appearance follows the system setting (no in-app switch). */
+@custom-variant dark (@media (prefers-color-scheme: dark));
+
+/*
+ * Design tokens. Contrast on its own surface (WCAG):
+ *   foreground #18181b on #ffffff 17.7:1 · muted-foreground #5f5f67 on #ffffff 6.4:1
+ *   foreground #ededef on #18181b 15.1:1 · muted-foreground #a1a1aa on #18181b 6.9:1
+ *   primary #2563eb with white text 5.2:1
+ * Seat status colours mean seat status only — selection uses the primary ring.
+ */
+:root {
+  --background: #ffffff;
+  --foreground: #18181b;
+  --canvas: #f6f6f7;
+  --card: #ffffff;
+  --card-foreground: #18181b;
+  --popover: #ffffff;
+  --popover-foreground: #18181b;
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+  --muted: #f4f4f5;
+  --muted-foreground: #5f5f67;
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+  --destructive: #dc2626;
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #2563eb;
+  --radius: 0.5rem;
+
+  --room-fill: #ffffff;
+  --room-stroke: #d4d4d8;
+  --room-meeting-fill: #f4f4f5;
+  --room-label: #71717a;
+
+  --seat-free-fill: #dcfce7;
+  --seat-free-stroke: #16a34a;
+  --seat-free-text: #14532d;
+  --seat-taken-fill: #e4e4e7;
+  --seat-taken-stroke: #71717a;
+  --seat-taken-text: #27272a;
+  --seat-reserved-fill: #fef3c7;
+  --seat-reserved-stroke: #d97706;
+  --seat-reserved-text: #78350f;
+  --seat-blocked-fill: #ffffff;
+  --seat-blocked-stroke: #a1a1aa;
+  --seat-blocked-text: #71717a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #18181b;
+    --foreground: #ededef;
+    --canvas: #0f0f11;
+    --card: #18181b;
+    --card-foreground: #ededef;
+    --popover: #1f1f23;
+    --popover-foreground: #ededef;
+    --primary: #2563eb;
+    --primary-foreground: #ffffff;
+    --secondary: #27272a;
+    --secondary-foreground: #ededef;
+    --muted: #27272a;
+    --muted-foreground: #a1a1aa;
+    --accent: #27272a;
+    --accent-foreground: #ededef;
+    --destructive: #ef4444;
+    --border: #2e2e33;
+    --input: #3f3f46;
+    --ring: #3b82f6;
+
+    --room-fill: #18181b;
+    --room-stroke: #3f3f46;
+    --room-meeting-fill: #202024;
+    --room-label: #a1a1aa;
+
+    --seat-free-fill: #14532d;
+    --seat-free-stroke: #22c55e;
+    --seat-free-text: #dcfce7;
+    --seat-taken-fill: #3f3f46;
+    --seat-taken-stroke: #a1a1aa;
+    --seat-taken-text: #f4f4f5;
+    --seat-reserved-fill: #713f12;
+    --seat-reserved-stroke: #f59e0b;
+    --seat-reserved-text: #fef3c7;
+    --seat-blocked-fill: #18181b;
+    --seat-blocked-stroke: #71717a;
+    --seat-blocked-text: #a1a1aa;
+  }
+}
+
+@theme inline {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-canvas: var(--canvas);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-seat-free: var(--seat-free-stroke);
+  --color-seat-taken: var(--seat-taken-stroke);
+  --color-seat-reserved: var(--seat-reserved-stroke);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    color-scheme: light dark;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

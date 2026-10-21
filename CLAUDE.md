@@ -100,6 +100,23 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - Right: details of the selected seat (person, since when, history)
 - Toggle between **View** and **Edit layout** mode
 
+## Web app notes (Phase 2)
+
+- `apps/web/components/workspace/workspace.tsx` is the screen; selection lives in the URL
+  (`?building=&floor=&seat=&person=`).
+- Floor map = Konva (`components/map/floor-map.tsx`). **Next 15 bundles React 19.2**, so
+  react-konva must stay on **19.2.x** (19.3 refuses to run). Canvas colours come from the CSS
+  tokens in `app/globals.css` via `useCssVars`.
+- The canvas is invisible to keyboards/screen readers: the hidden seat-button list next to it is
+  the accessible map — keep it in sync with what the canvas shows.
+- Seat status is colour **and** content (initials / R / cross). Status colours mean seat status
+  only; selection and focus use `--primary`.
+- No hard-coded UI text: everything goes through `messages/en.json` (next-intl).
+- Every seat change shows a toast with Undo; undo makes the opposite change (history keeps both).
+- shadcn components are added with `npx shadcn@<version> add …`; check its imports afterwards
+  (it once pulled an npm package called `cn` instead of `@/lib/utils`).
+- Browser tests: `apps/web/e2e`, real API + `seatline_e2e` database, reset before each test.
+
 ## Working style
 
 - Plan before coding larger steps; show the plan first.

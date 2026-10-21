@@ -28,8 +28,11 @@ pnpm db:seed                                 # two demo companies
 pnpm dev                                     # API on :3001, web on :3000
 ```
 
-Until Microsoft sign-in arrives (Phase 4), the API trusts two headers. The seed prints
-ready-to-use values, e.g. the Alpenblick AG admin:
+Open http://localhost:3000. Until Microsoft sign-in arrives (Phase 4), pick a demo
+company and user (admin / editor / viewer) in the top-left **dev sign-in** menu.
+
+The API itself trusts two headers until then. The seed prints ready-to-use values, e.g.
+the Alpenblick AG admin:
 
 ```bash
 curl localhost:3001/buildings \
@@ -40,14 +43,27 @@ curl localhost:3001/buildings \
 ### Checks
 
 ```bash
-pnpm test     # API tests against the seatline_test database (needs pnpm db:up)
-pnpm check    # format + typecheck + tests + build — same as CI
+pnpm test       # unit + API tests (API tests use the seatline_test database)
+pnpm test:e2e   # browser tests (Playwright) against seatline_e2e — run `pnpm build` first
+pnpm check      # format + typecheck + all tests + build — same as CI
 ```
+
+The browser tests start their own API (:3101) and web app (:3100) and reset + re-seed
+`seatline_e2e` before every test. If your Docker database was created before Phase 2,
+add that database once: `docker compose -f infra/docker-compose.yml exec postgres createdb -U seatline seatline_e2e`.
 
 Changing the schema: edit `apps/api/prisma/schema.prisma`, then
 `pnpm --filter @seatline/api db:migrate:dev --name <change>`.
 
-## API (Phase 1)
+## Web app
+
+- Left: dev sign-in, building and floor pickers, people search (drag a person onto a seat).
+- Centre: floor map — scroll to zoom, drag to pan, drag someone onto another seat to move them.
+- Right: the selected seat or person, with actions and full history. Every change can be undone.
+- Light and dark follow the system setting. All text lives in `apps/web/messages/en.json`.
+- The browser calls `/api/*` on the web app, which forwards to the API (`API_URL`, read at runtime).
+
+## API
 
 | Method           | Path                        | What                                                         |
 | ---------------- | --------------------------- | ------------------------------------------------------------ |
