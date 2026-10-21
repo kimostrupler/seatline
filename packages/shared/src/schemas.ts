@@ -57,6 +57,52 @@ export const createSeatSchema = z.strictObject({
 export const updateSeatSchema = createSeatSchema.omit({ floorId: true }).partial();
 export const listSeatsQuerySchema = z.strictObject({ floorId: id });
 
+// ---- Layout editor batch -------------------------------------------------
+
+/**
+ * One editor action (add, move, rotate, delete… possibly many items) saved atomically.
+ * The client creates ids (UUIDs) so undo/redo can refer to the same objects.
+ * Seats' rooms are derived from their position on the server.
+ */
+const layoutRoom = z.strictObject({
+  id,
+  name,
+  type: z.enum(ROOM_TYPES),
+  polygon: polygonSchema,
+});
+const layoutSeat = z.strictObject({
+  id,
+  label: z.string().trim().min(1).max(50),
+  x: z.number(),
+  y: z.number(),
+  rotation: z.number().min(0).lt(360),
+  type: z.enum(SEAT_TYPES),
+  status: z.enum(SEAT_STATUSES),
+});
+
+export const layoutChangesSchema = z.strictObject({
+  rooms: z
+    .strictObject({
+      create: z.array(layoutRoom).max(500).default([]),
+      update: z
+        .array(layoutRoom.partial().required({ id: true }))
+        .max(500)
+        .default([]),
+      delete: z.array(id).max(500).default([]),
+    })
+    .default({ create: [], update: [], delete: [] }),
+  seats: z
+    .strictObject({
+      create: z.array(layoutSeat).max(2000).default([]),
+      update: z
+        .array(layoutSeat.partial().required({ id: true }))
+        .max(2000)
+        .default([]),
+      delete: z.array(id).max(2000).default([]),
+    })
+    .default({ create: [], update: [], delete: [] }),
+});
+
 // ---- Assignments -----------------------------------------------------------
 
 /** Give a person a seat. If they already sit somewhere, that is a move. */
@@ -94,6 +140,10 @@ export type CreateRoomInput = z.infer<typeof createRoomSchema>;
 export type UpdateRoomInput = z.infer<typeof updateRoomSchema>;
 export type CreateSeatInput = z.infer<typeof createSeatSchema>;
 export type UpdateSeatInput = z.infer<typeof updateSeatSchema>;
+export type LayoutChanges = z.infer<typeof layoutChangesSchema>;
+export type LayoutChangesInput = z.input<typeof layoutChangesSchema>;
+export type LayoutRoom = z.infer<typeof layoutRoom>;
+export type LayoutSeat = z.infer<typeof layoutSeat>;
 export type AssignSeatInput = z.infer<typeof assignSeatSchema>;
 export type ReserveSeatInput = z.infer<typeof reserveSeatSchema>;
 export type EndAssignmentInput = z.infer<typeof endAssignmentSchema>;

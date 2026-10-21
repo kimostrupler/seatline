@@ -1,7 +1,7 @@
 'use client';
 
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { api } from './api';
+import { api, apiUpload } from './api';
 import type {
   Assignment,
   AssignResult,
@@ -108,6 +108,92 @@ export function useEndAssignment() {
         method: 'POST',
         body: { note: input.note },
       }),
+    onSettled: invalidate,
+  });
+}
+
+// ---- Buildings and floors (layout editor) -----------------------------------
+
+function useInvalidatePlaces() {
+  const qc = useQueryClient();
+  return () =>
+    Promise.all(
+      ['buildings', 'floors', 'floorMap'].map((k) => qc.invalidateQueries({ queryKey: [k] })),
+    );
+}
+
+export function useCreateBuilding() {
+  const invalidate = useInvalidatePlaces();
+  return useMutation({
+    mutationFn: (input: { name: string; address?: string }) =>
+      api<Building>('/buildings', { method: 'POST', body: input }),
+    onSettled: invalidate,
+  });
+}
+
+export function useUpdateBuilding() {
+  const invalidate = useInvalidatePlaces();
+  return useMutation({
+    mutationFn: ({ id, ...input }: { id: string; name?: string; address?: string | null }) =>
+      api<Building>(`/buildings/${id}`, { method: 'PATCH', body: input }),
+    onSettled: invalidate,
+  });
+}
+
+export function useDeleteBuilding() {
+  const invalidate = useInvalidatePlaces();
+  return useMutation({
+    mutationFn: (id: string) => api<void>(`/buildings/${id}`, { method: 'DELETE' }),
+    onSettled: invalidate,
+  });
+}
+
+export function useCreateFloor() {
+  const invalidate = useInvalidatePlaces();
+  return useMutation({
+    mutationFn: (input: { buildingId: string; name: string; level: number }) =>
+      api<Floor>('/floors', { method: 'POST', body: input }),
+    onSettled: invalidate,
+  });
+}
+
+export function useUpdateFloor() {
+  const invalidate = useInvalidatePlaces();
+  return useMutation({
+    mutationFn: ({
+      id,
+      ...input
+    }: {
+      id: string;
+      name?: string;
+      level?: number;
+      scale?: number | null;
+    }) => api<Floor>(`/floors/${id}`, { method: 'PATCH', body: input }),
+    onSettled: invalidate,
+  });
+}
+
+export function useDeleteFloor() {
+  const invalidate = useInvalidatePlaces();
+  return useMutation({
+    mutationFn: (id: string) => api<void>(`/floors/${id}`, { method: 'DELETE' }),
+    onSettled: invalidate,
+  });
+}
+
+export function useUploadPlan() {
+  const invalidate = useInvalidatePlaces();
+  return useMutation({
+    mutationFn: ({ floorId, file }: { floorId: string; file: File }) =>
+      apiUpload<Floor>(`/floors/${floorId}/plan`, file),
+    onSettled: invalidate,
+  });
+}
+
+export function useRemovePlan() {
+  const invalidate = useInvalidatePlaces();
+  return useMutation({
+    mutationFn: (floorId: string) => api<void>(`/floors/${floorId}/plan`, { method: 'DELETE' }),
     onSettled: invalidate,
   });
 }

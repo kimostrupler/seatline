@@ -117,6 +117,22 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   (it once pulled an npm package called `cn` instead of `@/lib/utils`).
 - Browser tests: `apps/web/e2e`, real API + `seatline_e2e` database, reset before each test.
 
+## Layout editor notes (Phase 3)
+
+- Edit mode = `components/editor/*`; pure edit logic (apply, inverse for undo, move,
+  rotate, duplicate, labels) is in `lib/editor/ops.ts` with unit tests — keep logic there.
+- Every user action is **one** `PATCH /floors/:id/layout` batch (all or nothing). The client
+  creates the UUIDs so undo/redo refer to the same rows. `useLayoutEditor` shows changes
+  instantly and sends batches one at a time, in order.
+- A seat's room is **derived on the server** from its position (smallest containing room,
+  `roomForPoint` in `packages/shared`). Don't let clients set `roomId` in the editor.
+- Seats with any assignment history can't be deleted (block them) — enforced in
+  `LayoutService`, and the history rows' FK restrict backs it up.
+- Plan images: raster only (PNG/JPG/WebP, checked by content). The image's pixel size is the
+  floor's coordinate space. Storage keys must start with the tenant id; `getPlan` checks it.
+- The shadcn CLI stops at "overwrite?" prompts and re-adds an npm package called `cn`. If it
+  does, fetch the component JSON from the registry instead and fix the `cn` import.
+
 ## Working style
 
 - Plan before coding larger steps; show the plan first.
