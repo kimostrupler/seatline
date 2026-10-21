@@ -27,6 +27,7 @@ export default defineConfig({
       AZURE_STORAGE_CONNECTION_STRING:
         'DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10100/devstoreaccount1;',
       AZURE_STORAGE_CONTAINER: 'test-floor-plans',
+      INTERNAL_AUTH_SECRET: 'test-internal-secret-0123456789-abcdefghijkl',
     },
   },
 });

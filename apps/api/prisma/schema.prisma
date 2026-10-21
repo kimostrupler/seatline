@@ -57,12 +57,17 @@ enum AssignmentKind {
 }
 
 model Tenant {
-  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name          String
-  slug          String   @unique
-  entraTenantId String?  @unique @map("entra_tenant_id") @db.Uuid
-  dataRegion    String   @default("switzerlandnorth") @map("data_region")
-  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String
+  slug             String    @unique
+  entraTenantId    String?   @unique @map("entra_tenant_id") @db.Uuid
+  dataRegion       String    @default("switzerlandnorth") @map("data_region")
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  /// role for people who sign in without one (null = only people an admin gave a role)
+  defaultAppRole   AppRole?  @default(viewer) @map("default_app_role")
+  peopleSyncedAt   DateTime? @map("people_synced_at") @db.Timestamptz(3)
+  /// last Microsoft Graph sync: { ok, error?, created, updated, deactivated, seatsFreed }
+  peopleSyncStatus Json?     @map("people_sync_status")
 
   people      Person[]
   buildings   Building[]
@@ -88,9 +93,9 @@ model Person {
   active        Boolean   @default(true)
   syncedAt      DateTime? @map("synced_at") @db.Timestamptz(3)
 
-  tenant        Tenant           @relation(fields: [tenantId], references: [id])
-  assignments   SeatAssignment[] @relation("AssignmentPerson")
-  assignedByMe  SeatAssignment[] @relation("AssignmentAssignedBy")
+  tenant       Tenant           @relation(fields: [tenantId], references: [id])
+  assignments  SeatAssignment[] @relation("AssignmentPerson")
+  assignedByMe SeatAssignment[] @relation("AssignmentAssignedBy")
 
   @@unique([tenantId, id])
   @@unique([tenantId, entraObjectId])

@@ -13,6 +13,19 @@ export type Tx = Prisma.TransactionClient;
 export class TenantDb {
   constructor(private readonly prisma: PrismaService) {}
 
+  /** Which workspace belongs to a Microsoft 365 tenant (works before we know the tenant). */
+  async resolveTenant(entraTenantId: string): Promise<string | null> {
+    const rows = await this.prisma.$queryRaw<{ id: string | null }[]>`
+      SELECT resolve_tenant(${entraTenantId}::uuid) AS id`;
+    return rows[0]?.id ?? null;
+  }
+
+  /** Workspaces connected to Microsoft 365 (for the nightly people sync). */
+  listSyncTenants() {
+    return this.prisma.$queryRaw<{ id: string; entra_tenant_id: string }[]>`
+      SELECT id, entra_tenant_id FROM list_sync_tenants()`;
+  }
+
   run<T>(tenantId: string, fn: (tx: Tx) => Promise<T>): Promise<T> {
     return this.prisma.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT set_config('app.tenant_id', ${tenantId}, true)`;
