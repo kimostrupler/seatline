@@ -50,13 +50,7 @@ export function Workspace() {
   const seats = useMemo(() => map.data?.seats ?? [], [map.data]);
   const selectedSeat = seats.find((s) => s.id === params.seat);
   const personSeat = person.data?.assignments[0]?.seat;
-  const actions = useSeatActions(seats, (id) => {
-    const fromMap = seats.find((s) => s.currentAssignment?.person?.id === id)?.currentAssignment
-      ?.person;
-    return (
-      fromMap?.displayName ?? (person.data?.id === id ? person.data.displayName : t('people.title'))
-    );
-  });
+  const actions = useSeatActions(seats);
 
   const sidebar = (
     <div className="flex h-full min-h-0 flex-col gap-4 p-3">
@@ -151,10 +145,10 @@ export function Workspace() {
               highlightSeatId={personSeat?.floorId === floorId ? (personSeat?.id ?? null) : null}
               canEdit={canEdit}
               onSelectSeat={(id) => update({ seat: id })}
-              onDropPerson={(seatId, personId) => actions.assign(seatId, personId)}
+              onDropPerson={(seatId, dropped) => actions.assign(seatId, dropped)}
               onMoveSeat={(fromId, toId) => {
-                const personId = seats.find((s) => s.id === fromId)?.currentAssignment?.personId;
-                if (personId) void actions.assign(toId, personId);
+                const moving = seats.find((s) => s.id === fromId)?.currentAssignment?.person;
+                if (moving) void actions.assign(toId, moving);
               }}
             />
           )}

@@ -9,7 +9,7 @@ import type { Assignment, AssignResult, Seat } from '@/lib/types';
  * Seat changes with feedback: every change shows a toast with Undo.
  * Undo never rewrites history — it makes the opposite change, which the history shows too.
  */
-export function useSeatActions(seats: Seat[], personName: (id: string) => string) {
+export function useSeatActions(seats: Seat[]) {
   const t = useTranslations('toast');
   const assignM = useAssign();
   const reserveM = useReserve();
@@ -23,6 +23,7 @@ export function useSeatActions(seats: Seat[], personName: (id: string) => string
 
   const withUndo = (message: string, undo: () => Promise<unknown>) =>
     toast.success(message, {
+      duration: 8000, // time to notice a mistake and undo it
       action: {
         label: t('undo'),
         onClick: () =>
@@ -48,15 +49,17 @@ export function useSeatActions(seats: Seat[], personName: (id: string) => string
       });
   };
 
-  const assign = async (seatId: string, personId: string) => {
+  const assign = async (seatId: string, person: { id: string; displayName: string }) => {
     try {
-      const result = await assignM.mutateAsync({ seatId, personId });
-      const person = personName(personId);
+      const result = await assignM.mutateAsync({ seatId, personId: person.id });
       const previous = result.closed.find((c) => c.kind === 'assigned');
       const from = previous && label(previous.seatId);
       const to = label(seatId) ?? '';
-      withUndo(from ? t('moved', { person, from, to }) : t('assigned', { person, label: to }), () =>
-        undoAssign(result),
+      withUndo(
+        from
+          ? t('moved', { person: person.displayName, from, to })
+          : t('assigned', { person: person.displayName, label: to }),
+        () => undoAssign(result),
       );
     } catch (error) {
       fail(error);

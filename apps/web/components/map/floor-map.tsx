@@ -59,7 +59,7 @@ export interface FloorMapProps {
   highlightSeatId: string | null;
   canEdit: boolean;
   onSelectSeat: (seatId: string | null) => void;
-  onDropPerson: (seatId: string, personId: string) => void;
+  onDropPerson: (seatId: string, person: { id: string; displayName: string }) => void;
   onMoveSeat: (fromSeatId: string, toSeatId: string) => void;
 }
 
@@ -136,7 +136,7 @@ export function FloorMap({
     setDropTargetId(null);
     if (personId && accepts(seat)) {
       e.preventDefault();
-      onDropPerson(seat!.id, personId);
+      onDropPerson(seat!.id, { id: personId, displayName: e.dataTransfer.getData('text/plain') });
     }
   };
 
@@ -174,6 +174,7 @@ export function FloorMap({
       onDragLeave={() => setDropTargetId(null)}
       onDrop={onDrop}
       data-testid="floor-map"
+      data-view={JSON.stringify(view)}
     >
       {colors && size.width > 0 && (
         <Stage

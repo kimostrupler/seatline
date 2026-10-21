@@ -99,7 +99,7 @@ export function SeatPanel({
                   seatId={seat.id}
                   label={t('assign')}
                   disabled={actions.busy}
-                  onPick={(personId) => actions.assign(seat.id, personId)}
+                  onPick={(person) => actions.assign(seat.id, person)}
                 />
                 <ReserveForm
                   disabled={actions.busy}
@@ -113,7 +113,7 @@ export function SeatPanel({
                   seatId={seat.id}
                   label={t('assign')}
                   disabled={actions.busy}
-                  onPick={(personId) => actions.assign(seat.id, personId)}
+                  onPick={(person) => actions.assign(seat.id, person)}
                 />
                 <Button
                   variant="outline"

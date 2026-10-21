@@ -23,7 +23,7 @@ export function AssignPicker({
   seatId: string;
   label: string;
   disabled?: boolean;
-  onPick: (personId: string) => void;
+  onPick: (person: { id: string; displayName: string }) => void;
 }) {
   const t = useTranslations('seat');
   const [open, setOpen] = useState(false);
@@ -48,7 +48,7 @@ export function AssignPicker({
                   value={`${p.displayName} ${p.department ?? ''} ${p.email}`}
                   onSelect={() => {
                     setOpen(false);
-                    onPick(p.id);
+                    onPick(p);
                   }}
                 >
                   <span className="flex-1 truncate">{p.displayName}</span>
