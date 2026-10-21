@@ -5,16 +5,12 @@ The website has a privacy policy, terms of service and an imprint in German, Fre
 Swiss B2B SaaS, but **they are not legal advice** — have a Swiss lawyer review them before the
 first paying customer.
 
-## 1. Fill in your details (one file)
+## 1. Your details (one file)
 
-`apps/web/lib/legal/operator.ts`:
-
-- `name`, `street`, `place` — the person or company that runs Seatline
-  (as a sole proprietor: your own name; with a GmbH: the company name).
-- `uid` — your company number `CHE-…` once you are registered (else leave empty).
-- `email` — `hello@seatline.ch` (create it at Hostpoint: _E-Mail → E-Mail-Adressen_, or a
-  forward to your own inbox).
-- When you change a text, update `LEGAL_UPDATED`.
+`apps/web/lib/legal/operator.ts` holds the operator's name, address, e-mail (`hello@seatline.ch`)
+and, once registered, the company number (`CHE-…`). Seatline is run as a sole proprietorship,
+so the imprint shows the owner's name and address, as Swiss law requires (UWG art. 3 s).
+When you change a text, update `LEGAL_UPDATED`.
 
 The texts themselves are in `apps/web/lib/legal/docs.ts` (every language must keep the same
 sections — `docs.test.ts` checks it).
