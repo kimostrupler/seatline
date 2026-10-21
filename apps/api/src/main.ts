@@ -5,7 +5,8 @@ import { loadConfig } from './config';
 
 async function bootstrap() {
   const config = loadConfig();
-  const app = await NestFactory.create(AppModule);
+  // rawBody: Stripe's webhook signature is checked against the exact bytes it sent
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   app.enableShutdownHooks();
   await app.listen(config.PORT);
 }

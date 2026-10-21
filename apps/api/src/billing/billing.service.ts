@@ -1,0 +1,285 @@
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
+import Stripe from 'stripe';
+import type { RequestContext } from '../auth/request-context';
+import { audit } from '../common/audit';
+import { orNotFound } from '../common/errors';
+import { loadConfig } from '../config';
+import { TenantDb } from '../db/tenant-db.service';
+import { billingState } from './billing-state';
+
+const billingSelect = {
+  id: true,
+  name: true,
+  trialEndsAt: true,
+  stripeCustomerId: true,
+  stripeSubscriptionId: true,
+  billingStatus: true,
+  billingPeriodEnd: true,
+  billedSeats: true,
+} as const;
+
+/** Return URLs from Stripe must be our own pages (https, or localhost while developing). */
+function checkReturnUrl(url: string) {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    throw new BadRequestException('Invalid return address');
+  }
+  const local = parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1';
+  if (!(parsed.protocol === 'https:' || local) || !parsed.pathname.startsWith('/billing'))
+    throw new BadRequestException('Invalid return address');
+  return parsed.toString();
+}
+
+/**
+ * Billing with Stripe: one subscription per workspace, priced per active seat per month.
+ * Card details only ever go to Stripe (Checkout and the customer portal). Stripe tells us about
+ * changes through the webhook; the nightly job keeps the billed seat count in step.
+ */
+@Injectable()
+export class BillingService {
+  private readonly logger = new Logger(BillingService.name);
+  private readonly config = loadConfig();
+  private client: Stripe | null = null;
+  private price: Promise<Stripe.Price> | null = null;
+
+  constructor(private readonly db: TenantDb) {}
+
+  get configured() {
+    const c = this.config;
+    return !!(c.STRIPE_SECRET_KEY && c.STRIPE_WEBHOOK_SECRET && c.STRIPE_PRICE_ID);
+  }
+
+  private stripe(): Stripe {
+    if (!this.configured) throw new ServiceUnavailableException('Billing is not set up');
+    if (!this.client) {
+      const base = this.config.STRIPE_API_BASE ? new URL(this.config.STRIPE_API_BASE) : null;
+      this.client = new Stripe(this.config.STRIPE_SECRET_KEY!, {
+        ...(base && {
+          host: base.hostname,
+          port: Number(base.port),
+          protocol: base.protocol.replace(':', '') as 'http' | 'https',
+        }),
+        maxNetworkRetries: 2,
+        appInfo: { name: 'Seatline' },
+      });
+    }
+    return this.client;
+  }
+
+  /** The per-seat price, as shown to admins (fetched once from Stripe). */
+  private async priceInfo() {
+    if (!this.configured) return null;
+    this.price ??= this.stripe().prices.retrieve(this.config.STRIPE_PRICE_ID!);
+    try {
+      const p = await this.price;
+      return {
+        amount: (p.unit_amount ?? 0) / 100,
+        currency: p.currency,
+        interval: p.recurring?.interval ?? 'month',
+      };
+    } catch (error) {
+      this.price = null;
+      this.logger.warn(`Could not load the Stripe price: ${String(error)}`);
+      return null;
+    }
+  }
+
+  /** The state the guard and the banner use (cheap: one row). */
+  async state(tenantId: string) {
+    const t = await this.db.run(tenantId, (tx) =>
+      tx.tenant.findFirst({ where: { id: tenantId }, select: billingSelect }),
+    );
+    if (!t) return 'off' as const;
+    return billingState({
+      configured: this.configured,
+      trialEndsAt: t.trialEndsAt,
+      status: t.billingStatus,
+    });
+  }
+
+  /** Admins: everything the billing page shows. */
+  async overview(ctx: RequestContext) {
+    const [t, seats] = await this.db.run(ctx.tenantId, (tx) =>
+      Promise.all([
+        tx.tenant.findFirst({ where: { id: ctx.tenantId }, select: billingSelect }),
+        tx.seat.count({ where: { tenantId: ctx.tenantId, status: 'active' } }),
+      ]),
+    );
+    const tenant = orNotFound(t, 'Workspace');
+    return {
+      configured: this.configured,
+      state: billingState({
+        configured: this.configured,
+        trialEndsAt: tenant.trialEndsAt,
+        status: tenant.billingStatus,
+      }),
+      trialEndsAt: tenant.trialEndsAt,
+      status: tenant.billingStatus,
+      periodEnd: tenant.billingPeriodEnd,
+      subscribed: !!tenant.stripeSubscriptionId,
+      seats: Math.max(1, seats),
+      billedSeats: tenant.billedSeats,
+      price: await this.priceInfo(),
+    };
+  }
+
+  /** Admins: a Stripe Checkout page to start the subscription (keeps the rest of the trial). */
+  async checkout(ctx: RequestContext, returnUrl: string) {
+    const back = checkReturnUrl(returnUrl);
+    const stripe = this.stripe();
+    const { tenant, seats, admin } = await this.db.run(ctx.tenantId, async (tx) => ({
+      tenant: orNotFound(
+        await tx.tenant.findFirst({ where: { id: ctx.tenantId }, select: billingSelect }),
+        'Workspace',
+      ),
+      seats: await tx.seat.count({ where: { tenantId: ctx.tenantId, status: 'active' } }),
+      admin: await tx.person.findFirst({ where: { id: ctx.actorId }, select: { email: true } }),
+    }));
+    let customer = tenant.stripeCustomerId;
+    if (!customer) {
+      customer = (
+        await stripe.customers.create({
+          name: tenant.name,
+          email: admin?.email,
+          metadata: { tenantId: tenant.id },
+        })
+      ).id;
+      await this.db.run(ctx.tenantId, (tx) =>
+        tx.tenant.update({ where: { id: tenant.id }, data: { stripeCustomerId: customer } }),
+      );
+    }
+    // Stripe wants a trial end at least 2 days ahead; otherwise billing starts right away
+    const trialLeft = tenant.trialEndsAt.getTime() - Date.now() > 2 * 86_400_000;
+    const session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
+      customer,
+      client_reference_id: tenant.id,
+      line_items: [{ price: this.config.STRIPE_PRICE_ID!, quantity: Math.max(1, seats) }],
+      subscription_data: {
+        metadata: { tenantId: tenant.id },
+        ...(trialLeft && { trial_end: Math.floor(tenant.trialEndsAt.getTime() / 1000) }),
+      },
+      billing_address_collection: 'required',
+      tax_id_collection: { enabled: true },
+      customer_update: { name: 'auto', address: 'auto' },
+      success_url: `${back}?checkout=done`,
+      cancel_url: back,
+    });
+    await this.db.run(ctx.tenantId, (tx) =>
+      audit(tx, ctx, {
+        action: 'billing.checkout',
+        entityType: 'tenant',
+        entityId: ctx.tenantId,
+        after: { seats: Math.max(1, seats) },
+      }),
+    );
+    return { url: session.url };
+  }
+
+  /** Admins: Stripe's customer portal (card, invoices, cancel). */
+  async portal(ctx: RequestContext, returnUrl: string) {
+    const back = checkReturnUrl(returnUrl);
+    const tenant = await this.db.run(ctx.tenantId, (tx) =>
+      tx.tenant.findFirst({ where: { id: ctx.tenantId }, select: billingSelect }),
+    );
+    if (!tenant?.stripeCustomerId) throw new BadRequestException('There is no subscription yet');
+    const session = await this.stripe().billingPortal.sessions.create({
+      customer: tenant.stripeCustomerId,
+      return_url: back,
+    });
+    return { url: session.url };
+  }
+
+  /** Stripe → us: subscription created/changed/ended. Verified with the webhook secret. */
+  async webhook(rawBody: Buffer | undefined, signature: string | undefined) {
+    if (!rawBody || !signature) throw new BadRequestException('Missing signature');
+    let event: Stripe.Event;
+    try {
+      event = this.stripe().webhooks.constructEvent(
+        rawBody,
+        signature,
+        this.config.STRIPE_WEBHOOK_SECRET!,
+      );
+    } catch {
+      throw new BadRequestException('Invalid signature');
+    }
+    if (
+      event.type === 'customer.subscription.created' ||
+      event.type === 'customer.subscription.updated' ||
+      event.type === 'customer.subscription.deleted'
+    )
+      await this.applySubscription(event.data.object);
+    return { received: true };
+  }
+
+  private async applySubscription(sub: Stripe.Subscription) {
+    const tenantId = sub.metadata?.tenantId;
+    if (!tenantId) return;
+    const customer = typeof sub.customer === 'string' ? sub.customer : sub.customer.id;
+    await this.db.run(tenantId, async (tx) => {
+      const tenant = await tx.tenant.findFirst({ where: { id: tenantId }, select: billingSelect });
+      // only the workspace's own customer can change it
+      if (!tenant || (tenant.stripeCustomerId && tenant.stripeCustomerId !== customer)) return;
+      const ended = sub.status === 'canceled' || sub.status === 'incomplete_expired';
+      const data = {
+        stripeCustomerId: customer,
+        stripeSubscriptionId: ended ? null : sub.id,
+        billingStatus: sub.status,
+        billingPeriodEnd: sub.current_period_end ? new Date(sub.current_period_end * 1000) : null,
+        billedSeats: ended ? null : (sub.items?.data[0]?.quantity ?? null),
+      };
+      await tx.tenant.update({ where: { id: tenantId }, data });
+      await audit(
+        tx,
+        { tenantId, actorId: null },
+        {
+          action: 'billing.subscription',
+          entityType: 'tenant',
+          entityId: tenantId,
+          before: { status: tenant.billingStatus },
+          after: { status: sub.status, seats: data.billedSeats },
+        },
+      );
+    });
+  }
+
+  /** Nightly: bill for the seats there really are (Stripe prorates the difference). */
+  async syncSeats(tenantId: string) {
+    const { tenant, seats } = await this.db.run(tenantId, async (tx) => ({
+      tenant: await tx.tenant.findFirst({ where: { id: tenantId }, select: billingSelect }),
+      seats: Math.max(1, await tx.seat.count({ where: { tenantId, status: 'active' } })),
+    }));
+    if (!tenant?.stripeSubscriptionId || tenant.billedSeats === seats)
+      return { changed: false, seats };
+    const stripe = this.stripe();
+    const sub = await stripe.subscriptions.retrieve(tenant.stripeSubscriptionId);
+    const item = sub.items.data[0];
+    if (!item) return { changed: false, seats };
+    await stripe.subscriptions.update(sub.id, {
+      items: [{ id: item.id, quantity: seats }],
+      proration_behavior: 'create_prorations',
+    });
+    await this.db.run(tenantId, async (tx) => {
+      await tx.tenant.update({ where: { id: tenantId }, data: { billedSeats: seats } });
+      await audit(
+        tx,
+        { tenantId, actorId: null },
+        {
+          action: 'billing.seats',
+          entityType: 'tenant',
+          entityId: tenantId,
+          before: { seats: tenant.billedSeats },
+          after: { seats },
+        },
+      );
+    });
+    return { changed: true, seats };
+  }
+}

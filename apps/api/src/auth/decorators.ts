@@ -7,6 +7,7 @@ export const IDENTITY_ONLY = 'identityOnly';
 export const ADMIN_ONLY = 'adminOnly';
 export const EDITORS_ONLY = 'editorsOnly';
 export const OWN_SETTINGS = 'ownSettings';
+export const BILLING_EXEMPT = 'billingExempt';
 
 /** Skip authentication (health checks). */
 export const Public = () => SetMetadata(IS_PUBLIC, true);
@@ -22,6 +23,9 @@ export const EditorsOnly = () => SetMetadata(EDITORS_ONLY, true);
 
 /** Changes only the caller's own settings (e.g. their dashboard): viewers may do this too. */
 export const OwnSettings = () => SetMetadata(OWN_SETTINGS, true);
+
+/** Allowed while the workspace is read-only for billing (subscribing, signing up). */
+export const BillingExempt = () => SetMetadata(BILLING_EXEMPT, true);
 
 /** Injects the caller's RequestContext. */
 export const Ctx = createParamDecorator(

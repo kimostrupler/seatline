@@ -13,6 +13,23 @@ export interface Me {
   person: { id: string; displayName: string; email: string };
   tenant: { id: string; name: string };
   role: AppRole;
+  billing: { state: BillingState; trialEndsAt: string };
+}
+
+/** off = billing not set up (local/self-hosted) */
+export type BillingState = 'off' | 'trial' | 'active' | 'past_due' | 'read_only';
+
+export interface BillingOverview {
+  configured: boolean;
+  state: BillingState;
+  trialEndsAt: string;
+  status: string | null;
+  periodEnd: string | null;
+  subscribed: boolean;
+  /** active seats now (what the next bill counts) */
+  seats: number;
+  billedSeats: number | null;
+  price: { amount: number; currency: string; interval: string } | null;
 }
 
 export interface Building {

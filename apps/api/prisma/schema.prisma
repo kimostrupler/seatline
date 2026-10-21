@@ -70,6 +70,15 @@ model Tenant {
   peopleSyncStatus       Json?     @map("people_sync_status")
   /// keep seat history and the activity log this many months (null = forever); nightly purge
   historyRetentionMonths Int?      @default(24) @map("history_retention_months")
+  /// free trial until (new workspaces: 30 days); afterwards a subscription is needed
+  trialEndsAt            DateTime  @default(dbgenerated("(now() + '30 days'::interval)")) @map("trial_ends_at") @db.Timestamptz(3)
+  stripeCustomerId       String?   @unique @map("stripe_customer_id")
+  stripeSubscriptionId   String?   @unique @map("stripe_subscription_id")
+  /// Stripe's subscription status (active, trialing, past_due, canceled, unpaid, …)
+  billingStatus          String?   @map("billing_status")
+  billingPeriodEnd       DateTime? @map("billing_period_end") @db.Timestamptz(3)
+  /// seats on the subscription (synced nightly with the active seats)
+  billedSeats            Int?      @map("billed_seats")
 
   people      Person[]
   buildings   Building[]

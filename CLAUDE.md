@@ -240,6 +240,18 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - `GET /privacy/people/:id/export` (admins): everything about a person as JSON (access request).
   Exports and forgets are audited. `people.left_at` is set by the sync when someone leaves.
 
+## Billing (Stripe)
+
+- `billing/billing.service.ts`; off unless all three `STRIPE_*` env vars are set (state `off`).
+  States (`billing-state.ts`): trial (30 days, `tenants.trial_ends_at`) → active / past_due →
+  `read_only`. The auth guard refuses writes in `read_only` with 402 `billing_required`, except
+  `@BillingExempt` routes (checkout/portal) — reads always work.
+- Stripe state arrives only via the signed webhook (`@Public`, raw body; the web proxy passes
+  `billing/webhook` through without a session). Subscriptions carry `metadata.tenantId`, but a
+  webhook only applies if its customer matches the tenant's `stripe_customer_id`.
+- Seat count = active seats; the nightly job syncs it (`list_billed_tenants`). Tests use
+  `test/fake-stripe.ts` via `STRIPE_API_BASE`. Keys online: `infra/azure/stripe-setup.sh`.
+
 ## Operations
 
 - Browser errors are posted to the web app's `/client-errors` (sanitized, rate-limited) and

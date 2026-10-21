@@ -2,6 +2,8 @@ import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
+  HttpException,
+  HttpStatus,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -9,7 +11,15 @@ import { Reflector } from '@nestjs/core';
 import { z } from 'zod';
 import { loadConfig } from '../config';
 import { TenantDb } from '../db/tenant-db.service';
-import { ADMIN_ONLY, EDITORS_ONLY, IDENTITY_ONLY, IS_PUBLIC, OWN_SETTINGS } from './decorators';
+import { BillingService } from '../billing/billing.service';
+import {
+  ADMIN_ONLY,
+  BILLING_EXEMPT,
+  EDITORS_ONLY,
+  IDENTITY_ONLY,
+  IS_PUBLIC,
+  OWN_SETTINGS,
+} from './decorators';
 import { verifyInternalToken, type Identity } from './identity';
 import { IdentityService } from './identity.service';
 import type { RequestContext } from './request-context';
@@ -39,6 +49,7 @@ export class AuthGuard implements CanActivate {
     private readonly reflector: Reflector,
     private readonly db: TenantDb,
     private readonly identities: IdentityService,
+    private readonly billing: BillingService,
   ) {}
 
   private flag(key: string, context: ExecutionContext) {
@@ -80,6 +91,21 @@ export class AuthGuard implements CanActivate {
       throw new ForbiddenException('Only admins can do this');
     if (this.flag(EDITORS_ONLY, context) && ctx.role === 'viewer')
       throw new ForbiddenException('Only editors and admins can see this');
+    // unpaid workspaces stay readable (and renewable) but can't change anything
+    if (
+      !READ_METHODS.has(req.method) &&
+      this.billing.configured &&
+      !this.flag(BILLING_EXEMPT, context) &&
+      (await this.billing.state(ctx.tenantId)) === 'read_only'
+    )
+      throw new HttpException(
+        {
+          message:
+            'This workspace is read-only: the free trial or subscription has ended. An admin can renew it under Billing.',
+          code: 'billing_required',
+        },
+        HttpStatus.PAYMENT_REQUIRED,
+      );
     req.ctx = ctx;
     return true;
   }

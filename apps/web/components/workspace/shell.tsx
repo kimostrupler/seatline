@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
+import { BillingBanner } from '@/components/billing/billing-banner';
 
 /** Three columns on desktop (sidebar · main · details); on phones the sidebar is a sheet. */
 export function Shell({
@@ -31,6 +32,7 @@ export function Shell({
     <div className="grid h-dvh grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)_340px]">
       <aside className="hidden min-h-0 border-r lg:block">{sidebar}</aside>
       <main className="flex min-h-0 flex-col">
+        <BillingBanner />
         <header className="flex h-12 shrink-0 items-center gap-2 border-b px-3">
           <Sheet>
             <SheetTrigger asChild>

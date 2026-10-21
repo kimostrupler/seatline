@@ -82,13 +82,19 @@ PLACEHOLDER="mcr.microsoft.com/k8se/quickstart:latest"
 # keep an own web address set up with custom-domain.sh
 CUSTOM_DOMAIN=$(az containerapp show -n web -g "$RG" --query "properties.configuration.ingress.customDomains[0].name" -o tsv 2>/dev/null || true)
 CUSTOM_CERT=$(az containerapp show -n web -g "$RG" --query "properties.configuration.ingress.customDomains[0].certificateId" -o tsv 2>/dev/null || true)
+# Stripe billing, if stripe-setup.sh stored keys (else billing stays off)
+kv_get() { az keyvault secret show --vault-name "$KV" -n "$1" --query value -o tsv 2>/dev/null || true; }
+STRIPE_KEY=$(kv_get stripe-secret-key)
+STRIPE_WEBHOOK=$(kv_get stripe-webhook-secret)
+STRIPE_PRICE=$(kv_get stripe-price-id)
 az deployment group create -g "$RG" -n seatline -f "$HERE/main.bicep" -o none --parameters \
   location="$LOCATION" \
   apiImage="${API_IMAGE:-$PLACEHOLDER}" webImage="${WEB_IMAGE:-$PLACEHOLDER}" \
   pgAdminPassword="$PG_PASSWORD" appDbPassword="$APP_DB_PASSWORD" \
   sessionSecret="$SESSION_SECRET" internalAuthSecret="$INTERNAL_SECRET" \
   entraClientId="$APP_ID" entraClientSecret="$ENTRA_SECRET" \
-  customDomain="$CUSTOM_DOMAIN" customDomainCertificateId="$CUSTOM_CERT"
+  customDomain="$CUSTOM_DOMAIN" customDomainCertificateId="$CUSTOM_CERT" \
+  stripeSecretKey="$STRIPE_KEY" stripeWebhookSecret="$STRIPE_WEBHOOK" stripePriceId="$STRIPE_PRICE"
 output() { az deployment group show -g "$RG" -n seatline --query "properties.outputs.$1.value" -o tsv; }
 WEB_URL=$(output webUrl)
 REGISTRY=$(output registryName)

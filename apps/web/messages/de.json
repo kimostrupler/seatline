@@ -351,7 +351,8 @@
     "home": "Start",
     "map": "Plan",
     "language": "Sprache",
-    "moves": "Umzüge"
+    "moves": "Umzüge",
+    "billing": "Abrechnung"
   },
   "overview": {
     "title": "Übersicht",
@@ -453,7 +454,10 @@
       "exportedHistory": "hat den Platzverlauf exportiert",
       "privacyExport": "hat die gespeicherten Daten von {person} heruntergeladen",
       "privacyForget": "hat die Personendaten einer ausgetretenen Person entfernt",
-      "privacyPurge": "hat Verlauf gelöscht, der älter als {months} Monate ist (Datenschutz)"
+      "privacyPurge": "hat Verlauf gelöscht, der älter als {months} Monate ist (Datenschutz)",
+      "billingCheckout": "hat den Abo-Checkout geöffnet",
+      "billingSubscription": "Abo ist jetzt «{status}»",
+      "billingSeats": "verrechnet jetzt {seats} Plätze"
     },
     "showPlan": "Plan öffnen"
   },
@@ -691,5 +695,40 @@
     "seat": "Platz",
     "person": "Person",
     "department": "Abteilung"
+  },
+  "billing": {
+    "title": "Abrechnung",
+    "onlyAdmins": "Nur Admins sehen die Abrechnung.",
+    "notConfigured": "Die Abrechnung ist für diese Installation nicht eingerichtet – alles funktioniert ohne Abo.",
+    "plan": "Abo",
+    "state": {
+      "off": "Nicht eingerichtet",
+      "trial": "Gratis-Testphase",
+      "active": "Aktiv",
+      "past_due": "Zahlung fehlgeschlagen",
+      "read_only": "Nur lesen"
+    },
+    "trialLeft": "{days, plural, =0 {Die Testphase endet heute} one {Noch # Tag Testphase} other {Noch # Tage Testphase}} (bis {date}). Sie können jederzeit abonnieren – die Testtage bleiben gratis.",
+    "readOnlyBody": "Die Testphase oder das Abo ist abgelaufen. Alles bleibt sichtbar, aber nichts kann geändert werden, bis Sie abonnieren. Es werden keine Daten gelöscht.",
+    "pastDueBody": "Die letzte Zahlung hat nicht geklappt. Stripe versucht es in den nächsten Tagen erneut – bitte aktualisieren Sie die Karte unter «Abrechnung verwalten».",
+    "nextBill": "Nächste Rechnung am {date}.",
+    "activeBody": "Danke – Ihr Abo ist aktiv.",
+    "thanks": "Danke! Ihr Abo wird eingerichtet.",
+    "confirming": "Warten auf die Bestätigung von Stripe…",
+    "pricePerSeat": "Preis pro Platz",
+    "activeSeats": "Aktive Plätze",
+    "estimate": "Pro Monat (geschätzt)",
+    "perMonth": "{price} / Monat",
+    "seatsHint": "Sie bezahlen für aktive Plätze auf Ihren Grundrissen (gesperrte Plätze sind gratis), jede Nacht gezählt. Preise zuzüglich MWST, wo anwendbar.",
+    "subscribe": "Abonnieren",
+    "manage": "Abrechnung & Rechnungen verwalten",
+    "stripeHint": "Zahlungen laufen über Stripe. Seatline sieht Ihre Kartendaten nie.",
+    "banner": {
+      "readOnly": "Dieser Arbeitsbereich ist schreibgeschützt: Das Abo ist abgelaufen. Ein Admin kann es erneuern.",
+      "readOnlyAdmin": "Dieser Arbeitsbereich ist schreibgeschützt: Testphase oder Abo sind abgelaufen.",
+      "pastDue": "Die letzte Zahlung für Seatline ist fehlgeschlagen.",
+      "trialEnding": "{days, plural, =0 {Die Testphase endet heute.} one {Die Testphase endet in # Tag.} other {Die Testphase endet in # Tagen.}}",
+      "open": "Abrechnung öffnen"
+    }
   }
 }

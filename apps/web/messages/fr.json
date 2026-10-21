@@ -351,7 +351,8 @@
     "home": "Accueil",
     "map": "Plan",
     "language": "Langue",
-    "moves": "Déménagements"
+    "moves": "Déménagements",
+    "billing": "Facturation"
   },
   "overview": {
     "title": "Vue d’ensemble",
@@ -453,7 +454,10 @@
       "exportedHistory": "a exporté l’historique des places",
       "privacyExport": "a téléchargé les données enregistrées de {person}",
       "privacyForget": "a supprimé les données personnelles d’une personne partie",
-      "privacyPurge": "a supprimé l’historique de plus de {months} mois (protection des données)"
+      "privacyPurge": "a supprimé l’historique de plus de {months} mois (protection des données)",
+      "billingCheckout": "a ouvert le paiement de l’abonnement",
+      "billingSubscription": "l’abonnement est maintenant « {status} »",
+      "billingSeats": "facture maintenant {seats} places"
     },
     "showPlan": "Ouvrir le plan"
   },
@@ -691,5 +695,40 @@
     "seat": "Place",
     "person": "Personne",
     "department": "Service"
+  },
+  "billing": {
+    "title": "Facturation",
+    "onlyAdmins": "Seuls les admins voient la facturation.",
+    "notConfigured": "La facturation n’est pas configurée pour cette installation – tout fonctionne sans abonnement.",
+    "plan": "Abonnement",
+    "state": {
+      "off": "Non configurée",
+      "trial": "Essai gratuit",
+      "active": "Actif",
+      "past_due": "Paiement échoué",
+      "read_only": "Lecture seule"
+    },
+    "trialLeft": "{days, plural, =0 {L’essai gratuit se termine aujourd’hui} one {Encore # jour d’essai gratuit} other {Encore # jours d’essai gratuit}} (jusqu’au {date}). Abonnez-vous quand vous voulez – les jours d’essai restent gratuits.",
+    "readOnlyBody": "L’essai gratuit ou l’abonnement est terminé. Tout reste visible, mais rien ne peut être modifié tant que vous ne vous abonnez pas. Aucune donnée n’est supprimée.",
+    "pastDueBody": "Le dernier paiement n’a pas abouti. Stripe réessaie dans les prochains jours – veuillez mettre à jour la carte sous « Gérer la facturation ».",
+    "nextBill": "Prochaine facture le {date}.",
+    "activeBody": "Merci – votre abonnement est actif.",
+    "thanks": "Merci ! Votre abonnement est en cours de mise en place.",
+    "confirming": "En attente de la confirmation de Stripe…",
+    "pricePerSeat": "Prix par place",
+    "activeSeats": "Places actives",
+    "estimate": "Par mois (estimation)",
+    "perMonth": "{price} / mois",
+    "seatsHint": "Vous payez pour les places actives de vos plans (les places bloquées sont gratuites), comptées chaque nuit. Prix hors TVA le cas échéant.",
+    "subscribe": "S’abonner",
+    "manage": "Gérer la facturation et les factures",
+    "stripeHint": "Les paiements sont gérés par Stripe. Seatline ne voit jamais vos données de carte.",
+    "banner": {
+      "readOnly": "Cet espace est en lecture seule : l’abonnement est terminé. Un admin peut le renouveler.",
+      "readOnlyAdmin": "Cet espace est en lecture seule : l’essai gratuit ou l’abonnement est terminé.",
+      "pastDue": "Le dernier paiement pour Seatline a échoué.",
+      "trialEnding": "{days, plural, =0 {L’essai gratuit se termine aujourd’hui.} one {L’essai gratuit se termine dans # jour.} other {L’essai gratuit se termine dans # jours.}}",
+      "open": "Ouvrir la facturation"
+    }
   }
 }

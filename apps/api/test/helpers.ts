@@ -92,7 +92,7 @@ export async function createTenant(slug: string): Promise<Fixture> {
 
 export async function createApp(): Promise<INestApplication> {
   const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
-  const app = moduleRef.createNestApplication({ logger: false });
+  const app = moduleRef.createNestApplication({ logger: false, rawBody: true });
   await app.init();
   return app;
 }

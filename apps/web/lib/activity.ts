@@ -273,6 +273,12 @@ export function describe(e: ActivityEntry, refs: ActivityRefs, unknownName: stri
       return { key: 'privacyForget', values: {} };
     case 'privacy.purge':
       return { key: 'privacyPurge', values: { months: Number(a.months ?? 0) } };
+    case 'billing.checkout':
+      return { key: 'billingCheckout', values: {} };
+    case 'billing.subscription':
+      return { key: 'billingSubscription', values: { status: str(a.status) ?? '' } };
+    case 'billing.seats':
+      return { key: 'billingSeats', values: { seats: Number(a.seats ?? 0) } };
     case 'tenant.seed':
       return { key: 'demoData', values: {} };
     case 'tenant.update':

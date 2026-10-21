@@ -7,6 +7,8 @@ import { internalToken, readSession, SESSION_COOKIE } from '@/lib/server/session
 // Microsoft sign-in: the session cookie becomes a 60 s signed token for the API; anything
 // identity-like the browser sends is dropped. Dev sign-in: the demo headers pass through.
 const FORWARD_HEADERS = ['accept', 'content-type'];
+/** Stripe calls this one directly (no session); it's verified by its signature in the API. */
+const STRIPE_WEBHOOK = 'billing/webhook';
 const DEV_HEADERS = ['x-tenant-id', 'x-user-id'];
 
 async function proxy(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
@@ -21,7 +23,11 @@ async function proxy(req: NextRequest, { params }: { params: Promise<{ path: str
     const value = req.headers.get(name);
     if (value) headers.set(name, value);
   }
-  if (config.AUTH_MODE === 'entra') {
+  const stripeWebhook = path.join('/') === STRIPE_WEBHOOK && req.method === 'POST';
+  if (stripeWebhook) {
+    const signature = req.headers.get('stripe-signature');
+    if (signature) headers.set('stripe-signature', signature);
+  } else if (config.AUTH_MODE === 'entra') {
     const user = await readSession(req.cookies.get(SESSION_COOKIE)?.value, config.SESSION_SECRET);
     if (!user) return Response.json({ message: 'Sign in with Microsoft' }, { status: 401 });
     headers.set(

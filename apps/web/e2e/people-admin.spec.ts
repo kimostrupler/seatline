@@ -67,3 +67,10 @@ test('data protection: how long history is kept, a person’s data, forgetting a
   await expect(page.getByTestId('directory')).not.toContainText('Marc Dubois');
   await expect(page.getByTestId('directory')).toContainText('Former employee');
 });
+
+test('without Stripe keys, billing stays out of the way', async ({ page }) => {
+  await expect(page.getByRole('link', { name: 'People & access' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Billing' })).toHaveCount(0);
+  await page.goto('/billing');
+  await expect(page.getByText('Billing isn’t set up for this installation')).toBeVisible();
+});

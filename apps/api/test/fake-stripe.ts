@@ -1,0 +1,58 @@
+import http from 'node:http';
+import type { AddressInfo } from 'node:net';
+
+export interface StripeCall {
+  method: string;
+  path: string;
+  /** form fields as Stripe's SDK sends them, e.g. "line_items[0][quantity]" */
+  body: Record<string, string>;
+}
+
+/** Just enough of Stripe's API for the billing tests (no network, no account). */
+export async function startFakeStripe() {
+  const calls: StripeCall[] = [];
+  const quantities = new Map<string, number>();
+  const server = http.createServer((req, res) => {
+    let raw = '';
+    req.on('data', (c: Buffer) => (raw += c.toString()));
+    req.on('end', () => {
+      const body = Object.fromEntries(new URLSearchParams(raw));
+      const path = (req.url ?? '').split('?')[0]!;
+      calls.push({ method: req.method ?? '', path, body });
+      const json = (data: object) => {
+        res.writeHead(200, { 'content-type': 'application/json' });
+        res.end(JSON.stringify(data));
+      };
+      if (path === '/v1/customers') return json({ id: 'cus_test', object: 'customer' });
+      if (path === '/v1/checkout/sessions')
+        return json({
+          id: 'cs_test',
+          object: 'checkout.session',
+          url: 'https://checkout.stripe.test/cs_test',
+        });
+      if (path === '/v1/billing_portal/sessions')
+        return json({ id: 'bps_test', url: 'https://billing.stripe.test/session' });
+      if (path.startsWith('/v1/prices/'))
+        return json({
+          id: path.split('/').pop(),
+          unit_amount: 200,
+          currency: 'chf',
+          recurring: { interval: 'month' },
+        });
+      if (path.startsWith('/v1/subscriptions/')) {
+        const id = path.split('/').pop()!;
+        if (req.method === 'POST') quantities.set(id, Number(body['items[0][quantity]']));
+        return json({
+          id,
+          object: 'subscription',
+          items: { data: [{ id: 'si_test', quantity: quantities.get(id) ?? 3 }] },
+        });
+      }
+      res.writeHead(404, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ error: { message: `fake stripe: no ${path}` } }));
+    });
+  });
+  await new Promise<void>((resolve) => server.listen(0, resolve));
+  const { port } = server.address() as AddressInfo;
+  return { url: `http://localhost:${port}`, calls, close: () => server.close() };
+}

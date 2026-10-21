@@ -351,7 +351,8 @@
     "home": "Home",
     "map": "Map",
     "language": "Language",
-    "moves": "Moves"
+    "moves": "Moves",
+    "billing": "Billing"
   },
   "overview": {
     "title": "Overview",
@@ -453,7 +454,10 @@
       "exportedHistory": "exported the seat history",
       "privacyExport": "downloaded the stored data of {person}",
       "privacyForget": "removed the personal data of a person who left",
-      "privacyPurge": "deleted history older than {months} months (data protection)"
+      "privacyPurge": "deleted history older than {months} months (data protection)",
+      "billingCheckout": "opened the subscription checkout",
+      "billingSubscription": "subscription is now {status}",
+      "billingSeats": "now billed for {seats} seats"
     },
     "showPlan": "Open the plan"
   },
@@ -691,5 +695,40 @@
     "seat": "Seat",
     "person": "Person",
     "department": "Department"
+  },
+  "billing": {
+    "title": "Billing",
+    "onlyAdmins": "Only admins can see billing.",
+    "notConfigured": "Billing isn’t set up for this installation — everything works without a subscription.",
+    "plan": "Subscription",
+    "state": {
+      "off": "Not set up",
+      "trial": "Free trial",
+      "active": "Active",
+      "past_due": "Payment failed",
+      "read_only": "Read-only"
+    },
+    "trialLeft": "{days, plural, =0 {The free trial ends today} one {# day left in the free trial} other {# days left in the free trial}} (until {date}). Subscribe any time — the trial days stay free.",
+    "readOnlyBody": "The free trial or subscription has ended. Everything stays visible, but nothing can be changed until you subscribe. No data is deleted.",
+    "pastDueBody": "The last payment didn’t go through. Stripe tries again over the next days — please update the card under “Manage billing”.",
+    "nextBill": "Next invoice on {date}.",
+    "activeBody": "Thank you — your subscription is active.",
+    "thanks": "Thank you! Your subscription is being set up.",
+    "confirming": "Waiting for Stripe’s confirmation…",
+    "pricePerSeat": "Price per seat",
+    "activeSeats": "Active seats",
+    "estimate": "Per month (estimate)",
+    "perMonth": "{price} / month",
+    "seatsHint": "You pay for active seats on your floor plans (blocked seats are free), counted every night. Prices exclude VAT where applicable.",
+    "subscribe": "Subscribe",
+    "manage": "Manage billing & invoices",
+    "stripeHint": "Payments are handled by Stripe. Seatline never sees your card details.",
+    "banner": {
+      "readOnly": "This workspace is read-only: the subscription has ended. An admin can renew it.",
+      "readOnlyAdmin": "This workspace is read-only: the free trial or subscription has ended.",
+      "pastDue": "The last payment for Seatline failed.",
+      "trialEnding": "{days, plural, =0 {The free trial ends today.} one {The free trial ends in # day.} other {The free trial ends in # days.}}",
+      "open": "Open billing"
+    }
   }
 }

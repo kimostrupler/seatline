@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRightLeft, ChartPie, History, House, Map, Users } from 'lucide-react';
+import { ArrowRightLeft, ChartPie, CreditCard, History, House, Map, Users } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -30,6 +30,9 @@ export function NavLinks({
         ]
       : []),
     ...(role === 'admin' ? [{ href: '/people', label: t('admin.link'), icon: Users }] : []),
+    ...(role === 'admin' && me.data?.billing.state !== 'off'
+      ? [{ href: '/billing', label: t('nav.billing'), icon: CreditCard }]
+      : []),
   ];
   return (
     <nav

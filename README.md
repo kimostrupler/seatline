@@ -113,28 +113,28 @@ Changing the schema: edit `apps/api/prisma/schema.prisma`, then
 
 ## API
 
-| Method           | Path                                     | What                                                                                                                                              |
-| ---------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET/POST         | `/buildings`                             | list / create                                                                                                                                     |
-| GET/PATCH/DELETE | `/buildings/:id`                         |                                                                                                                                                   |
-| GET/PUT/DELETE   | `/dashboard`                             | my dashboard layout (save / reset); `PUT /dashboard/default` (admins)                                                                             |
-| GET              | `/stats`                                 | numbers and short lists for the dashboard widgets                                                                                                 |
-| GET/POST/PATCH   | `/move-plans`, `/move-plans/:id`         | move plans (editors); `PUT :id/items`, `DELETE :id/items/:personId`, `POST :id/team`, `:id/schedule`, `:id/unschedule`, `:id/apply`, `:id/cancel` |
-| GET              | `/exports/seating`, `/exports/history`   | Excel/CSV downloads (`format=xlsx\|csv`, `lang=en\|de\|fr`); history: editors                                                                     |
-| GET/POST         | `/privacy/people/:id/export`, `…/forget` | admins: a person's data as JSON; forget someone who left                                                                                          |
-| GET/POST         | `/privacy/people/:id/export`, `…/forget` | admins: a person's data as JSON; forget someone who left                                                                                          |
-| GET              | `/overview`                              | seat counts per building and floor                                                                                                                |
-| GET              | `/activity`                              | change history (editors/admins): `kind personId from to cursor`                                                                                   |
-| GET/POST         | `/floors?buildingId=`                    | POST with `copyFromFloorId` copies rooms, seats, plan, scale                                                                                      |
-| GET/POST         | `/rooms?floorId=`                        | rooms have a polygon of `{x, y}` points                                                                                                           |
-| GET/POST         | `/seats?floorId=`                        | list includes `occupancy` + `currentAssignment`                                                                                                   |
-| GET              | `/seats/:id/history`                     | everyone who sat here, newest first                                                                                                               |
-| POST             | `/assignments`                           | `{seatId, personId}` — assign, or move if they sit elsewhere                                                                                      |
-| POST             | `/assignments/reservations`              | `{seatId, reservedFor}` — hold a free seat                                                                                                        |
-| POST             | `/assignments/:id/end`                   | free the seat (history is kept)                                                                                                                   |
-| GET              | `/people?search=`                        | people search                                                                                                                                     |
-| GET              | `/people/:id/history`                    | every seat this person had                                                                                                                        |
-| GET              | `/health`                                | no auth                                                                                                                                           |
+| Method           | Path                                        | What                                                                                                                                              |
+| ---------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET/POST         | `/buildings`                                | list / create                                                                                                                                     |
+| GET/PATCH/DELETE | `/buildings/:id`                            |                                                                                                                                                   |
+| GET/PUT/DELETE   | `/dashboard`                                | my dashboard layout (save / reset); `PUT /dashboard/default` (admins)                                                                             |
+| GET              | `/stats`                                    | numbers and short lists for the dashboard widgets                                                                                                 |
+| GET/POST/PATCH   | `/move-plans`, `/move-plans/:id`            | move plans (editors); `PUT :id/items`, `DELETE :id/items/:personId`, `POST :id/team`, `:id/schedule`, `:id/unschedule`, `:id/apply`, `:id/cancel` |
+| GET              | `/exports/seating`, `/exports/history`      | Excel/CSV downloads (`format=xlsx\|csv`, `lang=en\|de\|fr`); history: editors                                                                     |
+| GET/POST         | `/privacy/people/:id/export`, `…/forget`    | admins: a person's data as JSON; forget someone who left                                                                                          |
+| GET/POST         | `/billing`, `/billing/checkout`, `…/portal` | admins: plan and trial; open Stripe Checkout / customer portal. `POST /billing/webhook`: Stripe only (signed)                                     |
+| GET              | `/overview`                                 | seat counts per building and floor                                                                                                                |
+| GET              | `/activity`                                 | change history (editors/admins): `kind personId from to cursor`                                                                                   |
+| GET/POST         | `/floors?buildingId=`                       | POST with `copyFromFloorId` copies rooms, seats, plan, scale                                                                                      |
+| GET/POST         | `/rooms?floorId=`                           | rooms have a polygon of `{x, y}` points                                                                                                           |
+| GET/POST         | `/seats?floorId=`                           | list includes `occupancy` + `currentAssignment`                                                                                                   |
+| GET              | `/seats/:id/history`                        | everyone who sat here, newest first                                                                                                               |
+| POST             | `/assignments`                              | `{seatId, personId}` — assign, or move if they sit elsewhere                                                                                      |
+| POST             | `/assignments/reservations`                 | `{seatId, reservedFor}` — hold a free seat                                                                                                        |
+| POST             | `/assignments/:id/end`                      | free the seat (history is kept)                                                                                                                   |
+| GET              | `/people?search=`                           | people search                                                                                                                                     |
+| GET              | `/people/:id/history`                       | every seat this person had                                                                                                                        |
+| GET              | `/health`                                   | no auth                                                                                                                                           |
 
 Viewers can read; changes need the `editor` or `admin` role.
 
@@ -162,6 +162,15 @@ The database enforces the hard rules itself, so a bug in the API can't break the
   Graph every night (`nightly-sync` job) or on **Sync now**. Leavers become inactive and lose
   their seat; their history stays. A customer's Microsoft 365 admin approves Seatline once.
 - **People & access** (admins): roles, who can open Seatline, sync status.
+
+## Billing (Stripe)
+
+- Off unless `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` and `STRIPE_PRICE_ID` are set (online:
+  `infra/azure/stripe-setup.sh`). Then: 30-day trial per workspace → subscription per active
+  seat → **read-only** if unpaid (changes get HTTP 402 `billing_required`; reading still works).
+- Stripe tells us about subscriptions via the webhook (`/api/billing/webhook`, passed through
+  the web proxy without a session). The nightly job updates each subscription's seat count.
+- Tests use a fake Stripe server (`apps/api/test/fake-stripe.ts`); no Stripe account needed.
 
 ## Going online
 
