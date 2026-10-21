@@ -5,7 +5,11 @@
     "APP_DATABASE_URL",
     "TEST_DATABASE_URL",
     "TEST_APP_DATABASE_URL",
-    "PORT"
+    "PORT",
+    "E2E_DATABASE_URL",
+    "E2E_APP_DATABASE_URL",
+    "CI",
+    "PLAYWRIGHT_BROWSERS_PATH"
   ],
   "tasks": {
     "build": {
@@ -23,6 +27,10 @@
       "dependsOn": ["^build"],
       "cache": false,
       "persistent": true
+    },
+    "test:e2e": {
+      "dependsOn": ["build", "@seatline/api#build"],
+      "cache": false
     }
   }
 }

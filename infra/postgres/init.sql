@@ -7,3 +7,6 @@ CREATE ROLE seatline_app LOGIN PASSWORD 'seatline_app';
 
 -- Separate database for the automated tests.
 CREATE DATABASE seatline_test OWNER seatline;
+
+-- Separate database for the browser (Playwright) tests.
+CREATE DATABASE seatline_e2e OWNER seatline;
