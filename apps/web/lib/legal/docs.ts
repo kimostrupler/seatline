@@ -92,7 +92,7 @@ const TEXTS: Texts = {
       {
         heading: '11. Law and place of jurisdiction',
         paragraphs: [
-          'Swiss law applies, excluding the UN Convention on Contracts for the International Sale of Goods. The place of jurisdiction is our registered office.',
+          'Swiss law applies, excluding the UN Convention on Contracts for the International Sale of Goods. The place of jurisdiction is our place of business.',
         ],
       },
     ],
@@ -170,7 +170,7 @@ const TEXTS: Texts = {
       {
         heading: '11. Anwendbares Recht und Gerichtsstand',
         paragraphs: [
-          'Es gilt Schweizer Recht unter Ausschluss des Wiener Kaufrechts (CISG). Gerichtsstand ist unser Sitz.',
+          'Es gilt Schweizer Recht unter Ausschluss des Wiener Kaufrechts (CISG). Gerichtsstand ist unser Geschäftssitz.',
         ],
       },
     ],
