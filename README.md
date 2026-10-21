@@ -17,14 +17,29 @@ See [`CLAUDE.md`](CLAUDE.md) for the product brief, hard rules and build phases.
 
 ## Run it locally
 
-Needs Node 22, pnpm 10 (`corepack enable`) and Docker.
+**Once, before the first run** — install:
+
+- [Node.js 22](https://nodejs.org) (LTS)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) — start it, it runs the database
+- [Git](https://git-scm.com)
+
+Then in a terminal:
 
 ```bash
-pnpm install
+git clone https://github.com/kimostrupler/seatline.git
+cd seatline
+corepack enable                              # gives you pnpm
+pnpm install                                 # also prepares the database client
 pnpm db:up                                   # Postgres + Azurite in Docker
-cp apps/api/.env.example apps/api/.env
-pnpm db:migrate                              # apply migrations
+cp apps/api/.env.example apps/api/.env       # Windows: copy apps\api\.env.example apps\api\.env
+pnpm db:migrate                              # create the tables
 pnpm db:seed                                 # two demo companies
+```
+
+**Every time** you want to use it: start Docker Desktop, then
+
+```bash
+pnpm db:up
 pnpm dev                                     # API on :3001, web on :3000
 ```
 

@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "prisma generate && nest build",
+    "postinstall": "prisma generate",
     "dev": "nest start --watch",
     "start": "node dist/main.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
