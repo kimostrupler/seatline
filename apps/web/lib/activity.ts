@@ -219,6 +219,12 @@ export function describe(e: ActivityEntry, refs: ActivityRefs, unknownName: stri
       };
     case 'tenant.create':
       return { key: 'workspaceCreated', values: { name: str(a.name) ?? '' } };
+    case 'dashboard.update':
+      return { key: 'dashboardUpdated', values: {} };
+    case 'dashboard.reset':
+      return { key: 'dashboardReset', values: {} };
+    case 'dashboard.default':
+      return { key: 'dashboardDefault', values: {} };
     case 'tenant.seed':
       return { key: 'demoData', values: {} };
     case 'tenant.update':
@@ -228,7 +234,7 @@ export function describe(e: ActivityEntry, refs: ActivityRefs, unknownName: stri
   }
 }
 
-/** "/?building=…&floor=…&seat=…" or "/?person=…" */
+/** "/map?building=…&floor=…&seat=…" or "/map?person=…" */
 export function linkHref(link: NonNullable<Described['link']>): string {
-  return `/?${new URLSearchParams(link as Record<string, string>).toString()}`;
+  return `/map?${new URLSearchParams(link as Record<string, string>).toString()}`;
 }

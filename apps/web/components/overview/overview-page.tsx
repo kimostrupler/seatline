@@ -60,7 +60,7 @@ export function OverviewPage() {
                       <span className="truncate text-sm font-medium">{f.name}</span>
                       <OccupancyBar counts={f} label={f.name} compact />
                       <Button asChild variant="ghost" size="sm" className="justify-self-start">
-                        <Link href={`/?building=${b.id}&floor=${f.id}`}>{t('openMap')}</Link>
+                        <Link href={`/map?building=${b.id}&floor=${f.id}`}>{t('openMap')}</Link>
                       </Button>
                     </li>
                   ))}
@@ -74,7 +74,7 @@ export function OverviewPage() {
   );
 }
 
-function Tile({
+export function Tile({
   label,
   value,
   status,
@@ -95,7 +95,7 @@ function Tile({
 }
 
 /** Stacked bar (free · taken · reserved · blocked) with the numbers written next to it. */
-function OccupancyBar({
+export function OccupancyBar({
   counts,
   label,
   compact,

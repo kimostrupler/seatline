@@ -5,7 +5,7 @@ import { switchUser } from './helpers';
 
 test.beforeEach(async ({ page }) => {
   resetE2eDb();
-  await page.goto('/');
+  await page.goto('/map');
   await expect(page.getByTestId('floor-map').locator('canvas').first()).toBeVisible();
 });
 

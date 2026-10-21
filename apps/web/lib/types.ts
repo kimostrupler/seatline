@@ -185,3 +185,47 @@ export interface Overview extends OccupancyCounts {
     }
   >;
 }
+
+export interface DashboardData {
+  widgets: import('@seatline/shared').Widget[];
+  source: 'personal' | 'company' | 'builtin';
+  hasCompanyDefault: boolean;
+}
+
+interface FloorRef {
+  floorId: string;
+  floorName: string;
+  buildingId: string;
+  buildingName: string;
+}
+
+export interface Stats {
+  weeks: Array<{ start: string; assigned: number; moved: number; reserved: number; freed: number }>;
+  unseated: {
+    total: number;
+    people: Array<{ id: string; displayName: string; department: string | null }>;
+  };
+  reservations: {
+    total: number;
+    items: Array<
+      FloorRef & {
+        id: string;
+        seatId: string;
+        seatLabel: string;
+        reservedFor: string;
+        startAt: string;
+      }
+    >;
+  };
+  blocked: {
+    total: number;
+    items: Array<FloorRef & { seatId: string; label: string; since: string }>;
+  };
+  freeSeats: Array<FloorRef & { free: number; labels: string[] }>;
+  departments: Array<{
+    name: string | null;
+    people: number;
+    seated: number;
+    floors: Array<FloorRef & { count: number }>;
+  }>;
+}

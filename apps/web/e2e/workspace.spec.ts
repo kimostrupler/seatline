@@ -7,7 +7,7 @@ const admin = { tenantId: alpenblick!.id, userId: alpenblick!.users[0].id };
 
 test.beforeEach(async ({ page }) => {
   resetE2eDb();
-  await page.goto('/');
+  await page.goto('/map');
   await expect(page.getByTestId('floor-map').locator('canvas').first()).toBeVisible();
 });
 

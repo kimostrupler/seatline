@@ -50,6 +50,7 @@
   --seat-blocked-fill: #ffffff;
   --seat-blocked-stroke: #a1a1aa;
   --seat-blocked-text: #71717a;
+  --chart-1: #2a78d6; /* single data series (not a status colour) */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -91,6 +92,7 @@
     --seat-blocked-fill: #18181b;
     --seat-blocked-stroke: #71717a;
     --seat-blocked-text: #a1a1aa;
+    --chart-1: #3987e5;
   }
 }
 

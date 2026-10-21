@@ -22,7 +22,7 @@ export function OnboardingForm({ signedInAs }: { signedInAs: string }) {
         setBusy(true);
         try {
           await api('/onboarding', { method: 'POST', body: { companyName: name.trim() } });
-          router.replace('/');
+          router.replace('/map');
           router.refresh();
         } catch (error) {
           toast.error(error instanceof Error ? error.message : String(error));

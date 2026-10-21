@@ -1,8 +1,8 @@
 'use client';
 
-import { ChartPie, ChevronsUpDown, History, LogOut, Users } from 'lucide-react';
-import Link from 'next/link';
+import { ChevronsUpDown, LogOut } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { NavLinks } from '@/components/common/nav-links';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -17,12 +17,10 @@ import { useMe } from '@/lib/queries';
 import { DevLogin } from './dev-login';
 
 /** Top of the sidebar: who you are, and links to the other pages (by role). */
-export function AccountMenu() {
+export function AccountMenu({ withNav = true }: { withNav?: boolean }) {
   const mode = useAuthMode();
   const t = useTranslations();
   const me = useMe();
-  const isAdmin = me.data?.role === 'admin';
-  const canEdit = isAdmin || me.data?.role === 'editor';
 
   return (
     <div className="grid gap-1">
@@ -64,41 +62,7 @@ export function AccountMenu() {
           </DropdownMenuContent>
         </DropdownMenu>
       )}
-      <nav aria-label={t('nav.label')} className="grid">
-        {me.data && (
-          <NavLink href="/overview" icon={<ChartPie />}>
-            {t('nav.overview')}
-          </NavLink>
-        )}
-        {canEdit && (
-          <NavLink href="/activity" icon={<History />}>
-            {t('nav.activity')}
-          </NavLink>
-        )}
-        {isAdmin && (
-          <NavLink href="/people" icon={<Users />}>
-            {t('admin.link')}
-          </NavLink>
-        )}
-      </nav>
+      {withNav && <NavLinks />}
     </div>
-  );
-}
-
-function NavLink({
-  href,
-  icon,
-  children,
-}: {
-  href: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <Button asChild variant="ghost" size="sm" className="justify-start text-muted-foreground">
-      <Link href={href}>
-        {icon} {children}
-      </Link>
-    </Button>
   );
 }

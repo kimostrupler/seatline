@@ -2,7 +2,7 @@
 
 import { DEMO_TENANTS } from '@seatline/shared';
 import { Check, ChevronsUpDown } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ export function DevLogin() {
   const { identity, setIdentity } = useIdentity();
   const me = useMe();
   const router = useRouter();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
   return (
@@ -57,7 +58,7 @@ export function DevLogin() {
                     setOpen(false);
                     if (active) return;
                     setIdentity({ tenantId: tenant.id, userId: user.id });
-                    router.replace('/'); // the old selection belongs to the other company
+                    router.replace(pathname); // the old selection belongs to the other company
                   }}
                 >
                   <Check className={active ? 'size-4' : 'invisible size-4'} />
