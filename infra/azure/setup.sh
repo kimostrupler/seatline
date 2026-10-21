@@ -96,13 +96,24 @@ say "6/6 Deploy access for GitHub ($REPO, branch main) — no passwords (OpenID 
 DEPLOY_ID=$(az ad app list --display-name "$DEPLOY_APP_NAME" --query "[0].appId" -o tsv)
 [ -n "$DEPLOY_ID" ] || DEPLOY_ID=$(az ad app create --display-name "$DEPLOY_APP_NAME" --query appId -o tsv)
 az ad sp show --id "$DEPLOY_ID" >/dev/null 2>&1 || az ad sp create --id "$DEPLOY_ID" -o none
-if [ -z "$(az ad app federated-credential list --id "$DEPLOY_ID" --query "[?name=='main'].name" -o tsv)" ]; then
-  az ad app federated-credential create --id "$DEPLOY_ID" -o none --parameters "{
-    \"name\": \"main\",
-    \"issuer\": \"https://token.actions.githubusercontent.com\",
-    \"subject\": \"repo:$REPO:ref:refs/heads/main\",
-    \"audiences\": [\"api://AzureADTokenExchange\"]
-  }"
+# GitHub presents the repository either by name or, on newer setups, by name@id
+# (repo:owner@ownerId/repo@repoId:...). Trust both forms for the main branch.
+federate() {
+  local name="$1" subject="$2"
+  if [ -z "$(az ad app federated-credential list --id "$DEPLOY_ID" --query "[?name=='$name'].name" -o tsv)" ]; then
+    az ad app federated-credential create --id "$DEPLOY_ID" -o none --parameters "{
+      \"name\": \"$name\",
+      \"issuer\": \"https://token.actions.githubusercontent.com\",
+      \"subject\": \"$subject\",
+      \"audiences\": [\"api://AzureADTokenExchange\"]
+    }"
+  fi
+}
+federate main "repo:$REPO:ref:refs/heads/main"
+if IDS=$(gh api "repos/$REPO" --jq '"\(.owner.login)@\(.owner.id)/\(.name)@\(.id)"' 2>/dev/null); then
+  federate main-ids "repo:$IDS:ref:refs/heads/main"
+else
+  echo "  (sign in with 'gh auth login' and run again to also trust GitHub's id-based form)"
 fi
 DEPLOY_SP=$(az ad sp show --id "$DEPLOY_ID" --query id -o tsv)
 assign() {
