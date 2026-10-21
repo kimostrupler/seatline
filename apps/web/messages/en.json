@@ -1,0 +1,102 @@
+{
+  "app": {
+    "name": "Seatline",
+    "tagline": "Office seat management"
+  },
+  "devLogin": {
+    "label": "Dev sign-in",
+    "hint": "Until Microsoft sign-in arrives, pick which company and person you are.",
+    "role": {
+      "admin": "Admin",
+      "editor": "Editor",
+      "viewer": "Viewer"
+    }
+  },
+  "place": {
+    "building": "Building",
+    "floor": "Floor",
+    "chooseBuilding": "Choose a building",
+    "chooseFloor": "Choose a floor",
+    "noBuildings": "No buildings yet. They arrive with the layout editor.",
+    "noFloors": "This building has no floors yet."
+  },
+  "people": {
+    "title": "People",
+    "search": "Find a person",
+    "noSeat": "No seat",
+    "seat": "Seat {label}",
+    "otherFloor": "Seat {label} · other floor",
+    "none": "Nobody matches “{search}”.",
+    "dragHint": "Drag a person onto a seat to assign them."
+  },
+  "status": {
+    "free": "Free",
+    "taken": "Taken",
+    "reserved": "Reserved",
+    "blocked": "Blocked"
+  },
+  "map": {
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "fit": "Fit floor to screen",
+    "openSidebar": "Floors and people",
+    "loading": "Loading floor…",
+    "empty": "This floor has no seats yet.",
+    "error": "The floor couldn’t be loaded.",
+    "retry": "Try again",
+    "seatsList": "Seats on this floor",
+    "seatButton": "Seat {label}, {status}",
+    "seatButtonPerson": "Seat {label}, taken by {person}",
+    "seatButtonReserved": "Seat {label}, reserved for {reservedFor}"
+  },
+  "seat": {
+    "title": "Seat {label}",
+    "room": "{room}",
+    "noRoom": "No room",
+    "since": "Since {date}",
+    "sinceFor": "Since {date} · {duration}",
+    "reservedFor": "Reserved for {name}",
+    "blockedInfo": "This seat is blocked and can’t be assigned.",
+    "assign": "Assign person",
+    "reassign": "Assign someone else",
+    "reserve": "Reserve",
+    "free": "Free seat",
+    "cancelReservation": "Cancel reservation",
+    "reservePlaceholder": "Who is it for? e.g. New hire",
+    "reserveSave": "Reserve seat",
+    "assignSearch": "Search people",
+    "assignEmpty": "Nobody found.",
+    "willMove": "now at {label} — will move",
+    "viewOnly": "View only — ask an editor to make changes.",
+    "close": "Close"
+  },
+  "history": {
+    "title": "History",
+    "empty": "Nobody has sat here yet.",
+    "emptyPerson": "No seats yet.",
+    "now": "now",
+    "range": "{from} – {to}",
+    "by": "by {name}",
+    "reserved": "Reserved for {name}",
+    "seat": "Seat {label}"
+  },
+  "person": {
+    "currentSeat": "Current seat",
+    "noSeat": "Doesn’t have a seat",
+    "showSeat": "Show on map"
+  },
+  "details": {
+    "emptyTitle": "Select a seat",
+    "emptyBody": "Click a seat to see who sits there and its history, or drag a person from the list onto a free seat.",
+    "summary": "{free} free · {taken} taken · {reserved} reserved"
+  },
+  "toast": {
+    "assigned": "{person} now sits at {label}",
+    "moved": "{person} moved from {from} to {to}",
+    "reserved": "Seat {label} reserved for {name}",
+    "freed": "Seat {label} is free",
+    "undo": "Undo",
+    "undone": "Change undone",
+    "error": "That didn’t work: {message}"
+  }
+}
