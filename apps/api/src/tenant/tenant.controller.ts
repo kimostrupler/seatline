@@ -14,6 +14,7 @@ const select = {
   entraTenantId: true,
   peopleSyncedAt: true,
   peopleSyncStatus: true,
+  historyRetentionMonths: true,
 } as const;
 
 /** The caller's workspace and its settings. */
@@ -44,8 +45,16 @@ export class TenantController {
         action: 'tenant.update',
         entityType: 'tenant',
         entityId: ctx.tenantId,
-        before: { name: before.name, defaultAppRole: before.defaultAppRole },
-        after: { name: after.name, defaultAppRole: after.defaultAppRole },
+        before: {
+          name: before.name,
+          defaultAppRole: before.defaultAppRole,
+          historyRetentionMonths: before.historyRetentionMonths,
+        },
+        after: {
+          name: after.name,
+          defaultAppRole: after.defaultAppRole,
+          historyRetentionMonths: after.historyRetentionMonths,
+        },
       });
       return after;
     });

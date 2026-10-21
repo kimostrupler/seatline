@@ -77,6 +77,8 @@ export class PeopleService {
           active: true,
           syncedAt: true,
           entraObjectId: true,
+          leftAt: true,
+          forgottenAt: true,
         },
         orderBy: [{ active: 'desc' }, { displayName: 'asc' }],
       }),

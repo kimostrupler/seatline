@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { PrivacyController } from './privacy/privacy.controller';
+import { PrivacyService } from './privacy/privacy.service';
 import { ExportsController } from './exports/exports.controller';
 import { ExportsService } from './exports/exports.service';
 import { MovesController } from './moves/moves.controller';
@@ -55,8 +57,10 @@ import { PeopleSyncService } from './sync/people-sync.service';
     DashboardController,
     MovesController,
     ExportsController,
+    PrivacyController,
   ],
   providers: [
+    PrivacyService,
     ExportsService,
     MovesService,
     DashboardService,

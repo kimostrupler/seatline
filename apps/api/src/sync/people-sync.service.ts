@@ -119,9 +119,10 @@ export class PeopleSyncService {
           department: u.department,
           jobTitle: u.jobTitle,
           active: u.active,
+          leftAt: u.active ? null : (match.leftAt ?? at),
         };
-        const changed = (Object.keys(data) as (keyof typeof data)[]).some(
-          (k) => data[k] !== match[k],
+        const changed = (Object.keys(data) as (keyof typeof data)[]).some((k) =>
+          data[k] instanceof Date ? +data[k] !== +(match[k] ?? 0) : data[k] !== match[k],
         );
         if (changed) {
           await tx.person.update({ where: { id: match.id }, data });
@@ -159,7 +160,10 @@ export class PeopleSyncService {
     // Linked to Microsoft but no longer in the directory: they left.
     for (const p of people) {
       if (p.entraObjectId && !seen.has(p.entraObjectId) && p.active) {
-        await tx.person.update({ where: { id: p.id }, data: { active: false, syncedAt: at } });
+        await tx.person.update({
+          where: { id: p.id },
+          data: { active: false, leftAt: at, syncedAt: at },
+        });
         deactivated.push(p.id);
       }
     }

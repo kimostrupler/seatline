@@ -27,6 +27,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { describe, linkHref } from '@/lib/activity';
 import { initials } from '@/lib/map-geometry';
+import { usePersonName } from '@/lib/use-person-name';
 import { useActivity, useMe, usePeople, type ActivityFilters } from '@/lib/queries';
 import type { ActivityEntry, ActivityKind, ActivityRefs } from '@/lib/types';
 
@@ -212,15 +213,18 @@ function DayHeading({ day }: { day: string }) {
 
 export function EntryRow({ entry, refs }: { entry: ActivityEntry; refs: ActivityRefs }) {
   const t = useTranslations();
+  const personName = usePersonName();
   const format = useFormatter();
   const d = describe(entry, refs, t('activity.unknown'));
   const values = { ...d.values };
+  for (const key of ['person', 'by'] as const)
+    if (typeof values[key] === 'string') values[key] = personName(values[key] as string);
   if (typeof values.role === 'string' && values.role)
     values.role = t(`devLogin.role.${values.role}` as 'devLogin.role.admin');
   if (typeof values.type === 'string' && values.type)
     values.type = t(`inspector.seatType.${values.type}` as 'inspector.seatType.desk');
   const actor = entry.actorId
-    ? (refs.people[entry.actorId]?.displayName ?? t('activity.unknown'))
+    ? personName(refs.people[entry.actorId]?.displayName ?? t('activity.unknown'))
     : t('activity.system');
 
   return (
