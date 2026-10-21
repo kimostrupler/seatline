@@ -218,7 +218,11 @@ export function Workspace() {
             open={!!(selectedSeat || params.person)}
             onOpenChange={(open) => !open && update({ seat: null, person: null })}
           >
-            <SheetContent side="bottom" className="max-h-[75dvh] overflow-y-auto p-4">
+            <SheetContent
+              side="bottom"
+              showCloseButton={false}
+              className="max-h-[75dvh] overflow-y-auto p-4"
+            >
               <SheetTitle className="sr-only">{t('details.emptyTitle')}</SheetTitle>
               {details}
             </SheetContent>

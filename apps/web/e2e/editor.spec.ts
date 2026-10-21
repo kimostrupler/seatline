@@ -20,6 +20,18 @@ async function clickPlan(page: Page, p: { x: number; y: number }) {
   await page.mouse.click(s.x, s.y);
 }
 
+/** A click that doesn't move focus first (like Safari): the selection changes while the field is still focused. */
+async function clickPlanKeepFocus(page: Page, p: { x: number; y: number }) {
+  const s = await toScreen(editor(page), p);
+  await page.evaluate(({ x, y }) => {
+    const target = document.elementFromPoint(x, y)!;
+    for (const type of ['mousedown', 'mouseup', 'click'])
+      target.dispatchEvent(
+        new MouseEvent(type, { bubbles: true, cancelable: true, clientX: x, clientY: y }),
+      );
+  }, s);
+}
+
 async function dragPlan(page: Page, from: { x: number; y: number }, to: { x: number; y: number }) {
   const a = await toScreen(editor(page), from);
   const b = await toScreen(editor(page), to);
@@ -83,6 +95,28 @@ test('drag a seat to move it; arrows nudge; R rotates', async ({ page }) => {
   await saved(page);
   moved = (await floorMap(page)).seats.find((s) => s.id === seat.id)!;
   expect([moved.x, moved.rotation]).toEqual([seat.x + 100 + grid, 90]);
+});
+
+test('a new label is kept when you click on the map without pressing Enter', async ({ page }) => {
+  const map = await floorMap(page);
+  const seat = map.seats.find((s) => s.label === '1.04')!;
+  const other = map.seats.find((s) => s.label === '1.05')!;
+  await clickPlan(page, seat);
+  const label = page.getByTestId('inspector').getByRole('textbox', { name: 'Label' });
+  await label.fill('A1');
+  await clickPlanKeepFocus(page, other); // selecting another seat must not lose the typed label
+  await expect(page.getByTestId('inspector').getByRole('heading')).toHaveText('Seat 1.05');
+  await saved(page);
+  await expect
+    .poll(async () => (await floorMap(page)).seats.find((s) => s.id === seat.id)?.label)
+    .toBe('A1');
+
+  await label.fill('B2');
+  await clickPlanKeepFocus(page, { x: 40, y: 40 }); // empty spot: clears the selection
+  await saved(page);
+  await expect
+    .poll(async () => (await floorMap(page)).seats.find((s) => s.id === other.id)?.label)
+    .toBe('B2');
 });
 
 test('seats with people can’t be deleted', async ({ page }) => {
