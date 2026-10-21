@@ -8,7 +8,7 @@ import { TenantDb, type Tx } from '../db/tenant-db.service';
 import { seatOccupancy } from './occupancy';
 
 /** A seat plus its open assignment (if any) — what the floor map needs. */
-const withCurrent = {
+export const withCurrent = {
   assignments: {
     where: { endAt: null },
     take: 1,
@@ -18,7 +18,7 @@ const withCurrent = {
 
 type SeatWithCurrent = Prisma.SeatGetPayload<{ include: typeof withCurrent }>;
 
-function present(seat: SeatWithCurrent) {
+export function present(seat: SeatWithCurrent) {
   const { assignments, ...rest } = seat;
   const current = assignments[0] ?? null;
   return { ...rest, currentAssignment: current, occupancy: seatOccupancy(seat, current) };

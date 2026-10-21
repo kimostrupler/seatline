@@ -6,6 +6,7 @@
  * so it also works where the owner is subject to RLS (Azure).
  */
 import { PrismaClient, type Prisma } from '@prisma/client';
+import { DEMO_TENANTS, type DemoTenant as DemoIds } from '@seatline/shared';
 
 type Tx = Prisma.TransactionClient;
 
@@ -16,6 +17,9 @@ const DAY = 24 * 60 * 60 * 1000;
 interface DemoTenant {
   id: string;
   adminId: string;
+  /** fixed ids for the first two people: the demo editor and viewer */
+  editorId: string;
+  viewerId: string;
   name: string;
   slug: string;
   domain: string;
@@ -23,12 +27,19 @@ interface DemoTenant {
   people: Array<[name: string, department: string, jobTitle: string]>;
 }
 
-/** Fixed ids so you can call the API with the same headers after every reset. */
+/** Fixed ids (shared with the web dev login) so headers stay valid after every reset. */
+const [alpenblick, seeblick] = DEMO_TENANTS as [DemoIds, DemoIds];
+const ids = (t: DemoIds) => ({
+  id: t.id,
+  adminId: t.users[0].id,
+  editorId: t.users[1].id,
+  viewerId: t.users[2].id,
+  name: t.name,
+});
+
 const TENANTS: DemoTenant[] = [
   {
-    id: '11111111-1111-4111-8111-111111111111',
-    adminId: '11111111-1111-4111-8111-0000000000a1',
-    name: 'Alpenblick AG',
+    ...ids(alpenblick),
     slug: 'alpenblick',
     domain: 'alpenblick.example',
     building: { name: 'Hauptsitz Zürich', address: 'Seestrasse 1, 8000 Zürich' },
@@ -44,9 +55,7 @@ const TENANTS: DemoTenant[] = [
     ],
   },
   {
-    id: '22222222-2222-4222-8222-222222222222',
-    adminId: '22222222-2222-4222-8222-0000000000a1',
-    name: 'Seeblick GmbH',
+    ...ids(seeblick),
     slug: 'seeblick',
     domain: 'seeblick.example',
     building: { name: 'Büro Bern', address: 'Bundesgasse 2, 3000 Bern' },
@@ -92,6 +101,7 @@ async function seedTenant(t: DemoTenant) {
       people.push(
         await tx.person.create({
           data: {
+            id: i === 0 ? t.editorId : i === 1 ? t.viewerId : undefined,
             tenantId: t.id,
             email: emailFor(displayName, t.domain),
             displayName,

@@ -27,7 +27,10 @@ export class PeopleService {
             : {}),
         },
         include: {
-          assignments: { where: { endAt: null }, select: { id: true, seatId: true } },
+          assignments: {
+            where: { endAt: null },
+            select: { id: true, seat: { select: { id: true, label: true, floorId: true } } },
+          },
         },
         orderBy: { displayName: 'asc' },
         take: query.limit,

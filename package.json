@@ -16,7 +16,7 @@
     "db:up": "docker compose -f infra/docker-compose.yml up -d",
     "db:down": "docker compose -f infra/docker-compose.yml down",
     "db:migrate": "pnpm --filter @seatline/api db:migrate",
-    "db:seed": "pnpm --filter @seatline/api db:seed"
+    "db:seed": "pnpm --filter @seatline/shared build && pnpm --filter @seatline/api db:seed"
   },
   "devDependencies": {
     "prettier": "3.9.10",

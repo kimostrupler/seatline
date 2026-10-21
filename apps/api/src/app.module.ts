@@ -10,6 +10,7 @@ import { DbModule } from './db/db.module';
 import { FloorsController } from './floors/floors.controller';
 import { FloorsService } from './floors/floors.service';
 import { HealthController } from './health.controller';
+import { MeController } from './me.controller';
 import { PeopleController } from './people/people.controller';
 import { PeopleService } from './people/people.service';
 import { RoomsController } from './rooms/rooms.controller';
@@ -21,6 +22,7 @@ import { SeatsService } from './seats/seats.service';
   imports: [DbModule],
   controllers: [
     HealthController,
+    MeController,
     BuildingsController,
     FloorsController,
     RoomsController,

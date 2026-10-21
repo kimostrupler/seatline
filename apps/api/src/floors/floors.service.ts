@@ -4,6 +4,7 @@ import type { RequestContext } from '../auth/request-context';
 import { audit } from '../common/audit';
 import { orNotFound } from '../common/errors';
 import { TenantDb } from '../db/tenant-db.service';
+import { present, withCurrent } from '../seats/seats.service';
 
 @Injectable()
 export class FloorsService {
@@ -22,6 +23,31 @@ export class FloorsService {
     return this.db.run(ctx.tenantId, async (tx) =>
       orNotFound(await tx.floor.findFirst({ where: { id, tenantId: ctx.tenantId } }), 'Floor'),
     );
+  }
+
+  /** Everything the floor map needs, in one round trip and one consistent snapshot. */
+  map(ctx: RequestContext, id: string) {
+    return this.db.run(ctx.tenantId, async (tx) => {
+      const floor = orNotFound(
+        await tx.floor.findFirst({
+          where: { id, tenantId: ctx.tenantId },
+          include: { building: { select: { id: true, name: true } } },
+        }),
+        'Floor',
+      );
+      const [rooms, seats] = await Promise.all([
+        tx.room.findMany({
+          where: { tenantId: ctx.tenantId, floorId: id },
+          orderBy: { name: 'asc' },
+        }),
+        tx.seat.findMany({
+          where: { tenantId: ctx.tenantId, floorId: id },
+          include: withCurrent,
+          orderBy: { label: 'asc' },
+        }),
+      ]);
+      return { floor, rooms, seats: seats.map(present) };
+    });
   }
 
   create(ctx: RequestContext, input: CreateFloorInput) {

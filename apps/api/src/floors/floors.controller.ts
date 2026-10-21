@@ -28,6 +28,12 @@ export class FloorsController {
     return this.floors.get(ctx, id);
   }
 
+  /** Floor + rooms + seats with their current state, for the map. */
+  @Get(':id/map')
+  map(@Ctx() ctx: RequestContext, @Param('id', IdPipe) id: string) {
+    return this.floors.map(ctx, id);
+  }
+
   @Post()
   create(@Ctx() ctx: RequestContext, @Body(new ZodPipe(createFloorSchema)) body: CreateFloorInput) {
     return this.floors.create(ctx, body);
