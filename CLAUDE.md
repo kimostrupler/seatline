@@ -112,7 +112,10 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   the accessible map — keep it in sync with what the canvas shows.
 - Seat status is colour **and** content (initials / R / cross). Status colours mean seat status
   only; selection and focus use `--primary`.
-- No hard-coded UI text: everything goes through `messages/en.json` (next-intl).
+- No hard-coded UI text: everything goes through `messages/{en,de,fr}.json` (next-intl). Every
+  key must exist in all three with the same `{placeholders}` (`lib/locales.test.ts` checks).
+  German is Swiss ("ss", not "ß"; formal "Sie"); French uses "vous". Language = cookie
+  `seatline-language`, else the browser's Accept-Language (`pickLanguage`), else English.
 - Every seat change shows a toast with Undo; undo makes the opposite change (history keeps both).
 - shadcn components are added with `npx shadcn@<version> add …`; check its imports afterwards
   (it once pulled an npm package called `cn` instead of `@/lib/utils`).
@@ -187,6 +190,16 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   `components/dashboard/widgets.tsx`. New widget = `WIDGET_TYPES` + `WIDGETS` + body + texts.
   Numbers come from `GET /stats` (one snapshot; weeks are Swiss weeks starting Monday).
 - The `/api` proxy must export every HTTP method the API uses (PUT was missing once).
+
+## Operations
+
+- Browser errors are posted to the web app's `/client-errors` (sanitized, rate-limited) and
+  logged as `ERROR [client-error] …`; `app/error.tsx` is the friendly crash page.
+- Error alerts: `infra/azure/alerts.sh` (Azure Monitor log alert → e-mail), run by the deploy
+  when the GitHub variable `ALERT_EMAIL` is set. No third-party error service: logs must stay in
+  Switzerland. `KEEP_WARM=true` sets min replicas to 1 on deploy.
+- Own domain: `infra/azure/custom-domain.sh`; `main.bicep` takes `customDomain` +
+  `customDomainCertificateId`, and `setup.sh` re-reads them so a re-run keeps the binding.
 
 ## Working style
 

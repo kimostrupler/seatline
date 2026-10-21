@@ -32,6 +32,12 @@ param entraClientId string
 @secure()
 param entraClientSecret string
 
+@description('Own web address for the app, e.g. app.example.ch (set up with custom-domain.sh). Empty = the Azure address.')
+param customDomain string = ''
+
+@description('Managed certificate of customDomain (custom-domain.sh creates it).')
+param customDomainCertificateId string = ''
+
 var suffix = uniqueString(resourceGroup().id)
 var pgAdmin = 'seatlineadmin'
 
@@ -135,7 +141,8 @@ var dbHost = postgres.properties.fullyQualifiedDomainName
 var ownerDbUrl = 'postgresql://${pgAdmin}:${pgAdminPassword}@${dbHost}:5432/seatline?sslmode=require'
 var appDbUrl = 'postgresql://seatline_app:${appDbPassword}@${dbHost}:5432/seatline?sslmode=require'
 var storageConnection = 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
-var webUrl = 'https://web.${env.properties.defaultDomain}'
+var azureWebUrl = 'https://web.${env.properties.defaultDomain}'
+var webUrl = empty(customDomain) ? azureWebUrl : 'https://${customDomain}'
 var apiUrl = 'https://api.internal.${env.properties.defaultDomain}'
 
 var identity = {
@@ -192,7 +199,13 @@ resource web 'Microsoft.App/containerApps@2024-03-01' = {
   properties: {
     managedEnvironmentId: env.id
     configuration: {
-      ingress: { external: true, targetPort: 3000 }
+      ingress: {
+        external: true
+        targetPort: 3000
+        customDomains: empty(customDomain)
+          ? []
+          : [{ name: customDomain, certificateId: customDomainCertificateId, bindingType: 'SniEnabled' }]
+      }
       registries: registries
       secrets: [
         { name: 'session-secret', value: sessionSecret }
@@ -297,6 +310,7 @@ resource nightlySync 'Microsoft.App/jobs@2024-03-01' = {
 }
 
 output webUrl string = webUrl
+output azureWebUrl string = azureWebUrl
 output registryName string = registry.name
 output registryServer string = registry.properties.loginServer
 output postgresServer string = postgres.name

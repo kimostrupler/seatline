@@ -91,6 +91,8 @@ Changing the schema: edit `apps/api/prisma/schema.prisma`, then
 - **Overview** (everyone): free / taken / reserved seats per building and floor.
 - **Activity** (editors and admins): every change in plain words, newest first — filter by
   kind, person and date; each entry links to the seat or floor on the map.
+- **Languages:** German, French and English. The browser's language is used, or the person's
+  choice (globe menu, remembered in a cookie). Texts live in `apps/web/messages/{de,fr,en}.json`.
 - Light and dark follow the system setting. All text lives in `apps/web/messages/en.json`.
 - The browser calls `/api/*` on the web app, which forwards to the API (`API_URL`, read at runtime).
 

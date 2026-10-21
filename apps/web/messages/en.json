@@ -317,7 +317,8 @@
     "overview": "Overview",
     "activity": "Activity",
     "home": "Home",
-    "map": "Map"
+    "map": "Map",
+    "language": "Language"
   },
   "overview": {
     "title": "Overview",
@@ -525,5 +526,11 @@
         "description": "Find a person, open the map."
       }
     }
+  },
+  "errors": {
+    "title": "Something went wrong",
+    "body": "This page ran into a problem. We’ve been told about it. Try again, or go back to the start.",
+    "retry": "Try again",
+    "home": "Go to the start page"
   }
 }
