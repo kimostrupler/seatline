@@ -68,7 +68,7 @@ export function MapLegend({
         aria-label={t('map.colorBy')}
         value={colorBy}
         onValueChange={(v) => v && onColorBy(v as ColorBy)}
-        className="h-7"
+        className="h-7 print:hidden"
       >
         <ToggleGroupItem value="status" className="h-7 px-2 text-xs">
           {t('map.byStatus')}

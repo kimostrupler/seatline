@@ -36,10 +36,15 @@ async function proxy(req: NextRequest, { params }: { params: Promise<{ path: str
     body: hasBody ? await req.arrayBuffer() : undefined,
     cache: 'no-store',
   });
-  return new Response(res.status === 204 ? null : res.body, {
-    status: res.status,
-    headers: { 'content-type': res.headers.get('content-type') ?? 'application/json' },
+  const out = new Headers({
+    'content-type': res.headers.get('content-type') ?? 'application/json',
   });
+  // downloads (exports) keep their file name; plan images keep their caching
+  for (const name of ['content-disposition', 'cache-control', 'etag']) {
+    const value = res.headers.get(name);
+    if (value) out.set(name, value);
+  }
+  return new Response(res.status === 204 ? null : res.body, { status: res.status, headers: out });
 }
 
 export const dynamic = 'force-dynamic';

@@ -62,3 +62,20 @@ export async function api<T>(path: string, init?: { method?: string; body?: unkn
   if (!res.ok) throw await errorFrom(res);
   return (res.status === 204 ? undefined : await res.json()) as T;
 }
+
+/** Download a file from the API (exports) and save it under the name the API gives it. */
+export async function apiDownload(path: string): Promise<void> {
+  const res = await fetch(`/api${path}`, { headers: authHeaders() });
+  if (!res.ok) throw await errorFrom(res);
+  const name =
+    /filename="([^"]+)"/.exec(res.headers.get('content-disposition') ?? '')?.[1] ??
+    'seatline-export';
+  const url = URL.createObjectURL(await res.blob());
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+}

@@ -425,7 +425,9 @@
       "planApplied": "applied the move plan {name} ({count} moves)",
       "planFailed": "couldn’t apply the move plan {name} (see the plan)",
       "planCancelled": "cancelled the move plan {name}",
-      "planChanged": "changed the move plan {name}"
+      "planChanged": "changed the move plan {name}",
+      "exportedSeating": "exported the seating list",
+      "exportedHistory": "exported the seat history"
     },
     "showPlan": "Open the plan"
   },
@@ -647,5 +649,21 @@
       "added": "{person} → {seat} added to the plan",
       "freed": "{person} gives up the seat (planned)"
     }
+  },
+  "exports": {
+    "menu": "Export",
+    "thisFloor": "This floor",
+    "allFloors": "All buildings and floors",
+    "seatingExcel": "Seating list (Excel)",
+    "seatingCsv": "Seating list (CSV)",
+    "historyExcel": "Seat history (Excel)",
+    "print": "Print floor / save as PDF",
+    "failed": "The export didn’t work: {message}",
+    "back": "Back",
+    "printNow": "Print / save as PDF",
+    "asOf": "As of {date}",
+    "seat": "Seat",
+    "person": "Person",
+    "department": "Department"
   }
 }

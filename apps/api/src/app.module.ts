@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { ExportsController } from './exports/exports.controller';
+import { ExportsService } from './exports/exports.service';
 import { MovesController } from './moves/moves.controller';
 import { MovesService } from './moves/moves.service';
 import { DashboardController } from './dashboard/dashboard.controller';
@@ -52,8 +54,10 @@ import { PeopleSyncService } from './sync/people-sync.service';
     ActivityController,
     DashboardController,
     MovesController,
+    ExportsController,
   ],
   providers: [
+    ExportsService,
     MovesService,
     DashboardService,
     StatsService,

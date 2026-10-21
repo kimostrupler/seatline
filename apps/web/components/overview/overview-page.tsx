@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { ExportMenu } from '@/components/common/export-menu';
 import { PageFrame, PageSection } from '@/components/common/page-frame';
 import { StatusDot } from '@/components/map/status-dot';
 import { Button } from '@/components/ui/button';
@@ -27,7 +28,7 @@ export function OverviewPage() {
   const data = overview.data;
 
   return (
-    <PageFrame title={t('title')}>
+    <PageFrame title={t('title')} actions={<ExportMenu />}>
       {!data ? (
         overview.isError ? (
           <p className="text-sm text-muted-foreground">{t('error')}</p>

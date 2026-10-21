@@ -5,7 +5,9 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
+import { ExportMenu } from '@/components/common/export-menu';
 import { PlanBar, PlanSeatPanel, usePlanEdits } from '@/components/moves/plan-mode';
+import { useRouter } from 'next/navigation';
 import { projectFloor } from '@/lib/moves';
 import {
   useBuildings,
@@ -44,6 +46,7 @@ const EditMode = dynamic(() => import('@/components/editor/edit-mode').then((m) 
 export function Workspace() {
   const t = useTranslations();
   const [params, update] = useWorkspaceParams();
+  const router = useRouter();
   const isDesktop = useMediaQuery('(min-width: 1024px)');
   const [planOpacity] = usePlanOpacity();
   const [colorBy, setColorBy] = useColorBy();
@@ -135,6 +138,13 @@ export function Workspace() {
   );
   const headerEnd = (
     <>
+      {map.data && !editing && !plan && (
+        <ExportMenu
+          compact
+          floorId={map.data.floor.id}
+          onPrint={() => router.push(`/map/print?floor=${map.data!.floor.id}`)}
+        />
+      )}
       {me.data?.role === 'viewer' && <Badge variant="secondary">{t('devLogin.role.viewer')}</Badge>}
       {canEdit && map.data && !plan && (
         <ModeToggle

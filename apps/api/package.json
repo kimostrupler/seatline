@@ -25,6 +25,7 @@
     "@nestjs/platform-express": "11.2.7",
     "@prisma/client": "6.19.3",
     "@seatline/shared": "workspace:*",
+    "exceljs": "4.4.0",
     "image-size": "2.0.4",
     "jose": "6.2.13",
     "pg-boss": "12.38.0",
