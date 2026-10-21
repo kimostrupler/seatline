@@ -1,4 +1,6 @@
-import { roomForPoint, type LayoutRoom, type LayoutSeat } from '@seatline/shared';
+import { relabel, roomForPoint, type LayoutRoom, type LayoutSeat } from '@seatline/shared';
+
+export { relabel };
 import type { Point, Room, Seat } from '../types';
 
 /** What the editor works on: the floor's rooms and seats. */
@@ -190,14 +192,6 @@ export function clipSelection(doc: LayoutDoc, sel: SelectionIds, level: number):
       .filter((s) => sel.seats.includes(s.id) || (s.roomId && sel.rooms.includes(s.roomId)))
       .map(toLayoutSeat),
   };
-}
-
-/** "1.04" copied from level 1 to level 2 becomes "2.04"; other labels stay as they are. */
-export function relabel(label: string, fromLevel: number, toLevel: number): string {
-  const prefix = `${fromLevel}.`;
-  return fromLevel !== toLevel && label.startsWith(prefix)
-    ? `${toLevel}.${label.slice(prefix.length)}`
-    : label;
 }
 
 /**

@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
+import { extname } from 'node:path';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import type { CreateFloorInput, UpdateFloorInput } from '@seatline/shared';
+import type { Floor, Prisma } from '@prisma/client';
+import { relabel, type CreateFloorInput, type UpdateFloorInput } from '@seatline/shared';
 import type { RequestContext } from '../auth/request-context';
 import { audit } from '../common/audit';
 import { orNotFound } from '../common/errors';
@@ -56,21 +58,111 @@ export class FloorsService {
     });
   }
 
-  create(ctx: RequestContext, input: CreateFloorInput) {
-    return this.db.run(ctx.tenantId, async (tx) => {
-      orNotFound(
-        await tx.building.findFirst({ where: { id: input.buildingId, tenantId: ctx.tenantId } }),
-        'Building',
-      );
-      const floor = await tx.floor.create({ data: { ...input, tenantId: ctx.tenantId } });
-      await audit(tx, ctx, {
-        action: 'floor.create',
-        entityType: 'floor',
-        entityId: floor.id,
-        after: floor,
+  /**
+   * A new floor — empty, or a copy of another floor's layout: its rooms, seats (labels follow
+   * the new level, e.g. 1.04 → 2.04), plan image and scale. People are never copied.
+   */
+  async create(ctx: RequestContext, input: CreateFloorInput) {
+    const { copyFromFloorId, ...data } = input;
+    const id = randomUUID();
+    const source = copyFromFloorId ? await this.get(ctx, copyFromFloorId) : null;
+    // the plan file is copied first; if the floor can't be created it's removed again
+    let planFileKey = data.planFileKey ?? null;
+    if (source?.planFileKey) {
+      planFileKey = `${ctx.tenantId}/floors/${id}/${randomUUID()}${extname(source.planFileKey)}`;
+      await this.storage.copy(source.planFileKey, planFileKey);
+    }
+    try {
+      return await this.db.run(ctx.tenantId, async (tx) => {
+        orNotFound(
+          await tx.building.findFirst({ where: { id: data.buildingId, tenantId: ctx.tenantId } }),
+          'Building',
+        );
+        const floor = await tx.floor.create({
+          data: {
+            ...(source && {
+              planWidth: source.planWidth,
+              planHeight: source.planHeight,
+              scale: source.scale,
+            }),
+            ...data,
+            planFileKey,
+            id,
+            tenantId: ctx.tenantId,
+          },
+        });
+        await audit(tx, ctx, {
+          action: 'floor.create',
+          entityType: 'floor',
+          entityId: floor.id,
+          after: source ? { ...floor, copiedFromFloorId: source.id } : floor,
+        });
+        if (source) await this.copyLayout(tx, ctx, source, floor);
+        return floor;
       });
-      return floor;
-    });
+    } catch (error) {
+      if (source?.planFileKey && planFileKey) await this.storage.delete(planFileKey);
+      throw error;
+    }
+  }
+
+  private async copyLayout(
+    tx: Prisma.TransactionClient,
+    ctx: RequestContext,
+    source: Floor,
+    floor: Floor,
+  ) {
+    const { tenantId } = ctx;
+    const [rooms, seats] = await Promise.all([
+      tx.room.findMany({ where: { tenantId, floorId: source.id } }),
+      tx.seat.findMany({ where: { tenantId, floorId: source.id }, orderBy: { label: 'asc' } }),
+    ]);
+    const roomIds = new Map<string, string>();
+    for (const r of rooms) {
+      const room = await tx.room.create({
+        data: {
+          tenantId,
+          floorId: floor.id,
+          name: r.name,
+          type: r.type,
+          polygon: r.polygon as Prisma.InputJsonValue,
+        },
+      });
+      roomIds.set(r.id, room.id);
+      await audit(tx, ctx, {
+        action: 'layout.room.create',
+        entityType: 'room',
+        entityId: room.id,
+        after: room,
+      });
+    }
+    const used = new Set<string>();
+    for (const s of seats) {
+      let label = relabel(s.label, source.level, floor.level);
+      // labels are unique per floor: "2.04" may already come from the source as-is
+      for (let n = 2; used.has(label); n++)
+        label = `${relabel(s.label, source.level, floor.level)} (${n})`;
+      used.add(label);
+      const seat = await tx.seat.create({
+        data: {
+          tenantId,
+          floorId: floor.id,
+          roomId: s.roomId ? (roomIds.get(s.roomId) ?? null) : null,
+          label,
+          x: s.x,
+          y: s.y,
+          rotation: s.rotation,
+          type: s.type,
+          status: s.status,
+        },
+      });
+      await audit(tx, ctx, {
+        action: 'layout.seat.create',
+        entityType: 'seat',
+        entityId: seat.id,
+        after: seat,
+      });
+    }
   }
 
   update(ctx: RequestContext, id: string, input: UpdateFloorInput) {

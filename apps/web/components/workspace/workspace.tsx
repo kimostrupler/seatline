@@ -130,6 +130,7 @@ export function Workspace() {
         headerEnd={headerEnd}
         onFloorDeleted={() => update({ floor: null, seat: null })}
         onBuildingDeleted={() => update({ building: null, floor: null, seat: null, mode: null })}
+        onFloorCreated={(f) => update({ floor: f.id, seat: null })}
       />
     );
 

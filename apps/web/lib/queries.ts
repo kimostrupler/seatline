@@ -153,8 +153,12 @@ export function useDeleteBuilding() {
 export function useCreateFloor() {
   const invalidate = useInvalidatePlaces();
   return useMutation({
-    mutationFn: (input: { buildingId: string; name: string; level: number }) =>
-      api<Floor>('/floors', { method: 'POST', body: input }),
+    mutationFn: (input: {
+      buildingId: string;
+      name: string;
+      level: number;
+      copyFromFloorId?: string;
+    }) => api<Floor>('/floors', { method: 'POST', body: input }),
     onSettled: invalidate,
   });
 }

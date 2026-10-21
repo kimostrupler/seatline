@@ -13,6 +13,7 @@ export interface MapSeat {
   y: number;
   roomId: string | null;
   rotation: number;
+  currentAssignment?: unknown;
 }
 export interface MapData {
   floor: { id: string; scale: number | null; planFileKey: string | null };

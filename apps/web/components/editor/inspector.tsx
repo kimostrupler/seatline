@@ -15,6 +15,7 @@ import {
   ClipboardCopy,
   Copy,
   ImageOff,
+  Layers,
   RotateCcw,
   RotateCw,
   Trash2,
@@ -63,12 +64,14 @@ import { SEAT_H, SEAT_W } from '@/lib/map-geometry';
 import {
   useDeleteBuilding,
   useDeleteFloor,
+  useFloors,
   useRemovePlan,
   useUpdateBuilding,
   useUpdateFloor,
   useUploadPlan,
 } from '@/lib/queries';
-import type { Building, FloorMap, Room, Seat } from '@/lib/types';
+import type { Building, Floor, FloorMap, Room, Seat } from '@/lib/types';
+import { CreateFloorDialog } from '@/components/workspace/place-dialogs';
 import { platformKeys } from '@/lib/platform-keys';
 import { usePlanOpacity } from '@/lib/use-plan-opacity';
 import { CommitInput } from './commit-input';
@@ -83,6 +86,7 @@ export function Inspector({
   clipboard,
   onFloorDeleted,
   onBuildingDeleted,
+  onFloorCreated,
 }: {
   map: FloorMap;
   building: Building | undefined;
@@ -90,6 +94,7 @@ export function Inspector({
   clipboard: ClipboardActions;
   onFloorDeleted: () => void;
   onBuildingDeleted: () => void;
+  onFloorCreated: (floor: Floor) => void;
 }) {
   const { doc, selection } = editor;
   const seats = doc.seats.filter((s) => selection.seats.includes(s.id));
@@ -102,6 +107,7 @@ export function Inspector({
         building={building}
         onFloorDeleted={onFloorDeleted}
         onBuildingDeleted={onBuildingDeleted}
+        onFloorCreated={onFloorCreated}
       />
     );
   return (
@@ -540,16 +546,46 @@ function SelectionActions({
   );
 }
 
+/** "Duplicate floor": the new-floor dialog, starting as a copy of this floor. */
+function DuplicateFloor({
+  floor,
+  onCreated,
+}: {
+  floor: FloorMap['floor'];
+  onCreated: (floor: Floor) => void;
+}) {
+  const t = useTranslations('inspector');
+  const [open, setOpen] = useState(false);
+  const floors = useFloors(floor.buildingId);
+  return (
+    <Field label={t('duplicateFloor')} hint={t('duplicateFloorHint')}>
+      <Button variant="outline" className="justify-self-start" onClick={() => setOpen(true)}>
+        <Layers /> {t('duplicateFloor')}
+      </Button>
+      <CreateFloorDialog
+        open={open}
+        onOpenChange={setOpen}
+        buildingId={floor.buildingId}
+        floors={floors.data ?? []}
+        copyFrom={floor.id}
+        onCreated={onCreated}
+      />
+    </Field>
+  );
+}
+
 function FloorSettings({
   map,
   building,
   onFloorDeleted,
   onBuildingDeleted,
+  onFloorCreated,
 }: {
   map: FloorMap;
   building: Building | undefined;
   onFloorDeleted: () => void;
   onBuildingDeleted: () => void;
+  onFloorCreated: (floor: Floor) => void;
 }) {
   const t = useTranslations('inspector');
   const floor = map.floor;
@@ -641,6 +677,7 @@ function FloorSettings({
           {floor.scale ? t('scaleSet', { units: Math.round(floor.scale) }) : t('scaleUnset')}
         </p>
       </Field>
+      <DuplicateFloor floor={floor} onCreated={onFloorCreated} />
       <ConfirmDelete
         label={t('deleteFloor')}
         title={t('deleteFloorTitle', { name: floor.name })}

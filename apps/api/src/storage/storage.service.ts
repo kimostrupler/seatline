@@ -51,6 +51,14 @@ export class StorageService {
     };
   }
 
+  /** Copy a stored file to a new key (e.g. a floor plan for a copied floor). */
+  async copy(from: string, to: string): Promise<void> {
+    const container = await this.client();
+    const data = await container.getBlockBlobClient(from).downloadToBuffer();
+    const props = await container.getBlockBlobClient(from).getProperties();
+    await this.put(to, data, props.contentType ?? 'application/octet-stream');
+  }
+
   /** Best effort: a leftover file is harmless, a failed request is not. */
   async delete(key: string): Promise<void> {
     try {

@@ -24,8 +24,12 @@ export const createFloorSchema = z.strictObject({
   planHeight: z.number().positive().nullish(),
   /** Plan units per metre. */
   scale: z.number().positive().nullish(),
+  /** Start with a copy of this floor's rooms, seats, plan image and scale (no people). */
+  copyFromFloorId: id.nullish(),
 });
-export const updateFloorSchema = createFloorSchema.omit({ buildingId: true }).partial();
+export const updateFloorSchema = createFloorSchema
+  .omit({ buildingId: true, copyFromFloorId: true })
+  .partial();
 export const listFloorsQuerySchema = z.strictObject({ buildingId: id.optional() });
 
 // ---- Rooms -----------------------------------------------------------------

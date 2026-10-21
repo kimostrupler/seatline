@@ -185,6 +185,29 @@ test('align seats and add a row of desks', async ({ page }) => {
   expect(labels).toEqual(expect.arrayContaining(['1.09', '1.10']));
 });
 
+test('duplicate a floor: same rooms and seats, no people, numbered for the new level', async ({
+  page,
+}) => {
+  const source = await floorMap(page);
+  await page.getByRole('button', { name: 'Duplicate floor' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByLabel('Start with')).toHaveText('A copy of 1. OG');
+  await dialog.getByLabel('Floor name').fill('3. OG');
+  await expect(dialog.getByLabel('Level')).toHaveValue('3');
+  await dialog.getByRole('button', { name: 'Create' }).click();
+  await expect(page.getByTestId('floor-select')).toHaveText('3. OG');
+
+  const copy = await floorMap(page);
+  expect(copy.floor.id).not.toBe(source.floor.id);
+  expect(copy.rooms.map((r) => r.name).sort()).toEqual(source.rooms.map((r) => r.name).sort());
+  expect(copy.seats.map((s) => s.label)).toEqual(
+    source.seats.map((s) => s.label.replace(/^1\./, '3.')),
+  );
+  expect(copy.seats.every((s) => !('currentAssignment' in s) || s.currentAssignment === null)).toBe(
+    true,
+  );
+});
+
 test('seats with people can’t be deleted', async ({ page }) => {
   const seat = (await floorMap(page)).seats.find((s) => s.label === '1.01')!;
   await clickPlan(page, seat);
