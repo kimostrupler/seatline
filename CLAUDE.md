@@ -131,6 +131,14 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   `LayoutService`, and the history rows' FK restrict backs it up.
 - Plan images: raster only (PNG/JPG/WebP, checked by content). The image's pixel size is the
   floor's coordinate space. Storage keys must start with the tenant id; `getPlan` checks it.
+- The canvas uses **pointer events** (mouse, pen and touch alike). One finger on empty floor pans,
+  two fingers pinch-zoom (`useViewport`); a second finger cancels the first one's drag.
+- Copy/paste goes through `lib/editor/clipboard.ts` (memory + localStorage), so it works across
+  floors. Pasting keeps names/labels when free (labels follow the target floor's level) and
+  shifts aside if it would land on top of existing items (`pasteClip`, `pasteOffset`).
+- Room handles: corners (rectangles stay rectangular, `moveVertex`) and side midpoints
+  (`moveEdge`); double-click a side handle adds a corner, a corner removes it.
+- Edit mode also works on phones/tablets: the inspector becomes a panel under the canvas.
 - The shadcn CLI stops at "overwrite?" prompts and re-adds an npm package called `cn`. If it
   does, fetch the component JSON from the registry instead and fix the `cn` import.
 

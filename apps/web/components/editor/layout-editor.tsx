@@ -23,8 +23,12 @@ import {
   deleteSelection,
   duplicateSelection,
   gridStep,
+  insertVertex,
+  moveEdge,
   moveSelection,
+  moveVertex,
   nextSeatLabel,
+  removeVertex,
   rotateSeats,
   snap,
   type LayoutDoc,
@@ -36,6 +40,8 @@ import {
 } from '@/lib/editor/use-layout-editor';
 import { contentBounds, SEAT_W, toPlan } from '@/lib/map-geometry';
 import type { FloorMap, Point } from '@/lib/types';
+import type { ClipboardActions } from './use-clipboard';
+import { useMediaQuery } from '@/lib/use-media-query';
 
 export type Tool = 'select' | 'seat' | 'room' | 'rect' | 'measure';
 
@@ -43,6 +49,8 @@ type Drag =
   | { kind: 'move'; start: Point; delta: Point }
   | { kind: 'marquee'; start: Point; end: Point; additive: boolean }
   | { kind: 'vertex'; roomId: string; index: number; point: Point }
+  | { kind: 'edge'; roomId: string; index: number; point: Point }
+  | { kind: 'pan'; start: Point; origin: Point }
   | { kind: 'rect'; start: Point; end: Point }
   | { kind: 'measure'; start: Point; end: Point };
 
@@ -59,6 +67,8 @@ export function LayoutEditor({
   setTool,
   planOpacity,
   onMeasured,
+  onShowShortcuts,
+  clipboard,
 }: {
   map: FloorMap;
   editor: LayoutEditorState;
@@ -67,6 +77,8 @@ export function LayoutEditor({
   planOpacity: number;
   /** a line of this many plan units was drawn with the ruler */
   onMeasured: (units: number) => void;
+  onShowShortcuts: () => void;
+  clipboard: ClipboardActions;
 }) {
   const t = useTranslations('editor');
   const colors = useMapColors();
@@ -95,6 +107,8 @@ export function LayoutEditor({
   const [roomPoints, setRoomPoints] = useState<Point[]>([]);
   const [spaceDown, setSpaceDown] = useState(false);
   const lastRotation = useRef(0);
+  const [hover, setHover] = useState<'vertex' | 'edge' | null>(null);
+  const coarse = useMediaQuery('(pointer: coarse)');
 
   const snapPoint = (p: Point, free: boolean): Point =>
     free ? p : { x: snap(p.x, grid), y: snap(p.y, grid) };
@@ -103,19 +117,27 @@ export function LayoutEditor({
     return pos ? toPlan(view, pos) : null;
   };
 
+  /** The room change a corner/side drag makes (null if nothing changes). */
+  const reshape = (d: Extract<Drag, { kind: 'vertex' | 'edge' }>) => {
+    const room = doc.rooms.find((r) => r.id === d.roomId);
+    if (!room) return null;
+    const polygon =
+      d.kind === 'vertex'
+        ? moveVertex(room.polygon, d.index, d.point)
+        : moveEdge(room.polygon, d.index, d.point);
+    if (JSON.stringify(polygon) === JSON.stringify(room.polygon)) return null;
+    return changes({ rooms: { update: [{ id: room.id, polygon }] } });
+  };
+  const setPolygon = (roomId: string, polygon: Point[]) =>
+    commit(changes({ rooms: { update: [{ id: roomId, polygon }] } }));
+
   // What's on screen: the document plus the drag in progress.
   const shown: LayoutDoc = useMemo(() => {
     if (drag?.kind === 'move')
       return applyChanges(doc, moveSelection(doc, selection, drag.delta.x, drag.delta.y), floor.id);
-    if (drag?.kind === 'vertex') {
-      const room = doc.rooms.find((r) => r.id === drag.roomId);
-      if (!room) return doc;
-      const polygon = room.polygon.map((p, i) => (i === drag.index ? drag.point : p));
-      return applyChanges(
-        doc,
-        changes({ rooms: { update: [{ id: room.id, polygon }] } }),
-        floor.id,
-      );
+    if (drag?.kind === 'vertex' || drag?.kind === 'edge') {
+      const reshaped = reshape(drag);
+      return reshaped ? applyChanges(doc, reshaped, floor.id) : doc;
     }
     return doc;
   }, [doc, drag, selection, floor.id]);
@@ -204,11 +226,23 @@ export function LayoutEditor({
       } else if (mod && key === 'd') {
         e.preventDefault();
         duplicate();
+      } else if (mod && key === 'c') {
+        if (clipboard.copy()) e.preventDefault();
+      } else if (mod && key === 'x') {
+        if (clipboard.copy()) {
+          e.preventDefault();
+          removeSelection();
+        }
+      } else if (mod && key === 'v') {
+        e.preventDefault();
+        if (clipboard.paste()) setTool('select');
       } else if (mod && key === 'a') {
         e.preventDefault();
         setSelection({ seats: doc.seats.map((s) => s.id), rooms: doc.rooms.map((r) => r.id) });
       } else if (mod) {
         return;
+      } else if (e.key === '?') {
+        onShowShortcuts();
       } else if (e.key === 'Escape') {
         if (roomPoints.length) setRoomPoints([]);
         else if (tool !== 'select') setTool('select');
@@ -251,17 +285,20 @@ export function LayoutEditor({
   // ---- mouse -----------------------------------------------------------------
   const hit = (
     target: Konva.Node,
-  ): { kind: 'seat' | 'room' | 'vertex'; id: string; index?: number } | null => {
+  ): { kind: 'seat' | 'room' | 'vertex' | 'edge'; id: string; index?: number } | null => {
     for (let n: Konva.Node | null = target; n; n = n.getParent()) {
       const [kind, id, index] = n.name().split(':');
-      if ((kind === 'seat' || kind === 'room' || kind === 'vertex') && id)
+      if ((kind === 'seat' || kind === 'room' || kind === 'vertex' || kind === 'edge') && id)
         return { kind, id, index: index === undefined ? undefined : Number(index) };
     }
     return null;
   };
 
-  const onMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
+  const onPointerDown = (e: Konva.KonvaEventObject<PointerEvent>) => {
+    // a second finger means pinch-zoom: drop whatever the first one started
+    if (!e.evt.isPrimary) return setDrag(null);
     if (spaceDown || e.evt.button !== 0) return;
+    const touch = e.evt.pointerType === 'touch';
     const raw = planPointer();
     if (!raw) return;
     const free = e.evt.altKey;
@@ -285,8 +322,8 @@ export function LayoutEditor({
 
     // select tool
     const target = hit(e.target);
-    if (target?.kind === 'vertex') {
-      return setDrag({ kind: 'vertex', roomId: target.id, index: target.index!, point: p });
+    if (target?.kind === 'vertex' || target?.kind === 'edge') {
+      return setDrag({ kind: target.kind, roomId: target.id, index: target.index!, point: p });
     }
     if (target) {
       const key = target.kind === 'seat' ? 'seats' : 'rooms';
@@ -305,43 +342,53 @@ export function LayoutEditor({
       return;
     }
     if (!e.evt.shiftKey) setSelection(NO_SELECTION);
+    // fingers move around the floor; a mouse draws a selection box
+    if (touch) {
+      const screen = vp.stageRef.current?.getPointerPosition();
+      if (screen) setDrag({ kind: 'pan', start: screen, origin: { x: view.x, y: view.y } });
+      return;
+    }
     setDrag({ kind: 'marquee', start: raw, end: raw, additive: e.evt.shiftKey });
   };
 
-  const onMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
+  const onPointerMove = (e: Konva.KonvaEventObject<PointerEvent>) => {
+    if (!e.evt.isPrimary) return;
+    if (drag?.kind === 'pan') {
+      const screen = vp.stageRef.current?.getPointerPosition();
+      if (screen)
+        vp.setView((v) => ({
+          ...v,
+          x: drag.origin.x + screen.x - drag.start.x,
+          y: drag.origin.y + screen.y - drag.start.y,
+        }));
+      return;
+    }
     const raw = planPointer();
     if (!raw) return;
     const free = e.evt.altKey;
     setPointer(snapPoint(raw, free));
-    if (!drag) return;
+    if (!drag) {
+      const over = tool === 'select' ? hit(e.target) : null;
+      setHover(over?.kind === 'vertex' || over?.kind === 'edge' ? over.kind : null);
+      return;
+    }
     if (drag.kind === 'move') {
       const d = { x: raw.x - drag.start.x, y: raw.y - drag.start.y };
       setDrag({ ...drag, delta: free ? d : { x: snap(d.x, grid), y: snap(d.y, grid) } });
-    } else if (drag.kind === 'vertex') setDrag({ ...drag, point: snapPoint(raw, free) });
+    } else if (drag.kind === 'vertex' || drag.kind === 'edge')
+      setDrag({ ...drag, point: snapPoint(raw, free) });
     else if (drag.kind === 'rect') setDrag({ ...drag, end: snapPoint(raw, free) });
     else setDrag({ ...drag, end: raw });
   };
 
-  const onMouseUp = () => {
-    if (!drag) return;
+  const onPointerUp = (e: Konva.KonvaEventObject<PointerEvent>) => {
+    if (!drag || !e.evt.isPrimary) return;
     setDrag(null);
     if (drag.kind === 'move') {
       commit(moveSelection(doc, selection, drag.delta.x, drag.delta.y));
-    } else if (drag.kind === 'vertex') {
-      const room = doc.rooms.find((r) => r.id === drag.roomId);
-      if (room)
-        commit(
-          changes({
-            rooms: {
-              update: [
-                {
-                  id: room.id,
-                  polygon: room.polygon.map((p, i) => (i === drag.index ? drag.point : p)),
-                },
-              ],
-            },
-          }),
-        );
+    } else if (drag.kind === 'vertex' || drag.kind === 'edge') {
+      const reshaped = reshape(drag);
+      if (reshaped) commit(reshaped);
     } else if (drag.kind === 'marquee') {
       const [x1, x2] = [Math.min(drag.start.x, drag.end.x), Math.max(drag.start.x, drag.end.x)];
       const [y1, y2] = [Math.min(drag.start.y, drag.end.y), Math.max(drag.start.y, drag.end.y)];
@@ -376,13 +423,32 @@ export function LayoutEditor({
   const lastSelected = doc.seats.find((s) => s.id === selection.seats.at(-1));
   if (lastSelected) lastRotation.current = lastSelected.rotation;
 
-  const cursor = spaceDown ? 'grab' : tool === 'select' ? 'default' : 'crosshair';
-  const handle = 6 / view.scale;
+  // Double-click a side's handle to add a corner there, a corner to remove it.
+  const onDoubleClick = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
+    if (tool === 'room') return finishRoom(roomPoints);
+    const target = hit(e.target);
+    const room = target && doc.rooms.find((r) => r.id === target.id);
+    if (!room || target.index === undefined) return;
+    if (target.kind === 'edge') setPolygon(room.id, insertVertex(room.polygon, target.index));
+    if (target.kind === 'vertex' && room.polygon.length > 3)
+      setPolygon(room.id, removeVertex(room.polygon, target.index));
+  };
+
+  const cursor =
+    spaceDown || drag?.kind === 'pan'
+      ? 'grab'
+      : tool !== 'select'
+        ? 'crosshair'
+        : hover || drag?.kind === 'vertex' || drag?.kind === 'edge'
+          ? 'move'
+          : 'default';
+  // bigger handles for fingers
+  const handle = (coarse ? 10 : 6) / view.scale;
 
   return (
     <div
       ref={vp.containerRef}
-      className="relative h-full w-full overflow-hidden bg-canvas"
+      className="relative h-full w-full touch-none overflow-hidden bg-canvas"
       style={{ cursor }}
       data-testid="layout-editor"
       data-view={JSON.stringify(view)}
@@ -402,11 +468,16 @@ export function LayoutEditor({
               vp.setView((v) => ({ ...v, x: e.target.x(), y: e.target.y() }));
           }}
           onWheel={vp.onWheel}
-          onMouseDown={onMouseDown}
-          onMouseMove={onMouseMove}
-          onMouseUp={onMouseUp}
-          onMouseLeave={() => setPointer(null)}
-          onDblClick={() => tool === 'room' && finishRoom(roomPoints)}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={() => setDrag(null)}
+          onMouseLeave={() => {
+            setPointer(null);
+            setHover(null);
+          }}
+          onDblClick={onDoubleClick}
+          onDblTap={onDoubleClick}
         >
           <Layer listening={false}>
             <PlanBackground image={plan} floor={floor} opacity={planOpacity} />
@@ -449,9 +520,33 @@ export function LayoutEditor({
                 )}
               </Group>
             ))}
+            {/* side handles (drag to push a wall, double-click to add a corner) */}
+            {singleRoom?.polygon.map((p, i) => {
+              const q = singleRoom.polygon[(i + 1) % singleRoom.polygon.length]!;
+              return (
+                <Rect
+                  key={`e${i}`}
+                  name={`edge:${singleRoom.id}:${i}`}
+                  x={(p.x + q.x) / 2}
+                  y={(p.y + q.y) / 2}
+                  width={handle * 1.6}
+                  height={handle * 1.6}
+                  offsetX={handle * 0.8}
+                  offsetY={handle * 0.8}
+                  rotation={(Math.atan2(q.y - p.y, q.x - p.x) * 180) / Math.PI}
+                  cornerRadius={handle * 0.3}
+                  fill={colors.primary}
+                  stroke="#ffffff"
+                  strokeWidth={1.5}
+                  strokeScaleEnabled={false}
+                  hitStrokeWidth={12}
+                />
+              );
+            })}
+            {/* corner handles (drag to reshape, double-click to remove) */}
             {singleRoom?.polygon.map((p, i) => (
               <Circle
-                key={i}
+                key={`v${i}`}
                 name={`vertex:${singleRoom.id}:${i}`}
                 x={p.x}
                 y={p.y}
@@ -460,6 +555,7 @@ export function LayoutEditor({
                 stroke={colors.primary}
                 strokeWidth={2}
                 strokeScaleEnabled={false}
+                hitStrokeWidth={12}
               />
             ))}
           </Layer>

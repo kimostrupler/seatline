@@ -1,5 +1,5 @@
 import { roomForPoint, type LayoutRoom, type LayoutSeat } from '@seatline/shared';
-import type { Room, Seat } from '../types';
+import type { Point, Room, Seat } from '../types';
 
 /** What the editor works on: the floor's rooms and seats. */
 export interface LayoutDoc {
@@ -174,6 +174,89 @@ export function rotateSeats(doc: LayoutDoc, seatIds: string[], degrees: number):
   });
 }
 
+/** Copied rooms and seats (the clipboard), with the level of the floor they came from. */
+export interface Clip {
+  level: number;
+  rooms: LayoutRoom[];
+  seats: LayoutSeat[];
+}
+
+/** The selection as a clip; seats standing in a selected room come along. */
+export function clipSelection(doc: LayoutDoc, sel: SelectionIds, level: number): Clip {
+  return {
+    level,
+    rooms: doc.rooms.filter((r) => sel.rooms.includes(r.id)).map(toLayoutRoom),
+    seats: doc.seats
+      .filter((s) => sel.seats.includes(s.id) || (s.roomId && sel.rooms.includes(s.roomId)))
+      .map(toLayoutSeat),
+  };
+}
+
+/** "1.04" copied from level 1 to level 2 becomes "2.04"; other labels stay as they are. */
+export function relabel(label: string, fromLevel: number, toLevel: number): string {
+  const prefix = `${fromLevel}.`;
+  return fromLevel !== toLevel && label.startsWith(prefix)
+    ? `${toLevel}.${label.slice(prefix.length)}`
+    : label;
+}
+
+/**
+ * New rooms and seats from a clip, shifted by (dx, dy), with new ids. Labels and names are
+ * kept when they're free on this floor (seat labels follow the floor's level), otherwise
+ * seats get the next free label and rooms a "copy" name.
+ */
+export function pasteClip(
+  doc: LayoutDoc,
+  clip: Clip,
+  level: number,
+  dx: number,
+  dy: number,
+  newId: () => string,
+  copyName: (name: string) => string,
+): { changes: Changes; selection: SelectionIds } {
+  const names = new Set(doc.rooms.map((r) => r.name));
+  const rooms = clip.rooms.map((r) => {
+    const name = names.has(r.name) ? copyName(r.name) : r.name;
+    names.add(name);
+    return {
+      ...r,
+      id: newId(),
+      name,
+      polygon: r.polygon.map((p) => ({ x: p.x + dx, y: p.y + dy })),
+    };
+  });
+  const used = new Set(doc.seats.map((s) => s.label));
+  const seats = clip.seats.map((s) => {
+    const wanted = relabel(s.label, clip.level, level);
+    const label = used.has(wanted) ? nextSeatLabel(doc.seats, level, used) : wanted;
+    used.add(label);
+    return { ...s, id: newId(), label, x: s.x + dx, y: s.y + dy, status: 'active' as const };
+  });
+  return {
+    changes: changes({ rooms: { create: rooms }, seats: { create: seats } }),
+    selection: { rooms: rooms.map((r) => r.id), seats: seats.map((s) => s.id) },
+  };
+}
+
+/**
+ * Where a paste lands: in place, unless that would sit exactly on top of what's already
+ * there (e.g. pasting on the same floor) — then one step further each time.
+ */
+export function pasteOffset(doc: LayoutDoc, clip: Clip, step: number): Point {
+  const seatAt = new Set(doc.seats.map((s) => `${s.x},${s.y}`));
+  const roomAt = new Set(doc.rooms.map((r) => JSON.stringify(r.polygon)));
+  for (let k = 0; k < 100; k++) {
+    const d = k * step;
+    const clash =
+      clip.seats.some((s) => seatAt.has(`${s.x + d},${s.y}`)) ||
+      clip.rooms.some((r) =>
+        roomAt.has(JSON.stringify(r.polygon.map((p) => ({ x: p.x + d, y: p.y })))),
+      );
+    if (!clash) return { x: d, y: 0 };
+  }
+  return { x: 0, y: 0 };
+}
+
 /** Copies of the selection, shifted by (dx, dy), with new ids and the next free seat labels. */
 export function duplicateSelection(
   doc: LayoutDoc,
@@ -184,33 +267,156 @@ export function duplicateSelection(
   newId: () => string,
   copyName: (name: string) => string,
 ): { changes: Changes; selection: SelectionIds } {
-  const rooms = doc.rooms
-    .filter((r) => sel.rooms.includes(r.id))
-    .map((r) => ({
-      ...toLayoutRoom(r),
-      id: newId(),
-      name: copyName(r.name),
-      polygon: r.polygon.map((p) => ({ x: p.x + dx, y: p.y + dy })),
-    }));
-  const seatSources = doc.seats.filter(
-    (s) => sel.seats.includes(s.id) || (s.roomId && sel.rooms.includes(s.roomId)),
+  return pasteClip(doc, clipSelection(doc, sel, level), level, dx, dy, newId, copyName);
+}
+
+// ---- room shapes -------------------------------------------------------------
+
+export function polygonBounds(polygon: Point[]) {
+  const xs = polygon.map((p) => p.x);
+  const ys = polygon.map((p) => p.y);
+  const minX = Math.min(...xs);
+  const minY = Math.min(...ys);
+  return { minX, minY, width: Math.max(...xs) - minX, height: Math.max(...ys) - minY };
+}
+
+/** Four corners with only horizontal and vertical sides. */
+export function isAxisRect(polygon: Point[]): boolean {
+  return (
+    polygon.length === 4 &&
+    polygon.every((p, i) => {
+      const q = polygon[(i + 1) % 4]!;
+      return p.x === q.x || p.y === q.y;
+    })
   );
+}
+
+/** Move one corner. Rectangles stay rectangles: the two neighbouring corners follow. */
+export function moveVertex(polygon: Point[], index: number, to: Point): Point[] {
+  const from = polygon[index]!;
+  const rect = isAxisRect(polygon);
+  const n = polygon.length;
+  return polygon.map((p, i) => {
+    if (i === index) return to;
+    if (!rect || (i !== (index + 1) % n && i !== (index + n - 1) % n)) return p;
+    return { x: p.x === from.x ? to.x : p.x, y: p.y === from.y ? to.y : p.y };
+  });
+}
+
+/** Push one side (corner `index` to the next) outwards or inwards so it passes through `to`. */
+export function moveEdge(polygon: Point[], index: number, to: Point): Point[] {
+  const n = polygon.length;
+  const a = polygon[index]!;
+  const b = polygon[(index + 1) % n]!;
+  const len = Math.hypot(b.x - a.x, b.y - a.y);
+  if (len === 0) return polygon;
+  const normal = { x: -(b.y - a.y) / len, y: (b.x - a.x) / len };
+  const d = (to.x - a.x) * normal.x + (to.y - a.y) * normal.y;
+  // exact for horizontal/vertical sides, so snapping to the grid stays on the grid
+  const shift =
+    a.y === b.y ? { x: 0, y: to.y - a.y } : a.x === b.x ? { x: to.x - a.x, y: 0 } : null;
+  const move = (p: Point) =>
+    shift
+      ? { x: p.x + shift.x, y: p.y + shift.y }
+      : { x: p.x + normal.x * d, y: p.y + normal.y * d };
+  return polygon.map((p, i) => (i === index || i === (index + 1) % n ? move(p) : p));
+}
+
+/** A new corner in the middle of side `index`. */
+export function insertVertex(polygon: Point[], index: number): Point[] {
+  const a = polygon[index]!;
+  const b = polygon[(index + 1) % polygon.length]!;
+  const mid = { x: Math.round((a.x + b.x) / 2), y: Math.round((a.y + b.y) / 2) };
+  return [...polygon.slice(0, index + 1), mid, ...polygon.slice(index + 1)];
+}
+
+/** Remove a corner (a room keeps at least three). */
+export function removeVertex(polygon: Point[], index: number): Point[] {
+  return polygon.length > 3 ? polygon.filter((_, i) => i !== index) : polygon;
+}
+
+/** Stretch a room to a new width/height, keeping its top-left corner in place. */
+export function resizePolygon(polygon: Point[], width: number, height: number): Point[] {
+  const b = polygonBounds(polygon);
+  const kx = b.width ? width / b.width : 1;
+  const ky = b.height ? height / b.height : 1;
+  return polygon.map((p) => ({
+    x: Math.round((b.minX + (p.x - b.minX) * kx) * 100) / 100,
+    y: Math.round((b.minY + (p.y - b.minY) * ky) * 100) / 100,
+  }));
+}
+
+// ---- arranging seats ---------------------------------------------------------
+
+export type Align = 'left' | 'centerX' | 'right' | 'top' | 'middle' | 'bottom';
+
+/** Line seats up on their centres. */
+export function alignSeats(doc: LayoutDoc, seatIds: string[], how: Align): Changes {
+  const seats = doc.seats.filter((s) => seatIds.includes(s.id));
+  if (seats.length < 2) return changes({});
+  const xs = seats.map((s) => s.x);
+  const ys = seats.map((s) => s.y);
+  const target = {
+    left: Math.min(...xs),
+    right: Math.max(...xs),
+    centerX: (Math.min(...xs) + Math.max(...xs)) / 2,
+    top: Math.min(...ys),
+    bottom: Math.max(...ys),
+    middle: (Math.min(...ys) + Math.max(...ys)) / 2,
+  }[how];
+  const axis = how === 'left' || how === 'right' || how === 'centerX' ? 'x' : 'y';
+  return changes({
+    seats: {
+      update: seats.filter((s) => s[axis] !== target).map((s) => ({ id: s.id, [axis]: target })),
+    },
+  });
+}
+
+/** Even gaps between seats, from the first to the last one along an axis. */
+export function distributeSeats(doc: LayoutDoc, seatIds: string[], axis: 'x' | 'y'): Changes {
+  const seats = doc.seats.filter((s) => seatIds.includes(s.id)).sort((a, b) => a[axis] - b[axis]);
+  if (seats.length < 3) return changes({});
+  const first = seats[0]![axis];
+  const step = (seats.at(-1)![axis] - first) / (seats.length - 1);
+  return changes({
+    seats: {
+      update: seats
+        .map((s, i) => ({ id: s.id, [axis]: Math.round((first + step * i) * 100) / 100 }))
+        .filter((u, i) => u[axis] !== seats[i]![axis]),
+    },
+  });
+}
+
+/** `count` more desks next to a seat (to the right or below), facing the same way. */
+export function seatRow(
+  doc: LayoutDoc,
+  seat: Seat,
+  count: number,
+  direction: 'right' | 'down',
+  level: number,
+  size: { width: number; height: number; gap: number },
+  newId: () => string,
+): { changes: Changes; selection: SelectionIds } {
+  const turned = Math.round(seat.rotation / 90) % 2 !== 0;
+  const w = turned ? size.height : size.width;
+  const h = turned ? size.width : size.height;
+  const step = direction === 'right' ? { x: w, y: 0 } : { x: 0, y: h + size.gap };
   const taken = new Set<string>();
-  const seats = seatSources.map((s) => {
+  const seats = Array.from({ length: count }, (_, i) => {
     const label = nextSeatLabel(doc.seats, level, taken);
     taken.add(label);
     return {
-      ...toLayoutSeat(s),
+      ...toLayoutSeat(seat),
       id: newId(),
       label,
-      x: s.x + dx,
-      y: s.y + dy,
+      x: seat.x + step.x * (i + 1),
+      y: seat.y + step.y * (i + 1),
       status: 'active' as const,
     };
   });
   return {
-    changes: changes({ rooms: { create: rooms }, seats: { create: seats } }),
-    selection: { rooms: rooms.map((r) => r.id), seats: seats.map((s) => s.id) },
+    changes: changes({ seats: { create: seats } }),
+    selection: { rooms: [], seats: [seat.id, ...seats.map((s) => s.id)] },
   };
 }
 

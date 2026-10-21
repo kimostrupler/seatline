@@ -126,7 +126,7 @@ export function FloorMap({
   return (
     <div
       ref={vp.containerRef}
-      className="relative h-full w-full overflow-hidden bg-canvas"
+      className="relative h-full w-full touch-none overflow-hidden bg-canvas"
       onDragOver={onDragOver}
       onDragLeave={() => setDropTargetId(null)}
       onDrop={onDrop}

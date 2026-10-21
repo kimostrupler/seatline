@@ -1,9 +1,22 @@
 import { describe, expect, it } from 'vitest';
 import type { Room, Seat } from '../types';
 import {
+  alignSeats,
   applyChanges,
   changes,
+  clipSelection,
+  distributeSeats,
   duplicateSelection,
+  insertVertex,
+  isAxisRect,
+  moveEdge,
+  moveVertex,
+  pasteClip,
+  pasteOffset,
+  relabel,
+  removeVertex,
+  resizePolygon,
+  seatRow,
   inverse,
   isEmpty,
   moveSelection,
@@ -151,5 +164,145 @@ describe('selection operations', () => {
       ['new2', '1.04', 600],
     ]);
     expect(selection.seats).toEqual(['new1', 'new2']);
+  });
+});
+
+describe('copy and paste', () => {
+  let n = 0;
+  const id = () => `new${++n}`;
+  const copyName = (name: string) => `${name} copy`;
+
+  it('pasting on another floor keeps names and renumbers labels to that level', () => {
+    const clip = clipSelection(
+      { rooms: [room('r1', 0)], seats: [seat('s1', 50, '1.04')] },
+      { rooms: ['r1'], seats: ['s1'] },
+      1,
+    );
+    const other = { rooms: [], seats: [seat('x', 900, '2.04')] };
+    expect(pasteOffset(other, clip, 80)).toEqual({ x: 0, y: 0 });
+    const { changes: c, selection } = pasteClip(other, clip, 2, 0, 0, id, copyName);
+    expect(c.rooms.create[0]).toMatchObject({ name: 'r1', polygon: room('r1', 0).polygon });
+    // 2.04 is taken on the target floor, so the copy gets the next free label
+    expect(c.seats.create.map((s) => [s.label, s.x])).toEqual([['2.05', 50]]);
+    expect(selection.rooms).toHaveLength(1);
+    expect(relabel('1.04', 1, 2)).toBe('2.04');
+    expect(relabel('Desk A', 1, 2)).toBe('Desk A');
+  });
+
+  it('pasting on the same floor moves the copy aside until it lands on free space', () => {
+    const clip = clipSelection(doc, { rooms: [], seats: ['s1'] }, 1);
+    expect(pasteOffset(doc, clip, 80)).toEqual({ x: 80, y: 0 });
+    const twice = { ...doc, seats: [...doc.seats, seat('c', 130)] };
+    expect(pasteOffset(twice, clip, 80)).toEqual({ x: 160, y: 0 });
+  });
+});
+
+describe('room shapes', () => {
+  const rect = room('r', 0).polygon; // (0,0) (100,0) (100,100) (0,100)
+
+  it('dragging a corner keeps a rectangle rectangular', () => {
+    expect(isAxisRect(rect)).toBe(true);
+    expect(moveVertex(rect, 2, { x: 150, y: 120 })).toEqual([
+      { x: 0, y: 0 },
+      { x: 150, y: 0 },
+      { x: 150, y: 120 },
+      { x: 0, y: 120 },
+    ]);
+  });
+
+  it('dragging a corner of other shapes moves only that corner', () => {
+    const tri = [
+      { x: 0, y: 0 },
+      { x: 100, y: 0 },
+      { x: 50, y: 80 },
+    ];
+    expect(moveVertex(tri, 2, { x: 60, y: 90 })).toEqual([tri[0], tri[1], { x: 60, y: 90 }]);
+  });
+
+  it('dragging a side moves both its corners', () => {
+    expect(moveEdge(rect, 1, { x: 180, y: 37 })).toEqual([
+      { x: 0, y: 0 },
+      { x: 180, y: 0 },
+      { x: 180, y: 100 },
+      { x: 0, y: 100 },
+    ]);
+    // a slanted side moves along its normal
+    const slanted = moveEdge(
+      [
+        { x: 0, y: 0 },
+        { x: 100, y: 100 },
+        { x: 0, y: 100 },
+      ],
+      0,
+      { x: 100, y: 0 },
+    );
+    expect(slanted[0]!.x).toBeCloseTo(50);
+    expect(slanted[0]!.y).toBeCloseTo(-50);
+  });
+
+  it('adds and removes corners, never below three', () => {
+    const five = insertVertex(rect, 0);
+    expect(five[1]).toEqual({ x: 50, y: 0 });
+    expect(removeVertex(five, 1)).toEqual(rect);
+    expect(removeVertex(rect.slice(0, 3), 0)).toHaveLength(3);
+  });
+
+  it('resizes from the top-left corner', () => {
+    const moved = rect.map((p) => ({ x: p.x + 10, y: p.y + 20 }));
+    expect(resizePolygon(moved, 300, 50)).toEqual([
+      { x: 10, y: 20 },
+      { x: 310, y: 20 },
+      { x: 310, y: 70 },
+      { x: 10, y: 70 },
+    ]);
+  });
+});
+
+describe('arranging seats', () => {
+  const row = {
+    rooms: [],
+    seats: [seat('a', 0), { ...seat('b', 50), y: 80 }, { ...seat('c', 300), y: 20 }],
+  };
+
+  it('aligns on centres', () => {
+    expect(alignSeats(row, ['a', 'b', 'c'], 'top').seats.update).toEqual([
+      { id: 'a', y: 20 },
+      { id: 'b', y: 20 },
+    ]);
+    expect(alignSeats(row, ['a', 'b', 'c'], 'centerX').seats.update).toHaveLength(3);
+  });
+
+  it('spreads seats evenly between the outer two', () => {
+    expect(distributeSeats(row, ['a', 'b', 'c'], 'x').seats.update).toEqual([{ id: 'b', x: 150 }]);
+    expect(isEmpty(distributeSeats(row, ['a', 'b'], 'x'))).toBe(true);
+  });
+
+  it('adds a row of desks with the next labels', () => {
+    let n = 0;
+    const first = seat('s', 100, '1.01');
+    const { changes: c, selection } = seatRow(
+      { rooms: [], seats: [first] },
+      first,
+      2,
+      'right',
+      1,
+      { width: 64, height: 44, gap: 28 },
+      () => `n${++n}`,
+    );
+    expect(c.seats.create.map((s) => [s.label, s.x, s.y])).toEqual([
+      ['1.02', 164, 50],
+      ['1.03', 228, 50],
+    ]);
+    expect(selection.seats).toEqual(['s', 'n1', 'n2']);
+    const down = seatRow(
+      { rooms: [], seats: [first] },
+      { ...first, rotation: 90 },
+      1,
+      'down',
+      1,
+      { width: 64, height: 44, gap: 28 },
+      () => 'd',
+    );
+    expect(down.changes.seats.create[0]).toMatchObject({ x: 100, y: 50 + 64 + 28 });
   });
 });

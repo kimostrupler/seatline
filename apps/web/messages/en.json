@@ -126,7 +126,7 @@
     "pan": "Hold Space and drag to move around",
     "undo": "Undo (⌘Z)",
     "redo": "Redo (⇧⌘Z)",
-    "hintSelect": "Click to select · Shift-click to add · drag a box to select several · arrows nudge",
+    "hintSelect": "Click to select · Shift-click to add · drag a box to select several · drag a room’s corners or sides to resize · ? for all shortcuts",
     "hintSeat": "Click to place a seat · Esc when done",
     "hintRoom": "Click each corner · double-click or click the first corner to finish · Esc to cancel",
     "hintRect": "Drag to draw a rectangular room",
@@ -138,7 +138,13 @@
     "freeFirst": "Free or cancel the reservation on {labels} first — seats with people can’t be deleted.",
     "newRoom": "Room {n}",
     "copy": "{name} copy",
-    "accessibleList": "Rooms and seats on this floor"
+    "accessibleList": "Rooms and seats on this floor",
+    "paste": "Paste (⌘V)",
+    "floorSettings": "Floor settings",
+    "shortcuts": "Keyboard shortcuts (?)",
+    "hintSelectTouch": "Tap to select · drag a seat or room to move it · drag the floor to look around · pinch to zoom",
+    "closePanel": "Close panel",
+    "copied": "Copied — paste on any floor with ⌘V"
   },
   "inspector": {
     "floor": "Floor",
@@ -197,7 +203,29 @@
     "scaleDialogTitle": "How long is this line in reality?",
     "scaleDialogBody": "The line is {units} units long on the plan. Enter its real length to set the floor’s scale.",
     "meters": "Length in metres",
-    "setScale": "Set scale"
+    "setScale": "Set scale",
+    "copy": "Copy (⌘C)",
+    "addRow": "Add a row of desks",
+    "addRowHint": "Adds desks next to this one, facing the same way.",
+    "rowCount": "How many desks",
+    "toTheRight": "Right",
+    "below": "Below",
+    "sizeMetres": "Size (m)",
+    "sizeUnits": "Size (plan units)",
+    "sizeHint": "Width × height. Or drag the room’s corners and sides on the map.",
+    "width": "Width",
+    "height": "Height",
+    "arrange": "Arrange",
+    "align": {
+      "left": "Align left",
+      "centerX": "Align centres (vertical line)",
+      "right": "Align right",
+      "top": "Align top",
+      "middle": "Align middles (horizontal line)",
+      "bottom": "Align bottom"
+    },
+    "distributeX": "Space evenly left to right",
+    "distributeY": "Space evenly top to bottom"
   },
   "auth": {
     "signInTitle": "Sign in to Seatline",
@@ -250,5 +278,30 @@
     "roleNone": "No access",
     "roleChanged": "{name} is now {role}",
     "onlyAdmins": "Only admins can open this page."
+  },
+  "shortcuts": {
+    "title": "Keyboard shortcuts",
+    "body": "For the layout editor. On a phone or tablet: tap to select, drag to move, pinch to zoom.",
+    "select": "Select and move",
+    "seat": "Add seats",
+    "room": "Draw a room by its corners",
+    "rect": "Draw a rectangular room",
+    "measure": "Set the scale with a known length",
+    "copy": "Copy",
+    "cut": "Cut",
+    "paste": "Paste (also on another floor)",
+    "duplicate": "Duplicate",
+    "selectAll": "Select everything",
+    "undo": "Undo",
+    "redo": "Redo",
+    "delete": "Delete",
+    "nudge": "Nudge 10 cm (with Shift: 1 m)",
+    "rotate": "Rotate seats 90° (with Shift: 15°)",
+    "escape": "Cancel / back to Select",
+    "pan": "Hold and drag to move around",
+    "noSnap": "Hold while dragging to place freely (no grid)",
+    "addToSelection": "Click to add to the selection",
+    "corners": "Double-click a room’s side handle to add a corner, a corner to remove it",
+    "help": "Show this list"
   }
 }

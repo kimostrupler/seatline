@@ -22,10 +22,10 @@ export function ModeToggle({
       onValueChange={(v) => v && onChange(v === 'edit')}
     >
       <ToggleGroupItem value="view" className="px-2.5">
-        <Eye /> {t('view')}
+        <Eye /> <span className="max-sm:sr-only">{t('view')}</span>
       </ToggleGroupItem>
       <ToggleGroupItem value="edit" className="px-2.5" data-testid="mode-edit">
-        <Pencil /> {t('edit')}
+        <Pencil /> <span className="max-sm:sr-only">{t('edit')}</span>
       </ToggleGroupItem>
     </ToggleGroup>
   );
