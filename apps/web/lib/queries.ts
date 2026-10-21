@@ -1,8 +1,16 @@
 'use client';
 
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { api, apiUpload } from './api';
 import type {
+  ActivityKind,
+  ActivityPage,
   Assignment,
   AssignResult,
   Building,
@@ -10,6 +18,7 @@ import type {
   FloorMap,
   HistoryEntry,
   Me,
+  Overview,
   Person,
   DirectoryPerson,
   TenantInfo,
@@ -24,7 +33,35 @@ export const keys = {
   person: (personId: string) => ['people', 'one', personId] as const,
   seatHistory: (seatId: string) => ['seatHistory', seatId] as const,
   personHistory: (personId: string) => ['personHistory', personId] as const,
+  activity: (filters: ActivityFilters) => ['activity', filters] as const,
+  overview: ['overview'] as const,
 };
+
+export interface ActivityFilters {
+  kind?: ActivityKind;
+  personId?: string;
+  from?: string;
+  to?: string;
+}
+
+/** The change history, newest first, 50 at a time. */
+export const useActivity = (filters: ActivityFilters) =>
+  useInfiniteQuery({
+    queryKey: keys.activity(filters),
+    initialPageParam: null as string | null,
+    queryFn: ({ pageParam }) => {
+      const query = new URLSearchParams(
+        Object.entries({ ...filters, cursor: pageParam ?? undefined }).filter(
+          (e): e is [string, string] => !!e[1],
+        ),
+      );
+      return api<ActivityPage>(`/activity?${query.toString()}`);
+    },
+    getNextPageParam: (last) => last.nextCursor,
+  });
+
+export const useOverview = () =>
+  useQuery({ queryKey: keys.overview, queryFn: () => api<Overview>('/overview') });
 
 export const useMe = () => useQuery({ queryKey: keys.me, queryFn: () => api<Me>('/me') });
 

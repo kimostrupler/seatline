@@ -1,11 +1,12 @@
 'use client';
 
 import { X } from 'lucide-react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { usePerson, usePersonHistory } from '@/lib/queries';
+import { useMe, usePerson, usePersonHistory } from '@/lib/queries';
 import { HistoryList } from './history-list';
 
 export function PersonPanel({
@@ -22,6 +23,8 @@ export function PersonPanel({
   const ts = useTranslations('seat');
   const { data: person } = usePerson(personId);
   const history = usePersonHistory(personId);
+  const me = useMe();
+  const canEdit = me.data?.role === 'admin' || me.data?.role === 'editor';
   const seat = person?.assignments[0]?.seat;
 
   if (!person) return <Skeleton className="h-24 w-full" />;
@@ -77,6 +80,16 @@ export function PersonPanel({
         show="person"
         emptyText={th('emptyPerson')}
       />
+      {canEdit && (
+        <Button
+          asChild
+          variant="ghost"
+          size="sm"
+          className="justify-self-start text-muted-foreground"
+        >
+          <Link href={`/activity?personId=${person.id}`}>{t('allChanges')}</Link>
+        </Button>
+      )}
     </div>
   );
 }

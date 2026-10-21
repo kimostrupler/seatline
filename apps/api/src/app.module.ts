@@ -1,4 +1,7 @@
 import { Module } from '@nestjs/common';
+import { ActivityController } from './activity/activity.controller';
+import { ActivityService } from './activity/activity.service';
+import { OverviewService } from './activity/overview.service';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { AssignmentsController } from './assignments/assignments.controller';
 import { AssignmentsService } from './assignments/assignments.service';
@@ -41,8 +44,11 @@ import { PeopleSyncService } from './sync/people-sync.service';
     SeatsController,
     AssignmentsController,
     PeopleController,
+    ActivityController,
   ],
   providers: [
+    ActivityService,
+    OverviewService,
     BuildingsService,
     FloorsService,
     RoomsService,

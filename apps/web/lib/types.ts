@@ -139,3 +139,49 @@ export interface DirectoryPerson {
   appRole: AppRole | null;
   active: boolean;
 }
+
+export type ActivityKind = 'seating' | 'layout' | 'places' | 'people';
+
+export interface ActivityEntry {
+  id: string;
+  createdAt: string;
+  actorId: string | null;
+  action: string;
+  entityType: string;
+  entityId: string;
+  before: unknown;
+  after: unknown;
+}
+
+export interface ActivityRefs {
+  people: Record<string, { displayName: string }>;
+  seats: Record<string, { label: string; floorId: string }>;
+  rooms: Record<string, { name: string; floorId: string }>;
+  floors: Record<string, { name: string; buildingId: string }>;
+  buildings: Record<string, { name: string }>;
+}
+
+export interface ActivityPage {
+  items: ActivityEntry[];
+  nextCursor: string | null;
+  refs: ActivityRefs;
+}
+
+export interface OccupancyCounts {
+  seats: number;
+  free: number;
+  taken: number;
+  reserved: number;
+  blocked: number;
+}
+
+export interface Overview extends OccupancyCounts {
+  buildings: Array<
+    OccupancyCounts & {
+      id: string;
+      name: string;
+      address: string | null;
+      floors: Array<OccupancyCounts & { id: string; name: string; level: number }>;
+    }
+  >;
+}

@@ -1,11 +1,11 @@
 'use client';
 
 import { APP_ROLES, type AppRole } from '@seatline/shared';
-import { ArrowLeft, Loader2, RefreshCw } from 'lucide-react';
-import Link from 'next/link';
+import { Loader2, RefreshCw } from 'lucide-react';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
 import { useDeferredValue, useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { PageFrame, PageSection } from '@/components/common/page-frame';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -57,34 +57,10 @@ export function PeopleAdmin({
 
 function Page({ children }: { children: React.ReactNode }) {
   const t = useTranslations('admin');
-  return (
-    <main className="mx-auto grid max-w-3xl gap-8 px-4 py-6 sm:px-6">
-      <header className="grid gap-2">
-        <Button
-          asChild
-          variant="ghost"
-          size="sm"
-          className="-ml-2 justify-self-start text-muted-foreground"
-        >
-          <Link href="/">
-            <ArrowLeft /> {t('back')}
-          </Link>
-        </Button>
-        <h1 className="text-2xl font-semibold">{t('title')}</h1>
-      </header>
-      {children}
-    </main>
-  );
+  return <PageFrame title={t('title')}>{children}</PageFrame>;
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="grid gap-3">
-      <h2 className="text-base font-semibold">{title}</h2>
-      {children}
-    </section>
-  );
-}
+const Section = PageSection;
 
 function AccessSection() {
   const t = useTranslations('admin');

@@ -168,6 +168,14 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   `.github/workflows/deploy.yml` deploys after CI on main (OIDC, no stored Azure secrets).
   Docker Hub may rate-limit; Dockerfiles take `--build-arg NODE_IMAGE=…` for a mirror.
 
+## Activity & overview
+
+- `GET /activity` reads `audit_log` (editors/admins, `@EditorsOnly`), newest first with a cursor,
+  plus `refs` (current names of the people/seats/rooms/floors/buildings it mentions). The web
+  turns entries into sentences in `lib/activity.ts` (`describe`, unit-tested); removed things are
+  named from the entry's own before/after snapshot. New audit actions need a case there.
+- `GET /overview` counts seats per floor with the same rule as the map (`seatOccupancy`).
+
 ## Working style
 
 - Plan before coding larger steps; show the plan first.

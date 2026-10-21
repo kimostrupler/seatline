@@ -4,7 +4,8 @@ import zlib from 'node:zlib';
 
 const [alpenblick] = DEMO_TENANTS;
 export const admin = { tenantId: alpenblick!.id, userId: alpenblick!.users[0].id };
-const headers = { 'x-tenant-id': admin.tenantId, 'x-user-id': admin.userId };
+export const adminHeaders = { 'x-tenant-id': admin.tenantId, 'x-user-id': admin.userId };
+const headers = adminHeaders;
 
 export interface MapSeat {
   id: string;

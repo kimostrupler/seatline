@@ -9,7 +9,7 @@ import { Reflector } from '@nestjs/core';
 import { z } from 'zod';
 import { loadConfig } from '../config';
 import { TenantDb } from '../db/tenant-db.service';
-import { ADMIN_ONLY, IDENTITY_ONLY, IS_PUBLIC } from './decorators';
+import { ADMIN_ONLY, EDITORS_ONLY, IDENTITY_ONLY, IS_PUBLIC } from './decorators';
 import { verifyInternalToken, type Identity } from './identity';
 import { IdentityService } from './identity.service';
 import type { RequestContext } from './request-context';
@@ -78,6 +78,8 @@ export class AuthGuard implements CanActivate {
       throw new ForbiddenException('Viewers cannot make changes');
     if (this.flag(ADMIN_ONLY, context) && ctx.role !== 'admin')
       throw new ForbiddenException('Only admins can do this');
+    if (this.flag(EDITORS_ONLY, context) && ctx.role === 'viewer')
+      throw new ForbiddenException('Only editors and admins can see this');
     req.ctx = ctx;
     return true;
   }
