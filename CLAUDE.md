@@ -89,7 +89,8 @@ All tables except `tenants` have a `tenant_id`.
 5. **Plan engine**: PDF/image/DXF → draft layout, user confirms
 6. **SaaS**: onboarding, Stripe billing, retention settings, exports (CSV/PDF)
 
-Until Phase 4, the API trusts dev headers `x-tenant-id` / `x-user-id` (dev only).
+Locally (`AUTH_MODE=dev` / `DEV_AUTH=true`) the API trusts dev headers `x-tenant-id` / `x-user-id`;
+online only Microsoft sign-in works (`DEV_AUTH` is refused in production).
 
 ## UI direction
 
@@ -132,6 +133,32 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   floor's coordinate space. Storage keys must start with the tenant id; `getPlan` checks it.
 - The shadcn CLI stops at "overwrite?" prompts and re-adds an npm package called `cn`. If it
   does, fetch the component JSON from the registry instead and fix the `cn` import.
+
+## Microsoft sign-in, people sync, deployment notes (Phase 4)
+
+- **BFF auth**: the web app does OIDC (code + PKCE, `lib/server/oidc.ts`), keeps an encrypted
+  session cookie, and the `/api` proxy signs a 60 s HS256 token per request
+  (`INTERNAL_AUTH_SECRET`). The API (`auth.guard.ts`) verifies it and maps Entra `tid`/`oid` to a
+  workspace/person (`identity.service.ts`). Never forward identity headers from the browser in
+  entra mode.
+- ID tokens: issuer must equal `<login>/<tid>/v2.0` of the token's own `tid` (multi-tenant), plus
+  audience, nonce, signature. Covered by `lib/server/oidc.test.ts`.
+- Workspace lookup before the tenant is known uses SECURITY DEFINER SQL functions
+  (`resolve_tenant`, `list_sync_tenants`) — keep RLS on everything else.
+- New people get the workspace's `default_app_role` **when they first appear** (sync or first
+  sign-in); changing the setting doesn't touch existing people.
+- People sync (`sync/people-sync.service.ts`) stores only name, e-mail, department, job title,
+  active. Never changes roles. Leavers: inactive + open seats closed (history kept).
+- Jobs: pg-boss in schema `pgboss` (owned by the API role, created by a migration) for
+  "Sync now"; the nightly sync is a separate scheduled container (`dist/jobs/nightly-sync.js`)
+  because the API scales to zero. Keep queue code in `jobs/job-queue.service.ts`.
+- `jose` is ESM-only; the CommonJS API can `require` it because Node 22 supports require(esm).
+- Pages are `force-dynamic` (AUTH_MODE is read at runtime); middleware runs on the Node runtime.
+- Browser tests: project `entra` runs `e2e/entra.spec.ts` against a second web app in entra mode
+  and `e2e/fake-microsoft.mjs`; everything else runs in dev mode.
+- Azure: `infra/azure/main.bicep` + `setup.sh` (Cloud Shell, idempotent, secrets in Key Vault);
+  `.github/workflows/deploy.yml` deploys after CI on main (OIDC, no stored Azure secrets).
+  Docker Hub may rate-limit; Dockerfiles take `--build-arg NODE_IMAGE=…` for a mirror.
 
 ## Working style
 

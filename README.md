@@ -43,10 +43,10 @@ pnpm db:up
 pnpm dev                                     # API on :3001, web on :3000
 ```
 
-Open http://localhost:3000. Until Microsoft sign-in arrives (Phase 4), pick a demo
-company and user (admin / editor / viewer) in the top-left **dev sign-in** menu.
+Open http://localhost:3000. Locally you don't need Microsoft: pick a demo company and user
+(admin / editor / viewer) in the top-left **dev sign-in** menu (`AUTH_MODE=dev`, the default).
 
-The API itself trusts two headers until then. The seed prints ready-to-use values, e.g.
+In dev mode the API trusts two headers. The seed prints ready-to-use values, e.g.
 the Alpenblick AG admin:
 
 ```bash
@@ -115,6 +115,23 @@ The database enforces the hard rules itself, so a bug in the API can't break the
   and nothing else; assignments and audit entries can't be deleted.
 - **One open assignment** per seat and per person (partial unique indexes).
 
+## Sign-in and people (Microsoft 365)
+
+- Online (`AUTH_MODE=entra`) people **sign in with Microsoft** (any organisation). The first
+  person of a new organisation creates its workspace and becomes admin; colleagues join with the
+  workspace's role for new people (viewer by default, admins can switch to invite-only).
+- The web app holds the session (encrypted cookie) and signs a 60-second token per API request
+  (`INTERNAL_AUTH_SECRET`, same value in web and API). Microsoft tokens never reach the browser.
+- **People sync** reads name, e-mail, department, job title and account status from Microsoft
+  Graph every night (`nightly-sync` job) or on **Sync now**. Leavers become inactive and lose
+  their seat; their history stays. A customer's Microsoft 365 admin approves Seatline once.
+- **People & access** (admins): roles, who can open Seatline, sync status.
+
+## Going online
+
+See **[docs/azure-setup.md](docs/azure-setup.md)** — one script in Azure Cloud Shell, then every
+merge to `main` deploys automatically (`.github/workflows/deploy.yml`).
+
 ## File storage
 
 Floor plan images live in Azure Blob Storage (Azurite locally, started by `pnpm db:up`),
@@ -126,8 +143,5 @@ Tests start their own in-memory Azurite.
 ## Hosting (Plan A — about CHF 20–30 / month)
 
 Azure Switzerland North: Postgres Flexible Server B1ms, Container Apps (scale to zero),
-Blob Storage. No Redis — background jobs will use pg-boss in Postgres.
-
-On Azure, after the first `prisma migrate deploy`, give the API role a password once:
-`ALTER ROLE seatline_app LOGIN PASSWORD '…';` (store it in Key Vault / Container Apps
-secrets, never in the repo).
+Blob Storage, Container Registry. No Redis — background jobs use pg-boss in Postgres.
+Everything is created by `infra/azure/setup.sh`; see [docs/azure-setup.md](docs/azure-setup.md).
