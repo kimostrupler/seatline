@@ -1,5 +1,6 @@
 /**
- * Nightly people sync for every workspace connected to Microsoft 365.
+ * Nightly: people sync for every workspace connected to Microsoft 365, then the scheduled
+ * move plans that are due (after the sync, so people who left are already inactive).
  * Runs as its own scheduled container (Azure Container Apps Job), so it works even
  * while the API is scaled to zero:  node dist/jobs/nightly-sync.js
  */
@@ -13,6 +14,7 @@ async function main() {
   const { AppModule } = await import('../app.module');
   const { TenantDb } = await import('../db/tenant-db.service');
   const { PeopleSyncService } = await import('../sync/people-sync.service');
+  const { MovesService, zurichToday } = await import('../moves/moves.service');
   const logger = new Logger('NightlySync');
   const app = await NestFactory.createApplicationContext(AppModule, {
     logger: ['log', 'warn', 'error'],
@@ -26,6 +28,15 @@ async function main() {
       logger.log(`${t.id}: ${JSON.stringify(result)}`);
     }
     logger.log(`Synced ${tenants.length - failed}/${tenants.length} workspaces`);
+
+    const today = zurichToday();
+    for (const tenantId of await app.get(TenantDb).listDueMoveTenants(today)) {
+      const results = await app.get(MovesService).applyDue(tenantId, today);
+      for (const r of results)
+        if (r.ok) logger.log(`${tenantId}: move plan ${r.id} applied`);
+        else
+          logger.error(`${tenantId}: move plan ${r.id} could not be applied (see the Moves page)`);
+    }
   } finally {
     await app.close();
   }

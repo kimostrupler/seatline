@@ -26,6 +26,13 @@ export class TenantDb {
       SELECT id, entra_tenant_id FROM list_sync_tenants()`;
   }
 
+  /** Workspaces with scheduled move plans due by `day` (YYYY-MM-DD). */
+  async listDueMoveTenants(day: string): Promise<string[]> {
+    const rows = await this.prisma.$queryRaw<{ id: string }[]>`
+      SELECT id FROM list_due_move_tenants(${day}::date)`;
+    return rows.map((r) => r.id);
+  }
+
   run<T>(
     tenantId: string,
     fn: (tx: Tx) => Promise<T>,

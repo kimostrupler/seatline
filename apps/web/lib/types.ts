@@ -140,7 +140,7 @@ export interface DirectoryPerson {
   active: boolean;
 }
 
-export type ActivityKind = 'seating' | 'layout' | 'places' | 'people';
+export type ActivityKind = 'seating' | 'moves' | 'layout' | 'places' | 'people';
 
 export interface ActivityEntry {
   id: string;
@@ -228,4 +228,65 @@ export interface Stats {
     seated: number;
     floors: Array<FloorRef & { count: number }>;
   }>;
+}
+
+export type MovePlanStatus = 'draft' | 'scheduled' | 'applied' | 'cancelled' | 'failed';
+
+export interface MovePlanSummary {
+  id: string;
+  name: string;
+  note: string | null;
+  status: MovePlanStatus;
+  /** YYYY-MM-DD (Swiss calendar day) */
+  effectiveDate: string | null;
+  createdAt: string;
+  updatedAt: string;
+  appliedAt: string | null;
+  createdBy: { id: string; displayName: string };
+  moves: number;
+}
+
+export interface PlanSeatRef {
+  id: string;
+  label: string;
+  floorId: string;
+  floor: { id: string; name: string; level: number; buildingId: string };
+}
+
+export interface MoveItem {
+  personId: string;
+  person: { id: string; displayName: string; department: string | null; active: boolean };
+  /** where they sit now */
+  fromSeat: PlanSeatRef | null;
+  /** where they'll sit; null = they give up their seat */
+  toSeat: PlanSeatRef | null;
+}
+
+export interface PlanProblem {
+  code: 'seat_taken' | 'seat_blocked' | 'seat_double' | 'seat_missing' | 'no_moves';
+  personId?: string;
+  seatId?: string;
+  byPersonId?: string;
+  personName?: string;
+  byName?: string;
+  seatLabel?: string;
+}
+
+export interface PlanNote {
+  code: 'person_left' | 'no_change' | 'reservation_replaced';
+  personId: string;
+  seatId?: string;
+  reservedFor?: string;
+  personName?: string;
+  seatLabel?: string;
+}
+
+export interface MovePlanDetail extends Omit<MovePlanSummary, 'moves'> {
+  scheduledBy: { id: string; displayName: string } | null;
+  items: MoveItem[];
+  problems: PlanProblem[];
+  notes: PlanNote[];
+  /** only after "move a team" */
+  placed?: number;
+  unplaced?: number;
 }

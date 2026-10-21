@@ -34,6 +34,8 @@ export interface FloorMapProps {
   selectedSeatId: string | null;
   /** e.g. the seat of the person selected in the list */
   highlightSeatId: string | null;
+  /** seats to point out, e.g. the ones a move plan changes */
+  markedSeatIds?: ReadonlySet<string>;
   canEdit: boolean;
   planOpacity: number;
   onSelectSeat: (seatId: string | null) => void;
@@ -50,6 +52,7 @@ export function FloorMap({
   map,
   selectedSeatId,
   highlightSeatId,
+  markedSeatIds,
   canEdit,
   planOpacity,
   onSelectSeat,
@@ -224,7 +227,11 @@ export function FloorMap({
                 look={lookOf(seat, colors)}
                 dimmed={dimmed(seat)}
                 selected={seat.id === selectedSeatId}
-                highlighted={seat.id === highlightSeatId || seat.id === focusedSeatId}
+                highlighted={
+                  seat.id === highlightSeatId ||
+                  seat.id === focusedSeatId ||
+                  !!markedSeatIds?.has(seat.id)
+                }
                 dropTarget={seat.id === dropTargetId}
                 dragging={seat.id === draggingSeatId}
                 canDrag={canEdit && seat.occupancy === 'taken'}

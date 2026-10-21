@@ -327,7 +327,8 @@
     "activity": "Activity",
     "home": "Home",
     "map": "Map",
-    "language": "Language"
+    "language": "Language",
+    "moves": "Moves"
   },
   "overview": {
     "title": "Overview",
@@ -352,7 +353,8 @@
       "seating": "Seating (assign, move, reserve, free)",
       "layout": "Layout (rooms and seats)",
       "places": "Buildings and floors",
-      "people": "People and access"
+      "people": "People and access",
+      "moves": "Moves (plans)"
     },
     "person": "Person",
     "anyone": "Anyone",
@@ -417,8 +419,15 @@
       "demoData": "added the demo data",
       "dashboardUpdated": "changed their dashboard",
       "dashboardReset": "reset their dashboard",
-      "dashboardDefault": "changed the company’s default dashboard"
-    }
+      "dashboardDefault": "changed the company’s default dashboard",
+      "planCreated": "created the move plan {name}",
+      "planScheduled": "scheduled the move plan {name} for {date}",
+      "planApplied": "applied the move plan {name} ({count} moves)",
+      "planFailed": "couldn’t apply the move plan {name} (see the plan)",
+      "planCancelled": "cancelled the move plan {name}",
+      "planChanged": "changed the move plan {name}"
+    },
+    "showPlan": "Open the plan"
   },
   "dashboard": {
     "title": "Home",
@@ -533,13 +542,110 @@
       "quickActions": {
         "title": "Quick actions",
         "description": "Find a person, open the map."
+      },
+      "moves": {
+        "title": "Upcoming moves",
+        "description": "Planned and scheduled moves, and plans that need attention (editors and admins)."
       }
-    }
+    },
+    "noMoves": "No moves planned.",
+    "movesCount": "{count, plural, one {# move} other {# moves}}"
   },
   "errors": {
     "title": "Something went wrong",
     "body": "This page ran into a problem. We’ve been told about it. Try again, or go back to the start.",
     "retry": "Try again",
     "home": "Go to the start page"
+  },
+  "moves": {
+    "title": "Moves",
+    "intro": "Prepare seat changes as a plan, check them on the map, then apply them now or on a chosen day. Nothing changes until a plan is applied.",
+    "onlyEditors": "Only editors and admins can plan moves.",
+    "newPlan": "New move plan",
+    "planName": "Name",
+    "planNamePlaceholder": "e.g. Sales to the 2nd floor",
+    "create": "Create",
+    "cancel": "Cancel",
+    "openPlans": "Open plans",
+    "donePlans": "Done",
+    "noOpenPlans": "No open plans.",
+    "noDonePlans": "Nothing applied yet.",
+    "summary": "{count, plural, =0 {No moves yet} one {# move} other {# moves}} · {name} · {date}",
+    "notFound": "This plan doesn’t exist (any more).",
+    "editOnMap": "Plan on the map",
+    "viewOnMap": "View on the map",
+    "moveTeam": "Move a team",
+    "schedule": "Schedule",
+    "reschedule": "Change date",
+    "applyNow": "Apply now",
+    "more": "More",
+    "backToDraft": "Back to draft",
+    "backToDraftDone": "The plan is a draft again",
+    "cancelPlan": "Cancel plan",
+    "cancelled": "Plan cancelled",
+    "scheduledHint": "It will be applied automatically early in the morning of that day. To change it, move it back to draft (More).",
+    "failedHint": "This plan couldn’t be applied on its day because of the problems below — nothing of it was applied. Fix them, then schedule or apply it again.",
+    "movesTitle": "{count, plural, =0 {Moves} one {# move} other {# moves}}",
+    "noMoves": "No moves yet. Open the plan on the map and drag people to their new seats, or move a whole team at once.",
+    "noSeat": "no seat",
+    "to": "to",
+    "removeMove": "Remove {name}’s move",
+    "problemsTitle": "Fix these before the plan can be applied",
+    "problems": {
+      "seat_taken": "{person} → {seat}: {by} sits there and isn’t moving.",
+      "seat_blocked": "{person} → {seat}: the seat is blocked.",
+      "seat_double": "{person} → {seat}: more than one person is planned for this seat.",
+      "seat_missing": "{person}: the planned seat was deleted.",
+      "no_moves": "The plan has no moves left."
+    },
+    "notes": {
+      "person_left": "{person} has left the organisation — their move is skipped.",
+      "no_change": "{person} already sits there — nothing to do.",
+      "reservation_replaced": "Seat {seat} is reserved for {name} — the reservation ends when {person} moves in."
+    },
+    "moveTeamHint": "Puts everyone of a team on free seats of a floor, room by room so they sit together. People already on that floor stay where they are. You can change single moves afterwards.",
+    "team": "Team",
+    "chooseTeam": "Choose a team",
+    "teamOption": "{name} ({count})",
+    "noDepartment": "No department",
+    "toFloor": "To floor",
+    "chooseFloor": "Choose a floor",
+    "floorOption": "{name} — {free} free",
+    "placeTeam": "Add to plan",
+    "teamPlaced": "{placed, plural, =0 {Everyone already sits there} one {# move added} other {# moves added}}",
+    "teamPartly": "{placed} moves added — {unplaced} people didn’t fit (not enough free seats).",
+    "scheduleHint": "The moves happen automatically early in the morning of this day. To move today, use “Apply now”.",
+    "moveDay": "Moving day",
+    "scheduledDone": "Plan scheduled",
+    "applyTitle": "Apply {count, plural, one {# move} other {# moves}} now?",
+    "applyBody": "Everyone moves to their planned seat right away. Each move is kept in the seat history and can be changed later like any other.",
+    "appliedDone": "Moves applied",
+    "status": {
+      "draft": "Draft",
+      "scheduled": "Scheduled for {date}",
+      "applied": "Applied",
+      "cancelled": "Cancelled",
+      "failed": "Couldn’t be applied"
+    },
+    "planMode": {
+      "banner": "Planning: {name}",
+      "count": "{count, plural, =0 {no moves yet} one {# move} other {# moves}}",
+      "problems": "{count, plural, one {# problem} other {# problems}}",
+      "hint": "Drag people onto seats to plan where they’ll sit. Nothing changes until the plan is applied.",
+      "readOnly": "Preview of a plan that isn’t a draft — move it back to draft to change it.",
+      "backToPlan": "Open the plan",
+      "exit": "Leave plan mode",
+      "planned": "Planned",
+      "assign": "Plan: someone sits here",
+      "free": "Plan: free this seat",
+      "remove": "Remove from plan",
+      "movesHere": "{person} moves here from {from}",
+      "getsSeat": "{person} gets this seat",
+      "leaves": "{person} moves away ({to})",
+      "toOtherFloor": "to {seat} · {floor}",
+      "toNoSeat": "no seat",
+      "added": "{person} → {seat} added to the plan",
+      "freed": "{person} gives up the seat (planned)"
+    }
   }
 }

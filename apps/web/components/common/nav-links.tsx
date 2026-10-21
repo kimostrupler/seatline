@@ -1,6 +1,6 @@
 'use client';
 
-import { ChartPie, History, House, Map, Users } from 'lucide-react';
+import { ArrowRightLeft, ChartPie, History, House, Map, Users } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -23,7 +23,12 @@ export function NavLinks({
     { href: '/', label: t('nav.home'), icon: House },
     { href: '/map', label: t('nav.map'), icon: Map },
     { href: '/overview', label: t('nav.overview'), icon: ChartPie },
-    ...(role !== 'viewer' ? [{ href: '/activity', label: t('nav.activity'), icon: History }] : []),
+    ...(role !== 'viewer'
+      ? [
+          { href: '/moves', label: t('nav.moves'), icon: ArrowRightLeft },
+          { href: '/activity', label: t('nav.activity'), icon: History },
+        ]
+      : []),
     ...(role === 'admin' ? [{ href: '/people', label: t('admin.link'), icon: Users }] : []),
   ];
   return (
@@ -34,7 +39,7 @@ export function NavLinks({
       )}
     >
       {links.map(({ href, label, icon: Icon }) => {
-        const current = pathname === href;
+        const current = href === '/' ? pathname === '/' : pathname.startsWith(href);
         return (
           <Button
             key={href}
@@ -43,9 +48,14 @@ export function NavLinks({
             size="sm"
             className={cn('shrink-0 justify-start', !current && 'text-muted-foreground')}
           >
-            <Link href={href} aria-current={current ? 'page' : undefined}>
-              <Icon /> {/* phones: icons only in the top bar (the name stays for screen readers) */}
-              <span className={cn(orientation === 'horizontal' && 'max-sm:sr-only')}>{label}</span>
+            <Link
+              href={href}
+              aria-current={current ? 'page' : undefined}
+              title={orientation === 'horizontal' ? label : undefined}
+            >
+              <Icon />{' '}
+              {/* smaller screens: icons only in the top bar (the name stays for screen readers) */}
+              <span className={cn(orientation === 'horizontal' && 'max-lg:sr-only')}>{label}</span>
             </Link>
           </Button>
         );

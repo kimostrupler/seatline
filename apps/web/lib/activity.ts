@@ -5,7 +5,7 @@ export interface Described {
   key: string;
   values: Record<string, string | number>;
   /** opens the map here (query string for "/") */
-  link?: { building: string; floor: string; seat?: string } | { person: string };
+  link?: { building: string; floor: string; seat?: string } | { person: string } | { plan: string };
 }
 
 type Snap = Record<string, unknown>;
@@ -225,6 +225,40 @@ export function describe(e: ActivityEntry, refs: ActivityRefs, unknownName: stri
       return { key: 'dashboardReset', values: {} };
     case 'dashboard.default':
       return { key: 'dashboardDefault', values: {} };
+    case 'move_plan.create':
+      return {
+        key: 'planCreated',
+        values: { name: str(a.name) ?? '' },
+        link: { plan: e.entityId },
+      };
+    case 'move_plan.schedule':
+      return {
+        key: 'planScheduled',
+        values: { name: str(a.name) ?? '', date: str(a.effectiveDate) ?? '' },
+        link: { plan: e.entityId },
+      };
+    case 'move_plan.apply':
+      return {
+        key: 'planApplied',
+        values: { name: str(a.name) ?? '', count: Number(a.moves ?? 0) },
+        link: { plan: e.entityId },
+      };
+    case 'move_plan.failed':
+      return { key: 'planFailed', values: { name: str(a.name) ?? '' }, link: { plan: e.entityId } };
+    case 'move_plan.cancel':
+      return {
+        key: 'planCancelled',
+        values: { name: str(a.name) ?? '' },
+        link: { plan: e.entityId },
+      };
+    case 'move_plan.update':
+    case 'move_plan.items':
+    case 'move_plan.unschedule':
+      return {
+        key: 'planChanged',
+        values: { name: str(a.name) ?? str(b.name) ?? '' },
+        link: { plan: e.entityId },
+      };
     case 'tenant.seed':
       return { key: 'demoData', values: {} };
     case 'tenant.update':
@@ -236,5 +270,6 @@ export function describe(e: ActivityEntry, refs: ActivityRefs, unknownName: stri
 
 /** "/map?building=…&floor=…&seat=…" or "/map?person=…" */
 export function linkHref(link: NonNullable<Described['link']>): string {
+  if ('plan' in link) return `/moves/${link.plan}`;
   return `/map?${new URLSearchParams(link as Record<string, string>).toString()}`;
 }

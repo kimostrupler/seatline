@@ -195,6 +195,21 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   Numbers come from `GET /stats` (one snapshot; weeks are Swiss weeks starting Monday).
 - The `/api` proxy must export every HTTP method the API uses (PUT was missing once).
 
+## Move plans (planned moves)
+
+- `move_plans` + `move_plan_items` (person → seat, or null = gives up the seat). Editors/admins
+  only (`@EditorsOnly`). Edits only while `draft`; `scheduled` is locked (back to draft first).
+- `checkPlan` (`apps/api/src/moves/check.ts`, pure, unit-tested) is the one rule set for the
+  preview and for applying: problems (seat taken by someone not moving, blocked, wanted twice,
+  deleted) block; notes (person left, no change, reservation replaced) don't.
+- Applying is all or nothing in one transaction and writes history like single moves (close
+  all old rows first, then open the new ones; audits carry `movePlanId`). Scheduled plans are
+  applied by the nightly job (`list_due_move_tenants`, after the people sync); a broken plan is
+  marked `failed` with its problems and logs an ERROR (→ alert). Nightly moves are recorded as
+  made by whoever scheduled the plan; the audit actor is the system.
+- Web: `/moves`, `/moves/[id]`, and plan mode on the map (`/map?plan=…`): `projectFloor`
+  (`lib/moves.ts`) shows the floor after the plan; the usual gestures add plan items instead.
+
 ## Operations
 
 - Browser errors are posted to the web app's `/client-errors` (sanitized, rate-limited) and

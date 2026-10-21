@@ -10,10 +10,12 @@ export interface WorkspaceParams {
   person: string | null;
   /** 'edit' = layout editor */
   mode: string | null;
+  /** a move plan being planned on the map */
+  plan: string | null;
 }
 
 /**
- * What's selected lives in the URL (?building=&floor=&seat=&person=&mode=), so links can be
+ * What's selected lives in the URL (?building=&floor=&seat=&person=&mode=&plan=), so links can be
  * shared and the browser's back button works.
  */
 export function useWorkspaceParams() {
@@ -27,6 +29,7 @@ export function useWorkspaceParams() {
     seat: search.get('seat'),
     person: search.get('person'),
     mode: search.get('mode'),
+    plan: search.get('plan'),
   };
 
   const update = useCallback(

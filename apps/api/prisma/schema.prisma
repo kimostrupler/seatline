@@ -77,6 +77,8 @@ model Tenant {
   assignments SeatAssignment[]
   auditLog    AuditLog[]
   dashboards  DashboardLayout[]
+  movePlans   MovePlan[]
+  moveItems   MovePlanItem[]
 
   @@map("tenants")
 }
@@ -94,10 +96,13 @@ model Person {
   active        Boolean   @default(true)
   syncedAt      DateTime? @map("synced_at") @db.Timestamptz(3)
 
-  tenant       Tenant           @relation(fields: [tenantId], references: [id])
-  assignments  SeatAssignment[] @relation("AssignmentPerson")
-  assignedByMe SeatAssignment[] @relation("AssignmentAssignedBy")
+  tenant       Tenant            @relation(fields: [tenantId], references: [id])
+  assignments  SeatAssignment[]  @relation("AssignmentPerson")
+  assignedByMe SeatAssignment[]  @relation("AssignmentAssignedBy")
   dashboard    DashboardLayout[]
+  plansMade    MovePlan[]        @relation("MovePlanCreatedBy")
+  plansSet     MovePlan[]        @relation("MovePlanScheduledBy")
+  plannedMoves MovePlanItem[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, entraObjectId])
@@ -184,6 +189,7 @@ model Seat {
   floor       Floor            @relation(fields: [tenantId, floorId], references: [tenantId, id], onDelete: Restrict)
   room        Room?            @relation(fields: [tenantId, floorId, roomId], references: [tenantId, floorId, id], onDelete: Restrict)
   assignments SeatAssignment[]
+  plannedFor  MovePlanItem[]
 
   @@unique([tenantId, id])
   @@unique([floorId, label])
@@ -248,4 +254,58 @@ model DashboardLayout {
 
   @@unique([tenantId, personId])
   @@map("dashboard_layouts")
+}
+
+enum MovePlanStatus {
+  draft
+  scheduled
+  applied
+  cancelled
+  failed
+}
+
+/// A set of seat changes prepared in advance, applied together (now or on effective_date).
+model MovePlan {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String         @map("tenant_id") @db.Uuid
+  name          String
+  note          String?
+  status        MovePlanStatus @default(draft)
+  /// the day it happens (Swiss calendar day; the nightly job applies it early that morning)
+  effectiveDate DateTime?      @map("effective_date") @db.Date
+  createdById   String         @map("created_by") @db.Uuid
+  scheduledById String?        @map("scheduled_by") @db.Uuid
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+  appliedAt     DateTime?      @map("applied_at") @db.Timestamptz(3)
+  /// why a scheduled plan couldn't be applied: [{ code, personId?, seatId? }]
+  problems      Json?
+
+  tenant      Tenant         @relation(fields: [tenantId], references: [id])
+  createdBy   Person         @relation("MovePlanCreatedBy", fields: [tenantId, createdById], references: [tenantId, id], onDelete: Restrict)
+  scheduledBy Person?        @relation("MovePlanScheduledBy", fields: [tenantId, scheduledById], references: [tenantId, id], onDelete: Restrict)
+  items       MovePlanItem[]
+
+  @@unique([tenantId, id])
+  @@index([tenantId, status, effectiveDate])
+  @@map("move_plans")
+}
+
+/// One person's planned seat. to_seat_id null = they give up their seat.
+model MovePlanItem {
+  id       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId String  @map("tenant_id") @db.Uuid
+  planId   String  @map("plan_id") @db.Uuid
+  personId String  @map("person_id") @db.Uuid
+  toSeatId String? @map("to_seat_id") @db.Uuid
+
+  tenant Tenant   @relation(fields: [tenantId], references: [id])
+  plan   MovePlan @relation(fields: [tenantId, planId], references: [tenantId, id], onDelete: Cascade)
+  person Person   @relation(fields: [tenantId, personId], references: [tenantId, id], onDelete: Restrict)
+  // a planned seat that gets deleted drops that move from the plan (applied moves have history,
+  // so their seats can't be deleted)
+  toSeat Seat?    @relation(fields: [tenantId, toSeatId], references: [tenantId, id], onDelete: Cascade)
+
+  @@unique([planId, personId])
+  @@map("move_plan_items")
 }

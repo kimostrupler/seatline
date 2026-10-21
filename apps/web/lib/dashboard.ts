@@ -14,6 +14,7 @@ export const WIDGETS: Record<WidgetType, { size: WidgetSize; roles?: AppRole[] }
   sync: { size: 'small', roles: ['admin'] },
   mySeat: { size: 'small' },
   quickActions: { size: 'small' },
+  moves: { size: 'small', roles: ['admin', 'editor'] },
 };
 
 export const canSee = (type: WidgetType, role: AppRole | undefined) => {
