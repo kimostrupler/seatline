@@ -11,7 +11,10 @@ say() { printf '\n\033[1m%s\033[0m\n' "$*"; }
 
 SUB=$(az account show --query id -o tsv)
 KV="seatline-$(printf '%s' "$SUB$RG" | sha256sum | cut -c1-10)"
-WEB_URL=$(az deployment group show -g "$RG" -n seatline --query properties.outputs.webUrl.value -o tsv)
+# own domain (custom-domain.sh) if there is one, else the Azure address
+WEB_HOST=$(az containerapp show -n web -g "$RG" --query "properties.configuration.ingress.customDomains[0].name" -o tsv 2>/dev/null || true)
+[ -n "$WEB_HOST" ] || WEB_HOST=$(az containerapp show -n web -g "$RG" --query properties.configuration.ingress.fqdn -o tsv)
+WEB_URL="https://$WEB_HOST"
 kv_get() { az keyvault secret show --vault-name "$KV" -n "$1" --query value -o tsv 2>/dev/null || true; }
 
 say "1/4 Stripe secret key"
@@ -48,8 +51,13 @@ echo "  $PRICE"
 say "3/4 Webhook → $WEB_URL/api/billing/webhook"
 HOOK_URL="$WEB_URL/api/billing/webhook"
 WEBHOOK_SECRET=$(kv_get stripe-webhook-secret)
-HOOK=$(stripe -G https://api.stripe.com/v1/webhook_endpoints -d limit=100 |
-  jq -r --arg u "$HOOK_URL" '.data[] | select(.url == $u) | .id' | head -n1)
+HOOKS=$(stripe -G https://api.stripe.com/v1/webhook_endpoints -d limit=100)
+HOOK=$(jq -r --arg u "$HOOK_URL" '.data[] | select(.url == $u) | .id' <<<"$HOOKS" | head -n1)
+# remove Seatline webhooks for an older address (e.g. before the own domain)
+for old in $(jq -r --arg u "$HOOK_URL" '.data[] | select(.url != $u and (.url | endswith("/api/billing/webhook"))) | .id' <<<"$HOOKS"); do
+  stripe -X DELETE "https://api.stripe.com/v1/webhook_endpoints/$old" >/dev/null
+  echo "  removed the webhook for an older address"
+done
 # Stripe shows a webhook's signing secret only once: make a new one if we don't have it (or the key changed)
 if [ -n "$HOOK" ] && { [ -z "$WEBHOOK_SECRET" ] || [ "$OLD_KEY" != "$KEY" ]; }; then
   stripe -X DELETE "https://api.stripe.com/v1/webhook_endpoints/$HOOK" >/dev/null
