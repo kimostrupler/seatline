@@ -425,7 +425,9 @@
       "planApplied": "a appliqué le plan de déménagement {name} ({count} déménagements)",
       "planFailed": "n’a pas pu appliquer le plan de déménagement {name} (voir le plan)",
       "planCancelled": "a annulé le plan de déménagement {name}",
-      "planChanged": "a modifié le plan de déménagement {name}"
+      "planChanged": "a modifié le plan de déménagement {name}",
+      "exportedSeating": "a exporté la liste d’occupation",
+      "exportedHistory": "a exporté l’historique des places"
     },
     "showPlan": "Ouvrir le plan"
   },
@@ -647,5 +649,21 @@
       "added": "{person} → {seat} ajouté au plan",
       "freed": "{person} libère la place (prévu)"
     }
+  },
+  "exports": {
+    "menu": "Exporter",
+    "thisFloor": "Cet étage",
+    "allFloors": "Tous les bâtiments et étages",
+    "seatingExcel": "Liste d’occupation (Excel)",
+    "seatingCsv": "Liste d’occupation (CSV)",
+    "historyExcel": "Historique des places (Excel)",
+    "print": "Imprimer l’étage / PDF",
+    "failed": "L’export n’a pas fonctionné : {message}",
+    "back": "Retour",
+    "printNow": "Imprimer / enregistrer en PDF",
+    "asOf": "État au {date}",
+    "seat": "Place",
+    "person": "Personne",
+    "department": "Service"
   }
 }

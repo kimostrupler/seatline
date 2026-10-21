@@ -93,6 +93,10 @@ Changing the schema: edit `apps/api/prisma/schema.prisma`, then
   floor in one go, then apply now or schedule a day (applied early that morning by the nightly
   job). Problems (a seat someone keeps, blocked seats…) are shown and block applying.
 - **Team colours:** the map legend switches between colouring by status and by team.
+- **Exports:** seating list as Excel/CSV (Overview, or one floor from the map's download button;
+  CSV uses ";" for German/French Excel), seat history as Excel (editors), and "Print floor" — a
+  print-ready page with the map and a name list (print or save as PDF in the browser). Exports
+  are recorded in the activity log.
 - **Overview** (everyone): free / taken / reserved seats per building and floor.
 - **Activity** (editors and admins): every change in plain words, newest first — filter by
   kind, person and date; each entry links to the seat or floor on the map.
@@ -103,25 +107,26 @@ Changing the schema: edit `apps/api/prisma/schema.prisma`, then
 
 ## API
 
-| Method           | Path                             | What                                                                                                                                              |
-| ---------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET/POST         | `/buildings`                     | list / create                                                                                                                                     |
-| GET/PATCH/DELETE | `/buildings/:id`                 |                                                                                                                                                   |
-| GET/PUT/DELETE   | `/dashboard`                     | my dashboard layout (save / reset); `PUT /dashboard/default` (admins)                                                                             |
-| GET              | `/stats`                         | numbers and short lists for the dashboard widgets                                                                                                 |
-| GET/POST/PATCH   | `/move-plans`, `/move-plans/:id` | move plans (editors); `PUT :id/items`, `DELETE :id/items/:personId`, `POST :id/team`, `:id/schedule`, `:id/unschedule`, `:id/apply`, `:id/cancel` |
-| GET              | `/overview`                      | seat counts per building and floor                                                                                                                |
-| GET              | `/activity`                      | change history (editors/admins): `kind personId from to cursor`                                                                                   |
-| GET/POST         | `/floors?buildingId=`            | POST with `copyFromFloorId` copies rooms, seats, plan, scale                                                                                      |
-| GET/POST         | `/rooms?floorId=`                | rooms have a polygon of `{x, y}` points                                                                                                           |
-| GET/POST         | `/seats?floorId=`                | list includes `occupancy` + `currentAssignment`                                                                                                   |
-| GET              | `/seats/:id/history`             | everyone who sat here, newest first                                                                                                               |
-| POST             | `/assignments`                   | `{seatId, personId}` — assign, or move if they sit elsewhere                                                                                      |
-| POST             | `/assignments/reservations`      | `{seatId, reservedFor}` — hold a free seat                                                                                                        |
-| POST             | `/assignments/:id/end`           | free the seat (history is kept)                                                                                                                   |
-| GET              | `/people?search=`                | people search                                                                                                                                     |
-| GET              | `/people/:id/history`            | every seat this person had                                                                                                                        |
-| GET              | `/health`                        | no auth                                                                                                                                           |
+| Method           | Path                                   | What                                                                                                                                              |
+| ---------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET/POST         | `/buildings`                           | list / create                                                                                                                                     |
+| GET/PATCH/DELETE | `/buildings/:id`                       |                                                                                                                                                   |
+| GET/PUT/DELETE   | `/dashboard`                           | my dashboard layout (save / reset); `PUT /dashboard/default` (admins)                                                                             |
+| GET              | `/stats`                               | numbers and short lists for the dashboard widgets                                                                                                 |
+| GET/POST/PATCH   | `/move-plans`, `/move-plans/:id`       | move plans (editors); `PUT :id/items`, `DELETE :id/items/:personId`, `POST :id/team`, `:id/schedule`, `:id/unschedule`, `:id/apply`, `:id/cancel` |
+| GET              | `/exports/seating`, `/exports/history` | Excel/CSV downloads (`format=xlsx\|csv`, `lang=en\|de\|fr`); history: editors                                                                     |
+| GET              | `/overview`                            | seat counts per building and floor                                                                                                                |
+| GET              | `/activity`                            | change history (editors/admins): `kind personId from to cursor`                                                                                   |
+| GET/POST         | `/floors?buildingId=`                  | POST with `copyFromFloorId` copies rooms, seats, plan, scale                                                                                      |
+| GET/POST         | `/rooms?floorId=`                      | rooms have a polygon of `{x, y}` points                                                                                                           |
+| GET/POST         | `/seats?floorId=`                      | list includes `occupancy` + `currentAssignment`                                                                                                   |
+| GET              | `/seats/:id/history`                   | everyone who sat here, newest first                                                                                                               |
+| POST             | `/assignments`                         | `{seatId, personId}` — assign, or move if they sit elsewhere                                                                                      |
+| POST             | `/assignments/reservations`            | `{seatId, reservedFor}` — hold a free seat                                                                                                        |
+| POST             | `/assignments/:id/end`                 | free the seat (history is kept)                                                                                                                   |
+| GET              | `/people?search=`                      | people search                                                                                                                                     |
+| GET              | `/people/:id/history`                  | every seat this person had                                                                                                                        |
+| GET              | `/health`                              | no auth                                                                                                                                           |
 
 Viewers can read; changes need the `editor` or `admin` role.
 

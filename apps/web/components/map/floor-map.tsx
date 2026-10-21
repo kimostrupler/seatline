@@ -262,7 +262,9 @@ export function FloorMap({
         ))}
       </ul>
 
-      <ZoomControls zoomBy={vp.zoomBy} fit={vp.fit} />
+      <div data-print="hide">
+        <ZoomControls zoomBy={vp.zoomBy} fit={vp.fit} />
+      </div>
       <MapLegend
         seats={map.seats}
         colorBy={colorBy}

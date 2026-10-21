@@ -425,7 +425,9 @@
       "planApplied": "hat den Umzugsplan {name} angewendet ({count} Umzüge)",
       "planFailed": "konnte den Umzugsplan {name} nicht anwenden (siehe Plan)",
       "planCancelled": "hat den Umzugsplan {name} abgebrochen",
-      "planChanged": "hat den Umzugsplan {name} geändert"
+      "planChanged": "hat den Umzugsplan {name} geändert",
+      "exportedSeating": "hat die Belegungsliste exportiert",
+      "exportedHistory": "hat den Platzverlauf exportiert"
     },
     "showPlan": "Plan öffnen"
   },
@@ -647,5 +649,21 @@
       "added": "{person} → {seat} zum Plan hinzugefügt",
       "freed": "{person} gibt den Platz ab (geplant)"
     }
+  },
+  "exports": {
+    "menu": "Exportieren",
+    "thisFloor": "Dieses Stockwerk",
+    "allFloors": "Alle Gebäude und Stockwerke",
+    "seatingExcel": "Belegungsliste (Excel)",
+    "seatingCsv": "Belegungsliste (CSV)",
+    "historyExcel": "Platzverlauf (Excel)",
+    "print": "Stockwerk drucken / als PDF",
+    "failed": "Der Export hat nicht geklappt: {message}",
+    "back": "Zurück",
+    "printNow": "Drucken / als PDF speichern",
+    "asOf": "Stand {date}",
+    "seat": "Platz",
+    "person": "Person",
+    "department": "Abteilung"
   }
 }

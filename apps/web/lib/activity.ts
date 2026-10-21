@@ -259,6 +259,10 @@ export function describe(e: ActivityEntry, refs: ActivityRefs, unknownName: stri
         values: { name: str(a.name) ?? str(b.name) ?? '' },
         link: { plan: e.entityId },
       };
+    case 'export.seating':
+      return { key: 'exportedSeating', values: {} };
+    case 'export.history':
+      return { key: 'exportedHistory', values: {} };
     case 'tenant.seed':
       return { key: 'demoData', values: {} };
     case 'tenant.update':
