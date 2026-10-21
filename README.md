@@ -60,6 +60,11 @@ Changing the schema: edit `apps/api/prisma/schema.prisma`, then
 - Left: dev sign-in, building and floor pickers, people search (drag a person onto a seat).
 - Centre: floor map — scroll to zoom, drag to pan, drag someone onto another seat to move them.
 - Right: the selected seat or person, with actions and full history. Every change can be undone.
+- **Edit layout** (editors, desktop): switch at the top of the map. Tools on the left —
+  select/move (V), add seat (S), draw room by corners (P) or as a rectangle (B), ruler to set
+  the scale (M). R rotates, ⌘D duplicates, ⌫ deletes, arrows nudge, ⌘Z / ⇧⌘Z undo/redo,
+  hold Space to pan. Changes save instantly; the inspector on the right edits the selection
+  or, with nothing selected, the floor (plan image, scale) and building.
 - Light and dark follow the system setting. All text lives in `apps/web/messages/en.json`.
 - The browser calls `/api/*` on the web app, which forwards to the API (`API_URL`, read at runtime).
 
@@ -94,6 +99,14 @@ The database enforces the hard rules itself, so a bug in the API can't break the
 - **History is append-only**: a trigger lets an assignment be closed once (`end_at`)
   and nothing else; assignments and audit entries can't be deleted.
 - **One open assignment** per seat and per person (partial unique indexes).
+
+## File storage
+
+Floor plan images live in Azure Blob Storage (Azurite locally, started by `pnpm db:up`),
+in a private container, under `<tenant id>/floors/<floor id>/…`. Browsers never get a
+storage URL — `GET /floors/:id/plan` streams the file after the tenant check. Settings:
+`AZURE_STORAGE_CONNECTION_STRING` and `AZURE_STORAGE_CONTAINER` (see `apps/api/.env.example`).
+Tests start their own in-memory Azurite.
 
 ## Hosting (Plan A — about CHF 20–30 / month)
 

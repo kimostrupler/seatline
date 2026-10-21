@@ -20,7 +20,7 @@ beforeEach(async () => {
   b = await createTenant('beta');
 });
 
-const layout = (f: Fixture, body: unknown, headers = f.headers) =>
+const layout = (f: Fixture, body: object, headers = f.headers) =>
   api(app).patch(`/floors/${f.floorId}/layout`).set(headers).send(body);
 
 const square = (x: number, y: number, size: number) => [
