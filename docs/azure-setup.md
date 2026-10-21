@@ -95,6 +95,20 @@ It shows two DNS records to add (a CNAME and a TXT), waits for you, then connect
 creates a free HTTPS certificate and updates Microsoft sign-in. The Azure address keeps working.
 Running `setup.sh` again later keeps the address.
 
+### The website on your main domain (e.g. `example.ch`)
+
+The landing page and the legal pages are part of the web app. They show on the main domain
+and `www` once those point to Azure — the app keeps its own address (`app.example.ch`). In
+Cloud Shell:
+
+```bash
+bash seatline/infra/azure/site-domain.sh example.ch
+```
+
+It shows four DNS records to add (an A record and a TXT for the main domain, a CNAME and a TXT
+for `www`), waits for you, then creates free certificates. E-mail (MX records) isn't affected.
+The texts need your details first — see [legal.md](legal.md).
+
 ### Billing with Stripe (charge customers per seat)
 
 Off until you set it up — then every workspace gets a **30-day free trial**, after which an

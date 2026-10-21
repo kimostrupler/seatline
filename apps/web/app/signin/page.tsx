@@ -1,3 +1,5 @@
+import Link from 'next/link';
+import type React from 'react';
 import { getTranslations } from 'next-intl/server';
 import { Centered } from '@/components/auth/centered';
 import { Button } from '@/components/ui/button';
@@ -10,6 +12,12 @@ export default async function SignIn({
   searchParams: Promise<{ error?: string; signedOut?: string }>;
 }) {
   const t = await getTranslations('auth');
+  const tl = await getTranslations('legal');
+  const link = (doc: 'terms' | 'privacy') => (chunks: React.ReactNode) => (
+    <Link href={`/legal/${doc}`} className="underline underline-offset-2 hover:text-foreground">
+      {chunks}
+    </Link>
+  );
   const { error, signedOut } = await searchParams;
   const known = ERRORS.find((e) => e === error) ?? (error ? 'failed' : null);
   return (
@@ -35,6 +43,17 @@ export default async function SignIn({
         </a>
       </Button>
       <p className="text-xs text-muted-foreground">{t('privacy')}</p>
+      <p className="text-xs text-muted-foreground">
+        {tl.rich('agree', { terms: link('terms'), privacy: link('privacy') })}
+      </p>
+      <p className="flex gap-3 text-xs text-muted-foreground">
+        <Link href="/welcome" className="hover:text-foreground">
+          {tl('about')}
+        </Link>
+        <Link href="/legal/imprint" className="hover:text-foreground">
+          {tl('imprint')}
+        </Link>
+      </p>
     </Centered>
   );
 }

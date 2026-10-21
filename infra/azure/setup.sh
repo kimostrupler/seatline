@@ -79,9 +79,14 @@ current_image() { az "$@" -g "$RG" --query "properties.template.containers[0].im
 API_IMAGE=$(current_image containerapp show -n api)
 WEB_IMAGE=$(current_image containerapp show -n web)
 PLACEHOLDER="mcr.microsoft.com/k8se/quickstart:latest"
-# keep an own web address set up with custom-domain.sh
-CUSTOM_DOMAIN=$(az containerapp show -n web -g "$RG" --query "properties.configuration.ingress.customDomains[0].name" -o tsv 2>/dev/null || true)
-CUSTOM_CERT=$(az containerapp show -n web -g "$RG" --query "properties.configuration.ingress.customDomains[0].certificateId" -o tsv 2>/dev/null || true)
+# keep own addresses set up with custom-domain.sh (the app) and site-domain.sh (the website)
+APP_URL_NOW=$(az containerapp show -n web -g "$RG" --query "properties.template.containers[0].env[?name=='APP_URL'].value | [0]" -o tsv 2>/dev/null || true)
+APP_HOST=$(printf '%s' "$APP_URL_NOW" | sed -E 's#^https?://##; s#/.*##')
+DOMAINS_QUERY="properties.configuration.ingress.customDomains"
+CUSTOM_DOMAIN=$(az containerapp show -n web -g "$RG" --query "$DOMAINS_QUERY[?name=='$APP_HOST'].name | [0]" -o tsv 2>/dev/null || true)
+CUSTOM_CERT=$(az containerapp show -n web -g "$RG" --query "$DOMAINS_QUERY[?name=='$APP_HOST'].certificateId | [0]" -o tsv 2>/dev/null || true)
+SITE_DOMAINS=$(az containerapp show -n web -g "$RG" --query "$DOMAINS_QUERY[?name!='$APP_HOST'].{name: name, certificateId: certificateId}" -o json 2>/dev/null || true)
+[ -n "$SITE_DOMAINS" ] || SITE_DOMAINS='[]'
 # Stripe billing, if stripe-setup.sh stored keys (else billing stays off)
 kv_get() { az keyvault secret show --vault-name "$KV" -n "$1" --query value -o tsv 2>/dev/null || true; }
 STRIPE_KEY=$(kv_get stripe-secret-key)
@@ -93,7 +98,7 @@ az deployment group create -g "$RG" -n seatline -f "$HERE/main.bicep" -o none --
   pgAdminPassword="$PG_PASSWORD" appDbPassword="$APP_DB_PASSWORD" \
   sessionSecret="$SESSION_SECRET" internalAuthSecret="$INTERNAL_SECRET" \
   entraClientId="$APP_ID" entraClientSecret="$ENTRA_SECRET" \
-  customDomain="$CUSTOM_DOMAIN" customDomainCertificateId="$CUSTOM_CERT" \
+  customDomain="$CUSTOM_DOMAIN" customDomainCertificateId="$CUSTOM_CERT" siteDomains="$SITE_DOMAINS" \
   stripeSecretKey="$STRIPE_KEY" stripeWebhookSecret="$STRIPE_WEBHOOK" stripePriceId="$STRIPE_PRICE"
 output() { az deployment group show -g "$RG" -n seatline --query "properties.outputs.$1.value" -o tsv; }
 WEB_URL=$(output webUrl)
