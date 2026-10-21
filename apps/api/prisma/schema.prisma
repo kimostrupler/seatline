@@ -1,0 +1,228 @@
+// Seatline database schema.
+//
+// Child tables reference parents by (tenant_id, id), so a row can never point at another
+// tenant's data (foreign-key checks ignore RLS).
+//
+// Things Prisma can't express live in hand-written SQL inside the migrations
+// (see prisma/migrations/*/migration.sql and README "Database rules"):
+//   - Row-Level Security policies (tenant isolation)
+//   - partial unique indexes: one open assignment per seat / per person
+//   - triggers that make assignment history and the audit log append-only
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AppRole {
+  admin
+  editor
+  viewer
+
+  @@map("app_role")
+}
+
+enum RoomType {
+  office
+  open_space
+  meeting
+  other
+
+  @@map("room_type")
+}
+
+enum SeatType {
+  desk
+  office
+
+  @@map("seat_type")
+}
+
+enum SeatStatus {
+  active
+  blocked
+
+  @@map("seat_status")
+}
+
+enum AssignmentKind {
+  assigned
+  reserved
+
+  @@map("assignment_kind")
+}
+
+model Tenant {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String
+  slug          String   @unique
+  entraTenantId String?  @unique @map("entra_tenant_id") @db.Uuid
+  dataRegion    String   @default("switzerlandnorth") @map("data_region")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  people      Person[]
+  buildings   Building[]
+  floors      Floor[]
+  rooms       Room[]
+  seats       Seat[]
+  assignments SeatAssignment[]
+  auditLog    AuditLog[]
+
+  @@map("tenants")
+}
+
+model Person {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  entraObjectId String?   @map("entra_object_id") @db.Uuid
+  email         String
+  displayName   String    @map("display_name")
+  department    String?
+  jobTitle      String?   @map("job_title")
+  /// null = no access to the app (still assignable to a seat)
+  appRole       AppRole?  @map("app_role")
+  active        Boolean   @default(true)
+  syncedAt      DateTime? @map("synced_at") @db.Timestamptz(3)
+
+  tenant        Tenant           @relation(fields: [tenantId], references: [id])
+  assignments   SeatAssignment[] @relation("AssignmentPerson")
+  assignedByMe  SeatAssignment[] @relation("AssignmentAssignedBy")
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, entraObjectId])
+  @@unique([tenantId, email])
+  @@index([tenantId, displayName])
+  @@map("people")
+}
+
+model Building {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  name      String
+  address   String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant Tenant  @relation(fields: [tenantId], references: [id])
+  floors Floor[]
+
+  @@unique([tenantId, id])
+  @@map("buildings")
+}
+
+model Floor {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  buildingId  String   @map("building_id") @db.Uuid
+  name        String
+  level       Int
+  planFileKey String?  @map("plan_file_key")
+  planWidth   Float?   @map("plan_width")
+  planHeight  Float?   @map("plan_height")
+  /// plan units per metre
+  scale       Float?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id])
+  building Building @relation(fields: [tenantId, buildingId], references: [tenantId, id], onDelete: Restrict)
+  rooms    Room[]
+  seats    Seat[]
+
+  @@unique([tenantId, id])
+  @@index([tenantId, buildingId])
+  @@map("floors")
+}
+
+model Room {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  floorId   String   @map("floor_id") @db.Uuid
+  name      String
+  type      RoomType @default(office)
+  /// [{ x, y }, …] in plan units
+  polygon   Json
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  floor  Floor  @relation(fields: [tenantId, floorId], references: [tenantId, id], onDelete: Restrict)
+  seats  Seat[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, floorId, id])
+  @@index([tenantId, floorId])
+  @@map("rooms")
+}
+
+model Seat {
+  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String     @map("tenant_id") @db.Uuid
+  floorId   String     @map("floor_id") @db.Uuid
+  roomId    String?    @map("room_id") @db.Uuid
+  label     String
+  x         Float
+  y         Float
+  rotation  Float      @default(0)
+  type      SeatType   @default(desk)
+  status    SeatStatus @default(active)
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant      Tenant           @relation(fields: [tenantId], references: [id])
+  floor       Floor            @relation(fields: [tenantId, floorId], references: [tenantId, id], onDelete: Restrict)
+  room        Room?            @relation(fields: [tenantId, floorId, roomId], references: [tenantId, floorId, id], onDelete: Restrict)
+  assignments SeatAssignment[]
+
+  @@unique([tenantId, id])
+  @@unique([floorId, label])
+  @@index([tenantId, floorId])
+  @@map("seats")
+}
+
+/// Append-only history. Rows are only ever inserted, then closed once (end_at set).
+model SeatAssignment {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String         @map("tenant_id") @db.Uuid
+  seatId       String         @map("seat_id") @db.Uuid
+  personId     String?        @map("person_id") @db.Uuid
+  kind         AssignmentKind
+  reservedFor  String?        @map("reserved_for")
+  startAt      DateTime       @default(now()) @map("start_at") @db.Timestamptz(3)
+  endAt        DateTime?      @map("end_at") @db.Timestamptz(3)
+  assignedById String         @map("assigned_by") @db.Uuid
+  note         String?
+
+  tenant     Tenant  @relation(fields: [tenantId], references: [id])
+  seat       Seat    @relation(fields: [tenantId, seatId], references: [tenantId, id], onDelete: Restrict)
+  person     Person? @relation("AssignmentPerson", fields: [tenantId, personId], references: [tenantId, id], onDelete: Restrict)
+  assignedBy Person  @relation("AssignmentAssignedBy", fields: [tenantId, assignedById], references: [tenantId, id], onDelete: Restrict)
+
+  @@index([tenantId, seatId, startAt])
+  @@index([tenantId, personId, startAt])
+  @@map("seat_assignments")
+}
+
+/// Append-only. Who changed what, with before/after snapshots.
+model AuditLog {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  /// person id of the actor; null = system (sync job, migration…). No FK so the log outlives people.
+  actorId    String?  @map("actor_id") @db.Uuid
+  action     String
+  entityType String   @map("entity_type")
+  entityId   String   @map("entity_id") @db.Uuid
+  before     Json?
+  after      Json?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, entityType, entityId])
+  @@index([tenantId, createdAt])
+  @@map("audit_log")
+}
