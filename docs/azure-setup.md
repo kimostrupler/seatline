@@ -95,6 +95,30 @@ It shows two DNS records to add (a CNAME and a TXT), waits for you, then connect
 creates a free HTTPS certificate and updates Microsoft sign-in. The Azure address keeps working.
 Running `setup.sh` again later keeps the address.
 
+### Billing with Stripe (charge customers per seat)
+
+Off until you set it up — then every workspace gets a **30-day free trial**, after which an
+admin subscribes under **Billing** (card or invoice via Stripe). Unpaid workspaces become
+**read-only**: everyone can still look, nothing can be changed. The bill follows the number of
+active seats (updated every night).
+
+1. Create a free account at [stripe.com](https://stripe.com) (start in **test mode** — no real
+   money; test card `4242 4242 4242 4242`).
+2. Copy **Developers → API keys → Secret key** (`sk_test_…`).
+3. In Cloud Shell:
+
+   ```bash
+   bash seatline/infra/azure/stripe-setup.sh
+   ```
+
+   It asks for the key, creates the price (CHF 2 per seat per month — change the price in
+   Stripe any time, or run with `PRICE_CHF_CENTS=500` for CHF 5), adds the webhook and gives the
+   keys to the app (kept in Key Vault). Running `setup.sh` again later keeps them.
+
+To go live: activate your Stripe account, then run the script again with the **live** key
+(`sk_live_…`). In Stripe, also turn on the **Customer portal** (Settings → Billing → Customer
+portal) so admins can change their card or cancel.
+
 ## Good to know
 
 - **Other companies** can sign in the same way: their first person creates their workspace.

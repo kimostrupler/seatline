@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { BillingBanner } from '@/components/billing/billing-banner';
 import { AccountMenu } from '@/components/workspace/account-menu';
 import { cn } from '@/lib/utils';
 import { LanguageSelect } from './language-select';
@@ -22,6 +23,7 @@ export function PageFrame({
 }) {
   return (
     <div className="min-h-dvh">
+      <BillingBanner />
       <header className="sticky top-0 z-20 border-b bg-background/95 backdrop-blur">
         {/* the top bar always uses the full width: six links don't fit a narrow page column */}
         <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-2 sm:px-6">

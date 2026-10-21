@@ -22,6 +22,16 @@ const envSchema = z.object({
     .enum(['true', 'false'])
     .default('true')
     .transform((v) => v === 'true'),
+  /**
+   * Stripe billing (per seat per month). All three unset = billing is off: nothing is ever
+   * read-only (self-hosted, local development).
+   */
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  /** the monthly per-seat price (Stripe price id, e.g. price_…) */
+  STRIPE_PRICE_ID: z.string().optional(),
+  /** tests only: a fake Stripe server (http://localhost:port) */
+  STRIPE_API_BASE: z.url().optional(),
   /** Trust x-tenant-id / x-user-id headers. Dev only — replaced by Entra ID in Phase 4. */
   DEV_AUTH: z
     .enum(['true', 'false'])

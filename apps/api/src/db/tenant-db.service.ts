@@ -26,6 +26,14 @@ export class TenantDb {
       SELECT id, entra_tenant_id FROM list_sync_tenants()`;
   }
 
+  /** Workspaces with a Stripe subscription. */
+  async listBilledTenants(): Promise<string[]> {
+    const rows = await this.prisma.$queryRaw<
+      { id: string }[]
+    >`SELECT id FROM list_billed_tenants()`;
+    return rows.map((r) => r.id);
+  }
+
   /** Workspaces that limit how long history is kept (months). */
   listRetentionTenants() {
     return this.prisma.$queryRaw<{ id: string; months: number }[]>`

@@ -38,7 +38,31 @@ param customDomain string = ''
 @description('Managed certificate of customDomain (custom-domain.sh creates it).')
 param customDomainCertificateId string = ''
 
+@secure()
+@description('Stripe billing (stripe-setup.sh stores these in Key Vault). Empty = billing off.')
+param stripeSecretKey string = ''
+
+@secure()
+param stripeWebhookSecret string = ''
+
+param stripePriceId string = ''
+
 var suffix = uniqueString(resourceGroup().id)
+// Container Apps refuse empty secrets, so Stripe is only added once all three are set
+var stripeOn = !empty(stripeSecretKey) && !empty(stripeWebhookSecret) && !empty(stripePriceId)
+var stripeSecrets = stripeOn
+  ? [
+      { name: 'stripe-secret-key', value: stripeSecretKey }
+      { name: 'stripe-webhook-secret', value: stripeWebhookSecret }
+    ]
+  : []
+var stripeEnv = stripeOn
+  ? [
+      { name: 'STRIPE_SECRET_KEY', secretRef: 'stripe-secret-key' }
+      { name: 'STRIPE_WEBHOOK_SECRET', secretRef: 'stripe-webhook-secret' }
+      { name: 'STRIPE_PRICE_ID', value: stripePriceId }
+    ]
+  : []
 var pgAdmin = 'seatlineadmin'
 
 resource logs 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
@@ -161,12 +185,15 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
     configuration: {
       ingress: { external: false, targetPort: 3001 } // only reachable from the web app
       registries: registries
-      secrets: [
-        { name: 'app-database-url', value: appDbUrl }
-        { name: 'storage-connection', value: storageConnection }
-        { name: 'internal-auth-secret', value: internalAuthSecret }
-        { name: 'entra-client-secret', value: entraClientSecret }
-      ]
+      secrets: concat(
+        [
+          { name: 'app-database-url', value: appDbUrl }
+          { name: 'storage-connection', value: storageConnection }
+          { name: 'internal-auth-secret', value: internalAuthSecret }
+          { name: 'entra-client-secret', value: entraClientSecret }
+        ],
+        stripeSecrets
+      )
     }
     template: {
       containers: [
@@ -174,16 +201,19 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
           name: 'api'
           image: apiImage
           resources: { cpu: json('0.5'), memory: '1Gi' }
-          env: [
-            { name: 'NODE_ENV', value: 'production' }
-            { name: 'PORT', value: '3001' }
-            { name: 'APP_DATABASE_URL', secretRef: 'app-database-url' }
-            { name: 'AZURE_STORAGE_CONNECTION_STRING', secretRef: 'storage-connection' }
-            { name: 'AZURE_STORAGE_CONTAINER', value: 'floor-plans' }
-            { name: 'INTERNAL_AUTH_SECRET', secretRef: 'internal-auth-secret' }
-            { name: 'ENTRA_CLIENT_ID', value: entraClientId }
-            { name: 'ENTRA_CLIENT_SECRET', secretRef: 'entra-client-secret' }
-          ]
+          env: concat(
+            [
+              { name: 'NODE_ENV', value: 'production' }
+              { name: 'PORT', value: '3001' }
+              { name: 'APP_DATABASE_URL', secretRef: 'app-database-url' }
+              { name: 'AZURE_STORAGE_CONNECTION_STRING', secretRef: 'storage-connection' }
+              { name: 'AZURE_STORAGE_CONTAINER', value: 'floor-plans' }
+              { name: 'INTERNAL_AUTH_SECRET', secretRef: 'internal-auth-secret' }
+              { name: 'ENTRA_CLIENT_ID', value: entraClientId }
+              { name: 'ENTRA_CLIENT_SECRET', secretRef: 'entra-client-secret' }
+            ],
+            stripeEnv
+          )
         }
       ]
       scale: { minReplicas: 0, maxReplicas: 2 }
@@ -285,10 +315,13 @@ resource nightlySync 'Microsoft.App/jobs@2024-03-01' = {
       replicaRetryLimit: 1
       scheduleTriggerConfig: { cronExpression: '0 1 * * *', parallelism: 1, replicaCompletionCount: 1 }
       registries: registries
-      secrets: [
-        { name: 'app-database-url', value: appDbUrl }
-        { name: 'entra-client-secret', value: entraClientSecret }
-      ]
+      secrets: concat(
+        [
+          { name: 'app-database-url', value: appDbUrl }
+          { name: 'entra-client-secret', value: entraClientSecret }
+        ],
+        stripeSecrets
+      )
     }
     template: {
       containers: [
@@ -297,12 +330,15 @@ resource nightlySync 'Microsoft.App/jobs@2024-03-01' = {
           image: apiImage
           command: ['node', 'dist/jobs/nightly-sync.js']
           resources: { cpu: json('0.5'), memory: '1Gi' }
-          env: [
-            { name: 'NODE_ENV', value: 'production' }
-            { name: 'APP_DATABASE_URL', secretRef: 'app-database-url' }
-            { name: 'ENTRA_CLIENT_ID', value: entraClientId }
-            { name: 'ENTRA_CLIENT_SECRET', secretRef: 'entra-client-secret' }
-          ]
+          env: concat(
+            [
+              { name: 'NODE_ENV', value: 'production' }
+              { name: 'APP_DATABASE_URL', secretRef: 'app-database-url' }
+              { name: 'ENTRA_CLIENT_ID', value: entraClientId }
+              { name: 'ENTRA_CLIENT_SECRET', secretRef: 'entra-client-secret' }
+            ],
+            stripeEnv
+          )
         }
       ]
     }

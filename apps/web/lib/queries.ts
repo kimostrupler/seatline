@@ -13,6 +13,7 @@ import type {
   ActivityPage,
   Assignment,
   AssignResult,
+  BillingOverview,
   Building,
   DashboardData,
   Floor,
@@ -398,5 +399,25 @@ export function useForgetPerson() {
     mutationFn: (id: string) =>
       api<{ ok: boolean }>(`/privacy/people/${id}/forget`, { method: 'POST' }),
     onSettled: () => qc.invalidateQueries(),
+  });
+}
+
+export const useBilling = (options?: { refetchInterval?: number | false }) =>
+  useQuery({
+    queryKey: ['billing'],
+    queryFn: () => api<BillingOverview>('/billing'),
+    refetchInterval: options?.refetchInterval,
+  });
+
+/** Admins: go to Stripe (checkout to subscribe, or the portal for card and invoices). */
+export function useBillingRedirect() {
+  return useMutation({
+    mutationFn: async (to: 'checkout' | 'portal') => {
+      const { url } = await api<{ url: string }>(`/billing/${to}`, {
+        method: 'POST',
+        body: { returnUrl: `${window.location.origin}/billing` },
+      });
+      window.location.assign(url);
+    },
   });
 }

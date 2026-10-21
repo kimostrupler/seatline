@@ -17,6 +17,7 @@ async function main() {
   const { PeopleSyncService } = await import('../sync/people-sync.service');
   const { MovesService, zurichToday } = await import('../moves/moves.service');
   const { PrivacyService } = await import('../privacy/privacy.service');
+  const { BillingService } = await import('../billing/billing.service');
   const logger = new Logger('NightlySync');
   const app = await NestFactory.createApplicationContext(AppModule, {
     logger: ['log', 'warn', 'error'],
@@ -45,6 +46,18 @@ async function main() {
       const result = await app.get(PrivacyService).purge(t.id, t.months);
       logger.log(`${t.id}: privacy clean-up ${JSON.stringify(result)}`);
     }
+
+    // billing: the subscription follows the number of active seats
+    const billing = app.get(BillingService);
+    if (billing.configured)
+      for (const tenantId of await app.get(TenantDb).listBilledTenants()) {
+        try {
+          const r = await billing.syncSeats(tenantId);
+          if (r.changed) logger.log(`${tenantId}: now billed for ${r.seats} seats`);
+        } catch (error) {
+          logger.error(`${tenantId}: could not update the billed seats: ${String(error)}`);
+        }
+      }
   } finally {
     await app.close();
   }
