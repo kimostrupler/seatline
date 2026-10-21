@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { MapMessage, Shell } from '@/components/workspace/shell';
 import { ScaleDialog } from '@/components/workspace/place-dialogs';
 import { NO_SELECTION, useLayoutEditor } from '@/lib/editor/use-layout-editor';
-import type { Building, FloorMap } from '@/lib/types';
+import type { Building, Floor, FloorMap } from '@/lib/types';
 import { useMediaQuery } from '@/lib/use-media-query';
 import { usePlanOpacity } from '@/lib/use-plan-opacity';
 import { EditorToolbar } from './editor-toolbar';
@@ -28,6 +28,7 @@ export function EditMode({
   headerEnd,
   onFloorDeleted,
   onBuildingDeleted,
+  onFloorCreated,
 }: {
   map: FloorMap;
   building: Building | undefined;
@@ -36,6 +37,7 @@ export function EditMode({
   headerEnd: ReactNode;
   onFloorDeleted: () => void;
   onBuildingDeleted: () => void;
+  onFloorCreated: (floor: Floor) => void;
 }) {
   const t = useTranslations('mode');
   const te = useTranslations('editor');
@@ -56,6 +58,7 @@ export function EditMode({
       clipboard={clipboard}
       onFloorDeleted={onFloorDeleted}
       onBuildingDeleted={onBuildingDeleted}
+      onFloorCreated={onFloorCreated}
     />
   );
   const hasSelection = editor.selection.seats.length > 0 || editor.selection.rooms.length > 0;

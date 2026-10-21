@@ -33,3 +33,11 @@ export function roomForPoint<R extends { id: string; polygon: readonly XY[] }>(
     .filter((r) => r.polygon.length >= 3 && pointInPolygon(p, r.polygon))
     .sort((a, b) => polygonArea(a.polygon) - polygonArea(b.polygon))[0];
 }
+
+/** Seat label for a copied floor: "1.04" copied from level 1 to level 2 becomes "2.04". */
+export function relabel(label: string, fromLevel: number, toLevel: number): string {
+  const prefix = `${fromLevel}.`;
+  return fromLevel !== toLevel && label.startsWith(prefix)
+    ? `${toLevel}.${label.slice(prefix.length)}`
+    : label;
+}

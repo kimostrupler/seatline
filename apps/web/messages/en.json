@@ -30,7 +30,11 @@
     "cancel": "Cancel",
     "createFirstBuilding": "Create your first building",
     "created": "{name} created",
-    "createFirstFloor": "Create the first floor"
+    "createFirstFloor": "Create the first floor",
+    "startWith": "Start with",
+    "emptyFloor": "An empty floor",
+    "copyOf": "A copy of {name}",
+    "startWithHint": "A copy gets the same rooms, seats, plan image and scale — without people. Seat numbers follow the new level (1.04 → 2.04)."
   },
   "people": {
     "title": "People",
@@ -225,7 +229,9 @@
       "bottom": "Align bottom"
     },
     "distributeX": "Space evenly left to right",
-    "distributeY": "Space evenly top to bottom"
+    "distributeY": "Space evenly top to bottom",
+    "duplicateFloor": "Duplicate floor",
+    "duplicateFloorHint": "A new floor with the same rooms, seats and plan, without people."
   },
   "auth": {
     "signInTitle": "Sign in to Seatline",

@@ -92,7 +92,7 @@ Changing the schema: edit `apps/api/prisma/schema.prisma`, then
 | ---------------- | --------------------------- | ------------------------------------------------------------ |
 | GET/POST         | `/buildings`                | list / create                                                |
 | GET/PATCH/DELETE | `/buildings/:id`            |                                                              |
-| GET/POST         | `/floors?buildingId=`       |                                                              |
+| GET/POST         | `/floors?buildingId=`       | POST with `copyFromFloorId` copies rooms, seats, plan, scale |
 | GET/POST         | `/rooms?floorId=`           | rooms have a polygon of `{x, y}` points                      |
 | GET/POST         | `/seats?floorId=`           | list includes `occupancy` + `currentAssignment`              |
 | GET              | `/seats/:id/history`        | everyone who sat here, newest first                          |

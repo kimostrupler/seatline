@@ -7,6 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useCreateBuilding, useCreateFloor, useUpdateFloor } from '@/lib/queries';
 import type { Building, Floor } from '@/lib/types';
 
@@ -132,41 +139,57 @@ export function CreateFloorDialog({
   buildingId,
   floors,
   onCreated,
+  copyFrom,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   buildingId: string;
   floors: Floor[];
   onCreated: (floor: Floor) => void;
+  /** start as a copy of this floor ("Duplicate floor") */
+  copyFrom?: string;
 }) {
   const t = useTranslations('place');
   const create = useCreateFloor();
   const nextLevel = floors.length ? Math.max(...floors.map((f) => f.level)) + 1 : 0;
   const [name, setName] = useState('');
   const [level, setLevel] = useState<string | null>(null);
+  const [start, setStart] = useState<string | null>(null);
+  const startValue = start ?? copyFrom ?? 'empty';
   const levelValue = level ?? String(nextLevel);
   const valid = name.trim() && Number.isInteger(Number(levelValue));
   return (
     <FormDialog
       open={open}
       onOpenChange={(o) => {
-        if (!o) setLevel(null);
+        if (!o) {
+          setLevel(null);
+          setStart(null);
+        }
         onOpenChange(o);
       }}
       title={t('newFloor')}
       submitLabel={t('create')}
       busy={create.isPending || !valid}
       onSubmit={() =>
-        create.mutateAsync({ buildingId, name: name.trim(), level: Number(levelValue) }).then(
-          (floor) => {
-            toast.success(t('created', { name: floor.name }));
-            setName('');
-            setLevel(null);
-            onOpenChange(false);
-            onCreated(floor);
-          },
-          (error: unknown) => toast.error(errorText(error)),
-        )
+        create
+          .mutateAsync({
+            buildingId,
+            name: name.trim(),
+            level: Number(levelValue),
+            ...(startValue !== 'empty' && { copyFromFloorId: startValue }),
+          })
+          .then(
+            (floor) => {
+              toast.success(t('created', { name: floor.name }));
+              setName('');
+              setLevel(null);
+              setStart(null);
+              onOpenChange(false);
+              onCreated(floor);
+            },
+            (error: unknown) => toast.error(errorText(error)),
+          )
       }
     >
       <TextField
@@ -183,6 +206,27 @@ export function CreateFloorDialog({
         value={levelValue}
         onChange={(e) => setLevel(e.target.value)}
       />
+      {floors.length > 0 && (
+        <div className="grid gap-1.5">
+          <Label htmlFor="floor-start">{t('startWith')}</Label>
+          <Select value={startValue} onValueChange={setStart}>
+            <SelectTrigger id="floor-start" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="empty">{t('emptyFloor')}</SelectItem>
+              {[...floors]
+                .sort((x, y) => x.level - y.level)
+                .map((f) => (
+                  <SelectItem key={f.id} value={f.id}>
+                    {t('copyOf', { name: f.name })}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">{t('startWithHint')}</p>
+        </div>
+      )}
     </FormDialog>
   );
 }
