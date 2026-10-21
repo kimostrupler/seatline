@@ -5,7 +5,9 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
-import { useBuildings, useFloorMap, useFloors, useMe, usePerson } from '@/lib/queries';
+import { useBuildings, useFloorMap, useFloors, useMe, usePerson, useStats } from '@/lib/queries';
+import { teamSlots } from '@/lib/team-colors';
+import { useColorBy } from '@/lib/use-map-colors-mode';
 import { useMediaQuery } from '@/lib/use-media-query';
 import { usePlanOpacity } from '@/lib/use-plan-opacity';
 import { AccountMenu } from './account-menu';
@@ -34,6 +36,10 @@ export function Workspace() {
   const [params, update] = useWorkspaceParams();
   const isDesktop = useMediaQuery('(min-width: 1024px)');
   const [planOpacity] = usePlanOpacity();
+  const [colorBy, setColorBy] = useColorBy();
+  // team colours follow the company's largest departments, the same on every floor
+  const stats = useStats();
+  const slots = useMemo(() => teamSlots(stats.data?.departments ?? []), [stats.data]);
   const [dialog, setDialog] = useState<'building' | 'floor' | null>(null);
 
   const me = useMe();
@@ -202,6 +208,9 @@ export function Workspace() {
             highlightSeatId={personSeat?.floorId === floorId ? (personSeat?.id ?? null) : null}
             canEdit={canEdit}
             planOpacity={planOpacity}
+            colorBy={colorBy}
+            onColorBy={setColorBy}
+            teamSlots={slots}
             onSelectSeat={(id) => update({ seat: id })}
             onDropPerson={(seatId, dropped) => actions.assign(seatId, dropped)}
             onMoveSeat={(fromId, toId) => {

@@ -6,7 +6,9 @@ import { useMemo, useState } from 'react';
 import { Group, Layer, Rect, Stage } from 'react-konva';
 import { contentBounds, seatAt, toPlan } from '@/lib/map-geometry';
 import type { FloorMap as FloorMapData, Seat } from '@/lib/types';
-import { MapLegend } from './map-legend';
+import { withAlpha } from '@/lib/team-colors';
+import type { ColorBy } from '@/lib/use-map-colors-mode';
+import { MapLegend, teamsOnFloor } from './map-legend';
 import {
   PlanBackground,
   RoomShape,
@@ -18,8 +20,11 @@ import {
   useMapColors,
   usePlanImage,
   type Colors,
+  type SeatLook,
 } from './shapes';
 import { useViewport, ZoomControls } from './viewport';
+
+const NO_TEAMS = new Map<string, number>();
 
 /** MIME type used when a person is dragged from the people list. */
 export const PERSON_DRAG_TYPE = 'application/x-seatline-person';
@@ -34,6 +39,11 @@ export interface FloorMapProps {
   onSelectSeat: (seatId: string | null) => void;
   onDropPerson: (seatId: string, person: { id: string; displayName: string }) => void;
   onMoveSeat: (fromSeatId: string, toSeatId: string) => void;
+  /** colour seats by status (default) or by the sitting person's department */
+  colorBy?: ColorBy;
+  onColorBy?: (c: ColorBy) => void;
+  /** department → team colour slot (1–4) */
+  teamSlots?: Map<string, number>;
 }
 
 export function FloorMap({
@@ -45,6 +55,9 @@ export function FloorMap({
   onSelectSeat,
   onDropPerson,
   onMoveSeat,
+  colorBy = 'status',
+  onColorBy = () => {},
+  teamSlots = NO_TEAMS,
 }: FloorMapProps) {
   const t = useTranslations('map');
   const ts = useTranslations('status');
@@ -66,6 +79,33 @@ export function FloorMap({
   const [dropTargetId, setDropTargetId] = useState<string | null>(null);
   const [draggingSeatId, setDraggingSeatId] = useState<string | null>(null);
   const [focusedSeatId, setFocusedSeatId] = useState<string | null>(null);
+  const [focusTeam, setFocusTeam] = useState<string | null>(null);
+  const teams = useMemo(() => teamsOnFloor(map.seats, teamSlots), [map.seats, teamSlots]);
+  const byTeam = colorBy === 'team';
+  // the department of whoever sits here ('' = none), null for free/reserved/blocked seats
+  const teamOf = (seat: Seat) =>
+    seat.occupancy === 'taken' ? (seat.currentAssignment?.person?.department ?? '') : null;
+  const lookOf = (seat: Seat, c: Colors): SeatLook | undefined => {
+    if (!byTeam) return undefined;
+    const team = teamOf(seat);
+    if (team === null)
+      return {
+        fill: c['seat-blocked-fill'],
+        stroke: c['room-stroke'],
+        text: c['seat-blocked-text'],
+      };
+    const slot = teamSlots.get(team);
+    if (!slot)
+      return {
+        fill: c['seat-taken-fill'],
+        stroke: c['seat-taken-stroke'],
+        text: c['seat-taken-text'],
+      };
+    const color = c[`team-${slot}` as `team-${1 | 2 | 3 | 4}`];
+    return { fill: withAlpha(color, 0.22), stroke: color, text: c['seat-taken-text'] };
+  };
+  const dimmed = (seat: Seat) => byTeam && focusTeam !== null && teamOf(seat) !== focusTeam;
+
   // far zoomed out (e.g. a phone showing the whole floor) seat numbers would overlap
   const showLabels = view.scale >= 0.45;
 
@@ -117,7 +157,13 @@ export function FloorMap({
   const seatName = (seat: Seat) => {
     const a = seat.currentAssignment;
     if (seat.occupancy === 'taken' && a?.person)
-      return t('seatButtonPerson', { label: seat.label, person: a.person.displayName });
+      return byTeam
+        ? t('seatButtonTeam', {
+            label: seat.label,
+            person: a.person.displayName,
+            team: a.person.department || t('noDepartment'),
+          })
+        : t('seatButtonPerson', { label: seat.label, person: a.person.displayName });
     if (seat.occupancy === 'reserved' && a?.reservedFor)
       return t('seatButtonReserved', { label: seat.label, reservedFor: a.reservedFor });
     return t('seatButton', { label: seat.label, status: ts(seat.occupancy) });
@@ -175,6 +221,8 @@ export function FloorMap({
                 colors={colors}
                 textScale={vp.textScale}
                 showLabel={showLabels}
+                look={lookOf(seat, colors)}
+                dimmed={dimmed(seat)}
                 selected={seat.id === selectedSeatId}
                 highlighted={seat.id === highlightSeatId || seat.id === focusedSeatId}
                 dropTarget={seat.id === dropTargetId}
@@ -208,7 +256,18 @@ export function FloorMap({
       </ul>
 
       <ZoomControls zoomBy={vp.zoomBy} fit={vp.fit} />
-      <MapLegend seats={map.seats} className="absolute right-14 bottom-3 left-3 lg:right-auto" />
+      <MapLegend
+        seats={map.seats}
+        colorBy={colorBy}
+        onColorBy={(c) => {
+          setFocusTeam(null);
+          onColorBy(c);
+        }}
+        teams={teams}
+        focusTeam={byTeam ? focusTeam : null}
+        onFocusTeam={setFocusTeam}
+        className="absolute right-14 bottom-3 left-3 lg:right-auto lg:max-w-[calc(100%-5rem)]"
+      />
     </div>
   );
 }
@@ -217,6 +276,8 @@ export function FloorMap({
 function ViewSeat({
   seat,
   colors,
+  look,
+  dimmed,
   textScale,
   showLabel,
   selected,
@@ -231,6 +292,9 @@ function ViewSeat({
 }: {
   seat: Seat;
   colors: Colors;
+  look?: SeatLook;
+  /** another team is highlighted */
+  dimmed: boolean;
   textScale: number;
   showLabel: boolean;
   selected: boolean;
@@ -248,6 +312,8 @@ function ViewSeat({
       <SeatDesk
         seat={seat}
         colors={colors}
+        look={look}
+        opacity={dimmed ? 0.25 : 1}
         ring={selected ? 'selected' : dropTarget ? 'drop' : highlighted ? 'highlight' : null}
         onClick={onSelect}
         onTap={onSelect}
@@ -260,6 +326,7 @@ function ViewSeat({
           x={seat.x}
           y={seat.y}
           draggable={canDrag}
+          opacity={dimmed ? 0.3 : 1}
           onClick={onSelect}
           onTap={onSelect}
           onDragStart={onDragStart}
@@ -284,7 +351,7 @@ function ViewSeat({
             seat={seat}
             colors={colors}
             textScale={textScale}
-            color={dragging ? '#ffffff' : undefined}
+            color={dragging ? '#ffffff' : look?.text}
           />
         </Group>
       )}

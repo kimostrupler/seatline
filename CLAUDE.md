@@ -116,6 +116,10 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   key must exist in all three with the same `{placeholders}` (`lib/locales.test.ts` checks).
   German is Swiss ("ss", not "ß"; formal "Sie"); French uses "vous". Language = cookie
   `seatline-language`, else the browser's Accept-Language (`pickLanguage`), else English.
+- Map "Colour by: Status / Team" (`useColorBy`, per browser). Team colours are `--team-1..4`
+  (only 4 pass the all-pairs colour-blind check): the company's 4 largest departments
+  (`teamSlots`, from `/stats`), others neutral; the legend highlights any team. Team mode never
+  uses status colours; the accessible seat list then names the team.
 - Every seat change shows a toast with Undo; undo makes the opposite change (history keeps both).
 - shadcn components are added with `npx shadcn@<version> add …`; check its imports afterwards
   (it once pulled an npm package called `cn` instead of `@/lib/utils`).

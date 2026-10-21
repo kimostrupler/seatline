@@ -63,7 +63,16 @@
     "seatsList": "Plätze auf diesem Stockwerk",
     "seatButton": "Platz {label}, {status}",
     "seatButtonPerson": "Platz {label}, belegt von {person}",
-    "seatButtonReserved": "Platz {label}, reserviert für {reservedFor}"
+    "seatButtonReserved": "Platz {label}, reserviert für {reservedFor}",
+    "colorBy": "Plätze einfärben nach",
+    "byStatus": "Status",
+    "byTeam": "Team",
+    "teams": "Teams auf diesem Stockwerk",
+    "noTeams": "Auf diesem Stockwerk sitzt noch niemand.",
+    "noDepartment": "Keine Abteilung",
+    "focusTeam": "{team} hervorheben",
+    "showAllTeams": "Alle Teams zeigen",
+    "seatButtonTeam": "Platz {label}, belegt von {person} ({team})"
   },
   "seat": {
     "title": "Platz {label}",

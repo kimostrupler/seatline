@@ -157,3 +157,21 @@ async function relativeTo(page: Page, p: { x: number; y: number }) {
   const box = (await page.getByTestId('floor-map').boundingBox())!;
   return { x: p.x - box.x, y: p.y - box.y };
 }
+
+test('colour seats by team; highlight one team; the choice is remembered', async ({ page }) => {
+  const legend = page.getByTestId('map-legend');
+  await legend.getByRole('radio', { name: 'Team' }).click();
+  const engineering = legend.getByRole('button', { name: /Engineering/ });
+  await expect(engineering).toContainText('3');
+  await expect(legend.getByRole('button', { name: /Finance/ })).toBeVisible();
+  // the accessible seat list names the team too
+  await expect(
+    page.getByRole('button', { name: /taken by Luca Rossi \(Engineering\)/ }),
+  ).toBeAttached();
+
+  await engineering.click();
+  await expect(engineering).toHaveAttribute('aria-pressed', 'true');
+
+  await page.reload();
+  await expect(page.getByTestId('map-legend').getByRole('radio', { name: 'Team' })).toBeChecked();
+});

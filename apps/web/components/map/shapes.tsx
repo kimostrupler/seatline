@@ -31,6 +31,10 @@ const COLOR_VARS = [
   'seat-blocked-fill',
   'seat-blocked-stroke',
   'seat-blocked-text',
+  'team-1',
+  'team-2',
+  'team-3',
+  'team-4',
 ] as const;
 
 export type Colors = Record<(typeof COLOR_VARS)[number], string>;
@@ -85,18 +89,26 @@ export function RoomShape({
 
 export type SeatRing = 'selected' | 'highlight' | 'drop' | null;
 
+/** Overrides the status colours (e.g. team colours on the map). */
+export interface SeatLook {
+  fill: string;
+  stroke: string;
+  text: string;
+}
+
 /** The desk itself (rotates with the seat): ring, chair on the facing side, desk, blocked cross. */
 export function SeatDesk({
   seat,
   colors,
   ring,
+  look,
   ...groupProps
-}: { seat: Seat; colors: Colors; ring: SeatRing } & Omit<
+}: { seat: Seat; colors: Colors; ring: SeatRing; look?: SeatLook } & Omit<
   ComponentProps<typeof Group>,
   'children'
 >) {
   const state = seat.occupancy;
-  const stroke = colors[`seat-${state}-stroke`];
+  const stroke = look?.stroke ?? colors[`seat-${state}-stroke`];
   return (
     <Group x={seat.x} y={seat.y} rotation={seat.rotation} {...groupProps}>
       {ring && (
@@ -127,7 +139,7 @@ export function SeatDesk({
         width={SEAT_W}
         height={SEAT_H}
         cornerRadius={8}
-        fill={colors[`seat-${state}-fill`]}
+        fill={look?.fill ?? colors[`seat-${state}-fill`]}
         stroke={stroke}
         strokeWidth={1.5}
         dash={state === 'blocked' ? [5, 4] : undefined}
