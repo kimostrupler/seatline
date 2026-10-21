@@ -17,6 +17,11 @@ const envSchema = z.object({
   ENTRA_CLIENT_SECRET: z.string().optional(),
   ENTRA_LOGIN_URL: z.url().default('https://login.microsoftonline.com'),
   GRAPH_URL: z.url().default('https://graph.microsoft.com'),
+  /** Run the background job worker (pg-boss) inside this process. */
+  JOBS_ENABLED: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform((v) => v === 'true'),
   /** Trust x-tenant-id / x-user-id headers. Dev only — replaced by Entra ID in Phase 4. */
   DEV_AUTH: z
     .enum(['true', 'false'])

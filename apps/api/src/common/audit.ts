@@ -10,7 +10,8 @@ function toJson(value: unknown): Prisma.InputJsonValue | undefined {
 /** Records a change. Call inside the same transaction as the change itself. */
 export async function audit(
   tx: Tx,
-  ctx: RequestContext,
+  /** actorId null = the system (e.g. the nightly people sync) */
+  ctx: Pick<RequestContext, 'tenantId'> & { actorId: string | null },
   entry: {
     action: string;
     entityType: string;

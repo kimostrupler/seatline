@@ -67,7 +67,7 @@ export class IdentityService {
         });
         await audit(
           tx,
-          { tenantId, actorId: person.id, role: person.appRole ?? 'viewer' },
+          { tenantId, actorId: person.id },
           {
             action: 'person.first_sign_in',
             entityType: 'person',
@@ -105,7 +105,7 @@ export class IdentityService {
     });
     await audit(
       tx,
-      { tenantId, actorId: person.id, role: person.appRole ?? 'viewer' },
+      { tenantId, actorId: person.id },
       {
         action: 'person.link_microsoft',
         entityType: 'person',
@@ -143,7 +143,7 @@ export class IdentityService {
         });
         await audit(
           tx,
-          { tenantId, actorId: admin.id, role: 'admin' },
+          { tenantId, actorId: admin.id },
           {
             action: 'tenant.create',
             entityType: 'tenant',

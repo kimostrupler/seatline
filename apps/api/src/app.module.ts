@@ -22,6 +22,10 @@ import { SeatsController } from './seats/seats.controller';
 import { SeatsService } from './seats/seats.service';
 import { StorageService } from './storage/storage.service';
 import { TenantController } from './tenant/tenant.controller';
+import { JobQueue } from './jobs/job-queue.service';
+import { GraphClient } from './sync/graph.client';
+import { PeopleSyncController } from './sync/people-sync.controller';
+import { PeopleSyncService } from './sync/people-sync.service';
 
 @Module({
   imports: [DbModule],
@@ -30,6 +34,7 @@ import { TenantController } from './tenant/tenant.controller';
     MeController,
     AuthController,
     TenantController,
+    PeopleSyncController,
     BuildingsController,
     FloorsController,
     RoomsController,
@@ -47,6 +52,9 @@ import { TenantController } from './tenant/tenant.controller';
     StorageService,
     LayoutService,
     IdentityService,
+    GraphClient,
+    PeopleSyncService,
+    JobQueue,
     { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_FILTER, useClass: PrismaExceptionFilter },
   ],

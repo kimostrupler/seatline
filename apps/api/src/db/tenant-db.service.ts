@@ -26,10 +26,18 @@ export class TenantDb {
       SELECT id, entra_tenant_id FROM list_sync_tenants()`;
   }
 
-  run<T>(tenantId: string, fn: (tx: Tx) => Promise<T>): Promise<T> {
-    return this.prisma.$transaction(async (tx) => {
-      await tx.$queryRaw`SELECT set_config('app.tenant_id', ${tenantId}, true)`;
-      return fn(tx);
-    });
+  run<T>(
+    tenantId: string,
+    fn: (tx: Tx) => Promise<T>,
+    options?: { timeoutMs?: number },
+  ): Promise<T> {
+    return this.prisma.$transaction(
+      async (tx) => {
+        await tx.$queryRaw`SELECT set_config('app.tenant_id', ${tenantId}, true)`;
+        return fn(tx);
+      },
+      // long-running work (people sync of a large organisation) can ask for more time
+      { timeout: options?.timeoutMs ?? 5_000, maxWait: 10_000 },
+    );
   }
 }
