@@ -43,8 +43,9 @@ export function Shell({
                 <Menu />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-80 p-0">
+            <SheetContent side="left" className="w-80 p-0 pt-10">
               <SheetTitle className="sr-only">{t('openSidebar')}</SheetTitle>
+              {/* room above for the sheet's close button, so it never covers the account menu */}
               {sidebar}
             </SheetContent>
           </Sheet>

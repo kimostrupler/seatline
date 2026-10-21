@@ -74,9 +74,9 @@ export function Inspector({
   return (
     <div className="grid gap-4" data-testid="inspector">
       {seats.length === 1 && rooms.length === 0 ? (
-        <SeatForm seat={seats[0]!} editor={editor} />
+        <SeatForm key={seats[0]!.id} seat={seats[0]!} editor={editor} />
       ) : rooms.length === 1 && seats.length === 0 ? (
-        <RoomForm room={rooms[0]!} editor={editor} scale={map.floor.scale} />
+        <RoomForm key={rooms[0]!.id} room={rooms[0]!} editor={editor} scale={map.floor.scale} />
       ) : (
         <MultiForm seats={seats} rooms={rooms} editor={editor} />
       )}
