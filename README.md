@@ -83,25 +83,30 @@ Changing the schema: edit `apps/api/prisma/schema.prisma`, then
   Several seats can be aligned and spaced evenly; "Add a row of desks" adds desks next to a
   seat. Changes save instantly; the inspector (right, or under the map on phones) edits the
   selection or, with nothing selected, the floor (plan image, scale) and building.
+- **Overview** (everyone): free / taken / reserved seats per building and floor.
+- **Activity** (editors and admins): every change in plain words, newest first — filter by
+  kind, person and date; each entry links to the seat or floor on the map.
 - Light and dark follow the system setting. All text lives in `apps/web/messages/en.json`.
 - The browser calls `/api/*` on the web app, which forwards to the API (`API_URL`, read at runtime).
 
 ## API
 
-| Method           | Path                        | What                                                         |
-| ---------------- | --------------------------- | ------------------------------------------------------------ |
-| GET/POST         | `/buildings`                | list / create                                                |
-| GET/PATCH/DELETE | `/buildings/:id`            |                                                              |
-| GET/POST         | `/floors?buildingId=`       | POST with `copyFromFloorId` copies rooms, seats, plan, scale |
-| GET/POST         | `/rooms?floorId=`           | rooms have a polygon of `{x, y}` points                      |
-| GET/POST         | `/seats?floorId=`           | list includes `occupancy` + `currentAssignment`              |
-| GET              | `/seats/:id/history`        | everyone who sat here, newest first                          |
-| POST             | `/assignments`              | `{seatId, personId}` — assign, or move if they sit elsewhere |
-| POST             | `/assignments/reservations` | `{seatId, reservedFor}` — hold a free seat                   |
-| POST             | `/assignments/:id/end`      | free the seat (history is kept)                              |
-| GET              | `/people?search=`           | people search                                                |
-| GET              | `/people/:id/history`       | every seat this person had                                   |
-| GET              | `/health`                   | no auth                                                      |
+| Method           | Path                        | What                                                            |
+| ---------------- | --------------------------- | --------------------------------------------------------------- |
+| GET/POST         | `/buildings`                | list / create                                                   |
+| GET/PATCH/DELETE | `/buildings/:id`            |                                                                 |
+| GET              | `/overview`                 | seat counts per building and floor                              |
+| GET              | `/activity`                 | change history (editors/admins): `kind personId from to cursor` |
+| GET/POST         | `/floors?buildingId=`       | POST with `copyFromFloorId` copies rooms, seats, plan, scale    |
+| GET/POST         | `/rooms?floorId=`           | rooms have a polygon of `{x, y}` points                         |
+| GET/POST         | `/seats?floorId=`           | list includes `occupancy` + `currentAssignment`                 |
+| GET              | `/seats/:id/history`        | everyone who sat here, newest first                             |
+| POST             | `/assignments`              | `{seatId, personId}` — assign, or move if they sit elsewhere    |
+| POST             | `/assignments/reservations` | `{seatId, reservedFor}` — hold a free seat                      |
+| POST             | `/assignments/:id/end`      | free the seat (history is kept)                                 |
+| GET              | `/people?search=`           | people search                                                   |
+| GET              | `/people/:id/history`       | every seat this person had                                      |
+| GET              | `/health`                   | no auth                                                         |
 
 Viewers can read; changes need the `editor` or `admin` role.
 

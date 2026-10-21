@@ -150,6 +150,26 @@ export const listPeopleQuerySchema = z.strictObject({
   limit: z.coerce.number().int().min(1).max(100).default(50),
 });
 
+// ---- Activity (audit log) ---------------------------------------------------
+
+export const ACTIVITY_KINDS = ['seating', 'layout', 'places', 'people'] as const;
+export type ActivityKind = (typeof ACTIVITY_KINDS)[number];
+
+const day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD');
+
+export const activityQuerySchema = z.strictObject({
+  /** id of the last entry already shown (pages go back in time) */
+  cursor: id.optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+  kind: z.enum(ACTIVITY_KINDS).optional(),
+  /** changes by or about this person */
+  personId: id.optional(),
+  /** from/to are calendar days in Swiss time, both included */
+  from: day.optional(),
+  to: day.optional(),
+});
+export type ActivityQuery = z.infer<typeof activityQuerySchema>;
+
 export type CreateBuildingInput = z.infer<typeof createBuildingSchema>;
 export type UpdateBuildingInput = z.infer<typeof updateBuildingSchema>;
 export type CreateFloorInput = z.infer<typeof createFloorSchema>;
