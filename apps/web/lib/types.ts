@@ -116,6 +116,8 @@ export interface TenantInfo {
   id: string;
   name: string;
   defaultAppRole: AppRole | null;
+  /** keep history this many months (null = forever) */
+  historyRetentionMonths: 12 | 24 | 60 | 120 | null;
   entraTenantId: string | null;
   peopleSyncedAt: string | null;
   peopleSyncStatus: {
@@ -138,6 +140,8 @@ export interface DirectoryPerson {
   jobTitle: string | null;
   appRole: AppRole | null;
   active: boolean;
+  leftAt: string | null;
+  forgottenAt: string | null;
 }
 
 export type ActivityKind = 'seating' | 'moves' | 'layout' | 'places' | 'people';

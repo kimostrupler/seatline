@@ -281,8 +281,11 @@ export function useSetRole() {
 export function useUpdateTenant() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: { defaultAppRole?: TenantInfo['defaultAppRole']; name?: string }) =>
-      api<TenantInfo>('/tenant', { method: 'PATCH', body: input }),
+    mutationFn: (input: {
+      defaultAppRole?: TenantInfo['defaultAppRole'];
+      historyRetentionMonths?: TenantInfo['historyRetentionMonths'];
+      name?: string;
+    }) => api<TenantInfo>('/tenant', { method: 'PATCH', body: input }),
     onSettled: () => qc.invalidateQueries({ queryKey: ['tenant'] }),
   });
 }
@@ -385,5 +388,15 @@ export function useCreateMovePlan() {
     mutationFn: (input: { name: string }) =>
       api<MovePlanSummary>('/move-plans', { method: 'POST', body: input }),
     onSuccess: () => void qc.invalidateQueries({ queryKey: ['movePlans'] }),
+  });
+}
+
+/** Admins: forget a person who left (their seat history stays, unnamed). */
+export function useForgetPerson() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      api<{ ok: boolean }>(`/privacy/people/${id}/forget`, { method: 'POST' }),
+    onSettled: () => qc.invalidateQueries(),
   });
 }

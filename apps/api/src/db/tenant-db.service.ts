@@ -26,6 +26,12 @@ export class TenantDb {
       SELECT id, entra_tenant_id FROM list_sync_tenants()`;
   }
 
+  /** Workspaces that limit how long history is kept (months). */
+  listRetentionTenants() {
+    return this.prisma.$queryRaw<{ id: string; months: number }[]>`
+      SELECT id, months FROM list_retention_tenants()`;
+  }
+
   /** Workspaces with scheduled move plans due by `day` (YYYY-MM-DD). */
   async listDueMoveTenants(day: string): Promise<string[]> {
     const rows = await this.prisma.$queryRaw<{ id: string }[]>`

@@ -293,7 +293,30 @@
     "left": "Ausgetreten",
     "roleNone": "Kein Zugang",
     "roleChanged": "{name} ist jetzt {role}",
-    "onlyAdmins": "Nur Admins können diese Seite öffnen."
+    "onlyAdmins": "Nur Admins können diese Seite öffnen.",
+    "privacy": {
+      "title": "Datenschutz",
+      "retention": "Platzverlauf und Aktivitätsprotokoll aufbewahren für",
+      "keep": {
+        "12": "1 Jahr",
+        "24": "2 Jahre (empfohlen)",
+        "60": "5 Jahre",
+        "120": "10 Jahre",
+        "forever": "Unbegrenzt aufbewahren"
+      },
+      "retentionHint": "Jede Nacht werden davor beendete Platzzuweisungen und ältere Aktivitätseinträge gelöscht, und Personen, die davor ausgetreten sind, anonymisiert. Aktuelle Plätze werden nie gelöscht.",
+      "requestsHint": "Auskunfts- und Löschbegehren: Über das ⋯-Menü neben einer Person laden Sie alles herunter, was Seatline über sie speichert, oder vergessen jemanden, der ausgetreten ist.",
+      "saved": "Gespeichert",
+      "menu": "Mehr zu {name}",
+      "download": "Ihre Daten herunterladen",
+      "forget": "Diese Person vergessen",
+      "alreadyForgotten": "Bereits vergessen",
+      "formerEmployee": "Ehemalige Person",
+      "forgetTitle": "{name} vergessen?",
+      "forgetBody": "Name, E-Mail, Abteilung und Funktion werden endgültig aus Seatline entfernt – auch aus dem Aktivitätsprotokoll. Der Platzverlauf bleibt, als «Ehemalige Person». Das kann nicht rückgängig gemacht werden.",
+      "forgotten": "Personendaten entfernt",
+      "cancel": "Abbrechen"
+    }
   },
   "shortcuts": {
     "title": "Tastenkürzel",
@@ -427,7 +450,10 @@
       "planCancelled": "hat den Umzugsplan {name} abgebrochen",
       "planChanged": "hat den Umzugsplan {name} geändert",
       "exportedSeating": "hat die Belegungsliste exportiert",
-      "exportedHistory": "hat den Platzverlauf exportiert"
+      "exportedHistory": "hat den Platzverlauf exportiert",
+      "privacyExport": "hat die gespeicherten Daten von {person} heruntergeladen",
+      "privacyForget": "hat die Personendaten einer ausgetretenen Person entfernt",
+      "privacyPurge": "hat Verlauf gelöscht, der älter als {months} Monate ist (Datenschutz)"
     },
     "showPlan": "Plan öffnen"
   },

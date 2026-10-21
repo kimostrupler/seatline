@@ -26,3 +26,8 @@ export function resetE2eDb() {
   );
   run('pnpm exec tsx prisma/seed.ts');
 }
+
+/** Run SQL on the e2e database as its owner (to set up cases the UI can't, e.g. a leaver). */
+export function sqlE2e(sql: string) {
+  run(`pnpm exec prisma db execute --url "${E2E_DATABASE_URL}" --stdin`, sql);
+}

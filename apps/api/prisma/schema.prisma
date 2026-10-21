@@ -57,17 +57,19 @@ enum AssignmentKind {
 }
 
 model Tenant {
-  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name             String
-  slug             String    @unique
-  entraTenantId    String?   @unique @map("entra_tenant_id") @db.Uuid
-  dataRegion       String    @default("switzerlandnorth") @map("data_region")
-  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  id                     String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                   String
+  slug                   String    @unique
+  entraTenantId          String?   @unique @map("entra_tenant_id") @db.Uuid
+  dataRegion             String    @default("switzerlandnorth") @map("data_region")
+  createdAt              DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   /// role for people who sign in without one (null = only people an admin gave a role)
-  defaultAppRole   AppRole?  @default(viewer) @map("default_app_role")
-  peopleSyncedAt   DateTime? @map("people_synced_at") @db.Timestamptz(3)
+  defaultAppRole         AppRole?  @default(viewer) @map("default_app_role")
+  peopleSyncedAt         DateTime? @map("people_synced_at") @db.Timestamptz(3)
   /// last Microsoft Graph sync: { ok, error?, created, updated, deactivated, seatsFreed }
-  peopleSyncStatus Json?     @map("people_sync_status")
+  peopleSyncStatus       Json?     @map("people_sync_status")
+  /// keep seat history and the activity log this many months (null = forever); nightly purge
+  historyRetentionMonths Int?      @default(24) @map("history_retention_months")
 
   people      Person[]
   buildings   Building[]
@@ -95,6 +97,10 @@ model Person {
   appRole       AppRole?  @map("app_role")
   active        Boolean   @default(true)
   syncedAt      DateTime? @map("synced_at") @db.Timestamptz(3)
+  /// when the person was marked as having left (people sync)
+  leftAt        DateTime? @map("left_at") @db.Timestamptz(3)
+  /// personal data removed ("forgotten"); the seat history stays, unnamed
+  forgottenAt   DateTime? @map("forgotten_at") @db.Timestamptz(3)
 
   tenant       Tenant            @relation(fields: [tenantId], references: [id])
   assignments  SeatAssignment[]  @relation("AssignmentPerson")

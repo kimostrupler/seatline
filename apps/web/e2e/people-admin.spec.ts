@@ -1,6 +1,6 @@
 import { DEMO_TENANTS } from '@seatline/shared';
 import { expect, test } from '@playwright/test';
-import { resetE2eDb } from './db';
+import { resetE2eDb, sqlE2e } from './db';
 import { switchUser } from './helpers';
 
 test.beforeEach(async ({ page }) => {
@@ -39,4 +39,31 @@ test('non-admins don’t get People & access', async ({ page }) => {
   await expect(page.getByRole('link', { name: 'People & access' })).toHaveCount(0);
   await page.goto('/people');
   await expect(page.getByText('Only admins can open this page.')).toBeVisible();
+});
+
+test('data protection: how long history is kept, a person’s data, forgetting a leaver', async ({
+  page,
+}) => {
+  sqlE2e(`UPDATE people SET active = false, left_at = now() WHERE display_name = 'Marc Dubois'`);
+  await page.goto('/people');
+  await page.getByRole('combobox', { name: 'Keep seat history and the activity log for' }).click();
+  await page.getByRole('option', { name: '5 years' }).click();
+  await expect(page.getByText('Saved')).toBeVisible();
+
+  await page.getByRole('button', { name: 'More for Anna Meier' }).click();
+  const download = page.waitForEvent('download');
+  await page.getByRole('menuitem', { name: 'Download their data' }).click();
+  expect((await download).suggestedFilename()).toMatch(/^seatline-person-.+\.json$/);
+
+  // people who still work here can't be forgotten
+  await page.getByRole('button', { name: 'More for Anna Meier' }).click();
+  await expect(page.getByRole('menuitem', { name: 'Forget this person' })).toBeDisabled();
+  await page.keyboard.press('Escape');
+
+  await page.getByRole('button', { name: 'More for Marc Dubois' }).click();
+  await page.getByRole('menuitem', { name: 'Forget this person' }).click();
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Forget this person' }).click();
+  await expect(page.getByText('Personal data removed')).toBeVisible();
+  await expect(page.getByTestId('directory')).not.toContainText('Marc Dubois');
+  await expect(page.getByTestId('directory')).toContainText('Former employee');
 });

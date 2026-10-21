@@ -73,6 +73,10 @@ All tables except `tenants` have a `tenant_id`.
    non-owner role so RLS can't be bypassed. Tests prove tenant A cannot read tenant B.
 2. **History is never overwritten**: moving a person = close the old assignment
    (`end_at = now()`) and create a new one, in one transaction. Never update or delete past assignments.
+   The only exception is data protection, and only through the database functions
+   `purge_history` (retention) and `forget_person` (people who left); see "Privacy" below.
+   The only exception is data protection, and only through the database functions
+   `purge_history` (retention) and `forget_person` (people who left); see "Privacy" below.
 3. **One open assignment per seat and per person**: partial unique indexes (`WHERE end_at IS NULL`).
 4. **Every change writes to `audit_log`** (same transaction as the change).
 5. **Store minimal personal data** — only what Graph gives us and we need.
@@ -209,6 +213,32 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   made by whoever scheduled the plan; the audit actor is the system.
 - Web: `/moves`, `/moves/[id]`, and plan mode on the map (`/map?plan=…`): `projectFloor`
   (`lib/moves.ts`) shows the floor after the plan; the usual gestures add plan items instead.
+
+## Privacy (nDSG)
+
+- `tenants.history_retention_months` (12/24/60/120, null = forever; default 24). The nightly job
+  (after moves) calls `PrivacyService.purge`: forgets people who left before the cut-off, then
+  `purge_history(cutoff)` deletes **ended** assignments and audit entries older than it.
+- `forget_person(id)` (only inactive people): name → "Former employee" (`FORGOTTEN_NAME`, shown
+  translated via `usePersonName`), e-mail/department/job title/Entra id/role removed, and those
+  keys stripped from the person's own audit entries. Seat history stays.
+- Both are SECURITY DEFINER and act only on `app_current_tenant()`. The append-only triggers let
+  rows go only while `seatline.privacy` is set inside them; the app role still has no DELETE.
+- `GET /privacy/people/:id/export` (admins): everything about a person as JSON (access request).
+  Exports and forgets are audited. `people.left_at` is set by the sync when someone leaves.
+
+## Privacy (nDSG)
+
+- `tenants.history_retention_months` (12/24/60/120, null = forever; default 24). The nightly job
+  (after moves) calls `PrivacyService.purge`: forgets people who left before the cut-off, then
+  `purge_history(cutoff)` deletes **ended** assignments and audit entries older than it.
+- `forget_person(id)` (only inactive people): name → "Former employee" (`FORGOTTEN_NAME`, shown
+  translated via `usePersonName`), e-mail/department/job title/Entra id/role removed, and those
+  keys stripped from the person's own audit entries. Seat history stays.
+- Both are SECURITY DEFINER and act only on `app_current_tenant()`. The append-only triggers let
+  rows go only while `seatline.privacy` is set inside them; the app role still has no DELETE.
+- `GET /privacy/people/:id/export` (admins): everything about a person as JSON (access request).
+  Exports and forgets are audited. `people.left_at` is set by the sync when someone leaves.
 
 ## Operations
 

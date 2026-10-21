@@ -139,6 +139,11 @@ export const updateTenantSchema = z.strictObject({
   name: z.string().trim().min(2).max(200).optional(),
   /** what people get when they sign in without a role; null = only invited people */
   defaultAppRole: z.enum(APP_ROLES).nullable().optional(),
+  /** keep seat history and the activity log this long; null = forever */
+  historyRetentionMonths: z
+    .union([z.literal(12), z.literal(24), z.literal(60), z.literal(120)])
+    .nullable()
+    .optional(),
 });
 
 export const setRoleSchema = z.strictObject({

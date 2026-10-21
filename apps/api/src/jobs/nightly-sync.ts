@@ -1,6 +1,7 @@
 /**
  * Nightly: people sync for every workspace connected to Microsoft 365, then the scheduled
- * move plans that are due (after the sync, so people who left are already inactive).
+ * move plans that are due (after the sync, so people who left are already inactive), then the
+ * privacy clean-up (history older than each workspace's retention period).
  * Runs as its own scheduled container (Azure Container Apps Job), so it works even
  * while the API is scaled to zero:  node dist/jobs/nightly-sync.js
  */
@@ -15,6 +16,7 @@ async function main() {
   const { TenantDb } = await import('../db/tenant-db.service');
   const { PeopleSyncService } = await import('../sync/people-sync.service');
   const { MovesService, zurichToday } = await import('../moves/moves.service');
+  const { PrivacyService } = await import('../privacy/privacy.service');
   const logger = new Logger('NightlySync');
   const app = await NestFactory.createApplicationContext(AppModule, {
     logger: ['log', 'warn', 'error'],
@@ -36,6 +38,12 @@ async function main() {
         if (r.ok) logger.log(`${tenantId}: move plan ${r.id} applied`);
         else
           logger.error(`${tenantId}: move plan ${r.id} could not be applied (see the Moves page)`);
+    }
+
+    // privacy: delete history older than each workspace's retention period
+    for (const t of await app.get(TenantDb).listRetentionTenants()) {
+      const result = await app.get(PrivacyService).purge(t.id, t.months);
+      logger.log(`${t.id}: privacy clean-up ${JSON.stringify(result)}`);
     }
   } finally {
     await app.close();

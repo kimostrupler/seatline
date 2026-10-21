@@ -1,6 +1,7 @@
 'use client';
 
 import { useFormatter, useTranslations } from 'next-intl';
+import { usePersonName } from '@/lib/use-person-name';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { HistoryEntry } from '@/lib/types';
 
@@ -18,6 +19,7 @@ export function HistoryList({
 }) {
   const t = useTranslations('history');
   const format = useFormatter();
+  const personName = usePersonName();
   const date = (iso: string) => format.dateTime(new Date(iso), { dateStyle: 'medium' });
 
   return (
@@ -31,7 +33,9 @@ export function HistoryList({
         {entries?.map((e) => {
           const title =
             show === 'seat'
-              ? (e.person?.displayName ?? t('reserved', { name: e.reservedFor ?? '' }))
+              ? e.person
+                ? personName(e.person.displayName)
+                : t('reserved', { name: e.reservedFor ?? '' })
               : t('seat', { label: e.seat.label });
           const open = e.endAt === null;
           return (
@@ -43,7 +47,7 @@ export function HistoryList({
               <p className="text-sm font-medium">{title}</p>
               <p className="text-xs text-muted-foreground">
                 {t('range', { from: date(e.startAt), to: open ? t('now') : date(e.endAt!) })} ·{' '}
-                {t('by', { name: e.assignedBy.displayName })}
+                {t('by', { name: personName(e.assignedBy.displayName) })}
               </p>
               {e.note && <p className="mt-0.5 text-xs text-muted-foreground italic">{e.note}</p>}
             </li>

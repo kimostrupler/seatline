@@ -293,7 +293,30 @@
     "left": "Partie",
     "roleNone": "Pas d’accès",
     "roleChanged": "{name} est maintenant {role}",
-    "onlyAdmins": "Seuls les admins peuvent ouvrir cette page."
+    "onlyAdmins": "Seuls les admins peuvent ouvrir cette page.",
+    "privacy": {
+      "title": "Protection des données",
+      "retention": "Conserver l’historique des places et le journal d’activité pendant",
+      "keep": {
+        "12": "1 an",
+        "24": "2 ans (recommandé)",
+        "60": "5 ans",
+        "120": "10 ans",
+        "forever": "Conserver sans limite"
+      },
+      "retentionHint": "Chaque nuit, l’historique des places terminé avant cette date et les entrées d’activité plus anciennes sont supprimés, et les personnes parties avant sont anonymisées. Les places actuelles ne sont jamais supprimées.",
+      "requestsHint": "Demandes d’accès et d’effacement : le menu ⋯ à côté d’une personne permet de télécharger tout ce que Seatline enregistre sur elle, ou d’oublier une personne partie.",
+      "saved": "Enregistré",
+      "menu": "Plus pour {name}",
+      "download": "Télécharger ses données",
+      "forget": "Oublier cette personne",
+      "alreadyForgotten": "Déjà oubliée",
+      "formerEmployee": "Ancien·ne employé·e",
+      "forgetTitle": "Oublier {name} ?",
+      "forgetBody": "Son nom, son e-mail, son service et sa fonction sont définitivement supprimés de Seatline – aussi du journal d’activité. L’historique de ses places reste, sous « Ancien·ne employé·e ». Action irréversible.",
+      "forgotten": "Données personnelles supprimées",
+      "cancel": "Annuler"
+    }
   },
   "shortcuts": {
     "title": "Raccourcis clavier",
@@ -427,7 +450,10 @@
       "planCancelled": "a annulé le plan de déménagement {name}",
       "planChanged": "a modifié le plan de déménagement {name}",
       "exportedSeating": "a exporté la liste d’occupation",
-      "exportedHistory": "a exporté l’historique des places"
+      "exportedHistory": "a exporté l’historique des places",
+      "privacyExport": "a téléchargé les données enregistrées de {person}",
+      "privacyForget": "a supprimé les données personnelles d’une personne partie",
+      "privacyPurge": "a supprimé l’historique de plus de {months} mois (protection des données)"
     },
     "showPlan": "Ouvrir le plan"
   },

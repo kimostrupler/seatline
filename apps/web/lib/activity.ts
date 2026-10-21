@@ -263,6 +263,16 @@ export function describe(e: ActivityEntry, refs: ActivityRefs, unknownName: stri
       return { key: 'exportedSeating', values: {} };
     case 'export.history':
       return { key: 'exportedHistory', values: {} };
+    case 'privacy.export':
+      return {
+        key: 'privacyExport',
+        values: { person: person(e.entityId) },
+        link: { person: e.entityId },
+      };
+    case 'privacy.forget':
+      return { key: 'privacyForget', values: {} };
+    case 'privacy.purge':
+      return { key: 'privacyPurge', values: { months: Number(a.months ?? 0) } };
     case 'tenant.seed':
       return { key: 'demoData', values: {} };
     case 'tenant.update':

@@ -23,13 +23,18 @@ read -r -p "Press Enter once both records are saved (they can take a few minutes
 
 say "2/4 Connecting $DOMAIN and creating a free certificate (a few minutes)"
 az containerapp hostname add -n web -g "$RG" --hostname "$DOMAIN" -o none 2>/dev/null || true
-for attempt in 1 2 3 4 5 6; do
+# Azure needs the DNS records to be visible, then up to ~20 minutes to issue the certificate.
+for attempt in $(seq 1 25); do
   if az containerapp hostname bind -n web -g "$RG" --hostname "$DOMAIN" \
     --environment "$ENV_NAME" --validation-method CNAME -o none; then
     break
   fi
-  [ "$attempt" = 6 ] && { echo "The DNS records aren't visible yet. Wait a bit and run this again."; exit 1; }
-  echo "Not ready yet — trying again in 60 seconds…"; sleep 60
+  if [ "$attempt" = 25 ]; then
+    echo "Not finished after 25 minutes. Check the two DNS records, wait a bit and run this again"
+    echo "(it continues where it stopped)."
+    exit 1
+  fi
+  echo "Not ready yet (DNS or certificate) — trying again in 60 seconds… ($attempt/25)"; sleep 60
 done
 
 say "3/4 The app now uses https://$DOMAIN"

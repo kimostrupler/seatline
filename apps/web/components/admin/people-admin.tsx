@@ -1,12 +1,28 @@
 'use client';
 
 import { APP_ROLES, type AppRole } from '@seatline/shared';
-import { Loader2, RefreshCw } from 'lucide-react';
+import { Download, EllipsisVertical, Loader2, RefreshCw, UserX } from 'lucide-react';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
 import { useDeferredValue, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { PageFrame, PageSection } from '@/components/common/page-frame';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { apiDownload } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -19,13 +35,14 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   useDirectory,
+  useForgetPerson,
   useMe,
   useSetRole,
   useSyncNow,
   useTenant,
   useUpdateTenant,
 } from '@/lib/queries';
-import type { TenantInfo } from '@/lib/types';
+import type { DirectoryPerson, TenantInfo } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 const NONE = 'none';
@@ -50,6 +67,7 @@ export function PeopleAdmin({
     <Page>
       <AccessSection />
       <MicrosoftSection consentBase={consentBase} />
+      <PrivacySection />
       <PeopleSection />
     </Page>
   );
@@ -86,6 +104,54 @@ function AccessSection() {
         </SelectContent>
       </Select>
       <p className="text-xs text-muted-foreground">{t('accessHint')}</p>
+    </Section>
+  );
+}
+
+const RETENTION = ['12', '24', '60', '120', 'forever'] as const;
+
+/** How long seat history and the activity log are kept (Swiss data protection). */
+function PrivacySection() {
+  const t = useTranslations('admin.privacy');
+  const tenant = useTenant();
+  const update = useUpdateTenant();
+  if (!tenant.data) return <Skeleton className="h-20" />;
+  const value = tenant.data.historyRetentionMonths
+    ? String(tenant.data.historyRetentionMonths)
+    : 'forever';
+  return (
+    <Section title={t('title')}>
+      <div className="grid gap-1.5">
+        <label htmlFor="retention" className="text-sm font-medium">
+          {t('retention')}
+        </label>
+        <Select
+          value={value}
+          onValueChange={(v) =>
+            update
+              .mutateAsync({
+                historyRetentionMonths: v === 'forever' ? null : (Number(v) as 12 | 24 | 60 | 120),
+              })
+              .then(
+                () => toast.success(t('saved')),
+                (error: unknown) => toast.error(errorText(error)),
+              )
+          }
+        >
+          <SelectTrigger id="retention" className="w-full sm:w-96">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {RETENTION.map((r) => (
+              <SelectItem key={r} value={r}>
+                {t(`keep.${r}`)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <p className="text-xs text-muted-foreground">{t('retentionHint')}</p>
+      <p className="text-xs text-muted-foreground">{t('requestsHint')}</p>
     </Section>
   );
 }
@@ -222,7 +288,7 @@ function PeopleSection() {
           >
             <div className="min-w-0 flex-1">
               <p className="flex items-center gap-2 truncate text-sm font-medium">
-                {p.displayName}
+                {p.forgottenAt ? t('privacy.formerEmployee') : p.displayName}
                 {!p.active && <Badge variant="secondary">{t('left')}</Badge>}
               </p>
               <p className="truncate text-xs text-muted-foreground">
@@ -255,9 +321,66 @@ function PeopleSection() {
                 <SelectItem value={NONE}>{t('roleNone')}</SelectItem>
               </SelectContent>
             </Select>
+            <PersonMenu person={p} />
           </li>
         ))}
       </ul>
     </Section>
+  );
+}
+
+/** Per person: their data as a file (access request), and forgetting people who left. */
+function PersonMenu({ person }: { person: DirectoryPerson }) {
+  const t = useTranslations('admin.privacy');
+  const forget = useForgetPerson();
+  const [confirm, setConfirm] = useState(false);
+  const name = person.forgottenAt ? t('formerEmployee') : person.displayName;
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="size-8" aria-label={t('menu', { name })}>
+            <EllipsisVertical />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-60">
+          <DropdownMenuItem
+            onSelect={() =>
+              void apiDownload(`/privacy/people/${person.id}/export`).catch((e: unknown) =>
+                toast.error(errorText(e)),
+              )
+            }
+          >
+            <Download /> {t('download')}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            variant="destructive"
+            disabled={person.active || !!person.forgottenAt}
+            onSelect={() => setConfirm(true)}
+          >
+            <UserX /> {person.forgottenAt ? t('alreadyForgotten') : t('forget')}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <AlertDialog open={confirm} onOpenChange={setConfirm}>
+        <AlertDialogContent>
+          <AlertDialogTitle>{t('forgetTitle', { name })}</AlertDialogTitle>
+          <AlertDialogDescription>{t('forgetBody')}</AlertDialogDescription>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() =>
+                forget.mutateAsync(person.id).then(
+                  () => toast.success(t('forgotten')),
+                  (error: unknown) => toast.error(errorText(error)),
+                )
+              }
+            >
+              {t('forget')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
