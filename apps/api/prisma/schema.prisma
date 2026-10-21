@@ -76,6 +76,7 @@ model Tenant {
   seats       Seat[]
   assignments SeatAssignment[]
   auditLog    AuditLog[]
+  dashboards  DashboardLayout[]
 
   @@map("tenants")
 }
@@ -96,6 +97,7 @@ model Person {
   tenant       Tenant           @relation(fields: [tenantId], references: [id])
   assignments  SeatAssignment[] @relation("AssignmentPerson")
   assignedByMe SeatAssignment[] @relation("AssignmentAssignedBy")
+  dashboard    DashboardLayout[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, entraObjectId])
@@ -230,4 +232,20 @@ model AuditLog {
   @@index([tenantId, entityType, entityId])
   @@index([tenantId, createdAt])
   @@map("audit_log")
+}
+
+/// A home dashboard: which widgets, in which order and size. person_id null = the company default.
+model DashboardLayout {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  personId  String?  @map("person_id") @db.Uuid
+  /// [{ id, type, size }]
+  widgets   Json
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant Tenant  @relation(fields: [tenantId], references: [id])
+  person Person? @relation(fields: [tenantId, personId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, personId])
+  @@map("dashboard_layouts")
 }

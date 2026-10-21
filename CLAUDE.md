@@ -176,6 +176,18 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   named from the entry's own before/after snapshot. New audit actions need a case there.
 - `GET /overview` counts seats per floor with the same rule as the map (`seatOccupancy`).
 
+## Home dashboard
+
+- `/` is the dashboard, the map lives at `/map` (`app/page.tsx` redirects old `/?floor=…` links).
+  Pages share `PageFrame` + `NavLinks` (top bar); the map's sidebar shows the same `NavLinks`.
+- Layouts: `dashboard_layouts` (person_id null = company default; RLS like everything else).
+  `GET /dashboard` falls back personal → company → `DEFAULT_DASHBOARD` (packages/shared).
+  Saving one's own layout is allowed for viewers too (`@OwnSettings`). Audited.
+- Widgets: catalog + role rules + pure layout helpers in `lib/dashboard.ts`; bodies in
+  `components/dashboard/widgets.tsx`. New widget = `WIDGET_TYPES` + `WIDGETS` + body + texts.
+  Numbers come from `GET /stats` (one snapshot; weeks are Swiss weeks starting Monday).
+- The `/api` proxy must export every HTTP method the API uses (PUT was missing once).
+
 ## Working style
 
 - Plan before coding larger steps; show the plan first.

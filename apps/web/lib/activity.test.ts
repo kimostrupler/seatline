@@ -33,7 +33,7 @@ group('activity sentences', () => {
       values: { person: 'Anna Meier', seat: '1.01' },
       link: { building: 'b1', floor: 'f1', seat: 's1' },
     });
-    expect(linkHref(d.link!)).toBe('/?building=b1&floor=f1&seat=s1');
+    expect(linkHref(d.link!)).toBe('/map?building=b1&floor=f1&seat=s1');
   });
 
   it('a move names where the person came from', () => {

@@ -168,7 +168,7 @@ export function ActivityPage() {
   );
 }
 
-function mergeRefs(list: ActivityRefs[]): ActivityRefs {
+export function mergeRefs(list: ActivityRefs[]): ActivityRefs {
   const out: ActivityRefs = { people: {}, seats: {}, rooms: {}, floors: {}, buildings: {} };
   for (const r of list)
     for (const k of Object.keys(out) as (keyof ActivityRefs)[]) Object.assign(out[k], r[k]);
@@ -210,7 +210,7 @@ function DayHeading({ day }: { day: string }) {
   );
 }
 
-function EntryRow({ entry, refs }: { entry: ActivityEntry; refs: ActivityRefs }) {
+export function EntryRow({ entry, refs }: { entry: ActivityEntry; refs: ActivityRefs }) {
   const t = useTranslations();
   const format = useFormatter();
   const d = describe(entry, refs, t('activity.unknown'));

@@ -43,4 +43,4 @@ async function proxy(req: NextRequest, { params }: { params: Promise<{ path: str
 }
 
 export const dynamic = 'force-dynamic';
-export { proxy as GET, proxy as POST, proxy as PATCH, proxy as DELETE };
+export { proxy as GET, proxy as POST, proxy as PUT, proxy as PATCH, proxy as DELETE };

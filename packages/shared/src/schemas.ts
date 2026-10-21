@@ -170,6 +170,53 @@ export const activityQuerySchema = z.strictObject({
 });
 export type ActivityQuery = z.infer<typeof activityQuerySchema>;
 
+// ---- Dashboard ----------------------------------------------------------------
+
+export const WIDGET_TYPES = [
+  'summary',
+  'occupancy',
+  'activity',
+  'trend',
+  'unseated',
+  'reservations',
+  'departments',
+  'freeSeats',
+  'blocked',
+  'sync',
+  'mySeat',
+  'quickActions',
+] as const;
+export type WidgetType = (typeof WIDGET_TYPES)[number];
+export const WIDGET_SIZES = ['small', 'wide', 'full'] as const;
+export type WidgetSize = (typeof WIDGET_SIZES)[number];
+
+export const widgetSchema = z.strictObject({
+  id: z.string().min(1).max(64),
+  type: z.enum(WIDGET_TYPES),
+  size: z.enum(WIDGET_SIZES),
+});
+export const dashboardSchema = z.strictObject({
+  widgets: z
+    .array(widgetSchema)
+    .max(40)
+    .refine((w) => new Set(w.map((x) => x.id)).size === w.length, 'Widget ids must be unique'),
+});
+export type Widget = z.infer<typeof widgetSchema>;
+export type DashboardInput = z.infer<typeof dashboardSchema>;
+
+/** What a new workspace starts with (before an admin saves a company default). */
+export const DEFAULT_DASHBOARD: Widget[] = [
+  { id: 'quick', type: 'quickActions', size: 'small' },
+  { id: 'me', type: 'mySeat', size: 'small' },
+  { id: 'summary', type: 'summary', size: 'wide' },
+  { id: 'occupancy', type: 'occupancy', size: 'wide' },
+  { id: 'activity', type: 'activity', size: 'wide' },
+  { id: 'trend', type: 'trend', size: 'wide' },
+  { id: 'unseated', type: 'unseated', size: 'small' },
+  { id: 'reservations', type: 'reservations', size: 'small' },
+  { id: 'departments', type: 'departments', size: 'full' },
+];
+
 export type CreateBuildingInput = z.infer<typeof createBuildingSchema>;
 export type UpdateBuildingInput = z.infer<typeof updateBuildingSchema>;
 export type CreateFloorInput = z.infer<typeof createFloorSchema>;

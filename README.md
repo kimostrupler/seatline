@@ -83,6 +83,11 @@ Changing the schema: edit `apps/api/prisma/schema.prisma`, then
   Several seats can be aligned and spaced evenly; "Add a row of desks" adds desks next to a
   seat. Changes save instantly; the inspector (right, or under the map on phones) edits the
   selection or, with nothing selected, the floor (plan image, scale) and building.
+- **Home** (`/`): a dashboard of widgets — seats at a glance, floors, recent changes, seat
+  changes per week, people without a seat, open reservations, departments, free and blocked
+  seats, Microsoft 365 sync, my seat, quick actions. **Customize** to add, remove, reorder
+  (drag or arrows) and resize; everyone has their own layout, admins can save the company
+  default. The map is at `/map` (old `/?floor=…` links redirect there).
 - **Overview** (everyone): free / taken / reserved seats per building and floor.
 - **Activity** (editors and admins): every change in plain words, newest first — filter by
   kind, person and date; each entry links to the seat or floor on the map.
@@ -91,22 +96,24 @@ Changing the schema: edit `apps/api/prisma/schema.prisma`, then
 
 ## API
 
-| Method           | Path                        | What                                                            |
-| ---------------- | --------------------------- | --------------------------------------------------------------- |
-| GET/POST         | `/buildings`                | list / create                                                   |
-| GET/PATCH/DELETE | `/buildings/:id`            |                                                                 |
-| GET              | `/overview`                 | seat counts per building and floor                              |
-| GET              | `/activity`                 | change history (editors/admins): `kind personId from to cursor` |
-| GET/POST         | `/floors?buildingId=`       | POST with `copyFromFloorId` copies rooms, seats, plan, scale    |
-| GET/POST         | `/rooms?floorId=`           | rooms have a polygon of `{x, y}` points                         |
-| GET/POST         | `/seats?floorId=`           | list includes `occupancy` + `currentAssignment`                 |
-| GET              | `/seats/:id/history`        | everyone who sat here, newest first                             |
-| POST             | `/assignments`              | `{seatId, personId}` — assign, or move if they sit elsewhere    |
-| POST             | `/assignments/reservations` | `{seatId, reservedFor}` — hold a free seat                      |
-| POST             | `/assignments/:id/end`      | free the seat (history is kept)                                 |
-| GET              | `/people?search=`           | people search                                                   |
-| GET              | `/people/:id/history`       | every seat this person had                                      |
-| GET              | `/health`                   | no auth                                                         |
+| Method           | Path                        | What                                                                  |
+| ---------------- | --------------------------- | --------------------------------------------------------------------- |
+| GET/POST         | `/buildings`                | list / create                                                         |
+| GET/PATCH/DELETE | `/buildings/:id`            |                                                                       |
+| GET/PUT/DELETE   | `/dashboard`                | my dashboard layout (save / reset); `PUT /dashboard/default` (admins) |
+| GET              | `/stats`                    | numbers and short lists for the dashboard widgets                     |
+| GET              | `/overview`                 | seat counts per building and floor                                    |
+| GET              | `/activity`                 | change history (editors/admins): `kind personId from to cursor`       |
+| GET/POST         | `/floors?buildingId=`       | POST with `copyFromFloorId` copies rooms, seats, plan, scale          |
+| GET/POST         | `/rooms?floorId=`           | rooms have a polygon of `{x, y}` points                               |
+| GET/POST         | `/seats?floorId=`           | list includes `occupancy` + `currentAssignment`                       |
+| GET              | `/seats/:id/history`        | everyone who sat here, newest first                                   |
+| POST             | `/assignments`              | `{seatId, personId}` — assign, or move if they sit elsewhere          |
+| POST             | `/assignments/reservations` | `{seatId, reservedFor}` — hold a free seat                            |
+| POST             | `/assignments/:id/end`      | free the seat (history is kept)                                       |
+| GET              | `/people?search=`           | people search                                                         |
+| GET              | `/people/:id/history`       | every seat this person had                                            |
+| GET              | `/health`                   | no auth                                                               |
 
 Viewers can read; changes need the `editor` or `admin` role.
 

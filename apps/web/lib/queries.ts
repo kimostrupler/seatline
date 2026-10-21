@@ -14,12 +14,14 @@ import type {
   Assignment,
   AssignResult,
   Building,
+  DashboardData,
   Floor,
   FloorMap,
   HistoryEntry,
   Me,
   Overview,
   Person,
+  Stats,
   DirectoryPerson,
   TenantInfo,
 } from './types';
@@ -35,6 +37,8 @@ export const keys = {
   personHistory: (personId: string) => ['personHistory', personId] as const,
   activity: (filters: ActivityFilters) => ['activity', filters] as const,
   overview: ['overview'] as const,
+  dashboard: ['dashboard'] as const,
+  stats: ['stats'] as const,
 };
 
 export interface ActivityFilters {
@@ -42,6 +46,7 @@ export interface ActivityFilters {
   personId?: string;
   from?: string;
   to?: string;
+  limit?: number;
 }
 
 /** The change history, newest first, 50 at a time. */
@@ -51,9 +56,9 @@ export const useActivity = (filters: ActivityFilters) =>
     initialPageParam: null as string | null,
     queryFn: ({ pageParam }) => {
       const query = new URLSearchParams(
-        Object.entries({ ...filters, cursor: pageParam ?? undefined }).filter(
-          (e): e is [string, string] => !!e[1],
-        ),
+        Object.entries({ ...filters, cursor: pageParam ?? undefined })
+          .filter((e) => !!e[1])
+          .map(([k, v]) => [k, String(v)]),
       );
       return api<ActivityPage>(`/activity?${query.toString()}`);
     },
@@ -282,4 +287,32 @@ export function useSyncNow() {
   return useMutation({
     mutationFn: () => api<{ queued: boolean }>('/people/sync', { method: 'POST' }),
   });
+}
+
+export const useDashboard = () =>
+  useQuery({ queryKey: keys.dashboard, queryFn: () => api<DashboardData>('/dashboard') });
+
+export const useStats = () =>
+  useQuery({ queryKey: keys.stats, queryFn: () => api<Stats>('/stats') });
+
+/** Save my layout, reset it, or (admins) save it as the company default. */
+export function useDashboardActions() {
+  const qc = useQueryClient();
+  const done = (data: DashboardData) => qc.setQueryData(keys.dashboard, data);
+  return {
+    save: useMutation({
+      mutationFn: (widgets: DashboardData['widgets']) =>
+        api<DashboardData>('/dashboard', { method: 'PUT', body: { widgets } }),
+      onSuccess: done,
+    }),
+    reset: useMutation({
+      mutationFn: () => api<DashboardData>('/dashboard', { method: 'DELETE' }),
+      onSuccess: done,
+    }),
+    saveDefault: useMutation({
+      mutationFn: (widgets: DashboardData['widgets']) =>
+        api<DashboardData>('/dashboard/default', { method: 'PUT', body: { widgets } }),
+      onSuccess: done,
+    }),
+  };
 }

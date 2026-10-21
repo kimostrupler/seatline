@@ -315,7 +315,9 @@
     "label": "Pages",
     "back": "Back to the map",
     "overview": "Overview",
-    "activity": "Activity"
+    "activity": "Activity",
+    "home": "Home",
+    "map": "Map"
   },
   "overview": {
     "title": "Overview",
@@ -402,7 +404,126 @@
       "workspaceCreated": "created the workspace {name}",
       "workspaceChanged": "changed the workspace settings",
       "other": "made a change ({action})",
-      "demoData": "added the demo data"
+      "demoData": "added the demo data",
+      "dashboardUpdated": "changed their dashboard",
+      "dashboardReset": "reset their dashboard",
+      "dashboardDefault": "changed the company’s default dashboard"
+    }
+  },
+  "dashboard": {
+    "title": "Home",
+    "greeting": {
+      "morning": "Good morning, {name}",
+      "afternoon": "Good afternoon, {name}",
+      "evening": "Good evening, {name}"
+    },
+    "customize": "Customize",
+    "customizeHint": "Drag widgets to reorder them (or use the arrows), change their size, remove or add widgets. Only you see your layout.",
+    "addWidget": "Add widget",
+    "addWidgetHint": "Pick what you want to see. You can add a widget more than once.",
+    "alreadyThere": "Already on your dashboard",
+    "saveAsDefault": "Save as company default",
+    "defaultSaved": "Saved as the company default — new people start with this layout",
+    "reset": "Reset to default",
+    "resetToCompany": "Back to the company default",
+    "resetToBuiltin": "Back to the standard layout",
+    "cancel": "Cancel",
+    "done": "Done",
+    "saved": "Dashboard saved",
+    "empty": "Your dashboard is empty.",
+    "moveEarlier": "Move {name} earlier",
+    "moveLater": "Move {name} later",
+    "size": "Size of {name}",
+    "remove": "Remove {name}",
+    "sizes": {
+      "small": "Small",
+      "wide": "Wide",
+      "full": "Full width"
+    },
+    "seeAll": "See all",
+    "andMore": "and {count} more",
+    "usedShare": "{percent}% of seats are taken or reserved{blocked, plural, =0 {} other {, # blocked}}.",
+    "noBuildings": "No buildings yet.",
+    "noFreeSeats": "No free seats right now.",
+    "freeOn": "{count} free on {floor}",
+    "noBlocked": "No blocked seats.",
+    "seatOn": "Seat {seat} · {floor}",
+    "noReservations": "No open reservations.",
+    "waiting": "reserved {since}",
+    "everyoneSeated": "Everyone has a seat.",
+    "noPeople": "No people yet.",
+    "department": "Department",
+    "people": "People",
+    "seated": "Seated",
+    "where": "Where they sit",
+    "noDepartment": "No department",
+    "noSeatMine": "You don’t have a seat yet.",
+    "nearYou": "Near you:",
+    "showMySeat": "Show on map",
+    "noActivity": "Nothing has changed yet.",
+    "trend": "Seat changes per week",
+    "trendTotal": "{count, plural, =0 {No seat changes} one {# seat change} other {# seat changes}} in the last 12 weeks",
+    "trendHint": "Point at a bar for details",
+    "trendWeek": "Week of {week}: {assigned} assigned, {moved} moved, {reserved} reserved, {freed} freed",
+    "thisWeek": "This week",
+    "week": "Week of",
+    "assigned": "Assigned",
+    "moved": "Moved",
+    "reserved": "Reserved",
+    "freed": "Freed",
+    "findPerson": "Find a person…",
+    "nobody": "Nobody found.",
+    "openFloorMap": "Open the floor map",
+    "seeAllFloors": "All buildings and floors",
+    "widgets": {
+      "summary": {
+        "title": "Seats at a glance",
+        "description": "Total, free, taken and reserved seats across the company."
+      },
+      "occupancy": {
+        "title": "Floors",
+        "description": "How full every floor is, with a link to its map."
+      },
+      "activity": {
+        "title": "Recent changes",
+        "description": "The latest changes from the activity history (editors and admins)."
+      },
+      "trend": {
+        "title": "Seat changes per week",
+        "description": "Assignments, moves, reservations and freed seats over the last 12 weeks."
+      },
+      "unseated": {
+        "title": "People without a seat",
+        "description": "Who still needs a desk."
+      },
+      "reservations": {
+        "title": "Open reservations",
+        "description": "Seats held for someone, oldest first."
+      },
+      "departments": {
+        "title": "Departments",
+        "description": "People per department, how many have a seat, and on which floors they sit."
+      },
+      "freeSeats": {
+        "title": "Free seats",
+        "description": "Where there’s room right now, per floor."
+      },
+      "blocked": {
+        "title": "Blocked seats",
+        "description": "Seats that can’t be used, and since when."
+      },
+      "sync": {
+        "title": "Microsoft 365 sync",
+        "description": "When people were last synced, new people and leavers (admins)."
+      },
+      "mySeat": {
+        "title": "My seat",
+        "description": "Where you sit and who sits near you."
+      },
+      "quickActions": {
+        "title": "Quick actions",
+        "description": "Find a person, open the map."
+      }
     }
   }
 }

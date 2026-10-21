@@ -6,6 +6,7 @@ export const IS_PUBLIC = 'isPublic';
 export const IDENTITY_ONLY = 'identityOnly';
 export const ADMIN_ONLY = 'adminOnly';
 export const EDITORS_ONLY = 'editorsOnly';
+export const OWN_SETTINGS = 'ownSettings';
 
 /** Skip authentication (health checks). */
 export const Public = () => SetMetadata(IS_PUBLIC, true);
@@ -18,6 +19,9 @@ export const AdminOnly = () => SetMetadata(ADMIN_ONLY, true);
 
 /** Only editors and admins, also for reading (e.g. the full change history). */
 export const EditorsOnly = () => SetMetadata(EDITORS_ONLY, true);
+
+/** Changes only the caller's own settings (e.g. their dashboard): viewers may do this too. */
+export const OwnSettings = () => SetMetadata(OWN_SETTINGS, true);
 
 /** Injects the caller's RequestContext. */
 export const Ctx = createParamDecorator(

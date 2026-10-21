@@ -1,4 +1,7 @@
 import { Module } from '@nestjs/common';
+import { DashboardController } from './dashboard/dashboard.controller';
+import { DashboardService } from './dashboard/dashboard.service';
+import { StatsService } from './dashboard/stats.service';
 import { ActivityController } from './activity/activity.controller';
 import { ActivityService } from './activity/activity.service';
 import { OverviewService } from './activity/overview.service';
@@ -45,8 +48,11 @@ import { PeopleSyncService } from './sync/people-sync.service';
     AssignmentsController,
     PeopleController,
     ActivityController,
+    DashboardController,
   ],
   providers: [
+    DashboardService,
+    StatsService,
     ActivityService,
     OverviewService,
     BuildingsService,
