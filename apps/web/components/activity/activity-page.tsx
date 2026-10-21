@@ -30,7 +30,7 @@ import { initials } from '@/lib/map-geometry';
 import { useActivity, useMe, usePeople, type ActivityFilters } from '@/lib/queries';
 import type { ActivityEntry, ActivityKind, ActivityRefs } from '@/lib/types';
 
-const KINDS: ActivityKind[] = ['seating', 'layout', 'places', 'people'];
+const KINDS: ActivityKind[] = ['seating', 'moves', 'layout', 'places', 'people'];
 const ALL = 'all';
 
 /** Editors and admins: every change in the workspace, newest first, with filters. */
@@ -244,7 +244,11 @@ export function EntryRow({ entry, refs }: { entry: ActivityEntry; refs: Activity
             <>
               <span aria-hidden>·</span>
               <Link href={linkHref(d.link)} className="underline-offset-2 hover:underline">
-                {'person' in d.link ? t('activity.showPerson') : t('activity.showOnMap')}
+                {'person' in d.link
+                  ? t('activity.showPerson')
+                  : 'plan' in d.link
+                    ? t('activity.showPlan')
+                    : t('activity.showOnMap')}
               </Link>
             </>
           )}

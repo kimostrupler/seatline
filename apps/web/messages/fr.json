@@ -327,7 +327,8 @@
     "activity": "Activité",
     "home": "Accueil",
     "map": "Plan",
-    "language": "Langue"
+    "language": "Langue",
+    "moves": "Déménagements"
   },
   "overview": {
     "title": "Vue d’ensemble",
@@ -352,7 +353,8 @@
       "seating": "Attributions (attribuer, déménager, réserver, libérer)",
       "layout": "Plan (pièces et places)",
       "places": "Bâtiments et étages",
-      "people": "Personnes et accès"
+      "people": "Personnes et accès",
+      "moves": "Plans de déménagement"
     },
     "person": "Personne",
     "anyone": "Tout le monde",
@@ -417,8 +419,15 @@
       "demoData": "a ajouté les données de démonstration",
       "dashboardUpdated": "a modifié son tableau de bord",
       "dashboardReset": "a réinitialisé son tableau de bord",
-      "dashboardDefault": "a modifié le tableau de bord par défaut de l’entreprise"
-    }
+      "dashboardDefault": "a modifié le tableau de bord par défaut de l’entreprise",
+      "planCreated": "a créé le plan de déménagement {name}",
+      "planScheduled": "a programmé le plan de déménagement {name} pour le {date}",
+      "planApplied": "a appliqué le plan de déménagement {name} ({count} déménagements)",
+      "planFailed": "n’a pas pu appliquer le plan de déménagement {name} (voir le plan)",
+      "planCancelled": "a annulé le plan de déménagement {name}",
+      "planChanged": "a modifié le plan de déménagement {name}"
+    },
+    "showPlan": "Ouvrir le plan"
   },
   "dashboard": {
     "title": "Accueil",
@@ -533,13 +542,110 @@
       "quickActions": {
         "title": "Accès rapide",
         "description": "Trouver une personne, ouvrir le plan."
+      },
+      "moves": {
+        "title": "Déménagements à venir",
+        "description": "Déménagements prévus et programmés, et plans qui demandent votre attention (éditeurs et admins)."
       }
-    }
+    },
+    "noMoves": "Aucun déménagement prévu.",
+    "movesCount": "{count, plural, one {# déménagement} other {# déménagements}}"
   },
   "errors": {
     "title": "Un problème est survenu",
     "body": "Cette page a rencontré un problème. Nous en avons été informés. Réessayez ou revenez à l’accueil.",
     "retry": "Réessayer",
     "home": "Aller à l’accueil"
+  },
+  "moves": {
+    "title": "Déménagements",
+    "intro": "Préparez les changements de places dans un plan, vérifiez-les sur le plan d’étage, puis appliquez-les maintenant ou à une date choisie. Rien ne change avant.",
+    "onlyEditors": "Seuls les éditeurs et les admins peuvent planifier des déménagements.",
+    "newPlan": "Nouveau plan de déménagement",
+    "planName": "Nom",
+    "planNamePlaceholder": "p. ex. Ventes au 2e étage",
+    "create": "Créer",
+    "cancel": "Annuler",
+    "openPlans": "Plans en cours",
+    "donePlans": "Terminés",
+    "noOpenPlans": "Aucun plan en cours.",
+    "noDonePlans": "Rien d’appliqué pour l’instant.",
+    "summary": "{count, plural, =0 {Pas encore de déménagement} one {# déménagement} other {# déménagements}} · {name} · {date}",
+    "notFound": "Ce plan n’existe pas (ou plus).",
+    "editOnMap": "Planifier sur le plan",
+    "viewOnMap": "Voir sur le plan",
+    "moveTeam": "Déménager une équipe",
+    "schedule": "Programmer",
+    "reschedule": "Changer la date",
+    "applyNow": "Appliquer maintenant",
+    "more": "Plus",
+    "backToDraft": "Revenir au brouillon",
+    "backToDraftDone": "Le plan est de nouveau un brouillon",
+    "cancelPlan": "Annuler le plan",
+    "cancelled": "Plan annulé",
+    "scheduledHint": "Il sera appliqué automatiquement tôt le matin de ce jour. Pour le modifier, revenez au brouillon (Plus).",
+    "failedHint": "Ce plan n’a pas pu être appliqué à sa date à cause des problèmes ci-dessous – rien n’a été appliqué. Corrigez-les, puis programmez-le ou appliquez-le à nouveau.",
+    "movesTitle": "{count, plural, =0 {Déménagements} one {# déménagement} other {# déménagements}}",
+    "noMoves": "Pas encore de déménagement. Ouvrez le plan sur le plan d’étage et glissez les personnes vers leurs nouvelles places, ou déménagez toute une équipe d’un coup.",
+    "noSeat": "pas de place",
+    "to": "vers",
+    "removeMove": "Retirer le déménagement de {name}",
+    "problemsTitle": "Corrigez ces points avant de pouvoir appliquer le plan",
+    "problems": {
+      "seat_taken": "{person} → {seat} : {by} y est assis et ne déménage pas.",
+      "seat_blocked": "{person} → {seat} : la place est bloquée.",
+      "seat_double": "{person} → {seat} : plusieurs personnes sont prévues pour cette place.",
+      "seat_missing": "{person} : la place prévue a été supprimée.",
+      "no_moves": "Le plan ne contient plus de déménagement."
+    },
+    "notes": {
+      "person_left": "{person} a quitté l’organisation – son déménagement est ignoré.",
+      "no_change": "{person} y est déjà – rien à faire.",
+      "reservation_replaced": "La place {seat} est réservée pour {name} – la réservation prend fin à l’arrivée de {person}."
+    },
+    "moveTeamHint": "Place toute une équipe sur les places libres d’un étage, pièce par pièce pour qu’elle soit réunie. Les personnes déjà à cet étage restent à leur place. Vous pouvez ensuite modifier chaque déménagement.",
+    "team": "Équipe",
+    "chooseTeam": "Choisir une équipe",
+    "teamOption": "{name} ({count})",
+    "noDepartment": "Sans service",
+    "toFloor": "Vers l’étage",
+    "chooseFloor": "Choisir un étage",
+    "floorOption": "{name} – {free} libres",
+    "placeTeam": "Ajouter au plan",
+    "teamPlaced": "{placed, plural, =0 {Tout le monde y est déjà} one {# déménagement ajouté} other {# déménagements ajoutés}}",
+    "teamPartly": "{placed} déménagements ajoutés – {unplaced} personnes n’ont pas eu de place (pas assez de places libres).",
+    "scheduleHint": "Les déménagements ont lieu automatiquement tôt le matin de ce jour. Pour aujourd’hui, utilisez « Appliquer maintenant ».",
+    "moveDay": "Jour du déménagement",
+    "scheduledDone": "Plan programmé",
+    "applyTitle": "Appliquer {count, plural, one {# déménagement} other {# déménagements}} maintenant ?",
+    "applyBody": "Chacun rejoint immédiatement sa place prévue. Chaque déménagement reste dans l’historique de la place et peut être modifié plus tard comme les autres.",
+    "appliedDone": "Déménagements appliqués",
+    "status": {
+      "draft": "Brouillon",
+      "scheduled": "Prévu le {date}",
+      "applied": "Appliqué",
+      "cancelled": "Annulé",
+      "failed": "Non applicable"
+    },
+    "planMode": {
+      "banner": "Planification : {name}",
+      "count": "{count, plural, =0 {pas encore de déménagement} one {# déménagement} other {# déménagements}}",
+      "problems": "{count, plural, one {# problème} other {# problèmes}}",
+      "hint": "Glissez les personnes sur les places pour planifier où elles seront. Rien ne change avant l’application du plan.",
+      "readOnly": "Aperçu d’un plan qui n’est pas un brouillon – revenez au brouillon pour le modifier.",
+      "backToPlan": "Ouvrir le plan",
+      "exit": "Quitter la planification",
+      "planned": "Prévu",
+      "assign": "Prévoir : quelqu’un s’assied ici",
+      "free": "Prévoir : libérer cette place",
+      "remove": "Retirer du plan",
+      "movesHere": "{person} arrive ici depuis {from}",
+      "getsSeat": "{person} reçoit cette place",
+      "leaves": "{person} part ({to})",
+      "toOtherFloor": "vers {seat} · {floor}",
+      "toNoSeat": "pas de place",
+      "added": "{person} → {seat} ajouté au plan",
+      "freed": "{person} libère la place (prévu)"
+    }
   }
 }

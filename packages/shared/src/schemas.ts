@@ -152,7 +152,7 @@ export const listPeopleQuerySchema = z.strictObject({
 
 // ---- Activity (audit log) ---------------------------------------------------
 
-export const ACTIVITY_KINDS = ['seating', 'layout', 'places', 'people'] as const;
+export const ACTIVITY_KINDS = ['seating', 'moves', 'layout', 'places', 'people'] as const;
 export type ActivityKind = (typeof ACTIVITY_KINDS)[number];
 
 const day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD');
@@ -185,6 +185,7 @@ export const WIDGET_TYPES = [
   'sync',
   'mySeat',
   'quickActions',
+  'moves',
 ] as const;
 export type WidgetType = (typeof WIDGET_TYPES)[number];
 export const WIDGET_SIZES = ['small', 'wide', 'full'] as const;
@@ -207,6 +208,7 @@ export type DashboardInput = z.infer<typeof dashboardSchema>;
 /** What a new workspace starts with (before an admin saves a company default). */
 export const DEFAULT_DASHBOARD: Widget[] = [
   { id: 'quick', type: 'quickActions', size: 'small' },
+  { id: 'moves', type: 'moves', size: 'small' },
   { id: 'me', type: 'mySeat', size: 'small' },
   { id: 'summary', type: 'summary', size: 'wide' },
   { id: 'occupancy', type: 'occupancy', size: 'wide' },
@@ -216,6 +218,46 @@ export const DEFAULT_DASHBOARD: Widget[] = [
   { id: 'reservations', type: 'reservations', size: 'small' },
   { id: 'departments', type: 'departments', size: 'full' },
 ];
+
+// ---- Move plans -------------------------------------------------------------
+
+export const MOVE_PLAN_STATUSES = ['draft', 'scheduled', 'applied', 'cancelled', 'failed'] as const;
+export type MovePlanStatus = (typeof MOVE_PLAN_STATUSES)[number];
+
+export const createMovePlanSchema = z.strictObject({
+  name,
+  note: note.optional(),
+});
+export const updateMovePlanSchema = z.strictObject({
+  name: name.optional(),
+  note: note.nullable().optional(),
+});
+export const movePlanItemsSchema = z.strictObject({
+  items: z
+    .array(z.strictObject({ personId: id, toSeatId: id.nullable() }))
+    .min(1)
+    .max(1000),
+});
+export const scheduleMovePlanSchema = z.strictObject({
+  /** a Swiss calendar day, tomorrow or later (today: apply now instead) */
+  effectiveDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD'),
+});
+export const placeTeamSchema = z.strictObject({
+  /** null = people without a department */
+  department: z.string().trim().min(1).max(200).nullable(),
+  floorId: id,
+});
+export const listMovePlansQuerySchema = z.strictObject({
+  /** open = draft, scheduled or failed; done = applied or cancelled */
+  status: z.enum(['open', 'done']).optional(),
+});
+
+export type CreateMovePlanInput = z.infer<typeof createMovePlanSchema>;
+export type UpdateMovePlanInput = z.infer<typeof updateMovePlanSchema>;
+export type MovePlanItemsInput = z.infer<typeof movePlanItemsSchema>;
+export type ScheduleMovePlanInput = z.infer<typeof scheduleMovePlanSchema>;
+export type PlaceTeamInput = z.infer<typeof placeTeamSchema>;
+export type ListMovePlansQuery = z.infer<typeof listMovePlansQuerySchema>;
 
 export type CreateBuildingInput = z.infer<typeof createBuildingSchema>;
 export type UpdateBuildingInput = z.infer<typeof updateBuildingSchema>;

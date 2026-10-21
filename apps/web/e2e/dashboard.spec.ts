@@ -40,7 +40,7 @@ test('customize: remove, move and add widgets; the layout is kept; reset', async
   await expect(widget(page, 'Blocked seats')).toBeVisible();
   const after = await titles(page);
   expect(after[0]).toBe('Blocked seats');
-  expect(after.slice(1, 3)).toEqual(['My seat', 'Quick actions']);
+  expect(after.slice(1, 4)).toEqual(['Quick actions', 'My seat', 'Upcoming moves']);
   expect(after).not.toContain('Departments');
   expect(after).toHaveLength(before.length);
 

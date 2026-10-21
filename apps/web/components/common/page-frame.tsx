@@ -23,12 +23,8 @@ export function PageFrame({
   return (
     <div className="min-h-dvh">
       <header className="sticky top-0 z-20 border-b bg-background/95 backdrop-blur">
-        <div
-          className={cn(
-            'mx-auto flex items-center gap-2 px-4 py-2 sm:px-6',
-            wide ? 'max-w-7xl' : 'max-w-3xl',
-          )}
-        >
+        {/* the top bar always uses the full width: six links don't fit a narrow page column */}
+        <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-2 sm:px-6">
           <div className="min-w-0 flex-1">
             <NavLinks orientation="horizontal" />
           </div>

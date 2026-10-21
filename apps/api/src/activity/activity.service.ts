@@ -6,6 +6,7 @@ import { TenantDb } from '../db/tenant-db.service';
 
 const KIND_TYPES: Record<ActivityKind, string[]> = {
   seating: ['seat_assignment'],
+  moves: ['move_plan'],
   layout: ['room', 'seat'],
   places: ['building', 'floor'],
   people: ['person', 'tenant'],

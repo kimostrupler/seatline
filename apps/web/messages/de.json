@@ -327,7 +327,8 @@
     "activity": "Aktivität",
     "home": "Start",
     "map": "Plan",
-    "language": "Sprache"
+    "language": "Sprache",
+    "moves": "Umzüge"
   },
   "overview": {
     "title": "Übersicht",
@@ -352,7 +353,8 @@
       "seating": "Belegung (zuweisen, umziehen, reservieren, freigeben)",
       "layout": "Plan (Räume und Plätze)",
       "places": "Gebäude und Stockwerke",
-      "people": "Personen und Zugang"
+      "people": "Personen und Zugang",
+      "moves": "Umzugspläne"
     },
     "person": "Person",
     "anyone": "Alle",
@@ -417,8 +419,15 @@
       "demoData": "hat die Demodaten hinzugefügt",
       "dashboardUpdated": "hat das eigene Dashboard geändert",
       "dashboardReset": "hat das eigene Dashboard zurückgesetzt",
-      "dashboardDefault": "hat das Standard-Dashboard der Firma geändert"
-    }
+      "dashboardDefault": "hat das Standard-Dashboard der Firma geändert",
+      "planCreated": "hat den Umzugsplan {name} erstellt",
+      "planScheduled": "hat den Umzugsplan {name} für den {date} geplant",
+      "planApplied": "hat den Umzugsplan {name} angewendet ({count} Umzüge)",
+      "planFailed": "konnte den Umzugsplan {name} nicht anwenden (siehe Plan)",
+      "planCancelled": "hat den Umzugsplan {name} abgebrochen",
+      "planChanged": "hat den Umzugsplan {name} geändert"
+    },
+    "showPlan": "Plan öffnen"
   },
   "dashboard": {
     "title": "Start",
@@ -533,13 +542,110 @@
       "quickActions": {
         "title": "Schnellzugriff",
         "description": "Person suchen, Plan öffnen."
+      },
+      "moves": {
+        "title": "Anstehende Umzüge",
+        "description": "Geplante und terminierte Umzüge sowie Pläne, die Aufmerksamkeit brauchen (Bearbeiter und Admins)."
       }
-    }
+    },
+    "noMoves": "Keine Umzüge geplant.",
+    "movesCount": "{count, plural, one {# Umzug} other {# Umzüge}}"
   },
   "errors": {
     "title": "Etwas ist schiefgelaufen",
     "body": "Auf dieser Seite ist ein Problem aufgetreten. Wir wurden informiert. Versuchen Sie es erneut oder gehen Sie zur Startseite.",
     "retry": "Erneut versuchen",
     "home": "Zur Startseite"
+  },
+  "moves": {
+    "title": "Umzüge",
+    "intro": "Bereiten Sie Platzänderungen als Plan vor, prüfen Sie sie auf dem Plan und wenden Sie sie jetzt oder an einem gewählten Tag an. Bis dahin ändert sich nichts.",
+    "onlyEditors": "Nur Bearbeiter und Admins können Umzüge planen.",
+    "newPlan": "Neuer Umzugsplan",
+    "planName": "Name",
+    "planNamePlaceholder": "z. B. Verkauf in den 2. Stock",
+    "create": "Erstellen",
+    "cancel": "Abbrechen",
+    "openPlans": "Offene Pläne",
+    "donePlans": "Erledigt",
+    "noOpenPlans": "Keine offenen Pläne.",
+    "noDonePlans": "Noch nichts angewendet.",
+    "summary": "{count, plural, =0 {Noch keine Umzüge} one {# Umzug} other {# Umzüge}} · {name} · {date}",
+    "notFound": "Diesen Plan gibt es nicht (mehr).",
+    "editOnMap": "Auf dem Plan planen",
+    "viewOnMap": "Auf dem Plan ansehen",
+    "moveTeam": "Team umziehen",
+    "schedule": "Planen für Datum",
+    "reschedule": "Datum ändern",
+    "applyNow": "Jetzt anwenden",
+    "more": "Mehr",
+    "backToDraft": "Zurück zum Entwurf",
+    "backToDraftDone": "Der Plan ist wieder ein Entwurf",
+    "cancelPlan": "Plan abbrechen",
+    "cancelled": "Plan abgebrochen",
+    "scheduledHint": "Er wird am frühen Morgen dieses Tages automatisch angewendet. Zum Ändern zurück zum Entwurf setzen (Mehr).",
+    "failedHint": "Dieser Plan konnte an seinem Tag wegen der Probleme unten nicht angewendet werden – nichts davon wurde umgesetzt. Beheben Sie sie und planen oder wenden Sie ihn erneut an.",
+    "movesTitle": "{count, plural, =0 {Umzüge} one {# Umzug} other {# Umzüge}}",
+    "noMoves": "Noch keine Umzüge. Öffnen Sie den Plan auf dem Grundriss und ziehen Sie Personen auf ihre neuen Plätze – oder ziehen Sie ein ganzes Team auf einmal um.",
+    "noSeat": "kein Platz",
+    "to": "nach",
+    "removeMove": "Umzug von {name} entfernen",
+    "problemsTitle": "Beheben Sie diese Punkte, bevor der Plan angewendet werden kann",
+    "problems": {
+      "seat_taken": "{person} → {seat}: Dort sitzt {by} und zieht nicht um.",
+      "seat_blocked": "{person} → {seat}: Der Platz ist gesperrt.",
+      "seat_double": "{person} → {seat}: Für diesen Platz ist mehr als eine Person geplant.",
+      "seat_missing": "{person}: Der geplante Platz wurde gelöscht.",
+      "no_moves": "Der Plan enthält keine Umzüge mehr."
+    },
+    "notes": {
+      "person_left": "{person} hat die Organisation verlassen – dieser Umzug entfällt.",
+      "no_change": "{person} sitzt schon dort – nichts zu tun.",
+      "reservation_replaced": "Platz {seat} ist für {name} reserviert – die Reservation endet, wenn {person} einzieht."
+    },
+    "moveTeamHint": "Setzt alle aus einem Team auf freie Plätze eines Stockwerks, Raum für Raum, damit sie zusammensitzen. Wer schon dort sitzt, bleibt. Einzelne Umzüge können Sie danach ändern.",
+    "team": "Team",
+    "chooseTeam": "Team wählen",
+    "teamOption": "{name} ({count})",
+    "noDepartment": "Keine Abteilung",
+    "toFloor": "Auf Stockwerk",
+    "chooseFloor": "Stockwerk wählen",
+    "floorOption": "{name} – {free} frei",
+    "placeTeam": "Zum Plan hinzufügen",
+    "teamPlaced": "{placed, plural, =0 {Alle sitzen schon dort} one {# Umzug hinzugefügt} other {# Umzüge hinzugefügt}}",
+    "teamPartly": "{placed} Umzüge hinzugefügt – {unplaced} Personen hatten keinen Platz (zu wenig freie Plätze).",
+    "scheduleHint": "Die Umzüge geschehen am frühen Morgen dieses Tages automatisch. Für heute «Jetzt anwenden» verwenden.",
+    "moveDay": "Umzugstag",
+    "scheduledDone": "Plan terminiert",
+    "applyTitle": "{count, plural, one {# Umzug} other {# Umzüge}} jetzt anwenden?",
+    "applyBody": "Alle ziehen sofort auf ihren geplanten Platz. Jeder Umzug bleibt im Verlauf des Platzes und kann später wie jeder andere geändert werden.",
+    "appliedDone": "Umzüge angewendet",
+    "status": {
+      "draft": "Entwurf",
+      "scheduled": "Geplant für {date}",
+      "applied": "Angewendet",
+      "cancelled": "Abgebrochen",
+      "failed": "Nicht anwendbar"
+    },
+    "planMode": {
+      "banner": "Planung: {name}",
+      "count": "{count, plural, =0 {noch keine Umzüge} one {# Umzug} other {# Umzüge}}",
+      "problems": "{count, plural, one {# Problem} other {# Probleme}}",
+      "hint": "Ziehen Sie Personen auf Plätze, um zu planen, wo sie sitzen werden. Bis der Plan angewendet wird, ändert sich nichts.",
+      "readOnly": "Vorschau eines Plans, der kein Entwurf ist – zum Ändern zurück zum Entwurf setzen.",
+      "backToPlan": "Plan öffnen",
+      "exit": "Planung verlassen",
+      "planned": "Geplant",
+      "assign": "Planen: jemand sitzt hier",
+      "free": "Planen: Platz freigeben",
+      "remove": "Aus dem Plan entfernen",
+      "movesHere": "{person} zieht von {from} hierher",
+      "getsSeat": "{person} erhält diesen Platz",
+      "leaves": "{person} zieht weg ({to})",
+      "toOtherFloor": "nach {seat} · {floor}",
+      "toNoSeat": "kein Platz",
+      "added": "{person} → {seat} zum Plan hinzugefügt",
+      "freed": "{person} gibt den Platz ab (geplant)"
+    }
   }
 }

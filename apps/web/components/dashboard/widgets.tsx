@@ -23,6 +23,7 @@ import {
   useActivity,
   useFloorMap,
   useMe,
+  useMovePlans,
   useOverview,
   usePeople,
   usePerson,
@@ -30,6 +31,7 @@ import {
   useTenant,
 } from '@/lib/queries';
 import type { Stats } from '@/lib/types';
+import { PlanStatus } from '@/components/moves/plan-status';
 
 const mapHref = (params: Record<string, string>) => `/map?${new URLSearchParams(params)}`;
 
@@ -60,6 +62,8 @@ export function WidgetBody({ type }: { type: WidgetType }) {
       return <MySeat />;
     case 'quickActions':
       return <QuickActions />;
+    case 'moves':
+      return <UpcomingMoves />;
   }
 }
 
@@ -69,6 +73,7 @@ export const WIDGET_LINKS: Partial<Record<WidgetType, string>> = {
   occupancy: '/overview',
   activity: '/activity',
   sync: '/people',
+  moves: '/moves',
 };
 
 function Loading() {
@@ -524,5 +529,32 @@ function QuickActions() {
         </Link>
       </Button>
     </div>
+  );
+}
+
+// ---- moves ---------------------------------------------------------------------
+
+function UpcomingMoves() {
+  const t = useTranslations('dashboard');
+  const plans = useMovePlans('open').data;
+  if (!plans) return <Loading />;
+  if (!plans.length) return <Empty>{t('noMoves')}</Empty>;
+  return (
+    <ul className="grid gap-2.5">
+      {plans.slice(0, 6).map((p) => (
+        <li key={p.id} className="grid gap-1 text-sm">
+          <Link
+            href={`/moves/${p.id}`}
+            className="truncate font-medium underline-offset-2 hover:underline"
+          >
+            {p.name}
+          </Link>
+          <span className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <PlanStatus status={p.status} effectiveDate={p.effectiveDate} />
+            {t('movesCount', { count: p.moves })}
+          </span>
+        </li>
+      ))}
+    </ul>
   );
 }

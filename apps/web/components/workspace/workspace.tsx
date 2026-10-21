@@ -5,7 +5,17 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
-import { useBuildings, useFloorMap, useFloors, useMe, usePerson, useStats } from '@/lib/queries';
+import { PlanBar, PlanSeatPanel, usePlanEdits } from '@/components/moves/plan-mode';
+import { projectFloor } from '@/lib/moves';
+import {
+  useBuildings,
+  useFloorMap,
+  useFloors,
+  useMe,
+  useMovePlan,
+  usePerson,
+  useStats,
+} from '@/lib/queries';
 import { teamSlots } from '@/lib/team-colors';
 import { useColorBy } from '@/lib/use-map-colors-mode';
 import { useMediaQuery } from '@/lib/use-media-query';
@@ -65,6 +75,15 @@ export function Workspace() {
       update({ building: buildingId, floor: floorId }, 'replace');
   }, [buildingId, floorId, params.building, params.floor, update]);
 
+  // planning on the map (?plan=…): show the floor as it will be, gestures add to the plan
+  const plan = useMovePlan(canEdit && !editing ? params.plan : null).data;
+  const planEdits = usePlanEdits(plan);
+  const projected = useMemo(
+    () => (plan && map.data ? projectFloor(map.data, plan.items) : null),
+    [plan, map.data],
+  );
+  const viewMap = map.data && projected ? { ...map.data, seats: projected.seats } : map.data;
+
   const seats = useMemo(() => map.data?.seats ?? [], [map.data]);
   const selectedSeat = seats.find((s) => s.id === params.seat);
   const personSeat = person.data?.assignments[0]?.seat;
@@ -117,7 +136,7 @@ export function Workspace() {
   const headerEnd = (
     <>
       {me.data?.role === 'viewer' && <Badge variant="secondary">{t('devLogin.role.viewer')}</Badge>}
-      {canEdit && map.data && (
+      {canEdit && map.data && !plan && (
         <ModeToggle
           editing={editing}
           onChange={(edit) => update({ mode: edit ? 'edit' : null, seat: null, person: null })}
@@ -140,27 +159,39 @@ export function Workspace() {
       />
     );
 
-  const details = selectedSeat ? (
-    <SeatPanel
-      key={selectedSeat.id}
-      seat={selectedSeat}
-      room={map.data?.rooms.find((r) => r.id === selectedSeat.roomId)}
-      canEdit={canEdit}
-      actions={actions}
-      onClose={() => update({ seat: null })}
-      onSelectPerson={(id) => update({ person: id, seat: null })}
-    />
-  ) : params.person ? (
-    <PersonPanel
-      personId={params.person}
-      onClose={() => update({ person: null })}
-      onShowSeat={(seat) =>
-        update({ building: seat.buildingId, floor: seat.floorId, seat: seat.id })
-      }
-    />
-  ) : (
-    <EmptyDetails />
-  );
+  const plannedSeat = projected?.seats.find((s) => s.id === selectedSeat?.id);
+  const details =
+    plan && selectedSeat && plannedSeat ? (
+      <PlanSeatPanel
+        key={selectedSeat.id}
+        seat={selectedSeat}
+        planned={plannedSeat}
+        room={map.data?.rooms.find((r) => r.id === selectedSeat.roomId)}
+        plan={plan}
+        edits={planEdits}
+        onClose={() => update({ seat: null })}
+      />
+    ) : selectedSeat ? (
+      <SeatPanel
+        key={selectedSeat.id}
+        seat={selectedSeat}
+        room={map.data?.rooms.find((r) => r.id === selectedSeat.roomId)}
+        canEdit={canEdit}
+        actions={actions}
+        onClose={() => update({ seat: null })}
+        onSelectPerson={(id) => update({ person: id, seat: null })}
+      />
+    ) : params.person ? (
+      <PersonPanel
+        personId={params.person}
+        onClose={() => update({ person: null })}
+        onShowSeat={(seat) =>
+          update({ building: seat.buildingId, floor: seat.floorId, seat: seat.id })
+        }
+      />
+    ) : (
+      <EmptyDetails />
+    );
 
   const editLayout = canEdit
     ? { label: t('mode.edit'), onClick: () => update({ mode: 'edit' }) }
@@ -202,22 +233,36 @@ export function Workspace() {
         ) : map.data.seats.length === 0 && !map.data.floor.planFileKey ? (
           <MapMessage text={t('map.empty')} action={editLayout} />
         ) : (
-          <FloorMap
-            map={map.data}
-            selectedSeatId={params.seat}
-            highlightSeatId={personSeat?.floorId === floorId ? (personSeat?.id ?? null) : null}
-            canEdit={canEdit}
-            planOpacity={planOpacity}
-            colorBy={colorBy}
-            onColorBy={setColorBy}
-            teamSlots={slots}
-            onSelectSeat={(id) => update({ seat: id })}
-            onDropPerson={(seatId, dropped) => actions.assign(seatId, dropped)}
-            onMoveSeat={(fromId, toId) => {
-              const moving = seats.find((s) => s.id === fromId)?.currentAssignment?.person;
-              if (moving) void actions.assign(toId, moving);
-            }}
-          />
+          <div className="flex h-full flex-col">
+            {plan && <PlanBar plan={plan} onExit={() => update({ plan: null, seat: null })} />}
+            <div className="relative min-h-0 flex-1">
+              <FloorMap
+                map={viewMap!}
+                selectedSeatId={params.seat}
+                highlightSeatId={personSeat?.floorId === floorId ? (personSeat?.id ?? null) : null}
+                markedSeatIds={projected ? new Set(projected.changes.keys()) : undefined}
+                canEdit={canEdit && (!plan || planEdits.editable)}
+                planOpacity={planOpacity}
+                colorBy={colorBy}
+                onColorBy={setColorBy}
+                teamSlots={slots}
+                onSelectSeat={(id) => update({ seat: id })}
+                onDropPerson={(seatId, dropped) => {
+                  if (!plan) return void actions.assign(seatId, dropped);
+                  const seat = seats.find((s) => s.id === seatId);
+                  if (seat) planEdits.move(dropped, seat);
+                }}
+                onMoveSeat={(fromId, toId) => {
+                  const from = (viewMap?.seats ?? []).find((s) => s.id === fromId);
+                  const moving = from?.currentAssignment?.person;
+                  if (!moving) return;
+                  if (!plan) return void actions.assign(toId, moving);
+                  const to = seats.find((s) => s.id === toId);
+                  if (to) planEdits.move(moving, to);
+                }}
+              />
+            </div>
+          </div>
         )
       }
       mobileDetails={

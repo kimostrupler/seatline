@@ -21,8 +21,15 @@ const flat = (o: Tree, p = ''): Record<string, string> =>
   );
 const load = (lang: string) =>
   flat(JSON.parse(readFileSync(new URL(`../messages/${lang}.json`, import.meta.url), 'utf8')));
-/** {name}, {count, plural, …} → the variable names a text uses */
-const vars = (text: string) => [...text.matchAll(/\{\s*(\w+)\s*[,}]/g)].map((m) => m[1]).sort();
+/** {name}, {count, plural, …} → the variable names a text uses (not plural branches like =0 {…}) */
+const vars = (text: string) =>
+  [
+    ...new Set(
+      [...text.matchAll(/(?<!(?:=\d+|zero|one|two|few|many|other)\s*)\{\s*(\w+)\s*[,}]/g)].map(
+        (m) => m[1],
+      ),
+    ),
+  ].sort();
 
 describe('translations', () => {
   const en = load('en');

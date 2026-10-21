@@ -19,6 +19,8 @@ import type {
   FloorMap,
   HistoryEntry,
   Me,
+  MovePlanDetail,
+  MovePlanSummary,
   Overview,
   Person,
   Stats,
@@ -38,6 +40,8 @@ export const keys = {
   activity: (filters: ActivityFilters) => ['activity', filters] as const,
   overview: ['overview'] as const,
   dashboard: ['dashboard'] as const,
+  movePlans: (status: string) => ['movePlans', status] as const,
+  movePlan: (id: string) => ['movePlan', id] as const,
   stats: ['stats'] as const,
 };
 
@@ -315,4 +319,71 @@ export function useDashboardActions() {
       onSuccess: done,
     }),
   };
+}
+
+export const useMovePlans = (status: 'open' | 'done') =>
+  useQuery({
+    queryKey: keys.movePlans(status),
+    queryFn: () => api<MovePlanSummary[]>(`/move-plans?status=${status}`),
+  });
+
+export const useMovePlan = (id: string | null | undefined) =>
+  useQuery({
+    queryKey: keys.movePlan(id ?? ''),
+    queryFn: () => api<MovePlanDetail>(`/move-plans/${id}`),
+    enabled: !!id,
+  });
+
+/** Every change to a plan answers with the whole plan (moves + problems), which we keep. */
+export function useMovePlanActions(id: string) {
+  const qc = useQueryClient();
+  const done = (plan: MovePlanDetail) => {
+    qc.setQueryData(keys.movePlan(id), plan);
+    void qc.invalidateQueries({ queryKey: ['movePlans'] });
+  };
+  const useCall = <I>(path: string, method: string, body?: (input: I) => unknown) =>
+    useMutation({
+      mutationFn: (input: I) =>
+        api<MovePlanDetail>(`/move-plans/${id}${path}`, {
+          method,
+          body: body ? body(input) : undefined,
+        }),
+      onSuccess: done,
+    });
+  return {
+    update: useCall<{ name?: string; note?: string | null }>('', 'PATCH', (i) => i),
+    setItems: useCall<Array<{ personId: string; toSeatId: string | null }>>(
+      '/items',
+      'PUT',
+      (items) => ({
+        items,
+      }),
+    ),
+    removeItem: useMutation({
+      mutationFn: (personId: string) =>
+        api<MovePlanDetail>(`/move-plans/${id}/items/${personId}`, { method: 'DELETE' }),
+      onSuccess: done,
+    }),
+    placeTeam: useCall<{ department: string | null; floorId: string }>('/team', 'POST', (i) => i),
+    schedule: useCall<string>('/schedule', 'POST', (effectiveDate) => ({ effectiveDate })),
+    unschedule: useCall<void>('/unschedule', 'POST'),
+    cancel: useCall<void>('/cancel', 'POST'),
+    apply: useMutation({
+      mutationFn: () => api<MovePlanDetail>(`/move-plans/${id}/apply`, { method: 'POST' }),
+      onSuccess: (plan) => {
+        done(plan);
+        // people really moved: everything that shows seats is out of date
+        void qc.invalidateQueries();
+      },
+    }),
+  };
+}
+
+export function useCreateMovePlan() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { name: string }) =>
+      api<MovePlanSummary>('/move-plans', { method: 'POST', body: input }),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ['movePlans'] }),
+  });
 }
