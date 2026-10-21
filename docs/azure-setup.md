@@ -16,10 +16,13 @@ What gets created, all in **Switzerland North**:
 
 ## 1. Azure account
 
-1. Go to <https://azure.microsoft.com/free> and create an account (a credit card is needed;
-   the free credit is used first).
-2. Use a Microsoft account of **your company's Microsoft 365** if you have one — then your own
-   organisation is ready to test Seatline right away.
+1. Use a Microsoft account that is **only yours** (e.g. a new outlook.com address for Seatline).
+   If your account is a guest in an employer's Microsoft 365 (its address shows `#EXT#`), Azure
+   sends you to the employer's sign-in — don't continue there; use a separate account.
+   If creating the account is "blocked", wait a few hours and try from another network (no VPN).
+2. Sign in at <https://portal.azure.com>. Top right should show **your own** directory
+   ("Default Directory"). If it says "Don't have a subscription?", click **Start** under
+   **Azure free trial** (credit card needed; the free credit is used first).
 
 ## 2. Run the setup script (in the browser)
 

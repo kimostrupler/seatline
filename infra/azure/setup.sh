@@ -23,6 +23,20 @@ SUB=$(az account show --query id -o tsv)
 TENANT=$(az account show --query tenantId -o tsv)
 echo "Subscription: $(az account show --query name -o tsv) ($SUB)"
 
+say "0/6 Switching on the Azure services Seatline uses (new subscriptions start with them off)"
+for ns in Microsoft.App Microsoft.ContainerRegistry Microsoft.DBforPostgreSQL Microsoft.KeyVault \
+  Microsoft.ManagedIdentity Microsoft.OperationalInsights Microsoft.Storage; do
+  az provider register --namespace "$ns" -o none
+done
+for ns in Microsoft.App Microsoft.ContainerRegistry Microsoft.DBforPostgreSQL Microsoft.KeyVault \
+  Microsoft.ManagedIdentity Microsoft.OperationalInsights Microsoft.Storage; do
+  for _ in $(seq 1 60); do
+    [ "$(az provider show --namespace "$ns" --query registrationState -o tsv)" = "Registered" ] && break
+    sleep 5
+  done
+  echo "  $ns: $(az provider show --namespace "$ns" --query registrationState -o tsv)"
+done
+
 say "1/6 Resource group '$RG' in $LOCATION"
 az group create -n "$RG" -l "$LOCATION" -o none
 
