@@ -63,7 +63,16 @@
     "seatsList": "Places de cet étage",
     "seatButton": "Place {label}, {status}",
     "seatButtonPerson": "Place {label}, occupée par {person}",
-    "seatButtonReserved": "Place {label}, réservée pour {reservedFor}"
+    "seatButtonReserved": "Place {label}, réservée pour {reservedFor}",
+    "colorBy": "Colorer les places par",
+    "byStatus": "Statut",
+    "byTeam": "Équipe",
+    "teams": "Équipes à cet étage",
+    "noTeams": "Personne n’est encore assis à cet étage.",
+    "noDepartment": "Sans service",
+    "focusTeam": "Mettre {team} en évidence",
+    "showAllTeams": "Afficher toutes les équipes",
+    "seatButtonTeam": "Place {label}, occupée par {person} ({team})"
   },
   "seat": {
     "title": "Place {label}",

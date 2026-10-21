@@ -63,7 +63,16 @@
     "seatsList": "Seats on this floor",
     "seatButton": "Seat {label}, {status}",
     "seatButtonPerson": "Seat {label}, taken by {person}",
-    "seatButtonReserved": "Seat {label}, reserved for {reservedFor}"
+    "seatButtonReserved": "Seat {label}, reserved for {reservedFor}",
+    "colorBy": "Colour seats by",
+    "byStatus": "Status",
+    "byTeam": "Team",
+    "teams": "Teams on this floor",
+    "noTeams": "Nobody sits on this floor yet.",
+    "noDepartment": "No department",
+    "focusTeam": "Highlight {team}",
+    "showAllTeams": "Show all teams",
+    "seatButtonTeam": "Seat {label}, taken by {person} ({team})"
   },
   "seat": {
     "title": "Seat {label}",
