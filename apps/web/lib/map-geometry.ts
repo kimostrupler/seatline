@@ -20,8 +20,18 @@ export interface Bounds {
 }
 
 /** Everything drawn on the floor, so "fit to screen" frames the real content. */
-export function contentBounds(rooms: Room[], seats: Seat[]): Bounds | null {
+export function contentBounds(
+  rooms: Room[],
+  seats: Seat[],
+  plan?: { width: number; height: number } | null,
+): Bounds | null {
   const points: Point[] = [
+    ...(plan
+      ? [
+          { x: 0, y: 0 },
+          { x: plan.width, y: plan.height },
+        ]
+      : []),
     ...rooms.flatMap((r) => r.polygon),
     ...seats.flatMap((s) => [
       { x: s.x - SEAT_W / 2, y: s.y - SEAT_H / 2 },

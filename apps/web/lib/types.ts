@@ -26,8 +26,11 @@ export interface Floor {
   buildingId: string;
   name: string;
   level: number;
+  planFileKey: string | null;
   planWidth: number | null;
   planHeight: number | null;
+  /** plan units per metre, null until set with the scale tool */
+  scale: number | null;
 }
 
 export interface Point {

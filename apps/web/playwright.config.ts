@@ -7,6 +7,9 @@ const E2E_APP_DATABASE_URL =
   'postgresql://seatline_app:seatline_app@localhost:5432/seatline_e2e';
 const WEB_PORT = 3100;
 const API_PORT = 3101;
+const BLOB_PORT = 10200;
+// Azurite's well-known public development account (not a secret)
+const BLOB_CONNECTION = `DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:${BLOB_PORT}/devstoreaccount1;`;
 
 export default defineConfig({
   testDir: './e2e',
@@ -27,9 +30,20 @@ export default defineConfig({
   ],
   webServer: [
     {
+      command: `../api/node_modules/.bin/azurite-blob --blobHost 127.0.0.1 --blobPort ${BLOB_PORT} --inMemoryPersistence --silent --skipApiVersionCheck`,
+      port: BLOB_PORT,
+      reuseExistingServer: false,
+    },
+    {
       command: 'node ../api/dist/main.js',
       url: `http://localhost:${API_PORT}/health`,
-      env: { PORT: String(API_PORT), APP_DATABASE_URL: E2E_APP_DATABASE_URL, DEV_AUTH: 'true' },
+      env: {
+        PORT: String(API_PORT),
+        APP_DATABASE_URL: E2E_APP_DATABASE_URL,
+        DEV_AUTH: 'true',
+        AZURE_STORAGE_CONNECTION_STRING: BLOB_CONNECTION,
+        AZURE_STORAGE_CONTAINER: 'e2e-floor-plans',
+      },
       reuseExistingServer: false,
     },
     {
