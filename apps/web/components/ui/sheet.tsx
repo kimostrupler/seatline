@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { XIcon } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Dialog as SheetPrimitive } from 'radix-ui';
 
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
@@ -70,7 +71,9 @@ function SheetContent({
         {showCloseButton && (
           <SheetPrimitive.Close className="absolute top-4 right-4 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none data-[state=open]:bg-secondary">
             <XIcon className="size-4" />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">
+              <CloseLabel />
+            </span>
           </SheetPrimitive.Close>
         )}
       </SheetPrimitive.Content>
@@ -131,3 +134,8 @@ export {
   SheetTitle,
   SheetDescription,
 };
+
+/** "Close" in the person's language (shared by every dialog/sheet). */
+function CloseLabel() {
+  return useTranslations('seat')('close');
+}

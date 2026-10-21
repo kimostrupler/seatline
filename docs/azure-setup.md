@@ -64,6 +64,37 @@ Then **Actions → Deploy → Run workflow**. After ~10 minutes it shows "Live: 
    permission — a Microsoft 365 admin clicks **Approve in Microsoft** once. After that, people
    sync every night.
 
+## 5. Optional extras
+
+All set in GitHub → **Settings → Secrets and variables → Actions → Variables**. They take
+effect with the next deploy (**Actions → Deploy → Run workflow** to apply them right away).
+
+### Error alerts by e-mail (recommended, ~free)
+
+Add the variable **`ALERT_EMAIL`** = your e-mail address. Azure then e-mails you when Seatline
+logs errors (server errors, errors in people's browsers, a failed nightly sync) — at most once
+an hour. Logs and alerts stay in Switzerland North. The e-mail links to the logs in the Azure
+portal (**Log Analytics workspace → Logs**).
+
+### Faster first page (~CHF 10–20/month more)
+
+To save money the apps sleep when nobody uses them, so the first visit after a quiet time takes
+~15–30 seconds. Add the variable **`KEEP_WARM`** = `true` to keep one copy running. Remove it
+(or set `false`) to go back.
+
+### Your own web address (e.g. `app.yourcompany.ch`)
+
+You need a domain (e.g. from a Swiss provider like Infomaniak or Hostpoint, ~CHF 10–20/year)
+and access to its DNS settings. In Cloud Shell:
+
+```bash
+bash seatline/infra/azure/custom-domain.sh app.yourcompany.ch
+```
+
+It shows two DNS records to add (a CNAME and a TXT), waits for you, then connects the address,
+creates a free HTTPS certificate and updates Microsoft sign-in. The Azure address keeps working.
+Running `setup.sh` again later keeps the address.
+
 ## Good to know
 
 - **Other companies** can sign in the same way: their first person creates their workspace.

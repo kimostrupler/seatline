@@ -2,6 +2,7 @@
 
 import { ChevronsUpDown, LogOut } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { LanguageSelect } from '@/components/common/language-select';
 import { NavLinks } from '@/components/common/nav-links';
 import { Button } from '@/components/ui/button';
 import {
@@ -62,7 +63,12 @@ export function AccountMenu({ withNav = true }: { withNav?: boolean }) {
           </DropdownMenuContent>
         </DropdownMenu>
       )}
-      {withNav && <NavLinks />}
+      {withNav && (
+        <>
+          <NavLinks />
+          <LanguageSelect />
+        </>
+      )}
     </div>
   );
 }

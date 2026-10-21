@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import { AccountMenu } from '@/components/workspace/account-menu';
 import { cn } from '@/lib/utils';
+import { LanguageSelect } from './language-select';
 import { NavLinks } from './nav-links';
 
 /** Pages next to the map (Home, Overview, Activity, People & access): top bar + title. */
@@ -31,6 +32,7 @@ export function PageFrame({
           <div className="min-w-0 flex-1">
             <NavLinks orientation="horizontal" />
           </div>
+          <LanguageSelect compact />
           <div className="w-52 shrink-0 max-sm:w-40">
             <AccountMenu withNav={false} />
           </div>

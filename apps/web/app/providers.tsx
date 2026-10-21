@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, type ReactNode } from 'react';
+import { ErrorReporter } from '@/components/common/error-reporter';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AuthModeProvider, type AuthMode } from '@/lib/auth-mode';
@@ -22,6 +23,7 @@ export function Providers({ children, authMode }: { children: ReactNode; authMod
           <TooltipProvider delayDuration={400}>
             {children}
             <Toaster position="bottom-center" />
+            <ErrorReporter />
           </TooltipProvider>
         </IdentityProvider>
       </QueryClientProvider>

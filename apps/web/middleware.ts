@@ -5,7 +5,12 @@ import { readSession, SESSION_COOKIE } from '@/lib/server/session';
 export async function middleware(req: NextRequest) {
   if (process.env.AUTH_MODE !== 'entra') return NextResponse.next();
   const { pathname } = req.nextUrl;
-  if (pathname === '/signin' || pathname.startsWith('/auth/') || pathname.startsWith('/api/'))
+  if (
+    pathname === '/signin' ||
+    pathname === '/client-errors' || // also from the sign-in page; rate-limited, nothing personal
+    pathname.startsWith('/auth/') ||
+    pathname.startsWith('/api/')
+  )
     return NextResponse.next();
   const user = await readSession(
     req.cookies.get(SESSION_COOKIE)?.value,

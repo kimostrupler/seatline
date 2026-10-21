@@ -79,18 +79,23 @@ current_image() { az "$@" -g "$RG" --query "properties.template.containers[0].im
 API_IMAGE=$(current_image containerapp show -n api)
 WEB_IMAGE=$(current_image containerapp show -n web)
 PLACEHOLDER="mcr.microsoft.com/k8se/quickstart:latest"
+# keep an own web address set up with custom-domain.sh
+CUSTOM_DOMAIN=$(az containerapp show -n web -g "$RG" --query "properties.configuration.ingress.customDomains[0].name" -o tsv 2>/dev/null || true)
+CUSTOM_CERT=$(az containerapp show -n web -g "$RG" --query "properties.configuration.ingress.customDomains[0].certificateId" -o tsv 2>/dev/null || true)
 az deployment group create -g "$RG" -n seatline -f "$HERE/main.bicep" -o none --parameters \
   location="$LOCATION" \
   apiImage="${API_IMAGE:-$PLACEHOLDER}" webImage="${WEB_IMAGE:-$PLACEHOLDER}" \
   pgAdminPassword="$PG_PASSWORD" appDbPassword="$APP_DB_PASSWORD" \
   sessionSecret="$SESSION_SECRET" internalAuthSecret="$INTERNAL_SECRET" \
-  entraClientId="$APP_ID" entraClientSecret="$ENTRA_SECRET"
+  entraClientId="$APP_ID" entraClientSecret="$ENTRA_SECRET" \
+  customDomain="$CUSTOM_DOMAIN" customDomainCertificateId="$CUSTOM_CERT"
 output() { az deployment group show -g "$RG" -n seatline --query "properties.outputs.$1.value" -o tsv; }
 WEB_URL=$(output webUrl)
 REGISTRY=$(output registryName)
 
 say "5/6 Sign-in return addresses for $WEB_URL"
-az ad app update --id "$APP_ID" --web-redirect-uris "$WEB_URL/auth/callback" "$WEB_URL/people"
+AZURE_WEB_URL=$(output azureWebUrl)
+az ad app update --id "$APP_ID" --web-redirect-uris $(for u in $(echo "$WEB_URL $AZURE_WEB_URL" | tr ' ' '\n' | sort -u); do echo "$u/auth/callback $u/people"; done)
 
 say "6/6 Deploy access for GitHub ($REPO, branch main) — no passwords (OpenID Connect)"
 DEPLOY_ID=$(az ad app list --display-name "$DEPLOY_APP_NAME" --query "[0].appId" -o tsv)

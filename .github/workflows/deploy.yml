@@ -72,10 +72,21 @@ jobs:
           exit 1
 
       - name: Update the apps
+        env:
+          # GitHub variable KEEP_WARM=true keeps one copy of each app running (faster first
+          # page, ~CHF 10–20/month more); otherwise they sleep when nobody uses them.
+          MIN_REPLICAS: ${{ vars.KEEP_WARM == 'true' && '1' || '0' }}
         run: |
-          az containerapp update -n api -g "$RG" --image "$API_IMAGE" -o none
-          az containerapp update -n web -g "$RG" --image "$WEB_IMAGE" -o none
+          az containerapp update -n api -g "$RG" --image "$API_IMAGE" --min-replicas "$MIN_REPLICAS" -o none
+          az containerapp update -n web -g "$RG" --image "$WEB_IMAGE" --min-replicas "$MIN_REPLICAS" -o none
           az containerapp job update -n nightly-sync -g "$RG" --image "$API_IMAGE" -o none
+
+      - name: Error alerts by e-mail
+        if: vars.ALERT_EMAIL != ''
+        env:
+          ALERT_EMAIL: ${{ vars.ALERT_EMAIL }}
+        # an alert problem must not block a release: warn instead
+        run: bash infra/azure/alerts.sh || echo "::warning::Could not set up the error alert — see the log above"
 
       - name: Check the site answers
         run: |
