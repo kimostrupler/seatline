@@ -38,8 +38,7 @@ export function Workspace() {
 
   const me = useMe();
   const canEdit = me.data?.role === 'admin' || me.data?.role === 'editor';
-  // The layout editor needs a mouse or trackpad and room to work: desktop only.
-  const editing = canEdit && isDesktop && params.mode === 'edit';
+  const editing = canEdit && params.mode === 'edit';
   const buildings = useBuildings();
   const buildingId =
     params.building && buildings.data?.some((b) => b.id === params.building)
@@ -95,7 +94,7 @@ export function Workspace() {
           onOpenChange={(open) => setDialog(open ? 'floor' : null)}
           buildingId={buildingId}
           floors={floors.data ?? []}
-          onCreated={(f) => update({ floor: f.id, seat: null, mode: isDesktop ? 'edit' : null })}
+          onCreated={(f) => update({ floor: f.id, seat: null, mode: 'edit' })}
         />
       )}
     </div>
@@ -112,7 +111,7 @@ export function Workspace() {
   const headerEnd = (
     <>
       {me.data?.role === 'viewer' && <Badge variant="secondary">{t('devLogin.role.viewer')}</Badge>}
-      {canEdit && isDesktop && map.data && (
+      {canEdit && map.data && (
         <ModeToggle
           editing={editing}
           onChange={(edit) => update({ mode: edit ? 'edit' : null, seat: null, person: null })}
@@ -156,10 +155,9 @@ export function Workspace() {
     <EmptyDetails />
   );
 
-  const editLayout =
-    canEdit && isDesktop
-      ? { label: t('mode.edit'), onClick: () => update({ mode: 'edit' }) }
-      : undefined;
+  const editLayout = canEdit
+    ? { label: t('mode.edit'), onClick: () => update({ mode: 'edit' }) }
+    : undefined;
 
   return (
     <Shell

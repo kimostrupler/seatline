@@ -75,11 +75,14 @@ Changing the schema: edit `apps/api/prisma/schema.prisma`, then
 - Left: dev sign-in, building and floor pickers, people search (drag a person onto a seat).
 - Centre: floor map — scroll to zoom, drag to pan, drag someone onto another seat to move them.
 - Right: the selected seat or person, with actions and full history. Every change can be undone.
-- **Edit layout** (editors, desktop): switch at the top of the map. Tools on the left —
-  select/move (V), add seat (S), draw room by corners (P) or as a rectangle (B), ruler to set
-  the scale (M). R rotates, ⌘D duplicates, ⌫ deletes, arrows nudge, ⌘Z / ⇧⌘Z undo/redo,
-  hold Space to pan. Changes save instantly; the inspector on the right edits the selection
-  or, with nothing selected, the floor (plan image, scale) and building.
+- **Edit layout** (editors; desktop, tablet and phone): switch at the top of the map. Tools on
+  the left — select/move (V), add seat (S), draw room by corners (P) or as a rectangle (B), ruler
+  to set the scale (M). ⌘C / ⌘X / ⌘V copy, cut and paste (also onto another floor), ⌘D
+  duplicates, R rotates, ⌫ deletes, arrows nudge, ⌘Z / ⇧⌘Z undo/redo, hold Space to pan,
+  **?** lists every shortcut. Drag a room's corners or sides to resize it (or type its size).
+  Several seats can be aligned and spaced evenly; "Add a row of desks" adds desks next to a
+  seat. Changes save instantly; the inspector (right, or under the map on phones) edits the
+  selection or, with nothing selected, the floor (plan image, scale) and building.
 - Light and dark follow the system setting. All text lives in `apps/web/messages/en.json`.
 - The browser calls `/api/*` on the web app, which forwards to the API (`API_URL`, read at runtime).
 

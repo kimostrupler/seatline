@@ -1,9 +1,27 @@
 'use client';
 
 import { polygonArea, ROOM_TYPES, SEAT_TYPES } from '@seatline/shared';
-import { Copy, ImageOff, RotateCcw, RotateCw, Trash2, Upload } from 'lucide-react';
+import {
+  AlignCenterHorizontal,
+  AlignCenterVertical,
+  AlignEndHorizontal,
+  AlignEndVertical,
+  AlignHorizontalDistributeCenter,
+  AlignStartHorizontal,
+  AlignStartVertical,
+  AlignVerticalDistributeCenter,
+  ArrowDown,
+  ArrowRight,
+  ClipboardCopy,
+  Copy,
+  ImageOff,
+  RotateCcw,
+  RotateCw,
+  Trash2,
+  Upload,
+} from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useId, useRef, type ReactNode } from 'react';
+import { useId, useRef, useState, type ReactNode } from 'react';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -16,6 +34,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -27,9 +46,20 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
-import { changes, deleteSelection, duplicateSelection, rotateSeats } from '@/lib/editor/ops';
+import {
+  alignSeats,
+  changes,
+  deleteSelection,
+  distributeSeats,
+  duplicateSelection,
+  polygonBounds,
+  resizePolygon,
+  rotateSeats,
+  seatRow,
+  type Align,
+} from '@/lib/editor/ops';
 import { NO_SELECTION, type LayoutEditorState } from '@/lib/editor/use-layout-editor';
-import { SEAT_W } from '@/lib/map-geometry';
+import { SEAT_H, SEAT_W } from '@/lib/map-geometry';
 import {
   useDeleteBuilding,
   useDeleteFloor,
@@ -42,6 +72,7 @@ import type { Building, FloorMap, Room, Seat } from '@/lib/types';
 import { platformKeys } from '@/lib/platform-keys';
 import { usePlanOpacity } from '@/lib/use-plan-opacity';
 import { CommitInput } from './commit-input';
+import type { ClipboardActions } from './use-clipboard';
 
 const errorText = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
@@ -49,12 +80,14 @@ export function Inspector({
   map,
   building,
   editor,
+  clipboard,
   onFloorDeleted,
   onBuildingDeleted,
 }: {
   map: FloorMap;
   building: Building | undefined;
   editor: LayoutEditorState;
+  clipboard: ClipboardActions;
   onFloorDeleted: () => void;
   onBuildingDeleted: () => void;
 }) {
@@ -74,14 +107,14 @@ export function Inspector({
   return (
     <div className="grid gap-4" data-testid="inspector">
       {seats.length === 1 && rooms.length === 0 ? (
-        <SeatForm key={seats[0]!.id} seat={seats[0]!} editor={editor} />
+        <SeatForm key={seats[0]!.id} seat={seats[0]!} editor={editor} level={map.floor.level} />
       ) : rooms.length === 1 && seats.length === 0 ? (
         <RoomForm key={rooms[0]!.id} room={rooms[0]!} editor={editor} scale={map.floor.scale} />
       ) : (
         <MultiForm seats={seats} rooms={rooms} editor={editor} />
       )}
       <Separator />
-      <SelectionActions editor={editor} level={map.floor.level} />
+      <SelectionActions editor={editor} level={map.floor.level} clipboard={clipboard} />
     </div>
   );
 }
@@ -97,7 +130,15 @@ function Field({ label, children, hint }: { label: string; children: ReactNode; 
   );
 }
 
-function SeatForm({ seat, editor }: { seat: Seat; editor: LayoutEditorState }) {
+function SeatForm({
+  seat,
+  editor,
+  level,
+}: {
+  seat: Seat;
+  editor: LayoutEditorState;
+  level: number;
+}) {
   const t = useTranslations('inspector');
   const room = editor.doc.rooms.find((r) => r.id === seat.roomId);
   const update = (data: Partial<Pick<Seat, 'label' | 'type' | 'status' | 'rotation'>>) =>
@@ -142,7 +183,58 @@ function SeatForm({ seat, editor }: { seat: Seat; editor: LayoutEditorState }) {
       <Field label={t('inRoom')}>
         <p className="text-sm">{room?.name ?? t('noRoom')}</p>
       </Field>
+      <SeatRowField seat={seat} editor={editor} level={level} />
     </div>
+  );
+}
+
+/** "Add 3 more desks to the right / below" — quick rows of desks. */
+function SeatRowField({
+  seat,
+  editor,
+  level,
+}: {
+  seat: Seat;
+  editor: LayoutEditorState;
+  level: number;
+}) {
+  const t = useTranslations('inspector');
+  const [count, setCount] = useState('3');
+  const n = Math.min(50, Math.max(1, Math.floor(Number(count)) || 1));
+  const add = (direction: 'right' | 'down') => {
+    const { changes: c, selection } = seatRow(
+      editor.doc,
+      seat,
+      n,
+      direction,
+      level,
+      { width: SEAT_W, height: SEAT_H, gap: 28 },
+      () => crypto.randomUUID(),
+    );
+    editor.commit(c);
+    editor.setSelection(selection);
+  };
+  return (
+    <Field label={t('addRow')} hint={t('addRowHint')}>
+      <div className="flex items-center gap-2">
+        <Input
+          type="number"
+          inputMode="numeric"
+          min={1}
+          max={50}
+          className="w-20"
+          aria-label={t('rowCount')}
+          value={count}
+          onChange={(e) => setCount(e.target.value)}
+        />
+        <Button variant="outline" onClick={() => add('right')}>
+          <ArrowRight /> {t('toTheRight')}
+        </Button>
+        <Button variant="outline" onClick={() => add('down')}>
+          <ArrowDown /> {t('below')}
+        </Button>
+      </div>
+    </Field>
   );
 }
 
@@ -183,6 +275,7 @@ function RoomForm({
           </SelectContent>
         </Select>
       </Field>
+      <RoomSize room={room} editor={editor} scale={scale} />
       {scale && (
         <Field label={t('area')}>
           <p className="text-sm tabular-nums">
@@ -191,6 +284,106 @@ function RoomForm({
         </Field>
       )}
     </div>
+  );
+}
+
+/** Width × height of the room's outline, in metres once the floor has a scale. */
+function RoomSize({
+  room,
+  editor,
+  scale,
+}: {
+  room: Room;
+  editor: LayoutEditorState;
+  scale: number | null;
+}) {
+  const t = useTranslations('inspector');
+  const unit = scale ?? 1;
+  const b = polygonBounds(room.polygon);
+  const show = (v: number) => String(Math.round((v / unit) * 100) / 100);
+  const set = (axis: 'width' | 'height', text: string) => {
+    const v = Number(text.replace(',', '.'));
+    if (!Number.isFinite(v) || v <= 0) return;
+    const size = { width: b.width, height: b.height, [axis]: v * unit };
+    editor.commit(
+      changes({
+        rooms: {
+          update: [{ id: room.id, polygon: resizePolygon(room.polygon, size.width, size.height) }],
+        },
+      }),
+    );
+  };
+  return (
+    <Field label={scale ? t('sizeMetres') : t('sizeUnits')} hint={t('sizeHint')}>
+      <div className="flex items-center gap-2">
+        <CommitInput
+          aria-label={t('width')}
+          inputMode="decimal"
+          value={show(b.width)}
+          onCommit={(v) => set('width', v)}
+        />
+        <span className="text-muted-foreground">×</span>
+        <CommitInput
+          aria-label={t('height')}
+          inputMode="decimal"
+          value={show(b.height)}
+          onCommit={(v) => set('height', v)}
+        />
+      </div>
+    </Field>
+  );
+}
+
+const ALIGN: Array<{ how: Align; icon: typeof AlignStartVertical }> = [
+  { how: 'left', icon: AlignStartVertical },
+  { how: 'centerX', icon: AlignCenterVertical },
+  { how: 'right', icon: AlignEndVertical },
+  { how: 'top', icon: AlignStartHorizontal },
+  { how: 'middle', icon: AlignCenterHorizontal },
+  { how: 'bottom', icon: AlignEndHorizontal },
+];
+
+/** Line up and evenly space several seats. */
+function ArrangeButtons({ editor, seatIds }: { editor: LayoutEditorState; seatIds: string[] }) {
+  const t = useTranslations('inspector');
+  const icon = (
+    label: string,
+    onClick: () => void,
+    Icon: typeof AlignStartVertical,
+    off = false,
+  ) => (
+    <Button
+      key={label}
+      variant="outline"
+      size="icon"
+      aria-label={label}
+      title={label}
+      disabled={off}
+      onClick={onClick}
+    >
+      <Icon />
+    </Button>
+  );
+  return (
+    <Field label={t('arrange')}>
+      <div className="flex flex-wrap gap-1.5">
+        {ALIGN.map(({ how, icon: Icon }) =>
+          icon(t(`align.${how}`), () => editor.commit(alignSeats(editor.doc, seatIds, how)), Icon),
+        )}
+        {icon(
+          t('distributeX'),
+          () => editor.commit(distributeSeats(editor.doc, seatIds, 'x')),
+          AlignHorizontalDistributeCenter,
+          seatIds.length < 3,
+        )}
+        {icon(
+          t('distributeY'),
+          () => editor.commit(distributeSeats(editor.doc, seatIds, 'y')),
+          AlignVerticalDistributeCenter,
+          seatIds.length < 3,
+        )}
+      </div>
+    </Field>
   );
 }
 
@@ -215,6 +408,7 @@ function MultiForm({
       <h2 className="text-lg font-semibold">{title}</h2>
       {seats.length > 0 && (
         <>
+          {seats.length > 1 && <ArrangeButtons editor={editor} seatIds={seats.map((s) => s.id)} />}
           <Field label={t('rotation')}>
             <RotateButtons editor={editor} seatIds={seats.map((s) => s.id)} />
           </Field>
@@ -291,7 +485,15 @@ function BlockSwitch({ editor, seats }: { editor: LayoutEditorState; seats: Seat
   );
 }
 
-function SelectionActions({ editor, level }: { editor: LayoutEditorState; level: number }) {
+function SelectionActions({
+  editor,
+  level,
+  clipboard,
+}: {
+  editor: LayoutEditorState;
+  level: number;
+  clipboard: ClipboardActions;
+}) {
   const t = useTranslations('inspector');
   const te = useTranslations('editor');
   const occupied = editor.doc.seats.filter(
@@ -316,6 +518,9 @@ function SelectionActions({ editor, level }: { editor: LayoutEditorState; level:
         }}
       >
         <Copy /> {platformKeys(t('duplicate'))}
+      </Button>
+      <Button variant="outline" onClick={() => clipboard.copy() && toast(te('copied'))}>
+        <ClipboardCopy /> {platformKeys(t('copy'))}
       </Button>
       <Button
         variant="outline"

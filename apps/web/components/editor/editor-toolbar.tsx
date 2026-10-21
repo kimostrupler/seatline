@@ -2,17 +2,21 @@
 
 import {
   Armchair,
+  ClipboardPaste,
+  Keyboard,
   Loader2,
   MousePointer2,
   PenTool,
   Redo2,
   Ruler,
+  Settings2,
   Square,
   Undo2,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { MapButton } from '@/components/map/viewport';
 import { platformKeys } from '@/lib/platform-keys';
+import { useMediaQuery } from '@/lib/use-media-query';
 import type { Tool } from './layout-editor';
 
 const TOOLS: Array<{
@@ -43,6 +47,9 @@ export function EditorToolbar({
   canUndo,
   canRedo,
   saving,
+  onPaste,
+  onShortcuts,
+  onSettings,
 }: {
   tool: Tool;
   setTool: (tool: Tool) => void;
@@ -51,8 +58,13 @@ export function EditorToolbar({
   canUndo: boolean;
   canRedo: boolean;
   saving: boolean;
+  onPaste: () => void;
+  onShortcuts: () => void;
+  /** phones: open the floor's settings (on desktop they're always in the side panel) */
+  onSettings?: () => void;
 }) {
   const t = useTranslations('editor');
+  const touch = useMediaQuery('(pointer: coarse)', false);
   return (
     <>
       <div
@@ -88,13 +100,26 @@ export function EditorToolbar({
         >
           <Redo2 />
         </MapButton>
+        <div className="my-0.5 border-t" />
+        <MapButton label={platformKeys(t('paste'))} side="right" onClick={onPaste}>
+          <ClipboardPaste />
+        </MapButton>
+        {onSettings ? (
+          <MapButton label={t('floorSettings')} side="right" onClick={onSettings}>
+            <Settings2 />
+          </MapButton>
+        ) : (
+          <MapButton label={t('shortcuts')} side="right" onClick={onShortcuts}>
+            <Keyboard />
+          </MapButton>
+        )}
       </div>
       <p
         className="pointer-events-none absolute right-14 bottom-3 left-3 flex items-center gap-2 truncate text-xs text-muted-foreground"
         aria-live="polite"
       >
         <span className="truncate rounded-md border bg-background/95 px-2 py-1 shadow-sm">
-          {t(HINTS[tool])}
+          {t(touch && tool === 'select' ? 'hintSelectTouch' : HINTS[tool])}
         </span>
         <span
           className="flex shrink-0 items-center gap-1 rounded-md border bg-background/95 px-2 py-1 shadow-sm"

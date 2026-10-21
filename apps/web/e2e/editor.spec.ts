@@ -25,10 +25,13 @@ async function clickPlanKeepFocus(page: Page, p: { x: number; y: number }) {
   const s = await toScreen(editor(page), p);
   await page.evaluate(({ x, y }) => {
     const target = document.elementFromPoint(x, y)!;
-    for (const type of ['mousedown', 'mouseup', 'click'])
-      target.dispatchEvent(
-        new MouseEvent(type, { bubbles: true, cancelable: true, clientX: x, clientY: y }),
-      );
+    const init = { bubbles: true, cancelable: true, clientX: x, clientY: y };
+    const pointer = { ...init, pointerId: 1, pointerType: 'mouse', isPrimary: true };
+    target.dispatchEvent(new PointerEvent('pointerdown', pointer));
+    target.dispatchEvent(new MouseEvent('mousedown', init));
+    target.dispatchEvent(new PointerEvent('pointerup', pointer));
+    target.dispatchEvent(new MouseEvent('mouseup', init));
+    target.dispatchEvent(new MouseEvent('click', init));
   }, s);
 }
 
@@ -119,6 +122,69 @@ test('a new label is kept when you click on the map without pressing Enter', asy
     .toBe('B2');
 });
 
+test('copy a seat and paste it on another floor', async ({ page }) => {
+  const seat = (await floorMap(page)).seats.find((s) => s.label === '1.04')!;
+  await clickPlan(page, seat);
+  await page.keyboard.press('ControlOrMeta+c');
+  await page.getByTestId('floor-select').click();
+  await page.getByRole('option', { name: '2. OG' }).click();
+  await expect(page.getByTestId('layout-editor').locator('canvas').first()).toBeVisible();
+  await expect.poll(async () => (await floorMap(page)).seats[0]?.label).toMatch(/^2\./);
+
+  await page.keyboard.press('ControlOrMeta+v');
+  // 2.04 already stands there: the copy moves aside and takes the next free label
+  await expect(page.getByTestId('inspector').getByRole('heading')).toHaveText('Seat 2.09');
+  await saved(page);
+  const pasted = (await floorMap(page)).seats.find((s) => s.label === '2.09');
+  expect(pasted).toMatchObject({ x: seat.x + 80, y: seat.y });
+});
+
+test('resize a room by dragging its side, or by typing its size', async ({ page }) => {
+  const room = () => floorMap(page).then((m) => m.rooms.find((r) => r.name === 'Meeting Rigi')!);
+  await clickPlan(page, { x: 975, y: 175 }); // inside the empty meeting room
+  await expect(page.getByTestId('inspector').getByRole('heading')).toHaveText('Meeting Rigi');
+
+  await dragPlan(page, { x: 1150, y: 175 }, { x: 1250, y: 175 }); // right side's handle
+  await saved(page);
+  expect((await room()).polygon).toEqual([
+    { x: 800, y: 50 },
+    { x: 1250, y: 50 },
+    { x: 1250, y: 300 },
+    { x: 800, y: 300 },
+  ]);
+
+  // scale is 50 units per metre: 4 m deep = 200 units
+  const height = page.getByTestId('inspector').getByRole('textbox', { name: 'Height' });
+  await expect(height).toHaveValue('5');
+  await height.fill('4');
+  await height.press('Enter');
+  await saved(page);
+  expect((await room()).polygon.map((p) => p.y)).toEqual([50, 50, 250, 250]);
+});
+
+test('align seats and add a row of desks', async ({ page }) => {
+  const map = await floorMap(page);
+  const a = map.seats.find((s) => s.label === '1.01')!;
+  const b = map.seats.find((s) => s.label === '1.06')!;
+  await clickPlan(page, a);
+  await page.keyboard.down('Shift');
+  await clickPlan(page, b);
+  await page.keyboard.up('Shift');
+  await page.getByRole('button', { name: 'Align left' }).click();
+  await saved(page);
+  expect((await floorMap(page)).seats.find((s) => s.id === b.id)!.x).toBe(a.x);
+
+  await clickPlan(page, { x: 975, y: 175 }); // select something else first
+  const free = (await floorMap(page)).seats.find((s) => s.label === '1.08')!;
+  await clickPlan(page, free);
+  const inspector = page.getByTestId('inspector');
+  await inspector.getByRole('spinbutton', { name: 'How many desks' }).fill('2');
+  await inspector.getByRole('button', { name: 'Below' }).click();
+  await saved(page);
+  const labels = (await floorMap(page)).seats.map((s) => s.label);
+  expect(labels).toEqual(expect.arrayContaining(['1.09', '1.10']));
+});
+
 test('seats with people can’t be deleted', async ({ page }) => {
   const seat = (await floorMap(page)).seats.find((s) => s.label === '1.01')!;
   await clickPlan(page, seat);
@@ -165,4 +231,20 @@ test('viewers don’t get the editor', async ({ page }) => {
   await expect(page.getByTestId('floor-map').locator('canvas').first()).toBeVisible();
   await expect(page.getByTestId('mode-edit')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'New building' })).toHaveCount(0);
+});
+
+test.describe('on a phone', () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
+
+  test('edit mode works with the inspector as a panel under the floor', async ({ page }) => {
+    const seat = (await floorMap(page)).seats.find((s) => s.label === '1.04')!;
+    await clickPlan(page, seat);
+    const panel = page.getByTestId('mobile-inspector');
+    await expect(panel.getByRole('heading')).toHaveText('Seat 1.04');
+    await panel.getByRole('textbox', { name: 'Label' }).fill('Window');
+    await panel.getByRole('button', { name: 'Close panel' }).click();
+    await expect(panel).toBeHidden();
+    await saved(page);
+    expect((await floorMap(page)).seats.find((s) => s.id === seat.id)?.label).toBe('Window');
+  });
 });

@@ -27,6 +27,55 @@ export function useViewport(bounds: Bounds | null, fitKey: string) {
     fit();
   }, [fitKey, size.width, fit]);
 
+  // Two fingers: pinch to zoom and move around (phones and tablets).
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    let last: { dist: number; center: { x: number; y: number } } | null = null;
+    const read = (e: TouchEvent) => {
+      const box = el.getBoundingClientRect();
+      const [a, b] = [e.touches[0]!, e.touches[1]!];
+      return {
+        dist: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY),
+        center: {
+          x: (a.clientX + b.clientX) / 2 - box.left,
+          y: (a.clientY + b.clientY) / 2 - box.top,
+        },
+      };
+    };
+    const onMove = (e: TouchEvent) => {
+      if (e.touches.length !== 2) {
+        last = null;
+        return;
+      }
+      e.preventDefault();
+      stageRef.current?.stopDrag();
+      const now = read(e);
+      const prev = last;
+      if (prev && prev.dist > 0)
+        setView((v) => {
+          const z = zoomAt(v, now.dist / prev.dist, now.center);
+          return {
+            ...z,
+            x: z.x + now.center.x - prev.center.x,
+            y: z.y + now.center.y - prev.center.y,
+          };
+        });
+      last = now;
+    };
+    const onEnd = (e: TouchEvent) => {
+      if (e.touches.length < 2) last = null;
+    };
+    el.addEventListener('touchmove', onMove, { passive: false });
+    el.addEventListener('touchend', onEnd);
+    el.addEventListener('touchcancel', onEnd);
+    return () => {
+      el.removeEventListener('touchmove', onMove);
+      el.removeEventListener('touchend', onEnd);
+      el.removeEventListener('touchcancel', onEnd);
+    };
+  }, [containerRef]);
+
   const zoomBy = (factor: number) =>
     setView((v) => zoomAt(v, factor, { x: size.width / 2, y: size.height / 2 }));
 
