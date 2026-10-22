@@ -33,6 +33,7 @@ export default defineConfig({
       // e-mails land as JSON files here (test/mail.ts reads them)
       MAIL_OUTBOX: join(tmpdir(), 'seatline-test-mail'),
       APP_URL: 'https://app.seatline.test',
+      DESK_MAIL_DELAY_SECONDS: '0',
     },
   },
 });

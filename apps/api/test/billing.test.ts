@@ -4,6 +4,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { billingState } from '../src/billing/billing-state';
 import { BillingService } from '../src/billing/billing.service';
 import { startFakeStripe } from './fake-stripe';
+import { clearMails, sentMails } from './mail';
+import { TenantDb } from '../src/db/tenant-db.service';
 import { api, appDb, createApp, createTenant, owner, resetDb, type Fixture } from './helpers';
 
 const WEBHOOK_SECRET = 'whsec_test_secret';
@@ -204,5 +206,36 @@ describe('billing', () => {
     expect(billingState({ configured: true, trialEndsAt: past, status: 'trialing' })).toBe(
       'active',
     );
+  });
+
+  it('reminds the admins 7 days and 1 day before the trial ends, each once', async () => {
+    await clearMails();
+    const billing = app.get(BillingService);
+    const endsIn = (days: number) =>
+      owner.tenant.update({
+        where: { id: a.tenantId },
+        data: { trialEndsAt: new Date(Date.now() + days * 86_400_000 - 60_000) },
+      });
+    await endsIn(20);
+    expect(await app.get(TenantDb).listTrialTenants()).not.toContain(a.tenantId);
+    await endsIn(7);
+    expect(await app.get(TenantDb).listTrialTenants()).toContain(a.tenantId);
+    expect(await billing.remindTrial(a.tenantId)).toBe(7);
+    expect(await billing.remindTrial(a.tenantId)).toBeNull(); // only once
+    await endsIn(1);
+    expect(await billing.remindTrial(a.tenantId)).toBe(1);
+    const mails = (await sentMails()).filter((m) => m.to === 'admin@alpha.example');
+    expect(mails.map((m) => m.subject)).toEqual([
+      'Ihre Seatline-Testphase endet in 7 Tagen',
+      'Ihre Seatline-Testphase endet morgen',
+    ]);
+    expect(mails[0]!.text).toContain('https://app.seatline.test/billing');
+    // a subscribed workspace gets nothing
+    await owner.tenant.update({
+      where: { id: b.tenantId },
+      data: { stripeSubscriptionId: 'sub_b', trialEndsAt: new Date(Date.now() + 86_400_000) },
+    });
+    expect(await app.get(TenantDb).listTrialTenants()).not.toContain(b.tenantId);
+    expect(await billing.remindTrial(b.tenantId)).toBeNull();
   });
 });

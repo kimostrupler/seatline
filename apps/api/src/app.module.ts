@@ -22,6 +22,7 @@ import { IdentityService } from './auth/identity.service';
 import { EmailSignInService } from './auth/email-sign-in.service';
 import { MailService } from './mail/mail.service';
 import { NotifyService } from './mail/notify.service';
+import { DeskMailService } from './mail/desk-mail.service';
 import { BuildingsController } from './buildings/buildings.controller';
 import { BuildingsService } from './buildings/buildings.service';
 import { PrismaExceptionFilter } from './common/prisma-exception.filter';
@@ -88,6 +89,7 @@ import { PeopleSyncService } from './sync/people-sync.service';
     EmailSignInService,
     MailService,
     NotifyService,
+    DeskMailService,
     GraphClient,
     PeopleSyncService,
     JobQueue,

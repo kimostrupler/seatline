@@ -74,6 +74,10 @@ model Tenant {
   notifyEmails           String[]  @default([]) @map("notify_emails")
   notifyEvents           String[]  @default(["left", "joined", "team", "moves"]) @map("notify_events")
   notifyLanguage         String    @default("de") @map("notify_language")
+  /// people get an e-mail when they get a new desk
+  notifyPeople           Boolean   @default(true) @map("notify_people")
+  /// last trial reminder sent (days left: 7, then 1)
+  trialReminded          Int?      @map("trial_reminded") @db.SmallInt
   /// free trial until (new workspaces: 30 days); afterwards a subscription is needed
   trialEndsAt            DateTime  @default(dbgenerated("(now() + '30 days'::interval)")) @map("trial_ends_at") @db.Timestamptz(3)
   stripeCustomerId       String?   @unique @map("stripe_customer_id")

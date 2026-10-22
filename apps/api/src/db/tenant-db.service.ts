@@ -54,6 +54,13 @@ export class TenantDb {
     return rows.map((r) => r.id);
   }
 
+  /** Workspaces whose free trial ends within 8 days, without a subscription. */
+  async listTrialTenants(): Promise<string[]> {
+    const rows = await this.prisma.$queryRaw<{ id: string }[]>`
+      SELECT id FROM list_trial_tenants()`;
+    return rows.map((r) => r.id);
+  }
+
   /** Workspaces that limit how long history is kept (months). */
   listRetentionTenants() {
     return this.prisma.$queryRaw<{ id: string; months: number }[]>`

@@ -344,6 +344,7 @@ export function useUpdateTenant() {
       notifyEmails?: string[];
       notifyEvents?: TenantInfo['notifyEvents'];
       notifyLanguage?: TenantInfo['notifyLanguage'];
+      notifyPeople?: boolean;
     }) => api<TenantInfo>('/tenant', { method: 'PATCH', body: input }),
     onSettled: () => qc.invalidateQueries({ queryKey: ['tenant'] }),
   });
@@ -469,6 +470,36 @@ export interface NewPerson {
 export const useCreatePerson = () =>
   usePeopleMutation((body: NewPerson) =>
     api<DirectoryPerson & { invited: boolean }>('/people', { method: 'POST', body }),
+  );
+
+export interface ImportRow {
+  line: number;
+  displayName: string;
+  email: string;
+  department: string | null;
+  jobTitle: string | null;
+  problem: 'no_name' | 'bad_email' | null;
+  status: 'new' | 'exists' | 'duplicate' | 'invalid';
+}
+
+/** Read a spreadsheet of people (nothing is saved yet). */
+export const useReadImport = () =>
+  useMutation({
+    mutationFn: (file: File) => apiUpload<{ rows: ImportRow[] }>('/people/import/read', file),
+  });
+
+export const useImportPeople = () =>
+  usePeopleMutation(
+    (body: {
+      people: Array<Pick<ImportRow, 'displayName' | 'email' | 'department' | 'jobTitle'>>;
+      appRole: DirectoryPerson['appRole'];
+      invite: boolean;
+      language: string;
+    }) =>
+      api<{ created: number; skipped: number; invited: number }>('/people/import', {
+        method: 'POST',
+        body,
+      }),
   );
 
 export const useUpdatePerson = () =>

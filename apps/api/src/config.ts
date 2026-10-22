@@ -18,6 +18,8 @@ const envSchema = z.object({
   ENTRA_LOGIN_URL: z.url().default('https://login.microsoftonline.com'),
   GRAPH_URL: z.url().default('https://graph.microsoft.com'),
   /** Run the background job worker (pg-boss) inside this process. */
+  /** "your new desk" e-mails wait this long, so an undone move sends nothing */
+  DESK_MAIL_DELAY_SECONDS: z.coerce.number().int().min(0).default(120),
   JOBS_ENABLED: z
     .enum(['true', 'false'])
     .default('true')

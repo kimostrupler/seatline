@@ -233,6 +233,26 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   saved (never undoes it): manual leave/add/team, HR changes (incl. "leaving on"), sync
   (joined/left), carried-out move plans (who moved from → to). One plain-text e-mail per batch.
 
+## Customer e-mails, people import, security
+
+- **Your new desk** (`mail/desk-mail.service.ts`, text `deskMail`): a single move queues a pg-boss
+  `desk-mail` job that runs after `DESK_MAIL_DELAY_SECONDS` (120; tests 0 = send at once). It
+  sends nothing if the assignment has ended (undo) or the person is back on the desk they had
+  within 15 min. Move plans send at once. Off per workspace: `tenants.notify_people`.
+- **Trial reminders**: nightly, `list_trial_tenants()` → `BillingService.remindTrial` e-mails the
+  admins 7 days and 1 day before (`trialReminderDue`, `tenants.trial_reminded`). Only when
+  billing and e-mail are set up; subscribed workspaces get nothing.
+- **People import** (`people/import-file.ts`, pure + unit-tested): Excel (exceljs) or CSV
+  (; , tab, quotes, UTF-8 or Windows-1252). Column titles en/de/fr ("Nom" next to "Prénom" = last
+  name). `POST /people/import/read` (multipart, saves nothing) returns each row's status (new /
+  exists / duplicate / invalid); `POST /people/import` adds the new ones in one transaction,
+  sends one "joined" notice and optional invitations. Manual add also sends "joined" now.
+- **Security headers** in `apps/web/next.config.ts`: CSP (self only, `blob:` images,
+  `frame-ancestors 'none'`), HSTS, nosniff, Referrer/Permissions-Policy, COOP. A new outside
+  host (script, font, image, API) must be added to the CSP or it's blocked.
+- **Dependabot** (`.github/dependabot.yml`): weekly grouped minor/patch PRs for npm, pip, Docker,
+  Actions; majors are skipped (read the changelog; react-konva must match Next's React).
+
 ## Activity
 
 - `GET /activity` reads `audit_log` (editors/admins, `@EditorsOnly`), newest first with a cursor,

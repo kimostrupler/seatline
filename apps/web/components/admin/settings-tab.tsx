@@ -138,6 +138,18 @@ function NoticesSection() {
             ))}
           </ul>
         </div>
+        <div className="grid gap-2 border-t pt-4">
+          <p className="text-sm font-medium">{t('people')}</p>
+          <label className="flex items-center gap-3 text-sm">
+            <Switch
+              checked={tenant.notifyPeople}
+              onCheckedChange={(notifyPeople) => void save({ notifyPeople })}
+              aria-label={t('deskMail')}
+            />
+            {t('deskMail')}
+          </label>
+          <p className="text-xs text-muted-foreground">{t('deskMailHint')}</p>
+        </div>
         <div className="grid gap-1.5">
           <label htmlFor="notice-language" className="text-sm font-medium">
             {t('language')}

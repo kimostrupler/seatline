@@ -166,6 +166,8 @@ export interface TenantInfo {
   notifyEmails: string[];
   notifyEvents: NotifyEvent[];
   notifyLanguage: 'en' | 'de' | 'fr';
+  /** people get an e-mail when they get a new desk */
+  notifyPeople: boolean;
   entraTenantId: string | null;
   peopleSyncedAt: string | null;
   peopleSyncStatus: {

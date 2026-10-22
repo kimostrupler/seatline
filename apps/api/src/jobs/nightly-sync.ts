@@ -1,7 +1,8 @@
 /**
  * Nightly: people sync for every workspace connected to Microsoft 365, then HR leaving dates
  * that have come, then the scheduled move plans that are due (after the sync, so people who left are already inactive), then the
- * privacy clean-up (history older than each workspace's retention period).
+ * privacy clean-up (history older than each workspace's retention period), billing (seat
+ * counts, trial reminders).
  * Runs as its own scheduled container (Azure Container Apps Job), so it works even
  * while the API is scaled to zero:  node dist/jobs/nightly-sync.js
  */
@@ -63,6 +64,17 @@ async function main() {
           if (r.changed) logger.log(`${tenantId}: now billed for ${r.seats} seats`);
         } catch (error) {
           logger.error(`${tenantId}: could not update the billed seats: ${String(error)}`);
+        }
+      }
+
+    // billing: tell admins their free trial ends soon (7 days, then 1 day before)
+    if (billing.configured)
+      for (const tenantId of await app.get(TenantDb).listTrialTenants()) {
+        try {
+          const days = await billing.remindTrial(tenantId);
+          if (days) logger.log(`${tenantId}: trial reminder sent (${days} days left)`);
+        } catch (error) {
+          logger.error(`${tenantId}: could not send the trial reminder: ${String(error)}`);
         }
       }
   } finally {

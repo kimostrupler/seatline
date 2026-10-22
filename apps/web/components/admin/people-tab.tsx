@@ -8,6 +8,7 @@ import {
   Mail,
   Pencil,
   Undo2,
+  FileSpreadsheet,
   UserPlus,
   Users,
   UserX,
@@ -68,6 +69,7 @@ import {
 import { teamSlots } from '@/lib/team-colors';
 import type { DirectoryPerson } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { ImportPeopleDialog } from './import-dialog';
 import { AddPersonDialog, EditPersonDialog } from './person-dialogs';
 
 const NONE = 'none';
@@ -103,6 +105,7 @@ export function PeopleTab() {
   const setRole = useSetRole();
   const colorOf = useTeamColor();
   const [adding, setAdding] = useState(false);
+  const [importing, setImporting] = useState(false);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
   const q = useDeferredValue(search.trim().toLowerCase());
@@ -150,10 +153,18 @@ export function PeopleTab() {
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
-        <Button className="sm:ml-auto" onClick={() => setAdding(true)}>
-          <UserPlus /> {t('add.button')}
-        </Button>
+        <div className="flex gap-2 sm:ml-auto">
+          <Button variant="outline" onClick={() => setImporting(true)}>
+            <FileSpreadsheet /> {t('import.button')}
+          </Button>
+          <Button onClick={() => setAdding(true)}>
+            <UserPlus /> {t('add.button')}
+          </Button>
+        </div>
       </div>
+      {importing && (
+        <ImportPeopleDialog canInvite={emailWorkspace} onClose={() => setImporting(false)} />
+      )}
       {adding && (
         <AddPersonDialog
           teams={teams}

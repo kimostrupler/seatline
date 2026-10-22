@@ -10,7 +10,18 @@ import { audit } from '../common/audit';
 import { orNotFound } from '../common/errors';
 import { loadConfig } from '../config';
 import { TenantDb } from '../db/tenant-db.service';
+import { MailService } from '../mail/mail.service';
+import { trialMail } from '../mail/texts';
+import type { MailLanguage } from '@seatline/shared';
 import { billingState } from './billing-state';
+
+/** Which trial reminder is due (7 or 1 days left), or null; each is sent once. */
+export function trialReminderDue(daysLeft: number, reminded: number | null): 7 | 1 | null {
+  if (daysLeft < 1) return null;
+  if (daysLeft <= 1) return reminded === 1 ? null : 1;
+  if (daysLeft <= 7) return reminded == null ? 7 : null;
+  return null;
+}
 
 const billingSelect = {
   id: true,
@@ -49,7 +60,47 @@ export class BillingService {
   private client: Stripe | null = null;
   private price: Promise<Stripe.Price> | null = null;
 
-  constructor(private readonly db: TenantDb) {}
+  constructor(
+    private readonly db: TenantDb,
+    private readonly mail: MailService,
+  ) {}
+
+  /**
+   * Nightly: remind the admins that the free trial ends soon — 7 days before, then the day
+   * before (each once). Workspaces with a subscription get nothing.
+   */
+  async remindTrial(tenantId: string, now = new Date()): Promise<number | null> {
+    if (!this.configured || !this.mail.configured) return null;
+    const { tenant, admins } = await this.db.run(tenantId, async (tx) => ({
+      tenant: await tx.tenant.findUniqueOrThrow({
+        where: { id: tenantId },
+        select: {
+          name: true,
+          trialEndsAt: true,
+          trialReminded: true,
+          stripeSubscriptionId: true,
+          notifyLanguage: true,
+        },
+      }),
+      admins: await tx.person.findMany({
+        where: { tenantId, appRole: 'admin', active: true, forgottenAt: null },
+        select: { email: true },
+      }),
+    }));
+    if (tenant.stripeSubscriptionId) return null;
+    const left = Math.ceil((tenant.trialEndsAt.getTime() - now.getTime()) / 86_400_000);
+    const due = trialReminderDue(left, tenant.trialReminded);
+    if (!due || !admins.length) return null;
+    const link = `${this.mail.appUrl}/billing`;
+    for (const admin of admins)
+      await this.mail.send(
+        trialMail(admin.email, tenant.name, left, link, tenant.notifyLanguage as MailLanguage),
+      );
+    await this.db.run(tenantId, (tx) =>
+      tx.tenant.update({ where: { id: tenantId }, data: { trialReminded: due } }),
+    );
+    return due;
+  }
 
   get configured() {
     const c = this.config;

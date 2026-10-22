@@ -235,6 +235,8 @@ export const updateTenantSchema = z.strictObject({
   notifyEmails: z.array(email).max(10).optional(),
   notifyEvents: z.array(z.enum(NOTIFY_EVENTS)).optional(),
   notifyLanguage: z.enum(MAIL_LANGUAGES).optional(),
+  /** people get an e-mail when they get a new desk */
+  notifyPeople: z.boolean().optional(),
   /** what people get when they sign in without a role; null = only invited people */
   defaultAppRole: z.enum(APP_ROLES).nullable().optional(),
   /** keep seat history and the activity log this long; null = forever */
@@ -258,6 +260,24 @@ export const createPersonSchema = z.strictObject({
   jobTitle: z.string().trim().max(200).nullish(),
   appRole: z.enum(APP_ROLES).nullable().default(null),
   /** e-mail them how to sign in (needs a role; workspaces with e-mail sign-in) */
+  invite: z.boolean().default(false),
+  language: z.enum(MAIL_LANGUAGES).default('en'),
+});
+
+/** Add many people at once (read from a spreadsheet by POST /people/import/read). */
+export const importPeopleSchema = z.strictObject({
+  people: z
+    .array(
+      z.strictObject({
+        displayName: personName,
+        email,
+        department: z.string().trim().max(100).nullish(),
+        jobTitle: z.string().trim().max(200).nullish(),
+      }),
+    )
+    .min(1)
+    .max(2000),
+  appRole: z.enum(APP_ROLES).nullable().default(null),
   invite: z.boolean().default(false),
   language: z.enum(MAIL_LANGUAGES).default('en'),
 });
@@ -453,6 +473,7 @@ export type RenameTeamInput = z.infer<typeof renameTeamSchema>;
 export type NotifyEvent = (typeof NOTIFY_EVENTS)[number];
 export type CreatePersonInput = z.infer<typeof createPersonSchema>;
 export type UpdatePersonInput = z.infer<typeof updatePersonSchema>;
+export type ImportPeopleInput = z.infer<typeof importPeopleSchema>;
 export type SetActiveInput = z.infer<typeof setActiveSchema>;
 export type InviteInput = z.infer<typeof inviteSchema>;
 export type ListPeopleQuery = z.infer<typeof listPeopleQuerySchema>;

@@ -550,6 +550,9 @@
         "team": "Jemand wechselt das Team",
         "moves": "Ein Umzugsplan wird ausgeführt"
       },
+      "people": "An die Personen selbst",
+      "deskMail": "Personen per E-Mail informieren, wenn sie einen neuen Platz erhalten",
+      "deskMailHint": "Zwei Minuten nach einem Umzug (nichts, wenn er rückgängig gemacht wurde) und wenn ein Umzugsplan ausgeführt wird. Wer Zugang hat, erhält einen Link zum Platz auf dem Plan.",
       "language": "Sprache der E-Mails",
       "languages": {
         "de": "Deutsch",
@@ -557,6 +560,58 @@
         "en": "English"
       },
       "hint": "Gesendet von hello@seatline.ch, eine E-Mail pro Änderung (oder eine für mehrere zusammen). Reiner Text, kein Tracking."
+    },
+    "import": {
+      "button": "Liste importieren",
+      "title": "Personen aus einer Liste importieren",
+      "body": "Eine Excel- oder CSV-Datei mit einer Spalte für den Namen und einer für die E-Mail-Adresse. Team und Funktion sind freiwillig.",
+      "pick": "Datei wählen",
+      "otherFile": "Andere Datei wählen",
+      "template": "Vorlage herunterladen",
+      "reading": "{file} wird gelesen…",
+      "hint": "Spaltentitel auf Deutsch, Französisch oder Englisch werden erkannt (z. B. Name, Vorname + Nachname, Prénom + Nom, E-Mail, Team, Abteilung).",
+      "columns": {
+        "name": "Name",
+        "email": "E-Mail",
+        "team": "Team",
+        "jobTitle": "Funktion",
+        "status": "Was passiert"
+      },
+      "example": {
+        "name": "Mia Schmid",
+        "email": "mia.schmid@firma.ch",
+        "team": "Verkauf",
+        "jobTitle": "Kundenberaterin"
+      },
+      "summary": {
+        "new": "{count, plural, one {# neue Person} other {# neue Personen}}",
+        "exists": "{count} schon in der Liste",
+        "duplicate": "{count} doppelt in der Datei",
+        "invalid": "{count, plural, one {# Zeile} other {# Zeilen}} mit Problem"
+      },
+      "status": {
+        "new": "Neu",
+        "exists": "Schon in der Liste",
+        "duplicate": "Doppelt in der Datei",
+        "invalid": "Problem"
+      },
+      "problems": {
+        "no_name": "Kein Name (Zeile {line})",
+        "bad_email": "E-Mail ungültig (Zeile {line})"
+      },
+      "role": "Ihre Rolle in Seatline",
+      "noRole": "Kein Zugang (kann einen Platz erhalten)",
+      "invite": "Per E-Mail zur Anmeldung einladen",
+      "cancel": "Abbrechen",
+      "submit": "{count, plural, =0 {Importieren} one {# Person importieren} other {# Personen importieren}}",
+      "done": "{count, plural, one {# Person hinzugefügt} other {# Personen hinzugefügt}}",
+      "doneInvited": "{count, plural, one {# Person hinzugefügt} other {# Personen hinzugefügt}}, {invited} eingeladen",
+      "errors": {
+        "no_columns": "Die Datei braucht eine Spalte für den Namen und eine für die E-Mail-Adresse.",
+        "bad_format": "Speichern Sie die Datei zuerst als Excel (.xlsx) oder CSV und versuchen Sie es nochmals.",
+        "empty": "Die Datei ist leer.",
+        "too_many": "Höchstens 2000 Personen pro Datei — teilen Sie die Liste auf."
+      }
     }
   },
   "shortcuts": {
