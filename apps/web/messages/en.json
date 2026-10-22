@@ -1240,7 +1240,8 @@
     "busy": "Too many demos right now. Please try again in a while.",
     "failed": "The demo couldn’t be opened. Please try again.",
     "banner": "This is a demo with sample data — it’s deleted after a day.",
-    "startTrial": "Start your free trial"
+    "startTrial": "Start your free trial",
+    "leave": "Leave the demo"
   },
   "planning": {
     "title": "Space planning",

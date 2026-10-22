@@ -227,6 +227,11 @@ export function FloorMap({
             scaleY={view.scale}
             draggable
             onWheel={vp.onWheel}
+            // follow the drag live, so the markers (an HTML layer) move with the floor
+            onDragMove={(e) => {
+              if (e.target === e.target.getStage())
+                vp.setView((v) => ({ ...v, x: e.target.x(), y: e.target.y() }));
+            }}
             onDragEnd={(e) => {
               if (e.target === e.target.getStage())
                 vp.setView((v) => ({ ...v, x: e.target.x(), y: e.target.y() }));

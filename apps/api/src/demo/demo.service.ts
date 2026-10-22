@@ -21,6 +21,8 @@ const TEXT = {
     teams: ['Sales', 'Engineering', 'Finance', 'People & Culture'],
     open: 'Open space',
     focus: 'Focus room',
+    hall: 'Reception & kitchen',
+    lounge: 'Lounge',
     plan: 'Desks for our new colleagues',
     reserved: 'New hire (starts next month)',
     moved: 'Closer to the team',
@@ -33,6 +35,8 @@ const TEXT = {
     teams: ['Verkauf', 'Entwicklung', 'Finanzen', 'Personal'],
     open: 'Grossraum',
     focus: 'Ruheraum',
+    hall: 'Empfang & Küche',
+    lounge: 'Lounge',
     plan: 'Plätze für neue Kolleginnen und Kollegen',
     reserved: 'Neue Mitarbeiterin (ab nächstem Monat)',
     moved: 'Näher beim Team',
@@ -45,6 +49,8 @@ const TEXT = {
     teams: ['Ventes', 'Développement', 'Finances', 'Ressources humaines'],
     open: 'Open space',
     focus: 'Salle calme',
+    hall: 'Accueil & cuisine',
+    lounge: 'Espace détente',
     plan: 'Des places pour nos nouveaux collègues',
     reserved: 'Nouvelle collaboratrice (dès le mois prochain)',
     moved: 'Plus près de l’équipe',
@@ -101,6 +107,7 @@ const FLOORS: FloorSpec[] = [
   {
     rooms: [
       { key: 'open', type: 'open_space', polygon: rect(40, 40, 760, 500), team: 0 },
+      { key: 'hall', type: 'other', polygon: rect(40, 540, 1160, 760) },
       {
         key: 'meet',
         type: 'meeting',
@@ -118,18 +125,20 @@ const FLOORS: FloorSpec[] = [
         equipment: ['screen'],
       },
     ],
+    // markers inside the room below the offices (they used to float on empty floor)
     markers: [
-      { kind: 'reception', x: 120, y: 620 },
-      { kind: 'kitchen', x: 980, y: 620 },
-      { kind: 'printer', x: 700, y: 620 },
-      { kind: 'exit', x: 1160, y: 760 },
-      { kind: 'first_aid', x: 300, y: 620 },
+      { kind: 'reception', x: 140, y: 650 },
+      { kind: 'first_aid', x: 320, y: 650 },
+      { kind: 'printer', x: 680, y: 650 },
+      { kind: 'kitchen', x: 960, y: 650 },
+      { kind: 'exit', x: 1110, y: 720 },
     ],
   },
   {
     rooms: [
       { key: 'open', type: 'open_space', polygon: rect(40, 40, 760, 500), team: 1 },
       { key: 'focus', type: 'other', polygon: rect(800, 40, 1160, 260) },
+      { key: 'lounge', type: 'other', polygon: rect(40, 540, 1160, 760) },
       {
         key: 'meet',
         type: 'meeting',
@@ -140,11 +149,11 @@ const FLOORS: FloorSpec[] = [
       },
     ],
     markers: [
-      { kind: 'coffee', x: 980, y: 620 },
-      { kind: 'printer', x: 700, y: 620 },
-      { kind: 'stairs', x: 120, y: 700 },
-      { kind: 'elevator', x: 220, y: 700 },
-      { kind: 'exit', x: 1160, y: 760 },
+      { kind: 'stairs', x: 140, y: 650 },
+      { kind: 'elevator', x: 260, y: 650 },
+      { kind: 'printer', x: 680, y: 650 },
+      { kind: 'coffee', x: 960, y: 650 },
+      { kind: 'exit', x: 1110, y: 720 },
     ],
   },
 ];
@@ -254,9 +263,13 @@ export class DemoService {
             floorId: floor.id,
             name:
               r.name ??
-              (r.key === 'focus'
-                ? t.focus
-                : `${t.open}${r.team !== undefined ? ` ${t.teams[r.team]}` : ''}`),
+              (r.key === 'hall'
+                ? t.hall
+                : r.key === 'lounge'
+                  ? t.lounge
+                  : r.key === 'focus'
+                    ? t.focus
+                    : `${t.open}${r.team !== undefined ? ` ${t.teams[r.team]}` : ''}`),
             type: r.type,
             polygon: r.polygon,
             capacity: r.capacity ?? null,
