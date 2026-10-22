@@ -1394,5 +1394,13 @@
   "loading": {
     "title": "Loading Seatline…",
     "hint": "Waking up after a quiet moment — this can take a few seconds."
+  },
+  "desk": {
+    "title": "Desk {label}",
+    "whoSitsHere": "Who sits here",
+    "free": "Nobody sits here — the desk is free.",
+    "showOnMap": "Show on the map",
+    "notFound": "Desk not found",
+    "notFoundHint": "This desk was removed, or it belongs to another workspace."
   }
 }

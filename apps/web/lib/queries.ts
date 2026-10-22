@@ -25,6 +25,7 @@ import type {
   MovePlanSummary,
   Overview,
   Person,
+  Seat,
   Stats,
   DirectoryPerson,
   TenantInfo,
@@ -38,6 +39,7 @@ export const keys = {
   floorMap: (floorId: string) => ['floorMap', floorId] as const,
   people: (search: string) => ['people', search] as const,
   person: (personId: string) => ['people', 'one', personId] as const,
+  seat: (seatId: string) => ['seat', seatId] as const,
   seatHistory: (seatId: string) => ['seatHistory', seatId] as const,
   personHistory: (personId: string) => ['personHistory', personId] as const,
   activity: (filters: ActivityFilters) => ['activity', filters] as const,
@@ -108,6 +110,14 @@ export const usePerson = (personId: string | undefined) =>
     queryKey: keys.person(personId ?? ''),
     queryFn: () => api<Person>(`/people/${personId}`),
     enabled: !!personId,
+  });
+
+/** One desk with its current state (the page a desk's QR code opens). */
+export const useSeat = (seatId: string | undefined) =>
+  useQuery({
+    queryKey: keys.seat(seatId ?? ''),
+    queryFn: () => api<Seat>(`/seats/${seatId}`),
+    enabled: !!seatId,
   });
 
 export const useSeatHistory = (seatId: string | undefined) =>
