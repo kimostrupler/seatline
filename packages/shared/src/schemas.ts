@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { APP_ROLES, ROOM_TYPES, SEAT_NUMBERINGS, SEAT_STATUSES, SEAT_TYPES } from './enums';
 
 const id = z.uuid();
+const calendarDay = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD');
 const name = z.string().trim().min(1).max(200);
 const note = z.string().trim().max(1000);
 
@@ -193,8 +194,15 @@ export const emailSignInVerifySchema = z.strictObject({
   token: z.string().regex(/^[A-Za-z0-9_-]{43}$/),
 });
 
+/** What e-mail notices are about (workspace setting). */
+export const NOTIFY_EVENTS = ['left', 'joined', 'team', 'moves'] as const;
+
 export const updateTenantSchema = z.strictObject({
   name: z.string().trim().min(2).max(200).optional(),
+  /** e-mail notices about changes go to these addresses (e.g. IT, facility management) */
+  notifyEmails: z.array(email).max(10).optional(),
+  notifyEvents: z.array(z.enum(NOTIFY_EVENTS)).optional(),
+  notifyLanguage: z.enum(MAIL_LANGUAGES).optional(),
   /** what people get when they sign in without a role; null = only invited people */
   defaultAppRole: z.enum(APP_ROLES).nullable().optional(),
   /** keep seat history and the activity log this long; null = forever */
@@ -234,6 +242,30 @@ export const setActiveSchema = z.strictObject({ active: z.boolean() });
 
 export const inviteSchema = z.strictObject({
   language: z.enum(MAIL_LANGUAGES).default('en'),
+});
+
+/**
+ * HR changes from the table in People & access: team, role and leaving date per person, saved
+ * together. A leaving date today or earlier lets the person go now; a later one at night then.
+ */
+export const peopleChangesSchema = z.strictObject({
+  changes: z
+    .array(
+      z.strictObject({
+        personId: id,
+        department: z.string().trim().max(100).nullable().optional(),
+        appRole: z.enum(APP_ROLES).nullable().optional(),
+        leavesOn: calendarDay.nullable().optional(),
+      }),
+    )
+    .min(1)
+    .max(500),
+});
+
+/** Rename a team for everyone in it (to: null removes the team from its people). */
+export const renameTeamSchema = z.strictObject({
+  from: z.string().trim().min(1).max(100),
+  to: z.string().trim().min(1).max(100).nullable(),
 });
 
 /** Set someone's team by hand, or go back to the one from Microsoft (`fromDirectory`). */
@@ -383,6 +415,9 @@ export type MailLanguage = (typeof MAIL_LANGUAGES)[number];
 export type UpdateTenantInput = z.infer<typeof updateTenantSchema>;
 export type SetRoleInput = z.infer<typeof setRoleSchema>;
 export type SetTeamInput = z.infer<typeof setTeamSchema>;
+export type PeopleChangesInput = z.infer<typeof peopleChangesSchema>;
+export type RenameTeamInput = z.infer<typeof renameTeamSchema>;
+export type NotifyEvent = (typeof NOTIFY_EVENTS)[number];
 export type CreatePersonInput = z.infer<typeof createPersonSchema>;
 export type UpdatePersonInput = z.infer<typeof updatePersonSchema>;
 export type SetActiveInput = z.infer<typeof setActiveSchema>;

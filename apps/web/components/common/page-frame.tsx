@@ -15,8 +15,8 @@ export function PageFrame({
   title: ReactNode;
   /** buttons on the right of the title */
   actions?: ReactNode;
-  /** dashboards use the full width */
-  wide?: boolean;
+  /** dashboards use the full width; lists and tables a bit more than text pages */
+  wide?: boolean | 'medium';
   children: ReactNode;
 }) {
   return (
@@ -24,7 +24,10 @@ export function PageFrame({
       <BillingBanner />
       <TopBar />
       <main
-        className={cn('mx-auto grid gap-8 px-4 py-6 sm:px-6', wide ? 'max-w-7xl' : 'max-w-3xl')}
+        className={cn(
+          'mx-auto grid gap-8 px-4 py-6 sm:px-6',
+          wide === 'medium' ? 'max-w-5xl' : wide ? 'max-w-7xl' : 'max-w-3xl',
+        )}
       >
         <div className="flex flex-wrap items-end justify-between gap-3">
           <h1 className="text-2xl font-semibold">{title}</h1>

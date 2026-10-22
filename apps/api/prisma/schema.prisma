@@ -70,6 +70,10 @@ model Tenant {
   peopleSyncStatus       Json?     @map("people_sync_status")
   /// keep seat history and the activity log this many months (null = forever); nightly purge
   historyRetentionMonths Int?      @default(24) @map("history_retention_months")
+  /// e-mail notices about changes (people leaving/joining, teams, moves) go to these addresses
+  notifyEmails           String[]  @default([]) @map("notify_emails")
+  notifyEvents           String[]  @default(["left", "joined", "team", "moves"]) @map("notify_events")
+  notifyLanguage         String    @default("de") @map("notify_language")
   /// free trial until (new workspaces: 30 days); afterwards a subscription is needed
   trialEndsAt            DateTime  @default(dbgenerated("(now() + '30 days'::interval)")) @map("trial_ends_at") @db.Timestamptz(3)
   stripeCustomerId       String?   @unique @map("stripe_customer_id")
@@ -110,6 +114,8 @@ model Person {
   syncedAt      DateTime? @map("synced_at") @db.Timestamptz(3)
   /// when the person was marked as having left (people sync)
   leftAt        DateTime? @map("left_at") @db.Timestamptz(3)
+  /// HR: the person leaves on this day (the nightly job frees their seat then)
+  leavesOn      DateTime? @map("leaves_on") @db.Date
   /// personal data removed ("forgotten"); the seat history stays, unnamed
   forgottenAt   DateTime? @map("forgotten_at") @db.Timestamptz(3)
 

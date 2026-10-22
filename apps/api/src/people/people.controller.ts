@@ -1,6 +1,10 @@
 import { Body, Controller, Get, HttpCode, Param, Patch, Post, Query } from '@nestjs/common';
 import {
   createPersonSchema,
+  peopleChangesSchema,
+  renameTeamSchema,
+  type PeopleChangesInput,
+  type RenameTeamInput,
   inviteSchema,
   setActiveSchema,
   updatePersonSchema,
@@ -51,6 +55,27 @@ export class PeopleController {
     @Body(new ZodPipe(createPersonSchema)) body: CreatePersonInput,
   ) {
     return this.people.create(ctx, body);
+  }
+
+  /** HR table: several people's team / role / leaving date at once. */
+  @AdminOnly()
+  @Post('changes')
+  @HttpCode(200)
+  applyChanges(
+    @Ctx() ctx: RequestContext,
+    @Body(new ZodPipe(peopleChangesSchema)) body: PeopleChangesInput,
+  ) {
+    return this.people.applyChanges(ctx, body);
+  }
+
+  @AdminOnly()
+  @Post('teams/rename')
+  @HttpCode(200)
+  renameTeam(
+    @Ctx() ctx: RequestContext,
+    @Body(new ZodPipe(renameTeamSchema)) body: RenameTeamInput,
+  ) {
+    return this.people.renameTeam(ctx, body);
   }
 
   @AdminOnly()

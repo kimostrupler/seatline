@@ -1,6 +1,6 @@
 /**
- * Nightly: people sync for every workspace connected to Microsoft 365, then the scheduled
- * move plans that are due (after the sync, so people who left are already inactive), then the
+ * Nightly: people sync for every workspace connected to Microsoft 365, then HR leaving dates
+ * that have come, then the scheduled move plans that are due (after the sync, so people who left are already inactive), then the
  * privacy clean-up (history older than each workspace's retention period).
  * Runs as its own scheduled container (Azure Container Apps Job), so it works even
  * while the API is scaled to zero:  node dist/jobs/nightly-sync.js
@@ -33,6 +33,13 @@ async function main() {
     logger.log(`Synced ${tenants.length - failed}/${tenants.length} workspaces`);
 
     const today = zurichToday();
+    // HR leaving dates that have come (before moves, so a leaver's seat counts as free)
+    const { PeopleService } = await import('../people/people.service');
+    for (const tenantId of await app.get(TenantDb).listLeavingTenants(today)) {
+      const n = await app.get(PeopleService).leaveDue(tenantId, today);
+      logger.log(`${tenantId}: ${n} people left as planned`);
+    }
+
     for (const tenantId of await app.get(TenantDb).listDueMoveTenants(today)) {
       const results = await app.get(MovesService).applyDue(tenantId, today);
       for (const r of results)

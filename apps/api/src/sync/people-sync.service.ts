@@ -2,6 +2,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import type { AppRole, Prisma } from '@prisma/client';
 import { audit } from '../common/audit';
 import { TenantDb } from '../db/tenant-db.service';
+import type { Notice } from '../mail/notices';
+import { NotifyService, openSeats } from '../mail/notify.service';
+import { zurichToday } from '../moves/moves.service';
 import { GraphClient, GraphError, type GraphUser } from './graph.client';
 
 export interface SyncResult {
@@ -51,6 +54,7 @@ export class PeopleSyncService {
   constructor(
     private readonly db: TenantDb,
     private readonly graph: GraphClient,
+    private readonly notify: NotifyService,
   ) {}
 
   async syncTenant(tenantId: string): Promise<SyncResult> {
@@ -77,13 +81,14 @@ export class PeopleSyncService {
       });
     }
 
-    const counts = await this.db.run(
+    const { notices, ...counts } = await this.db.run(
       tenantId,
       (tx) => this.apply(tx, tenantId, tenant.defaultAppRole, users, at),
       {
         timeoutMs: 120_000,
       },
     );
+    await this.notify.send(tenantId, notices);
     return this.record(tenantId, { ok: true, at: at.toISOString(), ...counts });
   }
 
@@ -95,6 +100,8 @@ export class PeopleSyncService {
     at: Date,
   ) {
     const people = await tx.person.findMany({ where: { tenantId } });
+    const today = new Date(`${zurichToday()}T00:00:00Z`);
+    const gone = (p: { leavesOn: Date | null }) => !!p.leavesOn && p.leavesOn <= today;
     const byOid = new Map(people.filter((p) => p.entraObjectId).map((p) => [p.entraObjectId!, p]));
     const unlinkedByEmail = new Map(
       people.filter((p) => !p.entraObjectId).map((p) => [p.email.toLowerCase(), p]),
@@ -118,8 +125,9 @@ export class PeopleSyncService {
           displayName: u.displayName,
           department: match.teamManual ? match.department : u.department, // an admin's team wins
           jobTitle: u.jobTitle,
-          active: u.active,
-          leftAt: u.active ? null : (match.leftAt ?? at),
+          // HR's leaving date wins over an account that is still enabled
+          active: u.active && !gone(match),
+          leftAt: u.active && !gone(match) ? null : (match.leftAt ?? at),
         };
         const changed = (Object.keys(data) as (keyof typeof data)[]).some((k) =>
           data[k] instanceof Date ? +data[k] !== +(match[k] ?? 0) : data[k] !== match[k],
@@ -129,7 +137,7 @@ export class PeopleSyncService {
           updated.push(match.id);
         }
         synced.push(match.id);
-        if (match.active && !u.active) deactivated.push(match.id);
+        if (match.active && !data.active) deactivated.push(match.id);
         unlinkedByEmail.delete(match.email.toLowerCase());
       } else {
         if (emailOwner.has(u.email)) continue; // same e-mail, different Microsoft account: leave it to an admin
@@ -168,6 +176,28 @@ export class PeopleSyncService {
       }
     }
 
+    // notices for IT / facility: who joined, who left and which desks are free now
+    const freed = await openSeats(tx, tenantId, deactivated);
+    const leavers = await tx.person.findMany({
+      where: { id: { in: deactivated } },
+      select: { id: true, displayName: true, department: true },
+    });
+    const notices: Notice[] = [
+      ...leavers.map((p): Notice => ({
+        kind: 'left',
+        person: p.displayName,
+        team: p.department,
+        day: zurichToday(at),
+        seats: freed.get(p.id) ?? [],
+      })),
+      ...(
+        await tx.person.findMany({
+          where: { id: { in: created } },
+          select: { displayName: true, department: true },
+        })
+      ).map((p): Notice => ({ kind: 'joined', person: p.displayName, team: p.department })),
+    ];
+
     // People who left don't keep a seat; the history keeps when they sat there.
     const open = deactivated.length
       ? await tx.seatAssignment.findMany({
@@ -205,7 +235,7 @@ export class PeopleSyncService {
         after: { ...counts, createdIds: created, updatedIds: updated, deactivatedIds: deactivated },
       },
     );
-    return counts;
+    return { ...counts, notices };
   }
 
   private async record(tenantId: string, result: SyncResult): Promise<SyncResult> {

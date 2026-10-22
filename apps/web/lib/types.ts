@@ -1,6 +1,7 @@
 import type {
   AppRole,
   AssignmentKind,
+  NotifyEvent,
   RoomType,
   SeatNumbering,
   SeatOccupancy,
@@ -141,6 +142,10 @@ export interface TenantInfo {
   defaultAppRole: AppRole | null;
   /** keep history this many months (null = forever) */
   historyRetentionMonths: 12 | 24 | 60 | 120 | null;
+  /** e-mail notices about changes go to these addresses (IT, facility) */
+  notifyEmails: string[];
+  notifyEvents: NotifyEvent[];
+  notifyLanguage: 'en' | 'de' | 'fr';
   entraTenantId: string | null;
   peopleSyncedAt: string | null;
   peopleSyncStatus: {
@@ -168,7 +173,11 @@ export interface DirectoryPerson {
   appRole: AppRole | null;
   active: boolean;
   leftAt: string | null;
+  /** HR: leaves on this day (YYYY-MM-DD…), the nightly job then frees their seat */
+  leavesOn: string | null;
   forgottenAt: string | null;
+  /** their current seat (at most one) */
+  assignments: Array<{ seat: { id: string; label: string; floorId: string } }>;
 }
 
 export type ActivityKind = 'seating' | 'moves' | 'layout' | 'places' | 'people';

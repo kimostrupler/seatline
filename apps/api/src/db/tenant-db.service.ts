@@ -60,6 +60,13 @@ export class TenantDb {
       SELECT id, months FROM list_retention_tenants()`;
   }
 
+  /** Workspaces with someone whose leaving date (HR) is `day` or earlier. */
+  async listLeavingTenants(day: string): Promise<string[]> {
+    const rows = await this.prisma.$queryRaw<{ id: string }[]>`
+      SELECT id FROM list_leaving_tenants(${day}::date)`;
+    return rows.map((r) => r.id);
+  }
+
   /** Workspaces with scheduled move plans due by `day` (YYYY-MM-DD). */
   async listDueMoveTenants(day: string): Promise<string[]> {
     const rows = await this.prisma.$queryRaw<{ id: string }[]>`

@@ -341,6 +341,9 @@ export function useUpdateTenant() {
       defaultAppRole?: TenantInfo['defaultAppRole'];
       historyRetentionMonths?: TenantInfo['historyRetentionMonths'];
       name?: string;
+      notifyEmails?: string[];
+      notifyEvents?: TenantInfo['notifyEvents'];
+      notifyLanguage?: TenantInfo['notifyLanguage'];
     }) => api<TenantInfo>('/tenant', { method: 'PATCH', body: input }),
     onSettled: () => qc.invalidateQueries({ queryKey: ['tenant'] }),
   });
@@ -489,6 +492,24 @@ export const useSetActive = () =>
 export const useInvitePerson = () =>
   usePeopleMutation(({ id, language }: { id: string; language: string }) =>
     api<{ invited: boolean }>(`/people/${id}/invite`, { method: 'POST', body: { language } }),
+  );
+
+export interface PersonChange {
+  personId: string;
+  department?: string | null;
+  appRole?: DirectoryPerson['appRole'];
+  leavesOn?: string | null;
+}
+
+/** HR table: several people's team / role / leaving date at once. */
+export const useApplyChanges = () =>
+  usePeopleMutation((changes: PersonChange[]) =>
+    api<{ saved: number }>('/people/changes', { method: 'POST', body: { changes } }),
+  );
+
+export const useRenameTeam = () =>
+  usePeopleMutation((body: { from: string; to: string | null }) =>
+    api<{ people: number }>('/people/teams/rename', { method: 'POST', body }),
   );
 
 export function useForgetPerson() {

@@ -403,6 +403,110 @@
       "back": "Marquer comme de retour",
       "leftDone": "{name} marqué·e comme parti·e — son poste est libre",
       "backDone": "{name} est de retour"
+    },
+    "tabs": {
+      "people": "Personnes",
+      "teams": "Équipes",
+      "changes": "Changements",
+      "settings": "Réglages"
+    },
+    "people": {
+      "filter": "Afficher",
+      "filters": {
+        "all": "Tous",
+        "noDesk": "Sans poste",
+        "leaving": "Départ prévu",
+        "left": "Partis"
+      },
+      "columns": {
+        "person": "Personne",
+        "team": "Équipe",
+        "desk": "Poste",
+        "role": "Rôle"
+      },
+      "nobody": "Personne ne correspond.",
+      "noTeam": "Aucune équipe",
+      "deskShort": "Poste {desk}",
+      "noDesk": "Aucun poste",
+      "leaves": "Départ le {day}",
+      "count": "{shown} sur {total} personnes"
+    },
+    "teamsTab": {
+      "intro": "Les équipes regroupent les personnes sur le plan, dans les statistiques et lors des déménagements.",
+      "newTeam": "Nouvelle équipe",
+      "none": "Pas encore d’équipe. Créez-en une et ajoutez-y des personnes.",
+      "counts": "{people, plural, one {# personne} other {# personnes}} · {seated} avec un poste",
+      "menu": "Plus pour {team}",
+      "addPeople": "Ajouter des personnes",
+      "rename": "Renommer",
+      "remove": "Supprimer l’équipe",
+      "withoutTeam": "{count, plural, one {# personne n’a} other {# personnes n’ont}} pas d’équipe",
+      "placeThem": "Les placer dans une équipe",
+      "addTitle": "Ajouter des personnes à {team}",
+      "newTitle": "Nouvelle équipe",
+      "pickHint": "Choisissez qui en fait partie. Une personne fait partie d’une seule équipe à la fois.",
+      "saved": "{count, plural, one {# personne} other {# personnes}} désormais dans {team}",
+      "name": "Nom de l’équipe",
+      "namePlaceholder": "p. ex. Finances",
+      "exists": "Cette équipe existe déjà — les personnes y sont ajoutées.",
+      "searchPeople": "Rechercher des personnes",
+      "noTeam": "Aucune équipe",
+      "cancel": "Annuler",
+      "putIn": "{count, plural, =0 {Ajouter} one {Ajouter # personne} other {Ajouter # personnes}}",
+      "renameTitle": "Renommer {team}",
+      "renameHint": "Change l’équipe de toutes les personnes qui en font partie.",
+      "renamed": "Renommée en {team}",
+      "save": "Enregistrer",
+      "removeTitle": "Supprimer {team} ?",
+      "removeBody": "Ses membres restent, sans équipe. Leurs postes ne changent pas.",
+      "removed": "{team} supprimée"
+    },
+    "changes": {
+      "intro": "Modifiez plusieurs personnes à la fois — équipe, rôle, date de départ — et enregistrez le tout ensemble.",
+      "notifies": "Les avis vont à {emails}.",
+      "notifiesNobody": "Personne ne reçoit encore d’avis.",
+      "change": "Modifier",
+      "search": "Rechercher des personnes",
+      "person": "Personne",
+      "team": "Équipe",
+      "role": "Rôle",
+      "leavesOn": "Départ le",
+      "noTeam": "Aucune équipe",
+      "teamOf": "Équipe de {name}",
+      "roleOf": "Rôle de {name}",
+      "noRole": "Pas d’accès",
+      "leavesOnOf": "Date de départ de {name}",
+      "leavingHint": "Le jour du départ, tôt le matin, la personne est marquée comme partie et son poste se libère. Son historique est conservé.",
+      "pending": "{count, plural, one {# personne modifiée} other {# personnes modifiées}}",
+      "discard": "Annuler les modifications",
+      "save": "Enregistrer",
+      "saved": "{count, plural, one {Modification enregistrée} other {# modifications enregistrées}}",
+      "savedNotified": "{count, plural, one {Modification enregistrée} other {# modifications enregistrées}} — avis envoyé"
+    },
+    "notices": {
+      "title": "Avis",
+      "intro": "Seatline écrit à ces adresses (p. ex. l’IT ou le facility management) quand quelque chose change — par exemple qui est parti et quel poste est libre.",
+      "recipients": "Envoyer à",
+      "remove": "Retirer {email}",
+      "none": "Personne pour l’instant.",
+      "placeholder": "it@entreprise.ch",
+      "addressLabel": "Adresse e-mail pour les avis",
+      "add": "Ajouter",
+      "added": "{email} reçoit désormais les avis",
+      "about": "Sujets",
+      "events": {
+        "left": "Quelqu’un part (et son poste se libère)",
+        "joined": "Quelqu’un arrive",
+        "team": "Quelqu’un change d’équipe",
+        "moves": "Un plan de déménagement est exécuté"
+      },
+      "language": "Langue des e-mails",
+      "languages": {
+        "de": "Deutsch",
+        "fr": "Français",
+        "en": "English"
+      },
+      "hint": "Envoyés depuis hello@seatline.ch, un e-mail par changement (ou un pour plusieurs à la fois). Texte simple, sans suivi."
     }
   },
   "shortcuts": {
@@ -553,7 +657,11 @@
       "personChanged": "a modifié les informations de {person}",
       "personLeft": "a marqué {person} comme parti·e",
       "personBack": "a marqué {person} comme de retour",
-      "personInvited": "a invité {person} à se connecter"
+      "personInvited": "a invité {person} à se connecter",
+      "leavingSet": "a fixé la date de départ de {person} au {day}",
+      "leavingCleared": "a retiré la date de départ de {person}",
+      "teamRenamed": "a renommé l’équipe {old} en {team}",
+      "teamDeleted": "a supprimé l’équipe {team}"
     },
     "showPlan": "Ouvrir le plan",
     "search": "Rechercher dans l’activité",
