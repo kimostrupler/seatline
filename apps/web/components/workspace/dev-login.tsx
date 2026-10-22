@@ -1,7 +1,7 @@
 'use client';
 
 import { DEMO_TENANTS } from '@seatline/shared';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useIdentity } from '@/lib/identity';
 import { useMe } from '@/lib/queries';
+import { WhoAmI } from './who-am-i';
 
 /** Company + user switcher for local development. Replaced by Microsoft sign-in (Phase 4). */
 export function DevLogin() {
@@ -24,20 +25,16 @@ export function DevLogin() {
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
-          className="h-auto w-full justify-between px-2 py-1.5 text-left"
+          className="h-auto w-full justify-between px-2 py-1.5 text-left max-sm:w-auto max-sm:px-1"
           data-testid="dev-login"
         >
-          <span className="min-w-0">
-            <span className="block truncate text-sm font-semibold">
-              {me.data?.tenant.name ?? '…'}
-            </span>
-            <span className="block truncate text-xs text-muted-foreground">
-              {me.data
-                ? `${me.data.person.displayName} · ${t(`role.${me.data.role}`)}`
-                : t('label')}
-            </span>
-          </span>
-          <ChevronsUpDown className="text-muted-foreground" />
+          <WhoAmI
+            company={me.data?.tenant.name ?? '…'}
+            person={me.data?.person.displayName}
+            line={
+              me.data ? `${me.data.person.displayName} · ${t(`role.${me.data.role}`)}` : t('label')
+            }
+          />
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-72 p-1">

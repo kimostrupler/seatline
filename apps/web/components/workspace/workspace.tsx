@@ -22,7 +22,6 @@ import { teamSlots } from '@/lib/team-colors';
 import { useColorBy } from '@/lib/use-map-colors-mode';
 import { useMediaQuery } from '@/lib/use-media-query';
 import { usePlanOpacity } from '@/lib/use-plan-opacity';
-import { AccountMenu } from './account-menu';
 import { ModeToggle } from './mode-toggle';
 import { PeopleList } from './people-list';
 import { PersonPanel } from './person-panel';
@@ -94,7 +93,6 @@ export function Workspace() {
 
   const sidebar = (
     <div className="flex h-full min-h-0 flex-col gap-4 p-3">
-      <AccountMenu />
       <PlacePicker
         buildings={buildings.data ?? []}
         floors={floors.data ?? []}
