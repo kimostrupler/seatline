@@ -29,6 +29,7 @@ export function isPublicPath(pathname: string): boolean {
     pathname.startsWith('/legal/') ||
     pathname.startsWith('/guides/') ||
     pathname === '/robots.txt' ||
+    pathname === '/indexnow.txt' ||
     pathname === '/sitemap.xml'
   );
 }
@@ -43,3 +44,9 @@ export const SITE_PRICE_CHF = 2;
 export function websiteHref(appUrl: string): string {
   return siteHosts(appUrl).length ? `${siteUrl(appUrl)}/` : '/welcome';
 }
+
+/**
+ * IndexNow (Bing, Yandex, Seznam…): the deploy tells them which website pages exist; this key,
+ * served at /indexnow.txt, proves the site is ours. Public by design — not a secret.
+ */
+export const INDEXNOW_KEY = '4a804241a422b8f43ae8a72403f48098';

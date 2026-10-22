@@ -15,6 +15,7 @@ describe('site domain', () => {
     expect(isPublicPath('/welcome')).toBe(true);
     expect(isPublicPath('/legal/privacy')).toBe(true);
     expect(isPublicPath('/guides/seatline-vs-excel')).toBe(true);
+    expect(isPublicPath('/indexnow.txt')).toBe(true);
     expect(isPublicPath('/legal')).toBe(false);
     expect(isPublicPath('/map')).toBe(false);
   });
