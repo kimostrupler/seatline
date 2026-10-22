@@ -1,17 +1,15 @@
 import {
   ArrowRight,
   CalendarClock,
+  FileUp,
   Check,
-  Download,
   History,
   Languages,
   Lock,
   Map,
   MousePointerClick,
-  PencilRuler,
   RefreshCw,
   ShieldCheck,
-  Users,
   type LucideIcon,
 } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -27,15 +25,13 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t('metaTitle'), description: t('metaDescription') };
 }
 
-const FEATURES: [LucideIcon, `f${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8}`][] = [
+const FEATURES: [LucideIcon, `f${1 | 2 | 3 | 4 | 5 | 6}`][] = [
   [Map, 'f1'],
-  [PencilRuler, 'f2'],
+  [FileUp, 'f2'],
   [MousePointerClick, 'f3'],
   [CalendarClock, 'f4'],
   [History, 'f5'],
   [RefreshCw, 'f6'],
-  [Download, 'f7'],
-  [Users, 'f8'],
 ];
 
 /** The public landing page: seatline.ch (and /welcome on any address). */
@@ -56,9 +52,6 @@ export default async function Welcome() {
               <a href={signInUrl()}>
                 {t('ctaTrial')} <ArrowRight />
               </a>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <a href="#pricing">{t('ctaPricing')}</a>
             </Button>
           </div>
           <p className="text-sm text-muted-foreground">{t('ctaNote')}</p>
@@ -94,9 +87,8 @@ export default async function Welcome() {
           <h2 className="text-3xl font-semibold tracking-tight text-balance">
             {t('featuresTitle')}
           </h2>
-          <p className="text-muted-foreground">{t('featuresBody')}</p>
         </div>
-        <ul className="grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map(([Icon, key]) => (
             <li key={key} className="grid content-start gap-2">
               <span className="grid size-9 place-items-center rounded-lg bg-primary/10 text-primary">
@@ -109,27 +101,6 @@ export default async function Welcome() {
         </ul>
       </section>
 
-      {/* steps */}
-      <section className="bg-canvas">
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-20 sm:px-6">
-          <h2 className="text-3xl font-semibold tracking-tight">{t('stepsTitle')}</h2>
-          <ol className="grid gap-6 md:grid-cols-3">
-            {(['s1', 's2', 's3'] as const).map((key, i) => (
-              <li
-                key={key}
-                className="grid content-start gap-2 rounded-xl border bg-background p-6"
-              >
-                <span className="grid size-8 place-items-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-                  {i + 1}
-                </span>
-                <h3 className="font-medium">{t(`${key}Title`)}</h3>
-                <p className="text-sm text-muted-foreground">{t(`${key}Body`)}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
       {/* pricing */}
       <section
         id="pricing"
@@ -138,9 +109,6 @@ export default async function Welcome() {
         <div className="grid gap-3">
           <h2 className="text-3xl font-semibold tracking-tight">{t('pricingTitle')}</h2>
           <p className="text-muted-foreground">{t('pricingBody')}</p>
-          <p className="text-sm text-muted-foreground">
-            {t('pricingExample', { price, total: SITE_PRICE_CHF * 80 })}
-          </p>
         </div>
         <div className="grid gap-6 rounded-2xl border bg-background p-8 shadow-sm">
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
@@ -151,7 +119,7 @@ export default async function Welcome() {
             </span>
           </div>
           <ul className="grid gap-2.5 text-sm">
-            {(['p1', 'p2', 'p3', 'p4', 'p5'] as const).map((key) => (
+            {(['p1', 'p2', 'p3'] as const).map((key) => (
               <li key={key} className="flex gap-2.5">
                 <Check className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
                 {t(key)}
@@ -171,7 +139,7 @@ export default async function Welcome() {
         <div className="mx-auto grid max-w-3xl scroll-mt-20 gap-8 px-4 py-20 sm:px-6">
           <h2 className="text-3xl font-semibold tracking-tight">{t('faqTitle')}</h2>
           <div className="grid gap-3">
-            {(['1', '2', '3', '4', '5', '6'] as const).map((n) => (
+            {(['1', '2', '3', '4'] as const).map((n) => (
               <details key={n} className="group rounded-xl border bg-background px-5 py-4">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">
                   {t(`q${n}`)}
@@ -192,7 +160,6 @@ export default async function Welcome() {
       {/* final call */}
       <section className="mx-auto grid max-w-6xl justify-items-center gap-4 px-4 py-20 text-center sm:px-6">
         <h2 className="text-3xl font-semibold tracking-tight text-balance">{t('finalTitle')}</h2>
-        <p className="text-muted-foreground">{t('finalBody')}</p>
         <Button asChild size="lg">
           <a href={signInUrl()}>
             {t('ctaTrial')} <ArrowRight />

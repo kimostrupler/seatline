@@ -2,11 +2,9 @@ import { expect, test } from '@playwright/test';
 
 test('the landing page links to sign-in and the legal pages', async ({ page }) => {
   await page.goto('/welcome');
-  await expect(
-    page.getByRole('heading', { name: 'Who sits where — always up to date.' }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Know who sits where.' })).toBeVisible();
   await expect(page.getByText('CHF 2', { exact: true })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Start 30 days free' }).first()).toHaveAttribute(
+  await expect(page.getByRole('link', { name: 'Try it free for 30 days' }).first()).toHaveAttribute(
     'href',
     /\/signin$/,
   );
