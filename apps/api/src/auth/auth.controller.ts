@@ -1,5 +1,7 @@
 import { Body, Controller, Get, HttpCode, Post } from '@nestjs/common';
 import {
+  demoStartSchema,
+  type DemoStartInput,
   emailSignInStartSchema,
   emailSignInVerifySchema,
   onboardingSchema,
@@ -8,6 +10,7 @@ import {
   type OnboardingInput,
 } from '@seatline/shared';
 import { ZodPipe } from '../common/zod.pipe';
+import { DemoService } from '../demo/demo.service';
 import { CurrentIdentity, IdentityOnly, Public } from './decorators';
 import { EmailSignInService } from './email-sign-in.service';
 import type { Identity } from './identity';
@@ -18,7 +21,19 @@ export class AuthController {
   constructor(
     private readonly identities: IdentityService,
     private readonly emailSignIn: EmailSignInService,
+    private readonly demo: DemoService,
   ) {}
+
+  /**
+   * A new demo workspace with sample data (called by the web app's demo page, which limits
+   * how often one address may ask). Returns the address the visitor's session is for.
+   */
+  @Public()
+  @Post('auth/demo')
+  @HttpCode(200)
+  startDemo(@Body(new ZodPipe(demoStartSchema)) body: DemoStartInput) {
+    return this.demo.create(body.language);
+  }
 
   /** Which sign-in methods the sign-in page offers. */
   @Public()

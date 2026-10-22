@@ -141,6 +141,7 @@ export function Workspace() {
           compact
           floorId={map.data.floor.id}
           onPrint={() => router.push(`/map/print?floor=${map.data!.floor.id}`)}
+          onLabels={() => router.push(`/map/qr?floor=${map.data!.floor.id}`)}
         />
       )}
       {me.data?.role === 'viewer' && <Badge variant="secondary">{t('devLogin.role.viewer')}</Badge>}

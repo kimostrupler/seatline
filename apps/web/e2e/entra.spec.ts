@@ -32,6 +32,23 @@ test('the website and legal pages need no sign-in', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Terms of service' })).toBeVisible();
 });
 
+test('visitors try a demo workspace from the website, then start a real trial', async ({
+  page,
+}) => {
+  await page.goto('/welcome');
+  await page.getByRole('link', { name: 'Try the demo' }).first().click();
+  await expect(page.getByRole('heading', { name: 'Try Seatline' })).toBeVisible();
+  await page.getByRole('button', { name: 'Open the demo' }).click();
+  await expect(page.getByTestId('demo-banner')).toBeVisible();
+  await page.goto('/map');
+  await expect(page.getByTestId('floor-map').locator('canvas').first()).toBeVisible();
+  await page
+    .getByTestId('demo-banner')
+    .getByRole('button', { name: 'Start your free trial' })
+    .click();
+  await expect(page).toHaveURL(/\/signin/);
+});
+
 test('a new organisation creates its workspace; a colleague joins as viewer', async ({
   page,
   browser,

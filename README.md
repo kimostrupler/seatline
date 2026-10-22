@@ -114,6 +114,10 @@ Changing the schema: edit `apps/api/prisma/schema.prisma`, then
 - **Import a list** (People & access → People): an Excel or CSV file with name and e-mail
   (team, job title optional; titles in English, German or French). Seatline shows what happens
   to each row before anything is saved; there's a template to download.
+- **Demo** (website → "Try the demo", `/auth/demo`): a sample office anyone can change, no
+  sign-up; deleted after a day. Only with sign-in on (`AUTH_MODE=entra`).
+- **QR stickers** (map → Export → Desk QR codes): one per desk; scanning opens the desk on the
+  map (who sits there).
 - **"Your new desk" e-mails** to the person who got a desk (2 minutes later, so an undone move
   sends nothing), switchable in Settings. Admins get a reminder 7 days and 1 day before the
   free trial ends.

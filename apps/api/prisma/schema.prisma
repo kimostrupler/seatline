@@ -76,6 +76,8 @@ model Tenant {
   notifyLanguage         String    @default("de") @map("notify_language")
   /// people get an e-mail when they get a new desk
   notifyPeople           Boolean   @default(true) @map("notify_people")
+  /// a demo workspace (sample data for visitors; deleted after a day)
+  isDemo                 Boolean   @default(false) @map("is_demo")
   /// last trial reminder sent (days left: 7, then 1)
   trialReminded          Int?      @map("trial_reminded") @db.SmallInt
   /// free trial until (new workspaces: 30 days); afterwards a subscription is needed

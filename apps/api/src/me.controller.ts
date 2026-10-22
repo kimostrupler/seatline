@@ -23,7 +23,7 @@ export class MeController {
         }),
         tx.tenant.findFirst({
           where: { id: ctx.tenantId },
-          select: { id: true, name: true, trialEndsAt: true },
+          select: { id: true, name: true, trialEndsAt: true, isDemo: true },
         }),
       ]);
       const { trialEndsAt, ...workspace } = orNotFound(tenant, 'Tenant');

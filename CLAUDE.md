@@ -253,6 +253,21 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - **Dependabot** (`.github/dependabot.yml`): weekly grouped minor/patch PRs for npm, pip, Docker,
   Actions; majors are skipped (read the changelog; react-konva must match Next's React).
 
+## Demo workspaces, desk QR codes, DPA
+
+- **Demo** (`src/demo/demo.service.ts`): `POST /auth/demo` (public) creates a sample office
+  (`tenants.is_demo`, 2 floors, meeting rooms, team zones, markers, 22 people, history, a draft
+  move plan) in the visitor's language; the admin's address is `demo-…@demo.seatline.invalid`
+  and the web (`app/auth/demo` page → POST `start` route, 5 per IP per hour) signs the visitor
+  in with an ordinary e-mail session for it. Max 300 at once (`count_demo_tenants`); the nightly
+  job deletes them after a day (`purge_demo_tenants`, SECURITY DEFINER, sets
+  `seatline.privacy=purge`). Demo: billing state `off`, checkout refused, banner with "Start your
+  free trial" (= sign out → sign-in page). `MailService` never sends to `.invalid` addresses.
+- **QR stickers**: Export menu → `/map/qr?floor=` (`components/map/desk-labels.tsx`, `qrcode`
+  lib, SVG made in the browser). A code opens `/map?building=&floor=&seat=`.
+- **Legal**: `/legal/dpa` (data processing agreement, `lib/legal/dpa.ts`, same sections in all
+  languages). Sub-processors listed there and in the privacy policy must stay in step.
+
 ## Activity
 
 - `GET /activity` reads `audit_log` (editors/admins, `@EditorsOnly`), newest first with a cursor,

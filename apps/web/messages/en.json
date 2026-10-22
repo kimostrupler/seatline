@@ -1026,6 +1026,7 @@
     "seatingCsv": "Seating list (CSV)",
     "historyExcel": "Seat history (Excel)",
     "print": "Print floor / save as PDF",
+    "labels": "Desk QR codes (stickers)",
     "failed": "The export didn’t work: {message}",
     "back": "Back",
     "printNow": "Print / save as PDF",
@@ -1072,6 +1073,7 @@
   "legal": {
     "terms": "Terms of service",
     "privacy": "Privacy policy",
+    "dpa": "Data processing agreement",
     "imprint": "Imprint",
     "updated": "Last updated {date}",
     "contact": "Contact",
@@ -1095,6 +1097,7 @@
     "heroTitle": "Know who sits where.",
     "heroBody": "A seating plan for your office. Draw your floors, give people a desk, plan moves and let IT know automatically. Hosted in Switzerland.",
     "ctaTrial": "Try it free for 30 days",
+    "ctaDemo": "Try the demo",
     "ctaNote": "No credit card. Sign in with Microsoft 365 or by e-mail.",
     "mapAlt": "A Seatline floor map: free desks in green, taken in grey, reserved in yellow.",
     "mapFloor": "Zurich · 3rd floor",
@@ -1193,5 +1196,25 @@
       "plan_engine_unreachable": "The plan reader is starting. Please try again in a minute.",
       "failed": "Reading the plan didn’t work. Please try another file."
     }
+  },
+  "qr": {
+    "back": "Back",
+    "print": "Print",
+    "title": "QR codes · {place}",
+    "body": "{count, plural, one {# sticker} other {# stickers}}. Stick one on each desk: scanning it shows who sits there (after signing in).",
+    "codeFor": "QR code for desk {label}",
+    "scan": "Scan: who sits here?"
+  },
+  "demo": {
+    "title": "Try Seatline",
+    "body": "A sample office with two floors, meeting rooms and 22 people. Change anything you like — nothing is sent, and it’s deleted after a day.",
+    "point1": "Move people by dragging them to another desk",
+    "point2": "Draw rooms and desks in Edit layout",
+    "point3": "Plan a move and see the floor before and after",
+    "button": "Open the demo",
+    "busy": "Too many demos right now. Please try again in a while.",
+    "failed": "The demo couldn’t be opened. Please try again.",
+    "banner": "This is a demo with sample data — it’s deleted after a day.",
+    "startTrial": "Start your free trial"
   }
 }

@@ -1,12 +1,13 @@
 import type { Language } from '@/lib/locales';
+import { DPA } from './dpa';
 import { OPERATOR } from './operator';
 
 /**
- * Terms of service and privacy policy in German, French and English.
+ * Terms of service, privacy policy and data processing agreement in German, French and English.
  * Plain words on purpose; have a Swiss lawyer review them before selling (docs/legal.md).
  * {name} {address} {email} are filled in from OPERATOR.
  */
-export const LEGAL_DOCS = ['terms', 'privacy'] as const;
+export const LEGAL_DOCS = ['terms', 'privacy', 'dpa'] as const;
 export type LegalDoc = (typeof LEGAL_DOCS)[number];
 
 export interface LegalSection {
@@ -29,7 +30,7 @@ const TEXTS: Texts = {
       {
         heading: '2. The service',
         paragraphs: [
-          'Seatline is web software for managing office seating: floor plans, seat assignments, reservations, planned moves, history, dashboards and exports. People sign in with their Microsoft 365 work account.',
+          'Seatline is web software for managing office seating: floor plans, seat assignments, reservations, planned moves, history, dashboards and exports. People sign in with their Microsoft 365 work account or with a link sent by e-mail.',
           'We keep improving Seatline and may change features, as long as the main purpose stays the same. We tell admins about important changes in advance.',
         ],
       },
@@ -107,7 +108,7 @@ const TEXTS: Texts = {
       {
         heading: '2. Die Leistung',
         paragraphs: [
-          'Seatline ist eine Web-Software für die Verwaltung von Büroarbeitsplätzen: Grundrisse, Platzzuweisungen, Reservationen, geplante Umzüge, Verlauf, Dashboards und Exporte. Die Anmeldung erfolgt mit dem Microsoft-365-Geschäftskonto.',
+          'Seatline ist eine Web-Software für die Verwaltung von Büroarbeitsplätzen: Grundrisse, Platzzuweisungen, Reservationen, geplante Umzüge, Verlauf, Dashboards und Exporte. Die Anmeldung erfolgt mit dem Microsoft-365-Geschäftskonto oder mit einem Link per E-Mail.',
           'Wir entwickeln Seatline laufend weiter und dürfen Funktionen ändern, solange der Hauptzweck gleich bleibt. Über wichtige Änderungen informieren wir die Admins im Voraus.',
         ],
       },
@@ -185,7 +186,7 @@ const TEXTS: Texts = {
       {
         heading: '2. Le service',
         paragraphs: [
-          'Seatline est un logiciel web de gestion des places de travail : plans d’étage, attributions de places, réservations, déménagements planifiés, historique, tableaux de bord et exports. La connexion se fait avec le compte professionnel Microsoft 365.',
+          'Seatline est un logiciel web de gestion des places de travail : plans d’étage, attributions de places, réservations, déménagements planifiés, historique, tableaux de bord et exports. La connexion se fait avec le compte professionnel Microsoft 365 ou avec un lien reçu par e-mail.',
           'Nous améliorons Seatline en continu et pouvons modifier des fonctions tant que l’objectif principal reste le même. Nous informons les admins à l’avance des changements importants.',
         ],
       },
@@ -315,7 +316,7 @@ const TEXTS: Texts = {
       {
         heading: '9. Security',
         paragraphs: [
-          'Encrypted connections (HTTPS) and encrypted storage, strict separation between companies in the database, sign-in only through Microsoft, keys kept in a secured vault, and access limited to what is needed.',
+          'Encrypted connections (HTTPS) and encrypted storage, strict separation between companies in the database, sign-in through Microsoft or single-use e-mail links (no passwords stored), keys kept in a secured vault, and access limited to what is needed.',
         ],
       },
       {
@@ -392,7 +393,7 @@ const TEXTS: Texts = {
       {
         heading: '9. Sicherheit',
         paragraphs: [
-          'Verschlüsselte Verbindungen (HTTPS) und verschlüsselte Speicherung, strikte Trennung der Unternehmen in der Datenbank, Anmeldung nur über Microsoft, Schlüssel in einem gesicherten Tresor und Zugriff nur, wo nötig.',
+          'Verschlüsselte Verbindungen (HTTPS) und verschlüsselte Speicherung, strikte Trennung der Unternehmen in der Datenbank, Anmeldung über Microsoft oder einmalige E-Mail-Links (keine gespeicherten Passwörter), Schlüssel in einem gesicherten Tresor und Zugriff nur, wo nötig.',
         ],
       },
       {
@@ -469,7 +470,7 @@ const TEXTS: Texts = {
       {
         heading: '9. Sécurité',
         paragraphs: [
-          'Connexions chiffrées (HTTPS) et stockage chiffré, séparation stricte des entreprises dans la base de données, connexion uniquement via Microsoft, clés conservées dans un coffre sécurisé et accès limité au nécessaire.',
+          'Connexions chiffrées (HTTPS) et stockage chiffré, séparation stricte des entreprises dans la base de données, connexion via Microsoft ou par liens e-mail à usage unique (aucun mot de passe stocké), clés conservées dans un coffre sécurisé et accès limité au nécessaire.',
         ],
       },
       {
@@ -486,6 +487,7 @@ const TEXTS: Texts = {
       },
     ],
   },
+  dpa: DPA,
 };
 
 const fill = (text: string) =>

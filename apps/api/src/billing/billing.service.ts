@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   Logger,
   ServiceUnavailableException,
@@ -32,6 +33,7 @@ const billingSelect = {
   billingStatus: true,
   billingPeriodEnd: true,
   billedSeats: true,
+  isDemo: true,
 } as const;
 
 /** Return URLs from Stripe must be our own pages (https, or localhost while developing). */
@@ -147,7 +149,7 @@ export class BillingService {
     const t = await this.db.run(tenantId, (tx) =>
       tx.tenant.findFirst({ where: { id: tenantId }, select: billingSelect }),
     );
-    if (!t) return 'off' as const;
+    if (!t || t.isDemo) return 'off' as const; // demo workspaces never pay nor lock
     return billingState({
       configured: this.configured,
       trialEndsAt: t.trialEndsAt,
@@ -193,6 +195,11 @@ export class BillingService {
       seats: await tx.seat.count({ where: { tenantId: ctx.tenantId, status: 'active' } }),
       admin: await tx.person.findFirst({ where: { id: ctx.actorId }, select: { email: true } }),
     }));
+    if (tenant.isDemo)
+      throw new ConflictException({
+        message: 'This is a demo workspace — start a free trial with your own account',
+        code: 'demo',
+      });
     let customer = tenant.stripeCustomerId;
     if (!customer) {
       customer = (

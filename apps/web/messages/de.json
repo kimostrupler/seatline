@@ -1026,6 +1026,7 @@
     "seatingCsv": "Belegungsliste (CSV)",
     "historyExcel": "Platzverlauf (Excel)",
     "print": "Stockwerk drucken / als PDF",
+    "labels": "QR-Codes für Plätze (Etiketten)",
     "failed": "Der Export hat nicht geklappt: {message}",
     "back": "Zurück",
     "printNow": "Drucken / als PDF speichern",
@@ -1072,6 +1073,7 @@
   "legal": {
     "terms": "Nutzungsbedingungen",
     "privacy": "Datenschutzerklärung",
+    "dpa": "Auftragsverarbeitungsvertrag",
     "imprint": "Impressum",
     "updated": "Stand {date}",
     "contact": "Kontakt",
@@ -1095,6 +1097,7 @@
     "heroTitle": "Wissen, wer wo sitzt.",
     "heroBody": "Der Sitzplan für Ihr Büro. Etagen zeichnen, allen einen Platz geben, Umzüge planen und die IT automatisch informieren. Gehostet in der Schweiz.",
     "ctaTrial": "30 Tage gratis testen",
+    "ctaDemo": "Demo ausprobieren",
     "ctaNote": "Ohne Kreditkarte. Anmeldung mit Microsoft 365 oder per E-Mail.",
     "mapAlt": "Ein Seatline-Grundriss: freie Plätze grün, besetzte grau, reservierte gelb.",
     "mapFloor": "Zürich · 3. OG",
@@ -1193,5 +1196,25 @@
       "plan_engine_unreachable": "Der Planleser startet gerade. Bitte versuchen Sie es in einer Minute nochmals.",
       "failed": "Der Plan konnte nicht gelesen werden. Bitte versuchen Sie eine andere Datei."
     }
+  },
+  "qr": {
+    "back": "Zurück",
+    "print": "Drucken",
+    "title": "QR-Codes · {place}",
+    "body": "{count, plural, one {# Etikett} other {# Etiketten}}. Eines auf jeden Platz kleben: Beim Scannen sieht man, wer dort sitzt (nach der Anmeldung).",
+    "codeFor": "QR-Code für Platz {label}",
+    "scan": "Scannen: Wer sitzt hier?"
+  },
+  "demo": {
+    "title": "Seatline ausprobieren",
+    "body": "Ein Musterbüro mit zwei Etagen, Sitzungszimmern und 22 Personen. Ändern Sie, was Sie möchten — es wird nichts verschickt, und nach einem Tag wird alles gelöscht.",
+    "point1": "Personen auf einen anderen Platz ziehen",
+    "point2": "Räume und Plätze unter «Plan bearbeiten» zeichnen",
+    "point3": "Einen Umzug planen und die Etage vorher und nachher sehen",
+    "button": "Demo öffnen",
+    "busy": "Gerade sind zu viele Demos offen. Bitte versuchen Sie es später nochmals.",
+    "failed": "Die Demo konnte nicht geöffnet werden. Bitte versuchen Sie es nochmals.",
+    "banner": "Dies ist eine Demo mit Musterdaten — sie wird nach einem Tag gelöscht.",
+    "startTrial": "Gratis-Testphase starten"
   }
 }

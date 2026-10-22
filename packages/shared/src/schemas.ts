@@ -216,6 +216,10 @@ export const MAIL_LANGUAGES = ['en', 'de', 'fr'] as const;
 const email = z.string().trim().toLowerCase().max(320).pipe(z.email());
 
 /** Send a one-time sign-in link to this address. */
+/** Open a demo workspace (sample data, in the visitor's language). */
+export const demoStartSchema = z.strictObject({ language: z.enum(MAIL_LANGUAGES).default('en') });
+export type DemoStartInput = z.infer<typeof demoStartSchema>;
+
 export const emailSignInStartSchema = z.strictObject({
   email,
   language: z.enum(MAIL_LANGUAGES).default('en'),

@@ -67,6 +67,11 @@ async function main() {
         }
       }
 
+    // demo workspaces live a day
+    const { DemoService } = await import('../demo/demo.service');
+    const demos = await app.get(DemoService).purge();
+    if (demos) logger.log(`Deleted ${demos} demo workspaces`);
+
     // billing: tell admins their free trial ends soon (7 days, then 1 day before)
     if (billing.configured)
       for (const tenantId of await app.get(TenantDb).listTrialTenants()) {

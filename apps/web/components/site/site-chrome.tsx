@@ -20,6 +20,8 @@ export function Logo({ className }: { className?: string }) {
 }
 
 export const signInUrl = () => `${webConfig().APP_URL}/signin`;
+/** A demo workspace with sample data, no sign-up. */
+export const demoUrl = () => `${webConfig().APP_URL}/auth/demo`;
 
 /** Top bar of the public website (landing page and legal pages). */
 export async function SiteHeader({ sections = false }: { sections?: boolean }) {
@@ -84,7 +86,7 @@ export async function SiteFooter() {
 /** Terms · Privacy · Imprint, for footers (site, sign-in page, account menu). */
 export async function LegalLinks({ className }: { className?: string }) {
   const t = await getTranslations('legal');
-  return (['terms', 'privacy', 'imprint'] as const).map((doc) => (
+  return (['terms', 'privacy', 'dpa', 'imprint'] as const).map((doc) => (
     <Link key={doc} href={`/legal/${doc}`} className={className ?? 'hover:text-foreground'}>
       {t(doc)}
     </Link>
