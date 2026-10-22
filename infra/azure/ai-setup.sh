@@ -27,22 +27,35 @@ az resource update -g "$RG" -n "$NAME" --resource-type Microsoft.CognitiveServic
 ENDPOINT=$(az cognitiveservices account show -n "$NAME" -g "$RG" --query properties.endpoint -o tsv)
 
 say "2/4 Model (regional, data stays in Switzerland)"
-if ! az cognitiveservices account deployment show -n "$NAME" -g "$RG" --deployment-name "$DEPLOYMENT" -o none 2>/dev/null; then
-  MODEL="" VERSION=""
+deployed() { az cognitiveservices account deployment show -n "$NAME" -g "$RG" --deployment-name "$DEPLOYMENT" -o none 2>/dev/null; }
+if ! deployed; then
+  # new subscriptions often have no regional quota for some models: try each, smallest capacity last
   for m in $MODELS; do
     VERSION=$(az cognitiveservices account list-models -n "$NAME" -g "$RG" \
       --query "[?name=='$m' && skus[?name=='Standard']].version | [-1]" -o tsv 2>/dev/null || true)
-    if [ -n "$VERSION" ]; then MODEL=$m; break; fi
+    [ -n "$VERSION" ] || { echo "  $m: not offered here"; continue; }
+    for capacity in 10 1; do
+      if az cognitiveservices account deployment create -n "$NAME" -g "$RG" --deployment-name "$DEPLOYMENT" \
+        --model-name "$m" --model-version "$VERSION" --model-format OpenAI \
+        --sku-name Standard --sku-capacity "$capacity" -o none 2>/dev/null; then
+        echo "  $m ($VERSION), $capacity k tokens/minute"
+        break 2
+      fi
+    done
+    echo "  $m: no quota yet in $LOCATION"
   done
-  if [ -z "$MODEL" ]; then
-    echo "None of these models is offered as a regional deployment in $LOCATION: $MODELS"
-    echo "Check 'az cognitiveservices account list-models -n $NAME -g $RG -o table' and run again with MODELS=…"
+  if ! deployed; then
+    cat <<HELP
+
+Azure gives this subscription no quota yet for these models in Switzerland North
+(regional "Standard" deployments, so the data stays in Switzerland). Ask for some:
+  Azure portal → search "Quotas" → Azure OpenAI / Azure AI Foundry → region Switzerland North
+  → "gpt-4.1-mini" (or "gpt-4o-mini"), deployment type Standard → Request quota increase
+  (10 k tokens per minute is plenty). Then run this script again.
+Seatline works meanwhile: scans are imported without room names.
+HELP
     exit 1
   fi
-  echo "  $MODEL ($VERSION)"
-  az cognitiveservices account deployment create -n "$NAME" -g "$RG" --deployment-name "$DEPLOYMENT" \
-    --model-name "$MODEL" --model-version "$VERSION" --model-format OpenAI \
-    --sku-name Standard --sku-capacity 10 -o none
 fi
 
 say "3/4 Allow the plan engine to use it (managed identity, no keys)"
