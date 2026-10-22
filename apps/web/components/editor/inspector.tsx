@@ -13,6 +13,7 @@ import {
   ArrowDown,
   ArrowRight,
   ClipboardCopy,
+  Ellipsis,
   Copy,
   ImageOff,
   Layers,
@@ -33,7 +34,6 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -72,6 +72,13 @@ import {
   useUploadPlan,
 } from '@/lib/queries';
 import type { Building, Floor, FloorMap, Room, Seat } from '@/lib/types';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { CreateFloorDialog } from '@/components/workspace/place-dialogs';
 import { platformKeys } from '@/lib/platform-keys';
 import { usePlanOpacity } from '@/lib/use-plan-opacity';
@@ -550,33 +557,6 @@ function SelectionActions({
 }
 
 /** "Duplicate floor": the new-floor dialog, starting as a copy of this floor. */
-function DuplicateFloor({
-  floor,
-  onCreated,
-}: {
-  floor: FloorMap['floor'];
-  onCreated: (floor: Floor) => void;
-}) {
-  const t = useTranslations('inspector');
-  const [open, setOpen] = useState(false);
-  const floors = useFloors(floor.buildingId);
-  return (
-    <Field label={t('duplicateFloor')} hint={t('duplicateFloorHint')}>
-      <Button variant="outline" className="justify-self-start" onClick={() => setOpen(true)}>
-        <Layers /> {t('duplicateFloor')}
-      </Button>
-      <CreateFloorDialog
-        open={open}
-        onOpenChange={setOpen}
-        buildingId={floor.buildingId}
-        floors={floors.data ?? []}
-        copyFrom={floor.id}
-        onCreated={onCreated}
-      />
-    </Field>
-  );
-}
-
 function FloorSettings({
   map,
   editor,
@@ -600,54 +580,77 @@ function FloorSettings({
   const removePlan = useRemovePlan();
   const updateBuilding = useUpdateBuilding();
   const deleteBuilding = useDeleteBuilding();
+  const floors = useFloors(floor.buildingId);
   const [opacity, setOpacity] = usePlanOpacity();
   const fileInput = useRef<HTMLInputElement>(null);
-  const [importing, setImporting] = useState(false);
+  const [dialog, setDialog] = useState<
+    'import' | 'duplicate' | 'deleteFloor' | 'deleteBuilding' | null
+  >(null);
 
   const run = (promise: Promise<unknown>, success?: string) =>
     promise.then(
       () => success && toast.success(success),
       (error: unknown) => toast.error(errorText(error)),
     );
+  const close = (open: boolean) => !open && setDialog(null);
 
   return (
-    <div className="grid gap-4" data-testid="floor-settings">
-      <h2 className="text-lg font-semibold">{t('floor')}</h2>
-      <Field label={t('name')}>
-        <CommitInput
-          aria-label={t('name')}
-          value={floor.name}
-          maxLength={200}
-          onCommit={(name) => run(updateFloor.mutateAsync({ id: floor.id, name }))}
-        />
-      </Field>
-      <Field label={t('level')}>
-        <CommitInput
-          aria-label={t('level')}
-          inputMode="numeric"
-          value={String(floor.level)}
-          onCommit={(v) => {
-            const level = Number(v);
-            if (Number.isInteger(level)) void run(updateFloor.mutateAsync({ id: floor.id, level }));
+    <div className="grid gap-6" data-testid="floor-settings">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <h2 className="truncate text-lg font-semibold">{floor.name}</h2>
+          {building && <p className="truncate text-sm text-muted-foreground">{building.name}</p>}
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="size-8 shrink-0" aria-label={t('more')}>
+              <Ellipsis />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuItem onSelect={() => setDialog('duplicate')}>
+              <Layers /> {t('duplicateFloor')}
+            </DropdownMenuItem>
+            {floor.planFileKey && (
+              <DropdownMenuItem onSelect={() => void run(removePlan.mutateAsync(floor.id))}>
+                <ImageOff /> {t('removePlan')}
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem variant="destructive" onSelect={() => setDialog('deleteFloor')}>
+              <Trash2 /> {t('deleteFloor')}
+            </DropdownMenuItem>
+            {building && (
+              <DropdownMenuItem variant="destructive" onSelect={() => setDialog('deleteBuilding')}>
+                <Trash2 /> {t('deleteBuilding')}
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <Section title={t('planSection')}>
+        <input
+          ref={fileInput}
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          className="sr-only"
+          data-testid="plan-file"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            e.target.value = '';
+            if (file) void run(upload.mutateAsync({ floorId: floor.id, file }), t('planUploaded'));
           }}
         />
-      </Field>
-
-      <Field label={t('plan')} hint={t('planHint')}>
-        <div className="flex flex-wrap gap-2">
-          <input
-            ref={fileInput}
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-            className="sr-only"
-            data-testid="plan-file"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              e.target.value = '';
-              if (file)
-                void run(upload.mutateAsync({ floorId: floor.id, file }), t('planUploaded'));
-            }}
-          />
+        {!floor.planFileKey && <p className="text-sm text-muted-foreground">{t('planEmpty')}</p>}
+        <div className="grid gap-2">
+          <Button
+            variant={floor.planFileKey ? 'outline' : 'default'}
+            onClick={() => setDialog('import')}
+            data-testid="import-plan"
+          >
+            <FileInput /> {t('importPlan')}
+          </Button>
           <Button
             variant="outline"
             disabled={upload.isPending}
@@ -655,58 +658,57 @@ function FloorSettings({
           >
             <Upload /> {floor.planFileKey ? t('replacePlan') : t('uploadPlan')}
           </Button>
-          <Button variant="outline" onClick={() => setImporting(true)} data-testid="import-plan">
-            <FileInput /> {t('importPlan')}
-          </Button>
-          {floor.planFileKey && (
-            <Button
-              variant="ghost"
-              disabled={removePlan.isPending}
-              onClick={() => run(removePlan.mutateAsync(floor.id))}
-            >
-              <ImageOff /> {t('removePlan')}
-            </Button>
-          )}
         </div>
-      </Field>
-      <ImportPlanDialog open={importing} onOpenChange={setImporting} map={map} editor={editor} />
-      {floor.planFileKey && (
-        <Field label={t('planOpacity')}>
-          <Slider
-            aria-label={t('planOpacity')}
-            min={0.1}
-            max={1}
-            step={0.05}
-            value={[opacity]}
-            onValueChange={([v]) => v !== undefined && setOpacity(v)}
-          />
+        {floor.planFileKey && (
+          <Field label={t('planOpacity')}>
+            <Slider
+              aria-label={t('planOpacity')}
+              min={0.1}
+              max={1}
+              step={0.05}
+              value={[opacity]}
+              onValueChange={([v]) => v !== undefined && setOpacity(v)}
+            />
+          </Field>
+        )}
+        <Field label={t('scale')}>
+          <p className="text-sm">
+            {floor.scale ? (
+              t('scaleSet', { units: Math.round(floor.scale) })
+            ) : (
+              <span className="text-muted-foreground">{t('scaleUnset')}</span>
+            )}
+          </p>
         </Field>
-      )}
-      <Field label={t('scale')}>
-        <p className="text-sm text-muted-foreground">
-          {floor.scale ? t('scaleSet', { units: Math.round(floor.scale) }) : t('scaleUnset')}
-        </p>
-      </Field>
-      <DuplicateFloor floor={floor} onCreated={onFloorCreated} />
-      <ConfirmDelete
-        label={t('deleteFloor')}
-        title={t('deleteFloorTitle', { name: floor.name })}
-        body={t('deleteFloorBody')}
-        onConfirm={() =>
-          deleteFloor.mutateAsync(floor.id).then(
-            () => {
-              toast.success(t('deleted', { name: floor.name }));
-              onFloorDeleted();
-            },
-            (error: unknown) => toast.error(errorText(error)),
-          )
-        }
-      />
+      </Section>
+
+      <Section title={t('floor')}>
+        <div className="grid grid-cols-[minmax(0,1fr)_5.5rem] gap-3">
+          <Field label={t('name')}>
+            <CommitInput
+              aria-label={t('name')}
+              value={floor.name}
+              maxLength={200}
+              onCommit={(name) => run(updateFloor.mutateAsync({ id: floor.id, name }))}
+            />
+          </Field>
+          <Field label={t('level')}>
+            <CommitInput
+              aria-label={t('level')}
+              inputMode="numeric"
+              value={String(floor.level)}
+              onCommit={(v) => {
+                const level = Number(v);
+                if (Number.isInteger(level))
+                  void run(updateFloor.mutateAsync({ id: floor.id, level }));
+              }}
+            />
+          </Field>
+        </div>
+      </Section>
 
       {building && (
-        <>
-          <Separator />
-          <h2 className="text-lg font-semibold">{t('building')}</h2>
+        <Section title={t('building')}>
           <Field label={t('name')}>
             <CommitInput
               aria-label={t('building')}
@@ -723,45 +725,87 @@ function FloorSettings({
               onCommit={(address) => run(updateBuilding.mutateAsync({ id: building.id, address }))}
             />
           </Field>
-          <ConfirmDelete
-            label={t('deleteBuilding')}
-            title={t('deleteBuildingTitle', { name: building.name })}
-            body={t('deleteBuildingBody')}
-            onConfirm={() =>
-              deleteBuilding.mutateAsync(building.id).then(
-                () => {
-                  toast.success(t('deleted', { name: building.name }));
-                  onBuildingDeleted();
-                },
-                (error: unknown) => toast.error(errorText(error)),
-              )
-            }
-          />
-        </>
+        </Section>
+      )}
+
+      <ImportPlanDialog
+        open={dialog === 'import'}
+        onOpenChange={(o) => setDialog(o ? 'import' : null)}
+        map={map}
+        editor={editor}
+      />
+      <CreateFloorDialog
+        open={dialog === 'duplicate'}
+        onOpenChange={close}
+        buildingId={floor.buildingId}
+        floors={floors.data ?? []}
+        copyFrom={floor.id}
+        onCreated={onFloorCreated}
+      />
+      <ConfirmDelete
+        open={dialog === 'deleteFloor'}
+        onOpenChange={close}
+        title={t('deleteFloorTitle', { name: floor.name })}
+        body={t('deleteFloorBody')}
+        onConfirm={() =>
+          deleteFloor.mutateAsync(floor.id).then(
+            () => {
+              toast.success(t('deleted', { name: floor.name }));
+              onFloorDeleted();
+            },
+            (error: unknown) => toast.error(errorText(error)),
+          )
+        }
+      />
+      {building && (
+        <ConfirmDelete
+          open={dialog === 'deleteBuilding'}
+          onOpenChange={close}
+          title={t('deleteBuildingTitle', { name: building.name })}
+          body={t('deleteBuildingBody')}
+          onConfirm={() =>
+            deleteBuilding.mutateAsync(building.id).then(
+              () => {
+                toast.success(t('deleted', { name: building.name }));
+                onBuildingDeleted();
+              },
+              (error: unknown) => toast.error(errorText(error)),
+            )
+          }
+        />
       )}
     </div>
   );
 }
 
+/** A titled group in the floor panel. */
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section className="grid gap-3">
+      <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+        {title}
+      </h3>
+      {children}
+    </section>
+  );
+}
+
 function ConfirmDelete({
-  label,
+  open,
+  onOpenChange,
   title,
   body,
   onConfirm,
 }: {
-  label: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   title: string;
   body: string;
   onConfirm: () => void;
 }) {
   const t = useTranslations('inspector');
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button variant="outline" className="justify-self-start text-destructive">
-          <Trash2 /> {label}
-        </Button>
-      </AlertDialogTrigger>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogTitle>{title}</AlertDialogTitle>
         <AlertDialogDescription>{body}</AlertDialogDescription>

@@ -1,6 +1,6 @@
 'use client';
 
-import { X } from 'lucide-react';
+import { Settings2, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
@@ -46,7 +46,10 @@ export function EditMode({
   const [tool, setTool] = useState<Tool>('select');
   const [measured, setMeasured] = useState<number | null>(null);
   const [shortcuts, setShortcuts] = useState(false);
-  const [floorPanel, setFloorPanel] = useState(false);
+  // smaller screens: an empty floor opens its settings straight away (plan, import)
+  const [floorPanel, setFloorPanel] = useState(
+    () => !map.floor.planFileKey && !map.rooms.length && !map.seats.length,
+  );
   const [opacity] = usePlanOpacity();
   const isDesktop = useMediaQuery('(min-width: 1024px)');
 
@@ -68,7 +71,23 @@ export function EditMode({
     <Shell
       sidebar={sidebar}
       title={title}
-      headerEnd={headerEnd}
+      headerEnd={
+        <>
+          {!isDesktop && (
+            <Button
+              variant={floorPanel ? 'secondary' : 'outline'}
+              size="sm"
+              aria-pressed={floorPanel}
+              onClick={() => setFloorPanel((open) => !open)}
+              data-testid="floor-panel-toggle"
+            >
+              <Settings2 />
+              <span className="max-sm:sr-only">{te('floorAndPlan')}</span>
+            </Button>
+          )}
+          {headerEnd}
+        </>
+      }
       detailsLabel={t('edit')}
       main={
         <div className="flex h-full flex-col">
@@ -97,7 +116,6 @@ export function EditMode({
               saving={editor.saving}
               onPaste={() => clipboard.paste() && setTool('select')}
               onShortcuts={() => setShortcuts(true)}
-              onSettings={isDesktop ? undefined : () => setFloorPanel((open) => !open)}
             />
           </div>
           {panelOpen && (

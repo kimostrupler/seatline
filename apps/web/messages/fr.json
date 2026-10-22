@@ -158,7 +158,8 @@
     "shortcuts": "Raccourcis clavier (?)",
     "hintSelectTouch": "Touchez pour sélectionner · glissez une place ou une pièce pour la déplacer · glissez l’étage pour regarder autour · pincez pour zoomer",
     "closePanel": "Fermer le panneau",
-    "copied": "Copié – collez sur n’importe quel étage avec ⌘V"
+    "copied": "Copié – collez sur n’importe quel étage avec ⌘V",
+    "floorAndPlan": "Étage et plan"
   },
   "inspector": {
     "floor": "Étage",
@@ -166,16 +167,14 @@
     "name": "Nom",
     "level": "Niveau",
     "address": "Adresse",
-    "plan": "Image du plan",
-    "planHint": "PNG, JPG ou WebP, jusqu’à 10 Mo. Dessinez les pièces et places par-dessus.",
-    "uploadPlan": "Importer un plan",
+    "uploadPlan": "Importer une image",
     "replacePlan": "Remplacer le plan",
     "removePlan": "Supprimer le plan",
     "planOpacity": "Visibilité du plan",
     "planUploaded": "Plan importé",
     "scale": "Échelle",
     "scaleSet": "1 m = {units} unités",
-    "scaleUnset": "Non définie. Mesurez une longueur connue avec la règle.",
+    "scaleUnset": "Pas encore définie. Mesurez une longueur connue avec la règle (M).",
     "deleteFloor": "Supprimer l’étage",
     "deleteFloorTitle": "Supprimer {name} ?",
     "deleteFloorBody": "Seuls les étages vides peuvent être supprimés. Retirez d’abord ses pièces et places.",
@@ -242,7 +241,10 @@
     "distributeY": "Répartir de haut en bas",
     "duplicateFloor": "Dupliquer l’étage",
     "duplicateFloorHint": "Un nouvel étage avec les mêmes pièces, places et plan, sans les personnes.",
-    "importPlan": "Importer un plan d’architecte"
+    "importPlan": "Importer un plan d’architecte",
+    "planSection": "Plan",
+    "planEmpty": "Importez le plan de l’architecte et Seatline dessine les salles et les places, ou importez une image pour dessiner dessus.",
+    "more": "Plus"
   },
   "auth": {
     "signInTitle": "Se connecter à Seatline",

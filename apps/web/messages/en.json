@@ -158,7 +158,8 @@
     "shortcuts": "Keyboard shortcuts (?)",
     "hintSelectTouch": "Tap to select · drag a seat or room to move it · drag the floor to look around · pinch to zoom",
     "closePanel": "Close panel",
-    "copied": "Copied — paste on any floor with ⌘V"
+    "copied": "Copied — paste on any floor with ⌘V",
+    "floorAndPlan": "Floor & plan"
   },
   "inspector": {
     "floor": "Floor",
@@ -166,16 +167,14 @@
     "name": "Name",
     "level": "Level",
     "address": "Address",
-    "plan": "Floor plan image",
-    "planHint": "PNG, JPG or WebP, up to 10 MB. Draw rooms and seats on top of it.",
-    "uploadPlan": "Upload plan",
+    "uploadPlan": "Upload picture",
     "replacePlan": "Replace plan",
     "removePlan": "Remove plan",
     "planOpacity": "Plan visibility",
     "planUploaded": "Floor plan uploaded",
     "scale": "Scale",
     "scaleSet": "1 m = {units} units",
-    "scaleUnset": "Not set. Use the ruler tool to measure a known length.",
+    "scaleUnset": "Not set yet. Measure a known length with the ruler (M).",
     "deleteFloor": "Delete floor",
     "deleteFloorTitle": "Delete {name}?",
     "deleteFloorBody": "Only empty floors can be deleted. Remove its rooms and seats first.",
@@ -242,7 +241,10 @@
     "distributeY": "Space evenly top to bottom",
     "duplicateFloor": "Duplicate floor",
     "duplicateFloorHint": "A new floor with the same rooms, seats and plan, without people.",
-    "importPlan": "Import architect plan"
+    "importPlan": "Import architect plan",
+    "planSection": "Plan",
+    "planEmpty": "Import your architect’s plan and Seatline draws the rooms and desks, or upload a picture to draw on.",
+    "more": "More"
   },
   "auth": {
     "signInTitle": "Sign in to Seatline",

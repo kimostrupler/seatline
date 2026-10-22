@@ -189,7 +189,8 @@ test('duplicate a floor: same rooms and seats, no people, numbered for the new l
   page,
 }) => {
   const source = await floorMap(page);
-  await page.getByRole('button', { name: 'Duplicate floor' }).click();
+  await page.getByTestId('floor-settings').getByRole('button', { name: 'More' }).click();
+  await page.getByRole('menuitem', { name: 'Duplicate floor' }).click();
   const dialog = page.getByRole('dialog');
   await expect(dialog.getByLabel('Start with')).toHaveText('A copy of 1. OG');
   await dialog.getByLabel('Floor name').fill('3. OG');
@@ -269,5 +270,16 @@ test.describe('on a phone', () => {
     await expect(panel).toBeHidden();
     await saved(page);
     expect((await floorMap(page)).seats.find((s) => s.id === seat.id)?.label).toBe('Window');
+  });
+
+  test('the floor panel is one tap away: plan, import, name', async ({ page }) => {
+    const panel = page.getByTestId('mobile-inspector');
+    await expect(panel).toBeHidden();
+    await page.getByTestId('floor-panel-toggle').click();
+    await expect(panel.getByTestId('floor-settings')).toBeVisible();
+    await expect(panel.getByRole('button', { name: 'Import architect plan' })).toBeVisible();
+    await expect(panel.getByRole('textbox', { name: 'Name' })).toHaveValue('1. OG');
+    await page.getByTestId('floor-panel-toggle').click();
+    await expect(panel).toBeHidden();
   });
 });
