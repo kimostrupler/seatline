@@ -1278,5 +1278,69 @@
     "signingIn": "Sie werden mit Ihrem Microsoft-Konto angemeldet…",
     "failed": "Die Anmeldung in Teams hat nicht geklappt. Möglicherweise muss Ihre IT Seatline für Teams noch freigeben.",
     "openInBrowser": "Seatline im Browser öffnen"
+  },
+  "owner": {
+    "title": "Geschäftsübersicht",
+    "updated": "Aktualisiert {time}",
+    "refresh": "Jetzt aktualisieren",
+    "kpi": {
+      "mrr": "Monatsumsatz (MRR)",
+      "paying": "Zahlende Arbeitsbereiche",
+      "inTrial": "In der Testphase",
+      "signups30": "Anmeldungen, 30 Tage",
+      "signups7": "{count} in den letzten 7 Tagen",
+      "azureMonth": "Azure diesen Monat",
+      "result": "MRR − Azure",
+      "resultHint": "Umsatz pro Monat minus bisherige Azure-Kosten dieses Monats"
+    },
+    "signups": {
+      "title": "Anmeldungen pro Tag (30 Tage)",
+      "summary": "{total} Arbeitsbereiche · {active} diese Woche aktiv · {people} Personen · {seats} Plätze · {ended} Testphasen abgelaufen · {demos} Demos offen"
+    },
+    "stripe": {
+      "off": "Die Abrechnung ist nicht eingerichtet (stripe-setup.sh).",
+      "error": "Stripe war gerade nicht erreichbar.",
+      "testMode": "Testmodus",
+      "paid30": "Bezahlt, 30 Tage",
+      "available": "Guthaben",
+      "pending": "Unterwegs",
+      "noSubscriptions": "Noch keine Abos",
+      "noPayments": "Keine Zahlungen in den letzten 30 Tagen",
+      "status": {
+        "active": "Aktiv",
+        "trialing": "Testphase",
+        "past_due": "Zahlung überfällig",
+        "canceled": "Gekündigt",
+        "unpaid": "Unbezahlt",
+        "incomplete": "Unvollständig",
+        "incomplete_expired": "Abgelaufen",
+        "paused": "Pausiert"
+      }
+    },
+    "azure": {
+      "off": "Die Azure-Kosten sind nicht verbunden (owner-setup.sh).",
+      "error": "Die Azure-Kosten konnten gerade nicht gelesen werden.",
+      "month": "Diesen Monat bisher",
+      "lastMonth": "Letzter Monat",
+      "note": "Azure aktualisiert die Kosten ein paar Mal pro Tag (gelesen um {time})."
+    },
+    "status": {
+      "demo": "Demo",
+      "trialUntil": "Testphase bis {date}",
+      "trialEnded": "Testphase abgelaufen"
+    },
+    "workspaces": {
+      "title": "Arbeitsbereiche ({count})",
+      "showDemos": "Demos zeigen",
+      "name": "Arbeitsbereich",
+      "created": "Angemeldet",
+      "signIn": "Anmeldung",
+      "people": "Personen",
+      "desks": "Belegt/Plätze",
+      "status": "Status",
+      "lastActivity": "Letzte Änderung",
+      "admins": "Admins",
+      "email": "E-Mail-Link"
+    }
   }
 }

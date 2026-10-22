@@ -104,6 +104,58 @@ export class BillingService {
     return due;
   }
 
+  /**
+   * Owner dashboard: subscriptions by status, monthly recurring revenue, balance, payments of the
+   * last 30 days and the latest ones. Straight from Stripe (no caching: it's for one person).
+   */
+  async ownerSummary() {
+    if (!this.configured) return null;
+    const stripe = this.stripe();
+    const since = Math.floor(Date.now() / 1000) - 30 * 86_400;
+    const [subs, balance, invoices] = await Promise.all([
+      stripe.subscriptions.list({ status: 'all', limit: 100 }),
+      stripe.balance.retrieve(),
+      stripe.invoices.list({ status: 'paid', created: { gte: since }, limit: 100 }),
+    ]);
+    const byStatus: Record<string, number> = {};
+    let mrr = 0;
+    let currency = 'chf';
+    for (const sub of subs.data) {
+      byStatus[sub.status] = (byStatus[sub.status] ?? 0) + 1;
+      if (sub.status !== 'active' && sub.status !== 'past_due') continue;
+      for (const item of sub.items.data) {
+        const price = item.price;
+        currency = price.currency;
+        const months =
+          price.recurring?.interval === 'year'
+            ? 12
+            : price.recurring?.interval === 'week'
+              ? 0.25
+              : 1;
+        mrr += ((price.unit_amount ?? 0) * (item.quantity ?? 1)) / months;
+      }
+    }
+    const sum = (list: Array<{ amount: number; currency: string }>) =>
+      list.filter((b) => b.currency === currency).reduce((n, b) => n + b.amount, 0);
+    return {
+      currency: currency.toUpperCase(),
+      /** amounts in the currency's main unit (francs), not cents */
+      mrr: Math.round(mrr) / 100,
+      subscriptions: byStatus,
+      balance: { available: sum(balance.available) / 100, pending: sum(balance.pending) / 100 },
+      paidLast30Days: invoices.data.reduce((n, i) => n + i.amount_paid, 0) / 100,
+      payments: invoices.data.slice(0, 10).map((i) => ({
+        id: i.id,
+        amount: i.amount_paid / 100,
+        currency: i.currency.toUpperCase(),
+        customer: i.customer_name ?? i.customer_email ?? null,
+        tenantId: (i.subscription_details?.metadata?.tenantId as string | undefined) ?? null,
+        at: new Date(i.created * 1000).toISOString(),
+      })),
+      live: !this.config.STRIPE_SECRET_KEY!.startsWith('sk_test_'),
+    };
+  }
+
   get configured() {
     const c = this.config;
     return !!(c.STRIPE_SECRET_KEY && c.STRIPE_WEBHOOK_SECRET && c.STRIPE_PRICE_ID);

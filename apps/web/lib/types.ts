@@ -376,3 +376,67 @@ export interface SpacePlan {
     zoneFree: number;
   }>;
 }
+
+/** The operator's dashboard (GET /owner/overview; only for OWNER_EMAILS). */
+export interface OwnerOverview {
+  at: string;
+  totals: {
+    workspaces: number;
+    last7Days: number;
+    last30Days: number;
+    paying: number;
+    inTrial: number;
+    trialEnded: number;
+    activeLast7Days: number;
+    people: number;
+    seats: number;
+    demosOpen: number;
+  };
+  signupsPerDay: Array<{ day: string; count: number }>;
+  workspaces: Array<{
+    id: string;
+    name: string;
+    createdAt: string;
+    demo: boolean;
+    signIn: 'microsoft' | 'email';
+    people: number;
+    seats: number;
+    seated: number;
+    billingStatus: string | null;
+    trialEndsAt: string;
+    billedSeats: number | null;
+    subscribed: boolean;
+    lastActivity: string | null;
+    admins: string[];
+  }>;
+  stripe:
+    | null
+    | { error: 'unavailable' }
+    | {
+        currency: string;
+        mrr: number;
+        subscriptions: Record<string, number>;
+        balance: { available: number; pending: number };
+        paidLast30Days: number;
+        payments: Array<{
+          id: string;
+          amount: number;
+          currency: string;
+          customer: string | null;
+          tenantId: string | null;
+          at: string;
+        }>;
+        live: boolean;
+      };
+  azure:
+    | null
+    | { error: 'unavailable' }
+    | {
+        currency: string;
+        total: number;
+        lastMonth: number;
+        byService: Array<{ name: string; amount: number }>;
+        daily: Array<{ day: string; amount: number }>;
+        at: string;
+      };
+}

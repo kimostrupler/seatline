@@ -17,8 +17,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const locale = await getLocale();
-  // the website's texts are only used on the server: keep them out of every app page
-  const { site: _site, ...messages } = await getMessages();
+  // the website's texts are only used on the server, and the owner dashboard's only on its own
+  // page: keep both out of every app page
+  const { site: _site, owner: _owner, ...messages } = await getMessages();
   return (
     <html lang={locale}>
       <body>

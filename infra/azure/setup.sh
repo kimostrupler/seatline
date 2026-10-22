@@ -96,6 +96,8 @@ kv_get() { az keyvault secret show --vault-name "$KV" -n "$1" --query value -o t
 STRIPE_KEY=$(kv_get stripe-secret-key)
 STRIPE_WEBHOOK=$(kv_get stripe-webhook-secret)
 STRIPE_PRICE=$(kv_get stripe-price-id)
+# the owner dashboard's address, if owner-setup.sh set one (kept across runs)
+OWNER_EMAILS=$(az containerapp show -n api -g "$RG" --query "properties.template.containers[0].env[?name=='OWNER_EMAILS'].value | [0]" -o tsv 2>/dev/null || true)
 # E-mail sign-in, if mail-setup.sh stored the SMTP password (else Microsoft sign-in only)
 SMTP_PASSWORD=$(kv_get smtp-password)
 az deployment group create -g "$RG" -n seatline -f "$HERE/main.bicep" -o none --parameters \
@@ -107,7 +109,7 @@ az deployment group create -g "$RG" -n seatline -f "$HERE/main.bicep" -o none --
   entraClientId="$APP_ID" entraClientSecret="$ENTRA_SECRET" \
   customDomain="$CUSTOM_DOMAIN" customDomainCertificateId="$CUSTOM_CERT" siteDomains="$SITE_DOMAINS" \
   stripeSecretKey="$STRIPE_KEY" stripeWebhookSecret="$STRIPE_WEBHOOK" stripePriceId="$STRIPE_PRICE" \
-  smtpPassword="$SMTP_PASSWORD"
+  smtpPassword="$SMTP_PASSWORD" ownerEmails="$OWNER_EMAILS"
 output() { az deployment group show -g "$RG" -n seatline --query "properties.outputs.$1.value" -o tsv; }
 WEB_URL=$(output webUrl)
 REGISTRY=$(output registryName)

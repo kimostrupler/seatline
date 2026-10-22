@@ -76,6 +76,8 @@ export default defineConfig({
         // e-mail sign-in: links point to the entra web app, e-mails land in a folder
         APP_URL: `http://localhost:${ENTRA_WEB_PORT}`,
         MAIL_OUTBOX,
+        // the owner dashboard (/owner) is only for this address (the demo admin)
+        OWNER_EMAILS: 'admin@alpenblick.example',
       },
       reuseExistingServer: false,
     },
