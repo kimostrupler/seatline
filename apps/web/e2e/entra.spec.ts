@@ -22,7 +22,7 @@ test('the website and legal pages need no sign-in', async ({ page }) => {
   await page.goto('/legal/privacy');
   await expect(page.getByRole('heading', { name: 'Privacy policy' })).toBeVisible();
   await page.goto('/welcome');
-  await expect(page.getByRole('link', { name: 'Start 30 days free' }).first()).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Try it free for 30 days' }).first()).toBeVisible();
   await page.goto('/signin');
   await page.getByRole('link', { name: 'terms of service' }).click();
   await expect(page.getByRole('heading', { name: 'Terms of service' })).toBeVisible();
