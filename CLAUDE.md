@@ -249,10 +249,9 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   the web as ONE editor batch (`lib/editor/plan-import.ts`), so undo works like any edit.
 - Tests: pytest on `samples/make_samples.py` plans; API tests use a fake engine; e2e runs the real
   engine (`scripts/py.sh`: `.venv` locally, `python3` in CI).
-- Scans (C3): desks from thin drawn rectangles (OpenCV); room names via Azure OpenAI
-  (`app/ai_names.py`, numbered rooms + strict JSON schema; outlines never come from the model).
-  Only when `AZURE_OPENAI_*` is set (`infra/azure/ai-setup.sh`: Switzerland North, regional
-  "Standard" deployment, keys disabled, managed identity). Failures only add `ai_failed`.
+- Scans: desks from thin drawn rectangles, walls = long dark lines (specks dropped), room names
+  by OCR (`app/ocr.py`: Tesseract deu+fra+eng, installed in the image and CI; missing = no names).
+  No AI and nothing leaves the plan engine (the owner decided against AI services: keep it simple).
 - Deploy: `infra/azure/plan-engine.sh` (from deploy.yml) creates/updates the internal
   `plan-engine` app and sets the API's `PLAN_ENGINE_URL`; bicep has the same app for setup.sh.
 

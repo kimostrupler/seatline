@@ -35,15 +35,7 @@ const ERRORS = [
   'plan_engine_unreachable',
 ] as const;
 // "no_scale" is shown with the scale line
-const WARNINGS = [
-  'units_guessed',
-  'no_rooms',
-  'no_seats',
-  'scan',
-  'ai_names',
-  'ai_failed',
-  'first_page_only',
-] as const;
+const WARNINGS = ['units_guessed', 'no_rooms', 'no_seats', 'scan', 'first_page_only'] as const;
 
 /**
  * Architect plan → background image + suggested rooms and desks. Tap a suggestion to leave it

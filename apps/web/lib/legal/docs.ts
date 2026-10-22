@@ -274,7 +274,7 @@ const TEXTS: Texts = {
           'Sign-in: from your Microsoft work account we receive your name, e-mail address and Microsoft user and organisation IDs. Your password never reaches us.',
           'People directory: if your company’s Microsoft 365 admin approves it, Seatline reads each employee’s name, e-mail, department, job title and whether the account is active, once a night. Nothing else.',
           'Seating: seats, floor plans, assignments, reservations, planned moves, and a history of who changed what and when.',
-          'Plan import: architect plans you upload are read on our servers in Switzerland. For scanned plans, the image is also sent to Microsoft Azure OpenAI in Switzerland North to read the room names; Microsoft does not use it to train models and may keep it for up to 30 days to detect abuse.',
+          'Plan import: architect plans you upload are read on our servers in Switzerland.',
           'Billing: company name, billing e-mail, address and VAT number entered during checkout. Card and payment details are handled by Stripe only; we never see full card numbers.',
           'Error reports: if something breaks in your browser, the error message and the page address, with personal details removed.',
         ],
@@ -295,7 +295,7 @@ const TEXTS: Texts = {
       {
         heading: '6. Service providers',
         paragraphs: [
-          'Microsoft (hosting, sign-in and reading scanned plans with Azure OpenAI, Switzerland), Stripe (payments, Ireland/USA), Hostpoint (domain and e-mail, Switzerland). They process data only as needed for their service and under contracts that protect it.',
+          'Microsoft (hosting and sign-in, Switzerland), Stripe (payments, Ireland/USA), Hostpoint (domain and e-mail, Switzerland). They process data only as needed for their service and under contracts that protect it.',
         ],
       },
       {
@@ -350,7 +350,7 @@ const TEXTS: Texts = {
           'Anmeldung: Von Ihrem Microsoft-Geschäftskonto erhalten wir Name, E-Mail-Adresse sowie Microsoft-Benutzer- und Organisations-ID. Ihr Passwort erreicht uns nie.',
           'Personenverzeichnis: Wenn der Microsoft-365-Admin Ihres Unternehmens zustimmt, liest Seatline einmal pro Nacht Name, E-Mail, Abteilung, Funktion und Kontostatus (aktiv oder nicht) der Mitarbeitenden. Sonst nichts.',
           'Arbeitsplätze: Plätze, Grundrisse, Zuweisungen, Reservationen, geplante Umzüge und ein Verlauf, wer wann was geändert hat.',
-          'Planimport: Hochgeladene Architektenpläne werden auf unseren Servern in der Schweiz gelesen. Bei gescannten Plänen wird das Bild zusätzlich an Microsoft Azure OpenAI in der Region Switzerland North gesendet, um die Raumnamen zu lesen; Microsoft verwendet es nicht zum Trainieren von Modellen und kann es bis zu 30 Tage zur Missbrauchserkennung aufbewahren.',
+          'Planimport: Hochgeladene Architektenpläne werden auf unseren Servern in der Schweiz gelesen.',
           'Abrechnung: Firmenname, Rechnungs-E-Mail, Adresse und MWST-Nummer aus dem Bezahlvorgang. Karten- und Zahlungsdaten bearbeitet nur Stripe; vollständige Kartennummern sehen wir nie.',
           'Fehlerberichte: Geht in Ihrem Browser etwas schief, die Fehlermeldung und die Seitenadresse, ohne Personendaten.',
         ],
@@ -371,7 +371,7 @@ const TEXTS: Texts = {
       {
         heading: '6. Dienstleister',
         paragraphs: [
-          'Microsoft (Hosting, Anmeldung und Lesen gescannter Pläne mit Azure OpenAI, Schweiz), Stripe (Zahlungen, Irland/USA), Hostpoint (Domain und E-Mail, Schweiz). Sie bearbeiten Daten nur soweit für ihre Leistung nötig und unter Verträgen, die sie schützen.',
+          'Microsoft (Hosting und Anmeldung, Schweiz), Stripe (Zahlungen, Irland/USA), Hostpoint (Domain und E-Mail, Schweiz). Sie bearbeiten Daten nur soweit für ihre Leistung nötig und unter Verträgen, die sie schützen.',
         ],
       },
       {
@@ -426,7 +426,7 @@ const TEXTS: Texts = {
           'Connexion : de votre compte professionnel Microsoft, nous recevons votre nom, votre adresse e-mail et vos identifiants Microsoft d’utilisateur et d’organisation. Votre mot de passe ne nous parvient jamais.',
           'Annuaire : si l’admin Microsoft 365 de votre entreprise l’approuve, Seatline lit une fois par nuit le nom, l’e-mail, le service, la fonction et le statut (actif ou non) des collaborateurs. Rien d’autre.',
           'Places : places, plans d’étage, attributions, réservations, déménagements planifiés et un historique de qui a modifié quoi et quand.',
-          'Import de plans : les plans d’architecte que vous importez sont lus sur nos serveurs en Suisse. Pour les plans scannés, l’image est aussi envoyée à Microsoft Azure OpenAI dans la région Switzerland North afin de lire les noms des salles ; Microsoft ne l’utilise pas pour entraîner des modèles et peut la conserver jusqu’à 30 jours pour détecter les abus.',
+          'Import de plans : les plans d’architecte que vous importez sont lus sur nos serveurs en Suisse.',
           'Facturation : nom de l’entreprise, e-mail de facturation, adresse et numéro de TVA saisis lors du paiement. Les données de carte et de paiement sont traitées uniquement par Stripe ; nous ne voyons jamais les numéros de carte complets.',
           'Rapports d’erreur : si quelque chose ne fonctionne pas dans votre navigateur, le message d’erreur et l’adresse de la page, sans données personnelles.',
         ],
@@ -447,7 +447,7 @@ const TEXTS: Texts = {
       {
         heading: '6. Prestataires',
         paragraphs: [
-          'Microsoft (hébergement, connexion et lecture des plans scannés avec Azure OpenAI, Suisse), Stripe (paiements, Irlande/États-Unis), Hostpoint (domaine et e-mail, Suisse). Ils ne traitent les données que dans la mesure nécessaire à leur service et selon des contrats qui les protègent.',
+          'Microsoft (hébergement et connexion, Suisse), Stripe (paiements, Irlande/États-Unis), Hostpoint (domaine et e-mail, Suisse). Ils ne traitent les données que dans la mesure nécessaire à leur service et selon des contrats qui les protègent.',
         ],
       },
       {

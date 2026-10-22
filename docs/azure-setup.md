@@ -109,19 +109,6 @@ It shows four DNS records to add (an A record and a TXT for the main domain, a C
 for `www`), waits for you, then creates free certificates. E-mail (MX records) isn't affected.
 The texts need your details first — see [legal.md](legal.md).
 
-### AI room names for scanned plans (~1 Rappen per scan)
-
-Plan import reads DXF and PDF plans without AI. For **scans and photos**, Seatline can read the
-room names with Azure OpenAI — in Switzerland North (regional deployment), without any keys. In
-Cloud Shell:
-
-```bash
-bash seatline/infra/azure/ai-setup.sh
-```
-
-It creates the Azure OpenAI resource, picks a model Azure offers in Switzerland, and lets the plan
-engine use it. The privacy policy already mentions it.
-
 ### Billing with Stripe (charge customers per seat)
 
 Off until you set it up — then every workspace gets a **30-day free trial**, after which an

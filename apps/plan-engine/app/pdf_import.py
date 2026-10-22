@@ -2,7 +2,7 @@
 
 Vector PDFs (exported from CAD): rooms from the spaces between thick lines/filled walls, names
 from the words inside, desks from many identical rectangles, the scale from a "1:100" note.
-Scans and images: the background image, plus rooms from thick dark lines (no names or desks).
+Scans and images: rooms from thick dark lines, desks from drawn rectangles, names via OCR.
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ import pdfplumber
 import pypdfium2 as pdfium
 from PIL import Image
 
-from . import ai_names
+from . import ocr
 from .dxf_import import DrawingError
 from .geometry import (
     Draft,
@@ -25,7 +25,7 @@ from .geometry import (
     Text,
     encode_png,
     find_rooms,
-    inside,
+    join_words,
     name_rooms,
     seats_from_rects,
     type_rooms,
@@ -94,10 +94,11 @@ def analyze_pdf(data: bytes) -> Draft:
             y=(w["top"] + w["bottom"]) / 2 * r,
             text=w["text"],
             height=float(w.get("size") or 0) * r,
+            width=(w["x1"] - w["x0"]) * r,
         )
         for w in words
     ]
-    name_rooms(rooms, _join_lines(texts))
+    name_rooms(rooms, join_words(texts))
     rects = [
         Rect(x=o["x0"] * r, y=o["top"] * r, w=(o["x1"] - o["x0"]) * r, h=(o["bottom"] - o["top"]) * r)
         for o in page.rects
@@ -151,35 +152,23 @@ def _wall_masks(objects: list[dict], r: float, size: tuple[int, int]) -> tuple[n
     return thick, every
 
 
-def _join_lines(texts: list[Text]) -> list[Text]:
-    """PDF words → lines of text (words on the same line, close together)."""
-    lines: list[Text] = []
-    for t in sorted(texts, key=lambda t: (round(t.y / max(t.height, 1)), t.x)):
-        last = lines[-1] if lines else None
-        if last and abs(last.y - t.y) < 0.5 * max(t.height, 1) and t.x - last.x < 12 * max(t.height, 1):
-            last.text = f"{last.text} {t.text}"
-            last.x = (last.x + t.x) / 2
-        else:
-            lines.append(Text(x=t.x, y=t.y, text=t.text, height=t.height))
-    return lines
-
-
 def analyze_image(gray: np.ndarray) -> Draft:
-    """Scans and photos: thick dark strokes are walls, small drawn rectangles are desks."""
+    """Scans and photos: thick dark strokes are walls, small drawn rectangles are desks, and the
+    printed room labels are read with OCR (Tesseract, on this server)."""
     gray = _limit(gray)
     height, width = gray.shape
     _, dark = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
     # walls: what survives removing thin lines (text, furniture, hatching)
     stroke = max(3, int(round(unit_px(gray.shape, None) * 0.1)))  # ~10 cm
     walls = cv2.morphologyEx(dark, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (stroke, stroke)))
+    walls = _long_parts(walls)
     polygons = find_rooms(walls, None, unit_from_walls(walls))
     rooms = [Room(polygon=p) for p in polygons]
     seats = seats_from_rects(_outlined_rects(dark, walls), None, gray.shape)
+    if rooms:
+        name_rooms(rooms, join_words(ocr.read_words(gray)))  # printed labels, read on our server
     type_rooms(rooms, seats, None)
     warnings = ["scan", "no_scale"] + ([] if seats else ["no_seats"]) + ([] if rooms else ["no_rooms"])
-    if rooms and ai_names.configured():
-        per_room = [sum(inside(r.polygon, s.x, s.y) for s in seats) for r in rooms]
-        warnings.append("ai_names" if ai_names.name_rooms_with_ai(gray, rooms, per_room) else "ai_failed")
     return Draft(
         source="raster",
         width=width,
@@ -190,6 +179,14 @@ def analyze_image(gray: np.ndarray) -> Draft:
         seats=seats,
         warnings=warnings,
     )
+
+
+def _long_parts(walls: np.ndarray) -> np.ndarray:
+    """Walls are long connected lines; specks (bits of text, symbols) would cut into rooms."""
+    count, labels, stats, _ = cv2.connectedComponentsWithStats(walls, connectivity=8)
+    keep = np.zeros(count, bool)
+    keep[1:] = np.maximum(stats[1:, cv2.CC_STAT_WIDTH], stats[1:, cv2.CC_STAT_HEIGHT]) >= 0.03 * max(walls.shape)
+    return np.where(keep[labels], 255, 0).astype(np.uint8)
 
 
 def _outlined_rects(dark: np.ndarray, walls: np.ndarray) -> list[Rect]:
