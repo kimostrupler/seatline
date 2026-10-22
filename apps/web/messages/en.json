@@ -530,7 +530,6 @@
     },
     "seeAll": "See all",
     "andMore": "and {count} more",
-    "usedShare": "{percent}% of seats are taken or reserved{blocked, plural, =0 {} other {, # blocked}}.",
     "noBuildings": "No buildings yet.",
     "noFreeSeats": "No free seats right now.",
     "freeOn": "{count} free on {floor}",
@@ -540,10 +539,6 @@
     "waiting": "reserved {since}",
     "everyoneSeated": "Everyone has a seat.",
     "noPeople": "No people yet.",
-    "department": "Department",
-    "people": "People",
-    "seated": "Seated",
-    "where": "Where they sit",
     "noDepartment": "No department",
     "noSeatMine": "You don’t have a seat yet.",
     "nearYou": "Near you:",
@@ -618,7 +613,14 @@
       }
     },
     "noMoves": "No moves planned.",
-    "movesCount": "{count, plural, one {# move} other {# moves}}"
+    "movesCount": "{count, plural, one {# move} other {# moves}}",
+    "statUsed": "of {seats} desks are taken or reserved",
+    "statFree": "{count, plural, one {free desk} other {free desks}} right now",
+    "statBlocked": "{count, plural, one {desk is} other {desks are}} blocked",
+    "statReservations": "{count, plural, one {reservation is} other {reservations are}} waiting for someone",
+    "statUnseated": "{count, plural, one {person has} other {people have}} no desk",
+    "statMoves": "{count, plural, one {move plan} other {move plans}} open",
+    "seatedOf": "{seated} of {people} seated"
   },
   "errors": {
     "title": "Something went wrong",

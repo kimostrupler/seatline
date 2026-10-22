@@ -30,7 +30,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { addWidget, canSee, moveWidget, removeWidget, resizeWidget, SPAN } from '@/lib/dashboard';
 import { useDashboard, useDashboardActions, useMe } from '@/lib/queries';
 import { cn } from '@/lib/utils';
-import { WIDGET_LINKS, WidgetBody } from './widgets';
+import { WIDGET_ICONS, WIDGET_LINKS, WidgetBody } from './widgets';
 
 const errorText = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
@@ -222,13 +222,14 @@ function WidgetCard({
   const t = useTranslations('dashboard');
   const title = t(`widgets.${widget.type}.title`);
   const link = WIDGET_LINKS[widget.type];
+  const Icon = WIDGET_ICONS[widget.type];
   const [over, setOver] = useState(false);
   return (
     <section
       aria-label={title}
       data-widget={widget.type}
       className={cn(
-        'col-span-1 grid content-start gap-3 rounded-xl border bg-card p-4',
+        'col-span-1 grid content-start gap-4 rounded-xl border bg-card p-5 shadow-xs',
         SPAN[widget.size],
         editing && 'border-dashed',
         dragging && 'opacity-40',
@@ -256,6 +257,12 @@ function WidgetCard({
         {editing && (
           <GripVertical aria-hidden className="size-4 shrink-0 cursor-grab text-muted-foreground" />
         )}
+        <span
+          aria-hidden
+          className="mr-1.5 grid size-8 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary"
+        >
+          <Icon className="size-4" />
+        </span>
         <h2 className="min-w-0 flex-1 truncate text-sm font-semibold">{title}</h2>
         {editing ? (
           <div className="flex items-center gap-0.5">
