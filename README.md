@@ -238,6 +238,12 @@ The database enforces the hard rules itself, so a bug in the API can't break the
 See **[docs/azure-setup.md](docs/azure-setup.md)** — one script in Azure Cloud Shell, then every
 merge to `main` deploys automatically (`.github/workflows/deploy.yml`).
 
+## Running it (monitoring, backups, staging, statistics)
+
+See [docs/azure-setup.md](docs/azure-setup.md) → Optional extras: error alerts + uptime check
+(`ALERT_EMAIL`), the monthly backup restore test, a staging copy (branch `staging`), website
+statistics (`infra/azure/site-stats.sh`) and the Teams & Outlook app.
+
 ## File storage
 
 Floor plan images live in Azure Blob Storage (Azurite locally, started by `pnpm db:up`),

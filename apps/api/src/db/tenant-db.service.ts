@@ -54,6 +54,11 @@ export class TenantDb {
     return rows.map((r) => r.id);
   }
 
+  /** The database answers (health check). */
+  async ping(): Promise<void> {
+    await this.prisma.$queryRaw`SELECT 1`;
+  }
+
   /** How many demo workspaces exist right now. */
   async countDemoTenants(): Promise<number> {
     const [row] = await this.prisma.$queryRaw<{ n: bigint }[]>`SELECT count_demo_tenants() AS n`;

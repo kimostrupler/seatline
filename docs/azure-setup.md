@@ -74,7 +74,35 @@ effect with the next deploy (**Actions → Deploy → Run workflow** to apply th
 Add the variable **`ALERT_EMAIL`** = your e-mail address. Azure then e-mails you when Seatline
 logs errors (server errors, errors in people's browsers, a failed nightly sync) — at most once
 an hour. Logs and alerts stay in Switzerland North. The e-mail links to the logs in the Azure
-portal (**Log Analytics workspace → Logs**).
+portal (**Log Analytics workspace → Logs**). The same variable also switches on an **uptime
+check**: Azure opens `/healthz` every 15 minutes from Zurich and e-mails you if Seatline doesn't
+answer (`infra/azure/uptime.sh`).
+
+### Backup restore test (automatic, monthly)
+
+On the 1st of each month GitHub restores the database as it was an hour earlier into a
+temporary server, checks it and deletes it again (**Actions → Backup restore test**, also
+runnable by hand). In Cloud Shell, `bash seatline/infra/azure/restore-test.sh` does the same
+and also counts workspaces, people and seat history in the copy. Backups are kept 7 days, in
+Switzerland.
+
+### A test copy (staging, ~CHF 20/month more)
+
+`RG=seatline-staging APP_NAME="Seatline Staging" BRANCH=staging bash seatline/infra/azure/setup.sh`
+creates a separate copy with its own database and sign-in app. Add the two variables it prints
+(`STAGING_RESOURCE_GROUP`, `STAGING_REGISTRY`); from then on, pushing to the branch `staging`
+deploys there after CI, while `main` still goes live. Try risky changes there first.
+
+### Website statistics
+
+`bash seatline/infra/azure/site-stats.sh` prints the last 30 days (`DAYS=7` for a week): page
+views per day, pages, where visitors came from, phone or computer, clicks on "Try it free" /
+"Try the demo", demos opened and workspaces created. Counted without cookies or IP addresses.
+
+### Microsoft Teams & Outlook app
+
+`bash seatline/infra/azure/teams-setup.sh` once; then People & access → Settings → Teams &
+Outlook → download the app and upload it in Teams.
 
 ### Faster first page (~CHF 10–20/month more)
 

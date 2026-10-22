@@ -19,8 +19,10 @@ sections — `docs.test.ts` checks it).
 ## 2. Promises the texts make (keep them true)
 
 - **Data in Switzerland**: hosting, backups and logs in Azure Switzerland North.
-- **No tracking**: no analytics, ads or third-party cookies. Adding any needs a policy update
-  (and possibly a consent banner).
+- **No tracking**: no ads, third-party cookies or analytics services. The only statistics are
+  anonymous page-view counts on our own servers (page, referring site, language, device type —
+  no cookies, no IP address; `lib/site-stats.ts`), as the privacy policy says. Anything more
+  needs a policy update (and possibly a consent banner).
 - **E-mail** (sign-in links, invitations) goes out through Hostpoint's SMTP as hello@seatline.ch;
   only a hash of each link is stored, for at most a day.
 - **Sub-processors**: Microsoft, Stripe, Hostpoint. A new one (e.g. an e-mail service) must be added to the privacy policy and

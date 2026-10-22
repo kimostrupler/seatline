@@ -19,6 +19,7 @@ export async function middleware(req: NextRequest) {
     if (
       isPublicPath(pathname) ||
       pathname === '/client-errors' ||
+      pathname === '/site-visit' ||
       pathname.startsWith('/.well-known/')
     )
       return NextResponse.next();
@@ -30,6 +31,8 @@ export async function middleware(req: NextRequest) {
     pathname === '/signin' ||
     pathname.startsWith('/signin/') || // check your inbox; picking a workspace checks itself
     pathname === '/client-errors' || // also from the sign-in page; rate-limited, nothing personal
+    pathname === '/healthz' || // the uptime check
+    pathname === '/site-visit' || // anonymous website statistics
     pathname === '/teams' || // the Teams / Outlook tab signs in by itself (single sign-on)
     pathname === '/teams-app' || // the Teams app package (nothing secret)
     pathname.startsWith('/auth/') ||

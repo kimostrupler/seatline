@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import type { AppRole } from '@seatline/shared';
@@ -180,7 +180,7 @@ export class IdentityService {
     const microsoft = identity.kind === 'microsoft' ? identity : null;
     const tenantId = randomUUID();
     try {
-      return await this.db.run(tenantId, async (tx) => {
+      const result = await this.db.run(tenantId, async (tx) => {
         const tenant = await tx.tenant.create({
           data: {
             id: tenantId,
@@ -215,6 +215,11 @@ export class IdentityService {
         );
         return { workspace: { id: tenant.id, name: tenant.name } };
       });
+      // for the website statistics (infra/azure/site-stats.sh): no names, just that it happened
+      new Logger('Onboarding').log(
+        `New workspace ${tenantId} (${microsoft ? 'microsoft' : 'email'})`,
+      );
+      return result;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002')
         throw new ConflictException('Your organisation already has a Seatline workspace');

@@ -389,6 +389,18 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - Error alerts: `infra/azure/alerts.sh` (Azure Monitor log alert → e-mail), run by the deploy
   when the GitHub variable `ALERT_EMAIL` is set. No third-party error service: logs must stay in
   Switzerland. `KEEP_WARM=true` sets min replicas to 1 on deploy.
+- Uptime: `/healthz` (web → API `/health`, which runs `SELECT 1`), pinged every 15 min from
+  Zurich by an Application Insights availability test (`infra/azure/uptime.sh`, run by the deploy
+  with `ALERT_EMAIL`; rare enough that the apps still scale to zero).
+- Backups: `infra/azure/restore-test.sh` (point-in-time restore into a temporary server, check,
+  delete); `.github/workflows/restore-test.yml` runs it monthly.
+- Staging: `setup.sh` takes `RG`, `APP_NAME`, `BRANCH`; branch `staging` deploys to
+  `STAGING_RESOURCE_GROUP`/`STAGING_REGISTRY` (deploy.yml picks by branch; alerts/uptime only on
+  main). CI also runs on pushes to `staging`.
+- Website statistics: `SiteBeacon` on site pages → `POST /site-visit` → one log line
+  `[site-visit] {event, path, ref, source, lang, device}` (`lib/site-stats.ts`; no cookies, no
+  IP). Links with `data-track="cta-…"` count clicks. Report: `infra/azure/site-stats.sh` (also
+  counts "Demo workspace" / "New workspace" API log lines). The privacy policy describes it.
 - Own domain: `infra/azure/custom-domain.sh`; `main.bicep` takes `customDomain` +
   `customDomainCertificateId`, and `setup.sh` re-reads them so a re-run keeps the binding.
 

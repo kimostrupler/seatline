@@ -2,6 +2,8 @@
 # One-time Azure setup for Seatline. Run it in Azure Cloud Shell (Bash) — nothing to install:
 #   git clone https://github.com/kimostrupler/seatline.git && bash seatline/infra/azure/setup.sh
 # Safe to run again: existing resources and secrets are reused.
+# A separate test copy (staging, deployed from the branch "staging"; ~CHF 20/month more):
+#   RG=seatline-staging APP_NAME="Seatline Staging" BRANCH=staging bash seatline/infra/azure/setup.sh
 #
 # Microsoft Graph permissions requested (graph-permissions.json):
 #   delegated openid, profile, email, User.Read  — Sign in with Microsoft
@@ -11,7 +13,8 @@ set -euo pipefail
 RG="${RG:-seatline}"
 LOCATION="switzerlandnorth"
 REPO="${REPO:-kimostrupler/seatline}"
-APP_NAME="Seatline"
+APP_NAME="${APP_NAME:-Seatline}"
+BRANCH="${BRANCH:-main}" # the branch GitHub deploys from to this resource group
 DEPLOY_APP_NAME="seatline-github-deploy"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 
@@ -25,11 +28,11 @@ echo "Subscription: $(az account show --query name -o tsv) ($SUB)"
 
 say "0/6 Switching on the Azure services Seatline uses (new subscriptions start with them off)"
 for ns in Microsoft.App Microsoft.ContainerRegistry Microsoft.DBforPostgreSQL Microsoft.KeyVault \
-  Microsoft.ManagedIdentity Microsoft.OperationalInsights Microsoft.Storage; do
+  Microsoft.ManagedIdentity Microsoft.OperationalInsights Microsoft.Storage Microsoft.Insights; do
   az provider register --namespace "$ns" -o none
 done
 for ns in Microsoft.App Microsoft.ContainerRegistry Microsoft.DBforPostgreSQL Microsoft.KeyVault \
-  Microsoft.ManagedIdentity Microsoft.OperationalInsights Microsoft.Storage; do
+  Microsoft.ManagedIdentity Microsoft.OperationalInsights Microsoft.Storage Microsoft.Insights; do
   for _ in $(seq 1 60); do
     [ "$(az provider show --namespace "$ns" --query registrationState -o tsv)" = "Registered" ] && break
     sleep 5
@@ -113,12 +116,12 @@ say "5/6 Sign-in return addresses for $WEB_URL"
 AZURE_WEB_URL=$(output azureWebUrl)
 az ad app update --id "$APP_ID" --web-redirect-uris $(for u in $(echo "$WEB_URL $AZURE_WEB_URL" | tr ' ' '\n' | sort -u); do echo "$u/auth/callback $u/people"; done)
 
-say "6/6 Deploy access for GitHub ($REPO, branch main) — no passwords (OpenID Connect)"
+say "6/6 Deploy access for GitHub ($REPO, branch $BRANCH) — no passwords (OpenID Connect)"
 DEPLOY_ID=$(az ad app list --display-name "$DEPLOY_APP_NAME" --query "[0].appId" -o tsv)
 [ -n "$DEPLOY_ID" ] || DEPLOY_ID=$(az ad app create --display-name "$DEPLOY_APP_NAME" --query appId -o tsv)
 az ad sp show --id "$DEPLOY_ID" >/dev/null 2>&1 || az ad sp create --id "$DEPLOY_ID" -o none
 # GitHub presents the repository either by name or, on newer setups, by name@id
-# (repo:owner@ownerId/repo@repoId:...). Trust both forms for the main branch.
+# (repo:owner@ownerId/repo@repoId:...). Trust both forms for the branch.
 federate() {
   local name="$1" subject="$2"
   if [ -z "$(az ad app federated-credential list --id "$DEPLOY_ID" --query "[?name=='$name'].name" -o tsv)" ]; then
@@ -130,9 +133,9 @@ federate() {
     }"
   fi
 }
-federate main "repo:$REPO:ref:refs/heads/main"
+federate "$BRANCH" "repo:$REPO:ref:refs/heads/$BRANCH"
 if IDS=$(gh api "repos/$REPO" --jq '"\(.owner.login)@\(.owner.id)/\(.name)@\(.id)"' 2>/dev/null); then
-  federate main-ids "repo:$IDS:ref:refs/heads/main"
+  federate "$BRANCH-ids" "repo:$IDS:ref:refs/heads/$BRANCH"
 else
   echo "  (sign in with 'gh auth login' and run again to also trust GitHub's id-based form)"
 fi
@@ -143,6 +146,21 @@ assign() {
 }
 assign Contributor "/subscriptions/$SUB/resourceGroups/$RG"
 assign AcrPush "$(az acr show -n "$REGISTRY" --query id -o tsv)"
+
+if [ "$BRANCH" != main ]; then
+  cat <<DONE
+
+✅ The $BRANCH copy is ready at:  $WEB_URL
+
+On GitHub open https://github.com/$REPO/settings/variables/actions and add:
+
+  STAGING_RESOURCE_GROUP  $RG
+  STAGING_REGISTRY        $REGISTRY
+
+Then push to the branch "$BRANCH": it deploys here after CI passes (main still goes live).
+DONE
+  exit 0
+fi
 
 cat <<DONE
 
