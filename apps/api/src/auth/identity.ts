@@ -1,8 +1,9 @@
 import { jwtVerify } from 'jose';
 import { z } from 'zod';
 
-/** Who signed in with Microsoft, as vouched for by the web app (BFF). */
-export const identitySchema = z.object({
+/** Signed in with Microsoft. */
+export const microsoftIdentitySchema = z.object({
+  kind: z.literal('microsoft').default('microsoft'), // tokens from before e-mail sign-in had none
   /** Microsoft Entra tenant id (the customer's Microsoft 365 organisation) */
   tid: z.uuid(),
   /** Entra object id of the user */
@@ -10,7 +11,20 @@ export const identitySchema = z.object({
   name: z.string().min(1).max(200),
   email: z.string().min(3).max(320),
 });
+
+/** Signed in with a one-time e-mail link: the address is proven, nothing else. */
+export const emailIdentitySchema = z.object({
+  kind: z.literal('email'),
+  email: z.string().min(3).max(320),
+  /** the workspace picked when the address belongs to several (null = not picked yet) */
+  tenantId: z.uuid().nullable(),
+});
+
+/** Who signed in, as vouched for by the web app (BFF). */
+export const identitySchema = z.union([microsoftIdentitySchema, emailIdentitySchema]);
 export type Identity = z.infer<typeof identitySchema>;
+export type MicrosoftIdentity = z.infer<typeof microsoftIdentitySchema>;
+export type EmailIdentity = z.infer<typeof emailIdentitySchema>;
 
 export const INTERNAL_ISSUER = 'seatline-web';
 export const INTERNAL_AUDIENCE = 'seatline-api';

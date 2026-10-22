@@ -28,6 +28,7 @@ export async function middleware(req: NextRequest) {
   if (process.env.AUTH_MODE !== 'entra') return NextResponse.next();
   if (
     pathname === '/signin' ||
+    pathname.startsWith('/signin/') || // check your inbox; picking a workspace checks itself
     pathname === '/client-errors' || // also from the sign-in page; rate-limited, nothing personal
     pathname.startsWith('/auth/') ||
     pathname.startsWith('/api/') ||

@@ -202,6 +202,38 @@ export function describe(e: ActivityEntry, refs: ActivityRefs, unknownName: stri
         values: { person: person(e.entityId), role: str(a.appRole) ?? '' },
         link: { person: e.entityId },
       };
+    case 'person.create':
+      return {
+        key: 'personAdded',
+        values: {
+          person: refs.people[e.entityId]?.displayName || str(a.displayName) || unknownName,
+        },
+        link: { person: e.entityId },
+      };
+    case 'person.update':
+      return {
+        key: 'personChanged',
+        values: { person: person(e.entityId) },
+        link: { person: e.entityId },
+      };
+    case 'person.leave':
+      return {
+        key: 'personLeft',
+        values: { person: person(e.entityId) },
+        link: { person: e.entityId },
+      };
+    case 'person.return':
+      return {
+        key: 'personBack',
+        values: { person: person(e.entityId) },
+        link: { person: e.entityId },
+      };
+    case 'person.invite':
+      return {
+        key: 'personInvited',
+        values: { person: person(e.entityId) },
+        link: { person: e.entityId },
+      };
     case 'person.team':
       return {
         key: a.department ? 'teamChanged' : 'teamRemoved',

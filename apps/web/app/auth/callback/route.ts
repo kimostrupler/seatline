@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { cookieOptions, membership } from '@/lib/server/auth';
+import { cookieOptions, landing, membership } from '@/lib/server/auth';
 import { webConfig } from '@/lib/server/config';
 import { finishLogin, SignInError, type LoginTransaction } from '@/lib/server/oidc';
 import {
@@ -36,14 +36,7 @@ export async function GET(req: NextRequest) {
       code: params.get('code')!,
       transaction,
     });
-    const status = await membership(user);
-    res = to(
-      status === 'ok'
-        ? '/'
-        : status === 'no_workspace'
-          ? '/onboarding'
-          : `/no-access?reason=${status}`,
-    );
+    res = to(landing(await membership(user)));
     res.cookies.set(
       SESSION_COOKIE,
       await sealSession(user, config.SESSION_SECRET),

@@ -67,7 +67,7 @@ export async function finishLogin(opts: {
   redirectUri: string;
   code: string;
   transaction: LoginTransaction;
-}): Promise<SessionUser> {
+}): Promise<SessionUser & { kind: 'microsoft' }> {
   const res = await fetch(`${opts.loginUrl}/organizations/oauth2/v2.0/token`, {
     method: 'POST',
     headers: { 'content-type': 'application/x-www-form-urlencoded' },
@@ -93,7 +93,7 @@ export async function finishLogin(opts: {
 export async function verifyIdToken(
   idToken: string,
   opts: { loginUrl: string; clientId: string; transaction: Pick<LoginTransaction, 'nonce'> },
-): Promise<SessionUser> {
+): Promise<SessionUser & { kind: 'microsoft' }> {
   let payload;
   try {
     ({ payload } = await jwtVerify(idToken, jwks(opts.loginUrl), {
@@ -115,5 +115,5 @@ export async function verifyIdToken(
   const oid = typeof payload.oid === 'string' ? payload.oid : '';
   const email = String(payload.email ?? payload.preferred_username ?? '').toLowerCase();
   if (!oid || !email) throw new SignInError('The Microsoft account has no e-mail address');
-  return { tid, oid, email, name: String(payload.name ?? email) };
+  return { kind: 'microsoft', tid, oid, email, name: String(payload.name ?? email) };
 }

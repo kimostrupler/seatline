@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { Centered } from '@/components/auth/centered';
 import { SignOutButton } from '@/components/auth/sign-out-button';
+import { userLabel } from '@/lib/server/session';
 import { currentUser } from '@/lib/server/auth';
 
 export default async function NoAccess({
@@ -10,18 +11,20 @@ export default async function NoAccess({
 }) {
   const t = await getTranslations('auth');
   const user = await currentUser();
-  const inactive = (await searchParams).reason === 'inactive';
+  const reason = (await searchParams).reason;
+  const inactive = reason === 'inactive';
+  const microsoft = reason === 'use_microsoft';
   return (
     <Centered>
       <div className="grid gap-1">
         <h1 className="text-xl font-semibold">
-          {inactive ? t('inactiveTitle') : t('noAccessTitle')}
+          {microsoft ? t('useMicrosoftTitle') : inactive ? t('inactiveTitle') : t('noAccessTitle')}
         </h1>
         <p className="text-sm text-muted-foreground">
-          {inactive ? t('inactiveBody') : t('noAccessBody')}
+          {microsoft ? t('useMicrosoftBody') : inactive ? t('inactiveBody') : t('noAccessBody')}
         </p>
       </div>
-      {user && <p className="text-xs text-muted-foreground">{`${user.name} · ${user.email}`}</p>}
+      {user && <p className="text-xs text-muted-foreground">{userLabel(user)}</p>}
       <SignOutButton />
     </Centered>
   );

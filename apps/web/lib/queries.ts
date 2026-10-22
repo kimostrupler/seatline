@@ -448,6 +448,49 @@ export function useCreateMovePlan() {
 }
 
 /** Admins: forget a person who left (their seat history stays, unnamed). */
+/** People & access changes reach everything (lists, map, stats): refresh it all. */
+function usePeopleMutation<V, R>(fn: (vars: V) => Promise<R>) {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: fn, onSettled: () => qc.invalidateQueries() });
+}
+
+export interface NewPerson {
+  displayName: string;
+  email: string;
+  department?: string | null;
+  appRole: DirectoryPerson['appRole'];
+  invite: boolean;
+  language: string;
+}
+
+export const useCreatePerson = () =>
+  usePeopleMutation((body: NewPerson) =>
+    api<DirectoryPerson & { invited: boolean }>('/people', { method: 'POST', body }),
+  );
+
+export const useUpdatePerson = () =>
+  usePeopleMutation(
+    ({
+      id,
+      ...body
+    }: {
+      id: string;
+      displayName?: string;
+      email?: string;
+      jobTitle?: string | null;
+    }) => api<DirectoryPerson>(`/people/${id}`, { method: 'PATCH', body }),
+  );
+
+export const useSetActive = () =>
+  usePeopleMutation(({ id, active }: { id: string; active: boolean }) =>
+    api<DirectoryPerson>(`/people/${id}/active`, { method: 'PATCH', body: { active } }),
+  );
+
+export const useInvitePerson = () =>
+  usePeopleMutation(({ id, language }: { id: string; language: string }) =>
+    api<{ invited: boolean }>(`/people/${id}/invite`, { method: 'POST', body: { language } }),
+  );
+
 export function useForgetPerson() {
   const qc = useQueryClient();
   return useMutation({

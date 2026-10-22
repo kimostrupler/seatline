@@ -51,6 +51,14 @@ param stripeWebhookSecret string = ''
 
 param stripePriceId string = ''
 
+@description('E-mail through SMTP (mail-setup.sh; Hostpoint for hello@seatline.ch). Empty password = e-mail sign-in off.')
+param smtpHost string = 'asmtp.mail.hostpoint.ch'
+param smtpUser string = 'hello@seatline.ch'
+param mailFrom string = 'Seatline <hello@seatline.ch>'
+
+@secure()
+param smtpPassword string = ''
+
 var suffix = uniqueString(resourceGroup().id)
 // Container Apps refuse empty secrets, so Stripe is only added once all three are set
 var stripeOn = !empty(stripeSecretKey) && !empty(stripeWebhookSecret) && !empty(stripePriceId)
@@ -65,6 +73,17 @@ var stripeEnv = stripeOn
       { name: 'STRIPE_SECRET_KEY', secretRef: 'stripe-secret-key' }
       { name: 'STRIPE_WEBHOOK_SECRET', secretRef: 'stripe-webhook-secret' }
       { name: 'STRIPE_PRICE_ID', value: stripePriceId }
+    ]
+  : []
+var mailOn = !empty(smtpPassword)
+var mailSecrets = mailOn ? [{ name: 'smtp-password', value: smtpPassword }] : []
+var mailEnv = mailOn
+  ? [
+      { name: 'SMTP_HOST', value: smtpHost }
+      { name: 'SMTP_PORT', value: '465' }
+      { name: 'SMTP_USER', value: smtpUser }
+      { name: 'SMTP_PASSWORD', secretRef: 'smtp-password' }
+      { name: 'MAIL_FROM', value: mailFrom }
     ]
   : []
 var pgAdmin = 'seatlineadmin'
@@ -197,7 +216,8 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
           { name: 'internal-auth-secret', value: internalAuthSecret }
           { name: 'entra-client-secret', value: entraClientSecret }
         ],
-        stripeSecrets
+        stripeSecrets,
+        mailSecrets
       )
     }
     template: {
@@ -218,8 +238,10 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
               { name: 'ENTRA_CLIENT_SECRET', secretRef: 'entra-client-secret' }
               { name: 'PLAN_ENGINE_URL', value: planEngineUrl }
               { name: 'PLAN_ENGINE_TOKEN', secretRef: 'internal-auth-secret' }
+              { name: 'APP_URL', value: webUrl } // links in e-mails
             ],
-            stripeEnv
+            stripeEnv,
+            mailEnv
           )
         }
       ]
@@ -358,7 +380,8 @@ resource nightlySync 'Microsoft.App/jobs@2024-03-01' = {
           { name: 'app-database-url', value: appDbUrl }
           { name: 'entra-client-secret', value: entraClientSecret }
         ],
-        stripeSecrets
+        stripeSecrets,
+        mailSecrets
       )
     }
     template: {
@@ -374,8 +397,10 @@ resource nightlySync 'Microsoft.App/jobs@2024-03-01' = {
               { name: 'APP_DATABASE_URL', secretRef: 'app-database-url' }
               { name: 'ENTRA_CLIENT_ID', value: entraClientId }
               { name: 'ENTRA_CLIENT_SECRET', secretRef: 'entra-client-secret' }
+              { name: 'APP_URL', value: webUrl }
             ],
-            stripeEnv
+            stripeEnv,
+            mailEnv
           )
         }
       ]

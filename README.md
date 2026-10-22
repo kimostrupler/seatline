@@ -182,6 +182,16 @@ The database enforces the hard rules itself, so a bug in the API can't break the
   linked from the sign-in page, the account menu and the website footer. Operator details in
   `apps/web/lib/legal/operator.ts`; see [docs/legal.md](docs/legal.md).
 
+## Sign-in by e-mail (without Microsoft 365)
+
+- The sign-in page offers "E-mail me a sign-in link" once the API can send e-mail: `APP_URL` +
+  `SMTP_HOST`/`SMTP_USER`/`SMTP_PASSWORD` (online: `infra/azure/mail-setup.sh`, Hostpoint,
+  hello@seatline.ch). Links work once, for 15 minutes.
+- A new address can create a workspace (it signs in by e-mail). Admins add colleagues under
+  People & access → **Add person** (optionally with an invitation e-mail).
+- Locally/tests: set `MAIL_OUTBOX=/some/folder` (with `APP_URL`) and each e-mail is written there
+  as a JSON file instead of being sent.
+
 ## Billing (Stripe)
 
 - Off unless `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` and `STRIPE_PRICE_ID` are set (online:

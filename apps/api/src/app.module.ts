@@ -19,6 +19,8 @@ import { AssignmentsService } from './assignments/assignments.service';
 import { AuthController } from './auth/auth.controller';
 import { AuthGuard } from './auth/auth.guard';
 import { IdentityService } from './auth/identity.service';
+import { EmailSignInService } from './auth/email-sign-in.service';
+import { MailService } from './mail/mail.service';
 import { BuildingsController } from './buildings/buildings.controller';
 import { BuildingsService } from './buildings/buildings.service';
 import { PrismaExceptionFilter } from './common/prisma-exception.filter';
@@ -82,6 +84,8 @@ import { PeopleSyncService } from './sync/people-sync.service';
     StorageService,
     LayoutService,
     IdentityService,
+    EmailSignInService,
+    MailService,
     GraphClient,
     PeopleSyncService,
     JobQueue,

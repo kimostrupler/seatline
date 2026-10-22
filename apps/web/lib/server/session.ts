@@ -2,13 +2,19 @@ import { EncryptJWT, jwtDecrypt, SignJWT } from 'jose';
 
 // Works in Node and in the edge middleware (Web Crypto only).
 
-/** Who signed in with Microsoft. Kept in an encrypted, httpOnly cookie. */
-export interface SessionUser {
-  tid: string;
-  oid: string;
-  name: string;
-  email: string;
-}
+/** Who signed in: with Microsoft, or with a one-time e-mail link. Kept in an encrypted, httpOnly cookie. */
+export type SessionUser =
+  | { kind: 'microsoft'; tid: string; oid: string; name: string; email: string }
+  | {
+      kind: 'email';
+      email: string;
+      /** the workspace picked when the address belongs to several (null = not picked) */
+      tenantId: string | null;
+    };
+
+/** "Name · e-mail" (or just the e-mail) for "signed in as". */
+export const userLabel = (user: SessionUser) =>
+  user.kind === 'microsoft' ? `${user.name} · ${user.email}` : user.email;
 
 export const SESSION_COOKIE = 'sl_session';
 export const OIDC_COOKIE = 'sl_oidc';
@@ -56,13 +62,22 @@ export async function readSession(
   token: string | undefined,
   secret: string,
 ): Promise<SessionUser | null> {
-  const s = await unseal<SessionUser>(token, secret, 'session');
-  return s?.tid && s.oid ? { tid: s.tid, oid: s.oid, name: s.name, email: s.email } : null;
+  const s = await unseal<Record<string, string | null | undefined>>(token, secret, 'session');
+  if (s?.kind === 'email' && s.email)
+    return { kind: 'email', email: s.email, tenantId: s.tenantId ?? null };
+  // Microsoft (cookies from before e-mail sign-in have no kind)
+  if (s?.tid && s.oid)
+    return { kind: 'microsoft', tid: s.tid, oid: s.oid, name: s.name ?? '', email: s.email ?? '' };
+  return null;
 }
 
 /** The short-lived token the API trusts for one request (see apps/api/src/auth/identity.ts). */
 export async function internalToken(user: SessionUser, secret: string): Promise<string> {
-  return new SignJWT({ tid: user.tid, oid: user.oid, name: user.name, email: user.email })
+  const claims =
+    user.kind === 'email'
+      ? { kind: 'email', email: user.email, tenantId: user.tenantId }
+      : { kind: 'microsoft', tid: user.tid, oid: user.oid, name: user.name, email: user.email };
+  return new SignJWT(claims)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuer('seatline-web')
     .setAudience('seatline-api')

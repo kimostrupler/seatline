@@ -1,5 +1,13 @@
-import { Body, Controller, Get, Param, Patch, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Patch, Post, Query } from '@nestjs/common';
 import {
+  createPersonSchema,
+  inviteSchema,
+  setActiveSchema,
+  updatePersonSchema,
+  type CreatePersonInput,
+  type InviteInput,
+  type SetActiveInput,
+  type UpdatePersonInput,
   listPeopleQuerySchema,
   setRoleSchema,
   setTeamSchema,
@@ -33,6 +41,47 @@ export class PeopleController {
   @Get('directory')
   directory(@Ctx() ctx: RequestContext) {
     return this.people.directory(ctx);
+  }
+
+  /** Add someone by hand (and optionally invite them by e-mail). */
+  @AdminOnly()
+  @Post()
+  create(
+    @Ctx() ctx: RequestContext,
+    @Body(new ZodPipe(createPersonSchema)) body: CreatePersonInput,
+  ) {
+    return this.people.create(ctx, body);
+  }
+
+  @AdminOnly()
+  @Patch(':id')
+  update(
+    @Ctx() ctx: RequestContext,
+    @Param('id', IdPipe) id: string,
+    @Body(new ZodPipe(updatePersonSchema)) body: UpdatePersonInput,
+  ) {
+    return this.people.update(ctx, id, body);
+  }
+
+  @AdminOnly()
+  @Patch(':id/active')
+  setActive(
+    @Ctx() ctx: RequestContext,
+    @Param('id', IdPipe) id: string,
+    @Body(new ZodPipe(setActiveSchema)) body: SetActiveInput,
+  ) {
+    return this.people.setActive(ctx, id, body);
+  }
+
+  @AdminOnly()
+  @Post(':id/invite')
+  @HttpCode(200)
+  invite(
+    @Ctx() ctx: RequestContext,
+    @Param('id', IdPipe) id: string,
+    @Body(new ZodPipe(inviteSchema)) body: InviteInput,
+  ) {
+    return this.people.invite(ctx, id, body.language);
   }
 
   @AdminOnly()

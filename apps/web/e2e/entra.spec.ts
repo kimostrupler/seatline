@@ -1,9 +1,13 @@
 import { expect, test, type Page } from '@playwright/test';
 import { resetE2eDb } from './db';
+import { clearMails, lastLink, mailsTo } from './mail';
 
 // The web app in "entra" mode against a fake Microsoft login (e2e/fake-microsoft.mjs).
 
-test.beforeEach(() => resetE2eDb());
+test.beforeEach(() => {
+  resetE2eDb();
+  clearMails();
+});
 
 const signInAs = (page: Page, email: string) =>
   page.goto(`/auth/login?login_hint=${encodeURIComponent(email)}`);
@@ -91,4 +95,61 @@ test('sign out, and the API refuses requests without a session (dev headers are 
     },
   });
   expect(res.status()).toBe(401);
+});
+
+// ---- sign-in with an e-mail link (workspaces without Microsoft 365) ---------------------
+
+async function emailSignIn(page: Page, email: string) {
+  await page.goto('/signin');
+  await page.getByLabel('Work e-mail').fill(email);
+  await page.getByRole('button', { name: 'E-mail me a sign-in link' }).click();
+  await expect(page.getByRole('heading', { name: 'Check your inbox' })).toBeVisible();
+  const link = lastLink(email);
+  expect(link).toContain('/auth/email?token=');
+  await page.goto(link!);
+  // the link page doesn't sign in by itself (mail scanners open links): one click does
+  await page.getByRole('button', { name: 'Continue' }).click();
+  return link!;
+}
+
+test('an e-mail link signs in once; admins add and invite people', async ({ page, browser }) => {
+  const link = await emailSignIn(page, 'admin@alpenblick.example');
+  await expect(page.getByTestId('account-menu')).toContainText('Alpenblick AG');
+  await expect(page.getByTestId('account-menu')).toContainText('Admin');
+
+  // the link is used up
+  const again = await browser.newPage();
+  await again.goto(link);
+  await again.getByRole('button', { name: 'Continue' }).click();
+  await expect(again.getByRole('alert')).toContainText('expired or was already used');
+  await again.close();
+
+  // add a colleague and invite her
+  await page.goto('/people');
+  await page.getByRole('button', { name: 'Add person' }).click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Name', { exact: true }).fill('Nora Neu');
+  await dialog.getByLabel('E-mail', { exact: true }).fill('nora@alpenblick.example');
+  await dialog.getByRole('button', { name: 'Add' }).click();
+  await expect(page.getByText('Nora Neu added and invited')).toBeVisible();
+  expect(mailsTo('nora@alpenblick.example')[0]?.subject).toBe(
+    'Alpenblick AG Admin added you to Seatline',
+  );
+
+  // she follows the invitation: the sign-in page with her address filled in
+  const nora = await browser.newPage();
+  await nora.goto(lastLink('nora@alpenblick.example')!);
+  await expect(nora.getByLabel('Work e-mail')).toHaveValue('nora@alpenblick.example');
+  await emailSignIn(nora, 'nora@alpenblick.example');
+  await expect(nora.getByTestId('account-menu')).toContainText('Viewer');
+  await nora.close();
+});
+
+test('a new company signs up with an e-mail link', async ({ page }) => {
+  await emailSignIn(page, 'founder@small.example');
+  await expect(page.getByText('Create your company’s workspace')).toBeVisible();
+  await page.getByLabel('Organisation name').fill('Small GmbH');
+  await page.getByLabel('Your name').fill('Fiona Founder');
+  await page.getByRole('button', { name: 'Create workspace' }).click();
+  await expect(page.getByTestId('account-menu')).toContainText('Small GmbH');
 });

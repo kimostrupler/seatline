@@ -175,6 +175,22 @@ export const endAssignmentSchema = z.strictObject({
 /** First sign-in from a new organisation: create its Seatline workspace. */
 export const onboardingSchema = z.strictObject({
   companyName: z.string().trim().min(2).max(200),
+  /** only with e-mail sign-in (Microsoft tells us the name) */
+  yourName: z.string().trim().min(2).max(200).optional(),
+});
+
+export const MAIL_LANGUAGES = ['en', 'de', 'fr'] as const;
+const email = z.string().trim().toLowerCase().max(320).pipe(z.email());
+
+/** Send a one-time sign-in link to this address. */
+export const emailSignInStartSchema = z.strictObject({
+  email,
+  language: z.enum(MAIL_LANGUAGES).default('en'),
+});
+
+/** The token from a sign-in link. */
+export const emailSignInVerifySchema = z.strictObject({
+  token: z.string().regex(/^[A-Za-z0-9_-]{43}$/),
 });
 
 export const updateTenantSchema = z.strictObject({
@@ -190,6 +206,34 @@ export const updateTenantSchema = z.strictObject({
 
 export const setRoleSchema = z.strictObject({
   appRole: z.enum(APP_ROLES).nullable(),
+});
+
+const personName = z.string().trim().min(1).max(200);
+
+/** Add someone by hand (workspaces without Microsoft 365, or people not in its directory). */
+export const createPersonSchema = z.strictObject({
+  displayName: personName,
+  email,
+  department: z.string().trim().max(100).nullish(),
+  jobTitle: z.string().trim().max(200).nullish(),
+  appRole: z.enum(APP_ROLES).nullable().default(null),
+  /** e-mail them how to sign in (needs a role; workspaces with e-mail sign-in) */
+  invite: z.boolean().default(false),
+  language: z.enum(MAIL_LANGUAGES).default('en'),
+});
+
+/** Correct a person added by hand (people from Microsoft 365 come from its directory). */
+export const updatePersonSchema = z.strictObject({
+  displayName: personName.optional(),
+  email: email.optional(),
+  jobTitle: z.string().trim().max(200).nullish(),
+});
+
+/** Someone added by hand left (or came back). Leaving frees their seat; history stays. */
+export const setActiveSchema = z.strictObject({ active: z.boolean() });
+
+export const inviteSchema = z.strictObject({
+  language: z.enum(MAIL_LANGUAGES).default('en'),
 });
 
 /** Set someone's team by hand, or go back to the one from Microsoft (`fromDirectory`). */
@@ -333,7 +377,14 @@ export type AssignSeatInput = z.infer<typeof assignSeatSchema>;
 export type ReserveSeatInput = z.infer<typeof reserveSeatSchema>;
 export type EndAssignmentInput = z.infer<typeof endAssignmentSchema>;
 export type OnboardingInput = z.infer<typeof onboardingSchema>;
+export type EmailSignInStartInput = z.infer<typeof emailSignInStartSchema>;
+export type EmailSignInVerifyInput = z.infer<typeof emailSignInVerifySchema>;
+export type MailLanguage = (typeof MAIL_LANGUAGES)[number];
 export type UpdateTenantInput = z.infer<typeof updateTenantSchema>;
 export type SetRoleInput = z.infer<typeof setRoleSchema>;
 export type SetTeamInput = z.infer<typeof setTeamSchema>;
+export type CreatePersonInput = z.infer<typeof createPersonSchema>;
+export type UpdatePersonInput = z.infer<typeof updatePersonSchema>;
+export type SetActiveInput = z.infer<typeof setActiveSchema>;
+export type InviteInput = z.infer<typeof inviteSchema>;
 export type ListPeopleQuery = z.infer<typeof listPeopleQuerySchema>;

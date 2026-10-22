@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 import { Centered } from '@/components/auth/centered';
 import { OnboardingForm } from '@/components/auth/onboarding-form';
+import { userLabel } from '@/lib/server/session';
 import { currentUser, membership } from '@/lib/server/auth';
 
 export default async function Onboarding() {
@@ -13,9 +14,11 @@ export default async function Onboarding() {
     <Centered>
       <div className="grid gap-1">
         <h1 className="text-xl font-semibold">{t('onboardingTitle')}</h1>
-        <p className="text-sm text-muted-foreground">{t('onboardingBody')}</p>
+        <p className="text-sm text-muted-foreground">
+          {user.kind === 'email' ? t('onboardingBodyEmail') : t('onboardingBody')}
+        </p>
       </div>
-      <OnboardingForm signedInAs={`${user.name} · ${user.email}`} />
+      <OnboardingForm signedInAs={userLabel(user)} askName={user.kind === 'email'} />
     </Centered>
   );
 }
