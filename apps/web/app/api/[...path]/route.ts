@@ -23,11 +23,16 @@ async function proxy(req: NextRequest, { params }: { params: Promise<{ path: str
     const value = req.headers.get(name);
     if (value) headers.set(name, value);
   }
+  const hasBody = req.method !== 'GET' && req.method !== 'HEAD';
   const stripeWebhook = path.join('/') === STRIPE_WEBHOOK && req.method === 'POST';
   if (stripeWebhook) {
     const signature = req.headers.get('stripe-signature');
     if (signature) headers.set('stripe-signature', signature);
   } else if (config.AUTH_MODE === 'entra') {
+    // changes only from our own pages (the Teams cookie is SameSite=None)
+    const origin = req.headers.get('origin');
+    if (hasBody && origin && origin !== new URL(config.APP_URL).origin)
+      return Response.json({ message: 'Not allowed from another site' }, { status: 403 });
     const user = await readSession(req.cookies.get(SESSION_COOKIE)?.value, config.SESSION_SECRET);
     if (!user) return Response.json({ message: 'Sign in with Microsoft' }, { status: 401 });
     headers.set(
@@ -35,7 +40,6 @@ async function proxy(req: NextRequest, { params }: { params: Promise<{ path: str
       `Bearer ${await internalToken(user, config.INTERNAL_AUTH_SECRET)}`,
     );
   }
-  const hasBody = req.method !== 'GET' && req.method !== 'HEAD';
   const res = await fetch(url, {
     method: req.method,
     headers,

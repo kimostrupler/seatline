@@ -355,3 +355,24 @@ export interface MovePlanDetail extends Omit<MovePlanSummary, 'moves'> {
 
 /** A plan the plan engine read: suggestions in the pixels of its new background image. */
 export type PlanImport = import('@seatline/shared').PlanDraft & { importId: string };
+
+/** Space planning: expected headcount per team vs desks (GET /planning). */
+export interface SpacePlan {
+  desks: { total: number; free: number; taken: number; reserved: number; blocked: number };
+  /** people who will need a desk (unseated now + expected growth) */
+  needed: number;
+  growth: number;
+  /** desks missing once everyone expected has one */
+  short: number;
+  floors: Array<{ id: string; name: string; building: string; desks: number; free: number }>;
+  teams: Array<{
+    name: string | null;
+    people: number;
+    seated: number;
+    target: number | null;
+    byDate: string | null;
+    needed: number;
+    zoneDesks: number;
+    zoneFree: number;
+  }>;
+}

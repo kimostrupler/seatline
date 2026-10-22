@@ -612,6 +612,14 @@
         "empty": "Le fichier est vide.",
         "too_many": "2000 personnes au maximum par fichier — divisez la liste."
       }
+    },
+    "teamsApp": {
+      "title": "Teams et Outlook",
+      "body": "Ajoutez Seatline comme app dans Microsoft Teams et Outlook : chacun y voit le plan et trouve ses collègues, connecté automatiquement.",
+      "step1": "Téléchargez l’app ci-dessous.",
+      "step2": "Dans le centre d’administration Teams : Applications Teams → Gérer les applications → Charger une nouvelle application (pour tous), ou dans Teams : Applications → Gérer vos applications → Charger une application (pour vous).",
+      "step3": "Ouvrez Seatline depuis la barre d’applications de Teams ou d’Outlook.",
+      "download": "Télécharger l’app Teams"
     }
   },
   "shortcuts": {
@@ -650,7 +658,8 @@
     "map": "Plan",
     "language": "Langue",
     "moves": "Déménagements",
-    "billing": "Facturation"
+    "billing": "Facturation",
+    "planning": "Planification"
   },
   "overview": {
     "title": "Vue d’ensemble",
@@ -767,7 +776,9 @@
       "leavingSet": "a fixé la date de départ de {person} au {day}",
       "leavingCleared": "a retiré la date de départ de {person}",
       "teamRenamed": "a renommé l’équipe {old} en {team}",
-      "teamDeleted": "a supprimé l’équipe {team}"
+      "teamDeleted": "a supprimé l’équipe {team}",
+      "teamPlanSet": "prévoit {count} personnes dans {team}",
+      "teamPlanRemoved": "a supprimé la prévision d’effectif de {team}"
     },
     "showPlan": "Ouvrir le plan",
     "search": "Rechercher dans l’activité",
@@ -1216,5 +1227,42 @@
     "failed": "La démo n’a pas pu être ouverte. Veuillez réessayer.",
     "banner": "Ceci est une démo avec des données d’exemple — elle est supprimée après un jour.",
     "startTrial": "Commencer l’essai gratuit"
+  },
+  "planning": {
+    "title": "Planification des espaces",
+    "onlyEditors": "Seuls les éditeurs et les admins voient la planification des espaces.",
+    "intro": "Indiquez combien de personnes chaque équipe prévoit (p. ex. après des embauches) et pour quand. Seatline compare avec les places libres.",
+    "freeNow": "Places libres maintenant",
+    "freeOf": "{free} sur {total}",
+    "growth": "Nouvelles personnes prévues",
+    "outlook": "Perspective",
+    "short": "{count, plural, one {# place manquante} other {# places manquantes}}",
+    "enough": "Assez de places",
+    "explain": "{needed, plural, one {# personne a} other {# personnes ont}} besoin d’une place (sans place aujourd’hui, plus les nouvelles personnes prévues) ; {free} places sont libres.",
+    "teams": "Équipes",
+    "columns": {
+      "team": "Équipe",
+      "people": "Personnes",
+      "seated": "Avec une place",
+      "expected": "Prévues",
+      "by": "D’ici",
+      "needs": "Places nécessaires",
+      "zone": "Zone d’équipe"
+    },
+    "expectedOf": "Personnes prévues dans {team}",
+    "byOf": "Prévu pour (date) pour {team}",
+    "zoneFree": "{free} sur {total} libres",
+    "noTeam": "Sans équipe",
+    "saved": "Prévision pour {team} enregistrée",
+    "addTeam": "Planifier une nouvelle équipe",
+    "newTeam": "Nom de l’équipe",
+    "add": "Ajouter",
+    "cancel": "Annuler",
+    "floors": "Places libres par étage"
+  },
+  "teamsTab": {
+    "signingIn": "Connexion avec votre compte Microsoft…",
+    "failed": "La connexion dans Teams n’a pas fonctionné. Votre IT doit peut-être encore autoriser Seatline pour Teams.",
+    "openInBrowser": "Ouvrir Seatline dans le navigateur"
   }
 }

@@ -30,6 +30,8 @@ export async function middleware(req: NextRequest) {
     pathname === '/signin' ||
     pathname.startsWith('/signin/') || // check your inbox; picking a workspace checks itself
     pathname === '/client-errors' || // also from the sign-in page; rate-limited, nothing personal
+    pathname === '/teams' || // the Teams / Outlook tab signs in by itself (single sign-on)
+    pathname === '/teams-app' || // the Teams app package (nothing secret)
     pathname.startsWith('/auth/') ||
     pathname.startsWith('/api/') ||
     isPublicPath(pathname)

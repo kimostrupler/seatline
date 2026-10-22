@@ -273,6 +273,13 @@ export function describe(e: ActivityEntry, refs: ActivityRefs, unknownName: stri
       };
     case 'tenant.create':
       return { key: 'workspaceCreated', values: { name: str(a.name) ?? '' } };
+    case 'team_plan.set':
+      return a.headcount === undefined
+        ? { key: 'teamPlanRemoved', values: { team: str(b.team) ?? '' } }
+        : {
+            key: 'teamPlanSet',
+            values: { team: str(a.team) ?? '', count: Number(a.headcount ?? 0) },
+          };
     case 'dashboard.update':
       return { key: 'dashboardUpdated', values: {} };
     case 'dashboard.reset':

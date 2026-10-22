@@ -101,6 +101,7 @@ model Tenant {
   movePlans    MovePlan[]
   moveItems    MovePlanItem[]
   floorMarkers FloorMarker[]
+  teamPlans    TeamPlan[]
 
   @@map("tenants")
 }
@@ -384,4 +385,19 @@ model FloorMarker {
   @@unique([tenantId, id])
   @@index([tenantId, floorId])
   @@map("floor_markers")
+}
+
+/// Space planning: how many people a team expects (after hiring), by when.
+model TeamPlan {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String    @map("tenant_id") @db.Uuid
+  team      String
+  headcount Int
+  byDate    DateTime? @map("by_date") @db.Date
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, team])
+  @@map("team_plans")
 }

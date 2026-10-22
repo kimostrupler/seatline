@@ -612,6 +612,14 @@
         "empty": "Die Datei ist leer.",
         "too_many": "Höchstens 2000 Personen pro Datei — teilen Sie die Liste auf."
       }
+    },
+    "teamsApp": {
+      "title": "Teams & Outlook",
+      "body": "Fügen Sie Seatline als App in Microsoft Teams und Outlook hinzu: Alle sehen dort den Plan und finden Kolleginnen und Kollegen, automatisch angemeldet.",
+      "step1": "Laden Sie die App unten herunter.",
+      "step2": "Im Teams Admin Center: Teams-Apps → Apps verwalten → Neue App hochladen (für alle), oder in Teams: Apps → Ihre Apps verwalten → App hochladen (nur für Sie).",
+      "step3": "Öffnen Sie Seatline über die App-Leiste in Teams oder Outlook.",
+      "download": "Teams-App herunterladen"
     }
   },
   "shortcuts": {
@@ -650,7 +658,8 @@
     "map": "Plan",
     "language": "Sprache",
     "moves": "Umzüge",
-    "billing": "Abrechnung"
+    "billing": "Abrechnung",
+    "planning": "Planung"
   },
   "overview": {
     "title": "Übersicht",
@@ -767,7 +776,9 @@
       "leavingSet": "hat das Austrittsdatum von {person} auf {day} gesetzt",
       "leavingCleared": "hat das Austrittsdatum von {person} entfernt",
       "teamRenamed": "hat das Team {old} in {team} umbenannt",
-      "teamDeleted": "hat das Team {team} entfernt"
+      "teamDeleted": "hat das Team {team} entfernt",
+      "teamPlanSet": "erwartet {count} Personen im Team {team}",
+      "teamPlanRemoved": "hat die Personalplanung für {team} entfernt"
     },
     "showPlan": "Plan öffnen",
     "search": "Aktivität durchsuchen",
@@ -1216,5 +1227,42 @@
     "failed": "Die Demo konnte nicht geöffnet werden. Bitte versuchen Sie es nochmals.",
     "banner": "Dies ist eine Demo mit Musterdaten — sie wird nach einem Tag gelöscht.",
     "startTrial": "Gratis-Testphase starten"
+  },
+  "planning": {
+    "title": "Flächenplanung",
+    "onlyEditors": "Nur Bearbeiter und Admins sehen die Flächenplanung.",
+    "intro": "Geben Sie ein, wie viele Personen jedes Team erwartet (z. B. nach Neueinstellungen) und bis wann. Seatline vergleicht das mit den freien Plätzen.",
+    "freeNow": "Freie Plätze jetzt",
+    "freeOf": "{free} von {total}",
+    "growth": "Erwartete neue Personen",
+    "outlook": "Ausblick",
+    "short": "{count, plural, one {# Platz fehlt} other {# Plätze fehlen}}",
+    "enough": "Genug Plätze",
+    "explain": "{needed, plural, one {# Person braucht} other {# Personen brauchen}} einen Platz (heute ohne Platz plus erwartete neue Personen); {free} Plätze sind frei.",
+    "teams": "Teams",
+    "columns": {
+      "team": "Team",
+      "people": "Personen",
+      "seated": "Mit Platz",
+      "expected": "Erwartet",
+      "by": "Bis",
+      "needs": "Plätze nötig",
+      "zone": "Team-Zone"
+    },
+    "expectedOf": "Erwartete Personen im Team {team}",
+    "byOf": "Erwartet bis (Datum) für {team}",
+    "zoneFree": "{free} von {total} frei",
+    "noTeam": "Ohne Team",
+    "saved": "Planung für {team} gespeichert",
+    "addTeam": "Neues Team planen",
+    "newTeam": "Name des Teams",
+    "add": "Hinzufügen",
+    "cancel": "Abbrechen",
+    "floors": "Freie Plätze pro Etage"
+  },
+  "teamsTab": {
+    "signingIn": "Sie werden mit Ihrem Microsoft-Konto angemeldet…",
+    "failed": "Die Anmeldung in Teams hat nicht geklappt. Möglicherweise muss Ihre IT Seatline für Teams noch freigeben.",
+    "openInBrowser": "Seatline im Browser öffnen"
   }
 }
