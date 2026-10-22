@@ -403,6 +403,110 @@
       "back": "Als zurück markieren",
       "leftDone": "{name} als ausgetreten markiert – der Platz ist frei",
       "backDone": "{name} ist zurück"
+    },
+    "tabs": {
+      "people": "Personen",
+      "teams": "Teams",
+      "changes": "Änderungen",
+      "settings": "Einstellungen"
+    },
+    "people": {
+      "filter": "Anzeigen",
+      "filters": {
+        "all": "Alle",
+        "noDesk": "Ohne Platz",
+        "leaving": "Austritt geplant",
+        "left": "Ausgetreten"
+      },
+      "columns": {
+        "person": "Person",
+        "team": "Team",
+        "desk": "Platz",
+        "role": "Rolle"
+      },
+      "nobody": "Niemand gefunden.",
+      "noTeam": "Kein Team",
+      "deskShort": "Platz {desk}",
+      "noDesk": "Kein Platz",
+      "leaves": "Austritt {day}",
+      "count": "{shown} von {total} Personen"
+    },
+    "teamsTab": {
+      "intro": "Teams gruppieren Personen auf dem Plan, in den Statistiken und bei Umzügen.",
+      "newTeam": "Neues Team",
+      "none": "Noch keine Teams. Erstellen Sie eines und ordnen Sie Personen zu.",
+      "counts": "{people, plural, one {# Person} other {# Personen}} · {seated} mit Platz",
+      "menu": "Mehr für {team}",
+      "addPeople": "Personen hinzufügen",
+      "rename": "Umbenennen",
+      "remove": "Team entfernen",
+      "withoutTeam": "{count, plural, one {# Person hat} other {# Personen haben}} kein Team",
+      "placeThem": "Einem Team zuordnen",
+      "addTitle": "Personen zu {team} hinzufügen",
+      "newTitle": "Neues Team",
+      "pickHint": "Wählen Sie, wer dazugehört. Eine Person ist jeweils in einem Team.",
+      "saved": "{count, plural, one {# Person} other {# Personen}} jetzt in {team}",
+      "name": "Teamname",
+      "namePlaceholder": "z. B. Finanzen",
+      "exists": "Dieses Team gibt es schon – die Personen kommen dazu.",
+      "searchPeople": "Personen suchen",
+      "noTeam": "Kein Team",
+      "cancel": "Abbrechen",
+      "putIn": "{count, plural, =0 {Hinzufügen} one {# Person hinzufügen} other {# Personen hinzufügen}}",
+      "renameTitle": "{team} umbenennen",
+      "renameHint": "Ändert das Team aller Personen darin.",
+      "renamed": "Umbenannt in {team}",
+      "save": "Speichern",
+      "removeTitle": "{team} entfernen?",
+      "removeBody": "Die Personen bleiben, ohne Team. Ihre Plätze ändern sich nicht.",
+      "removed": "{team} entfernt"
+    },
+    "changes": {
+      "intro": "Ändern Sie mehrere Personen auf einmal – Team, Rolle, Austrittsdatum – und speichern Sie alles zusammen.",
+      "notifies": "Mitteilungen gehen an {emails}.",
+      "notifiesNobody": "Noch niemand erhält Mitteilungen.",
+      "change": "Ändern",
+      "search": "Personen suchen",
+      "person": "Person",
+      "team": "Team",
+      "role": "Rolle",
+      "leavesOn": "Austritt am",
+      "noTeam": "Kein Team",
+      "teamOf": "Team von {name}",
+      "roleOf": "Rolle von {name}",
+      "noRole": "Kein Zugriff",
+      "leavesOnOf": "Austrittsdatum von {name}",
+      "leavingHint": "Am Austrittstag wird die Person frühmorgens als ausgetreten markiert und ihr Platz wird frei. Ihre Platzhistorie bleibt.",
+      "pending": "{count, plural, one {# Person geändert} other {# Personen geändert}}",
+      "discard": "Verwerfen",
+      "save": "Änderungen speichern",
+      "saved": "{count, plural, one {Änderung gespeichert} other {# Änderungen gespeichert}}",
+      "savedNotified": "{count, plural, one {Änderung gespeichert} other {# Änderungen gespeichert}} – Mitteilung gesendet"
+    },
+    "notices": {
+      "title": "Mitteilungen",
+      "intro": "Seatline schreibt diesen Adressen (z. B. IT oder Facility Management), wenn sich etwas ändert – zum Beispiel, wer ausgetreten ist und welcher Platz jetzt frei ist.",
+      "recipients": "Senden an",
+      "remove": "{email} entfernen",
+      "none": "Noch niemand.",
+      "placeholder": "it@firma.ch",
+      "addressLabel": "E-Mail-Adresse für Mitteilungen",
+      "add": "Hinzufügen",
+      "added": "{email} erhält jetzt Mitteilungen",
+      "about": "Worüber",
+      "events": {
+        "left": "Jemand tritt aus (und sein Platz wird frei)",
+        "joined": "Jemand kommt neu dazu",
+        "team": "Jemand wechselt das Team",
+        "moves": "Ein Umzugsplan wird ausgeführt"
+      },
+      "language": "Sprache der E-Mails",
+      "languages": {
+        "de": "Deutsch",
+        "fr": "Français",
+        "en": "English"
+      },
+      "hint": "Gesendet von hello@seatline.ch, eine E-Mail pro Änderung (oder eine für mehrere zusammen). Reiner Text, kein Tracking."
     }
   },
   "shortcuts": {
@@ -553,7 +657,11 @@
       "personChanged": "hat die Angaben von {person} geändert",
       "personLeft": "hat {person} als ausgetreten markiert",
       "personBack": "hat {person} als zurück markiert",
-      "personInvited": "hat {person} zur Anmeldung eingeladen"
+      "personInvited": "hat {person} zur Anmeldung eingeladen",
+      "leavingSet": "hat das Austrittsdatum von {person} auf {day} gesetzt",
+      "leavingCleared": "hat das Austrittsdatum von {person} entfernt",
+      "teamRenamed": "hat das Team {old} in {team} umbenannt",
+      "teamDeleted": "hat das Team {team} entfernt"
     },
     "showPlan": "Plan öffnen",
     "search": "Aktivität durchsuchen",

@@ -202,6 +202,21 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   history stays). People from Microsoft (`entra_object_id`) are changed in Microsoft (409
   `from_microsoft`). Infra: `infra/azure/mail-setup.sh` stores the SMTP password in Key Vault.
 
+## People & access (tabs), teams, HR changes, notices
+
+- `/people` has tabs in the URL (`?tab=`): **People** (list: team colour, desk, role, filters all /
+  without desk / leaving / left, Add person), **Teams** (cards: seated meter, floors, rename /
+  remove via `POST /people/teams/rename`, add people), **Changes** (HR table: team, role, leaving
+  date for many people, one `POST /people/changes`, all or nothing), **Settings** (access,
+  notices, Microsoft 365, data protection). Files: `components/admin/*-tab.tsx`.
+- `people.leaves_on`: today or earlier → leave now (`PeopleService.leave`: inactive, open seats
+  end, history kept); later → the nightly job (`leaveDue`, `list_leaving_tenants`) before moves.
+  The people sync keeps someone inactive once their leaving date has come.
+- Notices (`mail/notify.service.ts`, texts in `mail/notices.ts`): `tenants.notify_emails`,
+  `notify_events` (left | joined | team | moves), `notify_language`. Sent after the change is
+  saved (never undoes it): manual leave/add/team, HR changes (incl. "leaving on"), sync
+  (joined/left), carried-out move plans (who moved from → to). One plain-text e-mail per batch.
+
 ## Activity & overview
 
 - `GET /activity` reads `audit_log` (editors/admins, `@EditorsOnly`), newest first with a cursor,

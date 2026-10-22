@@ -61,6 +61,7 @@ test('a new organisation creates its workspace; a colleague joins as viewer', as
   // the admin sees both people
   await page.getByRole('link', { name: 'People & access' }).click();
   await expect(page.getByTestId('directory')).toContainText('second@newco.example');
+  await page.getByRole('tab', { name: 'Settings' }).click();
   await expect(page.getByTestId('sync-status')).toContainText('People haven’t been synced yet');
 });
 

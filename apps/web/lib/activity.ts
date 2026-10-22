@@ -234,6 +234,16 @@ export function describe(e: ActivityEntry, refs: ActivityRefs, unknownName: stri
         values: { person: person(e.entityId) },
         link: { person: e.entityId },
       };
+    case 'person.leaves_on':
+      return {
+        key: a.leavesOn ? 'leavingSet' : 'leavingCleared',
+        values: { person: person(e.entityId), day: str(a.leavesOn) ?? '' },
+        link: { person: e.entityId },
+      };
+    case 'team.rename':
+      return { key: 'teamRenamed', values: { old: str(b.team) ?? '', team: str(a.team) ?? '' } };
+    case 'team.remove':
+      return { key: 'teamDeleted', values: { team: str(b.team) ?? '' } };
     case 'person.team':
       return {
         key: a.department ? 'teamChanged' : 'teamRemoved',

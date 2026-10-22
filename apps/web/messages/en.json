@@ -403,6 +403,110 @@
       "back": "Mark as back",
       "leftDone": "{name} marked as left — their seat is free",
       "backDone": "{name} is back"
+    },
+    "tabs": {
+      "people": "People",
+      "teams": "Teams",
+      "changes": "Changes",
+      "settings": "Settings"
+    },
+    "people": {
+      "filter": "Show",
+      "filters": {
+        "all": "All",
+        "noDesk": "Without a desk",
+        "leaving": "Leaving",
+        "left": "Left"
+      },
+      "columns": {
+        "person": "Person",
+        "team": "Team",
+        "desk": "Desk",
+        "role": "Role"
+      },
+      "nobody": "Nobody matches.",
+      "noTeam": "No team",
+      "deskShort": "Desk {desk}",
+      "noDesk": "No desk",
+      "leaves": "Leaves {day}",
+      "count": "{shown} of {total} people"
+    },
+    "teamsTab": {
+      "intro": "Teams group people on the map, in the statistics and in moves.",
+      "newTeam": "New team",
+      "none": "No teams yet. Create one and put people in it.",
+      "counts": "{people, plural, one {# person} other {# people}} · {seated} with a desk",
+      "menu": "More for {team}",
+      "addPeople": "Add people",
+      "rename": "Rename",
+      "remove": "Remove team",
+      "withoutTeam": "{count, plural, one {# person has} other {# people have}} no team",
+      "placeThem": "Put them in a team",
+      "addTitle": "Add people to {team}",
+      "newTitle": "New team",
+      "pickHint": "Pick who belongs to it. People can be in one team at a time.",
+      "saved": "{count, plural, one {# person} other {# people}} now in {team}",
+      "name": "Team name",
+      "namePlaceholder": "e.g. Finance",
+      "exists": "This team exists already — the people are added to it.",
+      "searchPeople": "Search people",
+      "noTeam": "No team",
+      "cancel": "Cancel",
+      "putIn": "{count, plural, =0 {Add} one {Add # person} other {Add # people}}",
+      "renameTitle": "Rename {team}",
+      "renameHint": "Changes the team of everyone in it.",
+      "renamed": "Renamed to {team}",
+      "save": "Save",
+      "removeTitle": "Remove {team}?",
+      "removeBody": "Its people stay, without a team. Their desks don’t change.",
+      "removed": "{team} removed"
+    },
+    "changes": {
+      "intro": "Change several people at once — team, role, leaving date — and save it together.",
+      "notifies": "Notices go to {emails}.",
+      "notifiesNobody": "Nobody gets notices yet.",
+      "change": "Change",
+      "search": "Search people",
+      "person": "Person",
+      "team": "Team",
+      "role": "Role",
+      "leavesOn": "Leaves on",
+      "noTeam": "No team",
+      "teamOf": "Team of {name}",
+      "roleOf": "Role of {name}",
+      "noRole": "No access",
+      "leavesOnOf": "Leaving date of {name}",
+      "leavingHint": "On the leaving day, early in the morning, the person is marked as left and their desk becomes free. Their seat history stays.",
+      "pending": "{count, plural, one {# person changed} other {# people changed}}",
+      "discard": "Discard",
+      "save": "Save changes",
+      "saved": "{count, plural, one {Change saved} other {# changes saved}}",
+      "savedNotified": "{count, plural, one {Change saved} other {# changes saved}} — notice sent"
+    },
+    "notices": {
+      "title": "Notices",
+      "intro": "Seatline e-mails these addresses (e.g. IT or facility management) when something changes — for example who left and which desk is free now.",
+      "recipients": "Send to",
+      "remove": "Remove {email}",
+      "none": "Nobody yet.",
+      "placeholder": "it@company.ch",
+      "addressLabel": "E-mail address for notices",
+      "add": "Add",
+      "added": "{email} gets notices now",
+      "about": "About",
+      "events": {
+        "left": "Someone leaves (and their desk is free)",
+        "joined": "Someone joins",
+        "team": "Someone changes team",
+        "moves": "A move plan is carried out"
+      },
+      "language": "Language of the e-mails",
+      "languages": {
+        "de": "Deutsch",
+        "fr": "Français",
+        "en": "English"
+      },
+      "hint": "Sent from hello@seatline.ch, one e-mail per change (or one for several at once). Plain text, no tracking."
     }
   },
   "shortcuts": {
@@ -553,7 +657,11 @@
       "personChanged": "changed the details of {person}",
       "personLeft": "marked {person} as left",
       "personBack": "marked {person} as back",
-      "personInvited": "invited {person} to sign in"
+      "personInvited": "invited {person} to sign in",
+      "leavingSet": "set {person}’s leaving date to {day}",
+      "leavingCleared": "removed {person}’s leaving date",
+      "teamRenamed": "renamed team {old} to {team}",
+      "teamDeleted": "removed team {team}"
     },
     "showPlan": "Open the plan",
     "search": "Search activity",
