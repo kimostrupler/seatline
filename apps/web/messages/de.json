@@ -840,7 +840,14 @@
     "statReservations": "{count, plural, one {Reservation wartet} other {Reservationen warten}} auf jemanden",
     "statUnseated": "{count, plural, one {Person hat} other {Personen haben}} keinen Arbeitsplatz",
     "statMoves": "{count, plural, one {Umzugsplan} other {Umzugspläne}} offen",
-    "seatedOf": "{seated} von {people} mit Platz"
+    "seatedOf": "{seated} von {people} mit Platz",
+    "options": "Optionen für {name}",
+    "moveEarlierShort": "Nach vorne",
+    "moveLaterShort": "Nach hinten",
+    "sizeLabel": "Grösse",
+    "removeShort": "Vom Dashboard entfernen",
+    "addedWidget": "{name} hinzugefügt – ganz oben",
+    "approveMicrosoft": "Unter «Personen & Zugriff» freigeben"
   },
   "errors": {
     "title": "Etwas ist schiefgelaufen",

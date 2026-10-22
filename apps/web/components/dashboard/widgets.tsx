@@ -107,7 +107,7 @@ export const WIDGET_ICONS: Record<WidgetType, LucideIcon> = {
 /** "See all" style link in a widget's header. */
 export const WIDGET_LINKS: Partial<Record<WidgetType, string>> = {
   activity: '/activity',
-  sync: '/people',
+  sync: '/people?tab=settings',
   moves: '/moves',
 };
 
@@ -422,6 +422,16 @@ function Sync() {
   const status = tenant.peopleSyncStatus;
   if (!tenant.entraTenantId) return <Empty>{t('admin.notConnected')}</Empty>;
   if (!status) return <Empty>{t('admin.neverSynced')}</Empty>;
+  // Microsoft hasn't allowed reading the directory yet: one approval by a Microsoft 365 admin
+  if (!status.ok && status.error === 'consent_required')
+    return (
+      <div className="grid gap-2 text-sm">
+        <p>{t('admin.consentNeeded')}</p>
+        <Button asChild variant="outline" size="sm" className="justify-self-start">
+          <Link href="/people?tab=settings">{t('dashboard.approveMicrosoft')}</Link>
+        </Button>
+      </div>
+    );
   return (
     <div className="grid gap-1 text-sm">
       <p className="font-medium">

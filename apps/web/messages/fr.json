@@ -840,7 +840,14 @@
     "statReservations": "{count, plural, one {réservation attend} other {réservations attendent}} quelqu’un",
     "statUnseated": "{count, plural, one {personne n’a} other {personnes n’ont}} pas de poste",
     "statMoves": "{count, plural, one {plan de déménagement ouvert} other {plans de déménagement ouverts}}",
-    "seatedOf": "{seated} sur {people} placés"
+    "seatedOf": "{seated} sur {people} placés",
+    "options": "Options pour {name}",
+    "moveEarlierShort": "Avancer",
+    "moveLaterShort": "Reculer",
+    "sizeLabel": "Taille",
+    "removeShort": "Retirer du tableau de bord",
+    "addedWidget": "{name} ajouté — tout en haut",
+    "approveMicrosoft": "L’approuver sous « Personnes et accès »"
   },
   "errors": {
     "title": "Un problème est survenu",

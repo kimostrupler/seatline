@@ -840,7 +840,14 @@
     "statReservations": "{count, plural, one {reservation is} other {reservations are}} waiting for someone",
     "statUnseated": "{count, plural, one {person has} other {people have}} no desk",
     "statMoves": "{count, plural, one {move plan} other {move plans}} open",
-    "seatedOf": "{seated} of {people} seated"
+    "seatedOf": "{seated} of {people} seated",
+    "options": "Options for {name}",
+    "moveEarlierShort": "Move earlier",
+    "moveLaterShort": "Move later",
+    "sizeLabel": "Size",
+    "removeShort": "Remove from dashboard",
+    "addedWidget": "{name} added — it’s at the top",
+    "approveMicrosoft": "Approve it under People & access"
   },
   "errors": {
     "title": "Something went wrong",

@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
+  Ellipsis,
   GripVertical,
   LayoutGrid,
   Plus,
@@ -14,19 +15,22 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useNow, useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { ExportMenu } from '@/components/common/export-menu';
 import { PageFrame } from '@/components/common/page-frame';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
 import { addWidget, canSee, moveWidget, removeWidget, resizeWidget, SPAN } from '@/lib/dashboard';
 import { useDashboard, useDashboardActions, useMe } from '@/lib/queries';
@@ -44,6 +48,7 @@ export function Dashboard() {
   // while customizing, changes stay local until "Done"
   const [draft, setDraft] = useState<Widget[] | null>(null);
   const [adding, setAdding] = useState(false);
+  const [justAdded, setJustAdded] = useState<string | null>(null);
   const [dragging, setDragging] = useState<number | null>(null);
 
   const editing = draft !== null;
@@ -166,6 +171,7 @@ export function Dashboard() {
                 if (dragging !== null) setDraft(moveWidget(all, dragging, indexOf(w.id)));
                 setDragging(null);
               }}
+              highlight={w.id === justAdded}
             />
           ))}
         </div>
@@ -175,8 +181,12 @@ export function Dashboard() {
         onClose={() => setAdding(false)}
         present={new Set(all.map((w) => w.type))}
         onAdd={(type) => {
-          setDraft(addWidget(all, type, () => crypto.randomUUID()));
+          const id = crypto.randomUUID();
+          setDraft(addWidget(all, type, () => id));
           setAdding(false);
+          setJustAdded(id);
+          toast.success(t('addedWidget', { name: t(`widgets.${type}.title`) }));
+          setTimeout(() => setJustAdded((current) => (current === id ? null : current)), 2500);
         }}
       />
     </PageFrame>
@@ -211,6 +221,7 @@ function WidgetCard({
   onDragStart,
   onDragEnd,
   onDrop,
+  highlight,
 }: {
   widget: Widget;
   editing: boolean;
@@ -223,8 +234,14 @@ function WidgetCard({
   onDragStart: () => void;
   onDragEnd: () => void;
   onDrop: () => void;
+  /** just added: scrolled into view and outlined for a moment */
+  highlight?: boolean;
 }) {
   const t = useTranslations('dashboard');
+  const ref = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (highlight) ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [highlight]);
   const title = t(`widgets.${widget.type}.title`);
   const link = WIDGET_LINKS[widget.type];
   const Icon = WIDGET_ICONS[widget.type];
@@ -239,7 +256,9 @@ function WidgetCard({
         editing && 'border-dashed',
         dragging && 'opacity-40',
         over && 'ring-2 ring-ring',
+        highlight && 'ring-2 ring-primary ring-offset-2 ring-offset-background',
       )}
+      ref={ref}
       draggable={editing}
       onDragStart={(e) => {
         e.dataTransfer.effectAllowed = 'move';
@@ -270,53 +289,45 @@ function WidgetCard({
         </span>
         <h2 className="min-w-0 flex-1 truncate text-sm font-semibold">{title}</h2>
         {editing ? (
-          <div className="flex items-center gap-0.5">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              aria-label={t('moveEarlier', { name: title })}
-              disabled={first}
-              onClick={() => onMove(-1)}
-            >
-              <ArrowLeft />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              aria-label={t('moveLater', { name: title })}
-              disabled={last}
-              onClick={() => onMove(1)}
-            >
-              <ArrowRight />
-            </Button>
-            <Select value={widget.size} onValueChange={(v) => onResize(v as WidgetSize)}>
-              <SelectTrigger
-                size="sm"
-                className="h-8 w-auto"
-                aria-label={t('size', { name: title })}
+          // all edit controls in one menu, so even a small widget's header stays tidy
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="size-8 shrink-0"
+                aria-label={t('options', { name: title })}
               >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {SIZES.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {t(`sizes.${s}`)}
-                  </SelectItem>
+                <Ellipsis />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52">
+              <DropdownMenuItem disabled={first} onSelect={() => onMove(-1)}>
+                <ArrowLeft /> {t('moveEarlierShort')}
+              </DropdownMenuItem>
+              <DropdownMenuItem disabled={last} onSelect={() => onMove(1)}>
+                <ArrowRight /> {t('moveLaterShort')}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+                {t('sizeLabel')}
+              </DropdownMenuLabel>
+              <DropdownMenuRadioGroup
+                value={widget.size}
+                onValueChange={(v) => onResize(v as WidgetSize)}
+              >
+                {SIZES.map((size) => (
+                  <DropdownMenuRadioItem key={size} value={size}>
+                    {t(`sizes.${size}`)}
+                  </DropdownMenuRadioItem>
                 ))}
-              </SelectContent>
-            </Select>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              aria-label={t('remove', { name: title })}
-              onClick={onRemove}
-            >
-              <X />
-            </Button>
-          </div>
+              </DropdownMenuRadioGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem variant="destructive" onSelect={onRemove}>
+                <X /> {t('removeShort')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         ) : (
           link && (
             <Link href={link} className="shrink-0 text-xs text-muted-foreground hover:underline">

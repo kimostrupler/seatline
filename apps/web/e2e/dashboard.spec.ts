@@ -26,8 +26,10 @@ test('home shows the company at a glance', async ({ page }) => {
 test('customize: remove, move and add widgets; the layout is kept; reset', async ({ page }) => {
   const before = await titles(page);
   await page.getByRole('button', { name: 'Customize' }).click();
-  await page.getByRole('button', { name: 'Remove Departments' }).click();
-  await page.getByRole('button', { name: 'Move My seat earlier' }).click();
+  await page.getByRole('button', { name: 'Options for Departments' }).click();
+  await page.getByRole('menuitem', { name: 'Remove from dashboard' }).click();
+  await page.getByRole('button', { name: 'Options for My seat' }).click();
+  await page.getByRole('menuitem', { name: 'Move earlier' }).click();
   await page.getByRole('button', { name: 'Add widget' }).click();
   await page
     .getByRole('dialog')
@@ -55,7 +57,8 @@ test('viewers get their own dashboard, without the change history', async ({ pag
   await expect(widget(page, 'Recent changes')).toHaveCount(0);
   await expect(widget(page, 'Seats at a glance')).toBeVisible();
   await page.getByRole('button', { name: 'Customize' }).click();
-  await page.getByRole('button', { name: 'Remove Seats at a glance' }).click();
+  await page.getByRole('button', { name: 'Options for Seats at a glance' }).click();
+  await page.getByRole('menuitem', { name: 'Remove from dashboard' }).click();
   await page.getByRole('button', { name: 'Done' }).click();
   await expect(page.getByText('Dashboard saved')).toBeVisible();
   await expect(widget(page, 'Seats at a glance')).toHaveCount(0);
