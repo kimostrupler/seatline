@@ -48,6 +48,7 @@ export const keys = {
 };
 
 export interface ActivityFilters {
+  q?: string;
   kind?: ActivityKind;
   personId?: string;
   from?: string;
@@ -314,6 +315,22 @@ export function useSetRole() {
         qc.invalidateQueries({ queryKey: ['directory'] }),
         qc.invalidateQueries({ queryKey: ['me'] }),
       ]),
+  });
+}
+
+export function useSetTeam() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      ...body
+    }: { id: string } & ({ team: string | null } | { fromDirectory: true })) =>
+      api<{ id: string; department: string | null }>(`/people/${id}/team`, {
+        method: 'PATCH',
+        body,
+      }),
+    // teams show up in the directory, people lists, the map's team colours and the stats
+    onSettled: () => qc.invalidateQueries(),
   });
 }
 

@@ -2,8 +2,10 @@ import { Body, Controller, Get, Param, Patch, Query } from '@nestjs/common';
 import {
   listPeopleQuerySchema,
   setRoleSchema,
+  setTeamSchema,
   type ListPeopleQuery,
   type SetRoleInput,
+  type SetTeamInput,
 } from '@seatline/shared';
 import { AssignmentsService } from '../assignments/assignments.service';
 import { AdminOnly, Ctx } from '../auth/decorators';
@@ -41,6 +43,16 @@ export class PeopleController {
     @Body(new ZodPipe(setRoleSchema)) body: SetRoleInput,
   ) {
     return this.people.setRole(ctx, id, body);
+  }
+
+  @AdminOnly()
+  @Patch(':id/team')
+  setTeam(
+    @Ctx() ctx: RequestContext,
+    @Param('id', IdPipe) id: string,
+    @Body(new ZodPipe(setTeamSchema)) body: SetTeamInput,
+  ) {
+    return this.people.setTeam(ctx, id, body);
   }
 
   @Get(':id')

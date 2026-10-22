@@ -169,7 +169,8 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - New people get the workspace's `default_app_role` **when they first appear** (sync or first
   sign-in); changing the setting doesn't touch existing people.
 - People sync (`sync/people-sync.service.ts`) stores only name, e-mail, department, job title,
-  active. Never changes roles. Leavers: inactive + open seats closed (history kept).
+  active. Never changes roles. Teams = `department`; admins can set one by hand (`PATCH /people/:id/team`,
+  sets `team_manual`, then the sync keeps it until `fromDirectory`). Leavers: inactive + open seats closed (history kept).
 - Jobs: pg-boss in schema `pgboss` (owned by the API role, created by a migration) for
   "Sync now"; the nightly sync is a separate scheduled container (`dist/jobs/nightly-sync.js`)
   because the API scales to zero. Keep queue code in `jobs/job-queue.service.ts`.
@@ -187,6 +188,8 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   plus `refs` (current names of the people/seats/rooms/floors/buildings it mentions). The web
   turns entries into sentences in `lib/activity.ts` (`describe`, unit-tested); removed things are
   named from the entry's own before/after snapshot. New audit actions need a case there.
+- `?q=` searches: text values in before/after (not ids/timestamps) + current names of people, seats,
+  rooms, floors, buildings (entries about, mentioning or made by them). Raw SQL in `ActivityService.search`.
 - `GET /overview` counts seats per floor with the same rule as the map (`seatOccupancy`).
 
 ## Home dashboard

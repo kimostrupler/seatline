@@ -91,4 +91,32 @@ group('activity sentences', () => {
     ).toEqual({ person: '?', seat: '?' });
     expect(describe(entry({ action: 'something.new' }), refs, '?')).toMatchObject({ key: 'other' });
   });
+
+  it('team changes name the person and the team', () => {
+    const set = describe(
+      entry({
+        action: 'person.team',
+        entityType: 'person',
+        entityId: 'p1',
+        after: { department: 'Finance' },
+      }),
+      refs,
+      '?',
+    );
+    expect(set).toMatchObject({
+      key: 'teamChanged',
+      values: { person: 'Anna Meier', team: 'Finance' },
+    });
+    const removed = describe(
+      entry({
+        action: 'person.team',
+        entityType: 'person',
+        entityId: 'p1',
+        after: { department: null },
+      }),
+      refs,
+      '?',
+    );
+    expect(removed.key).toBe('teamRemoved');
+  });
 });

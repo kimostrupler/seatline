@@ -192,6 +192,12 @@ export const setRoleSchema = z.strictObject({
   appRole: z.enum(APP_ROLES).nullable(),
 });
 
+/** Set someone's team by hand, or go back to the one from Microsoft (`fromDirectory`). */
+export const setTeamSchema = z.union([
+  z.strictObject({ team: z.string().trim().max(100).nullable() }),
+  z.strictObject({ fromDirectory: z.literal(true) }),
+]);
+
 export const listPeopleQuerySchema = z.strictObject({
   search: z.string().trim().max(200).optional(),
   limit: z.coerce.number().int().min(1).max(100).default(50),
@@ -211,6 +217,8 @@ export const activityQuerySchema = z.strictObject({
   kind: z.enum(ACTIVITY_KINDS).optional(),
   /** changes by or about this person */
   personId: id.optional(),
+  /** free text: names, labels, rooms, places, notes… (current names and the log's own snapshots) */
+  q: z.string().trim().min(1).max(100).optional(),
   /** from/to are calendar days in Swiss time, both included */
   from: day.optional(),
   to: day.optional(),
@@ -327,4 +335,5 @@ export type EndAssignmentInput = z.infer<typeof endAssignmentSchema>;
 export type OnboardingInput = z.infer<typeof onboardingSchema>;
 export type UpdateTenantInput = z.infer<typeof updateTenantSchema>;
 export type SetRoleInput = z.infer<typeof setRoleSchema>;
+export type SetTeamInput = z.infer<typeof setTeamSchema>;
 export type ListPeopleQuery = z.infer<typeof listPeopleQuerySchema>;

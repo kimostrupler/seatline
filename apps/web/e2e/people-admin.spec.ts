@@ -26,6 +26,17 @@ test('admins manage roles and who can open Seatline', async ({ page }) => {
   );
 });
 
+test('admins put people in a team', async ({ page }) => {
+  await page.goto('/people');
+  await page.getByRole('button', { name: 'More for Marc Dubois' }).click();
+  await page.getByRole('menuitem', { name: 'Set team' }).click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Team').fill('Platform');
+  await dialog.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByText('Team of Marc Dubois saved')).toBeVisible();
+  await expect(page.getByTestId('directory')).toContainText('Platform');
+});
+
 test('the last admin can’t remove their own admin role', async ({ page }) => {
   await page.goto('/people');
   await page.getByRole('combobox', { name: 'Role: Alpenblick AG Admin' }).click();

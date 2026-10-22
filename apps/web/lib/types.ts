@@ -160,6 +160,10 @@ export interface DirectoryPerson {
   displayName: string;
   email: string;
   department: string | null;
+  /** team set by an admin (the Microsoft sync leaves it alone) */
+  teamManual: boolean;
+  /** linked to a Microsoft 365 account */
+  entraObjectId: string | null;
   jobTitle: string | null;
   appRole: AppRole | null;
   active: boolean;

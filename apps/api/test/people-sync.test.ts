@@ -137,6 +137,39 @@ describe('people sync from Microsoft 365', () => {
     ).toBe(false);
   });
 
+  it('a team set by an admin sticks until it is handed back to Microsoft 365', async () => {
+    const admin = await owner.person.findUniqueOrThrow({ where: { id: a.adminId } });
+    microsoft.users.set(tid, [user('Admin', { mail: admin.email, department: 'IT' })]);
+    await sync.syncTenant(a.tenantId);
+
+    const team = (body: object, headers = a.headers) =>
+      api(app).patch(`/people/${a.adminId}/team`).set(headers).send(body);
+    await team({ team: 'Platform' }, a.viewerHeaders).expect(403);
+    await team({ team: 'x'.repeat(101) }).expect(400);
+    await team({ team: ' Platform ' })
+      .expect(200)
+      .expect(({ body }) =>
+        expect(body).toMatchObject({ department: 'Platform', teamManual: true }),
+      );
+    await sync.syncTenant(a.tenantId);
+    const dept = async () =>
+      (await owner.person.findUniqueOrThrow({ where: { id: a.adminId } })).department;
+    expect(await dept()).toBe('Platform');
+
+    await team({ fromDirectory: true }).expect(200);
+    await sync.syncTenant(a.tenantId);
+    expect(await dept()).toBe('IT');
+    expect(
+      await owner.auditLog.count({ where: { tenantId: a.tenantId, action: 'person.team' } }),
+    ).toBe(2);
+    // only people of this workspace
+    await api(app)
+      .patch(`/people/${b.adminId}/team`)
+      .set(a.headers)
+      .send({ team: 'X' })
+      .expect(404);
+  });
+
   it('reports missing admin consent instead of failing silently', async () => {
     microsoft.tokenError = {
       status: 400,

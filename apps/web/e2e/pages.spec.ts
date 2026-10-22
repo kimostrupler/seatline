@@ -41,6 +41,16 @@ test('activity lists every change in plain words, filters by person, links to th
   await expect(page.getByText('No changes match these filters.')).toBeVisible();
   await page.getByRole('button', { name: 'Clear filters' }).click();
 
+  // search over everything: the reservation's note, then something that isn't there
+  const searchBox = page.getByRole('searchbox', { name: 'Search activity' });
+  await searchBox.fill('new HIRE');
+  await expect(page).toHaveURL(/q=new\+HIRE/);
+  await expect(list.getByRole('listitem')).toHaveCount(1);
+  await searchBox.fill('nothing like this');
+  await expect(page.getByText('No changes match these filters.')).toBeVisible();
+  await page.getByRole('button', { name: 'Clear filters' }).click();
+  await expect(searchBox).toHaveValue('');
+
   await list.getByRole('link', { name: 'Show on map' }).first().click();
   await expect(page.getByTestId('seat-panel')).toContainText('Reserved for New hire');
 });

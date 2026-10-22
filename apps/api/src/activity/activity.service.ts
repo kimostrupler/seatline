@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import type { ActivityKind, ActivityQuery } from '@seatline/shared';
 import type { RequestContext } from '../auth/request-context';
 import { TenantDb } from '../db/tenant-db.service';
@@ -45,6 +45,11 @@ const snapshots = (value: Prisma.JsonValue | null): Snapshot[] =>
       : [];
 const str = (v: unknown) => (typeof v === 'string' ? v : undefined);
 
+/** How many entries a search looks at (newest first); enough for years of a normal office. */
+const SEARCH_LIMIT = 5000;
+const MACHINE_VALUE = '^([0-9a-f]{8}-[0-9a-f-]{27}|\\d{4}-\\d{2}-\\d{2}T.*)$';
+const likePattern = (text: string) => `%${text.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+
 /**
  * The workspace's change history (audit log), newest first, with the current names of the
  * people, seats, rooms, floors and buildings it mentions (deleted ones are named from the
@@ -57,8 +62,10 @@ export class ActivityService {
   list(ctx: RequestContext, q: ActivityQuery) {
     const { tenantId } = ctx;
     return this.db.run(tenantId, async (tx) => {
+      const matches = q.q ? await this.search(tx, tenantId, q.q) : null;
       const where: Prisma.AuditLogWhereInput = {
         tenantId,
+        ...(matches && { id: { in: matches } }),
         ...(q.kind && { entityType: { in: KIND_TYPES[q.kind] } }),
         ...((q.from || q.to) && {
           createdAt: {
@@ -147,5 +154,39 @@ export class ActivityService {
         },
       };
     });
+  }
+
+  /**
+   * Entries matching a search: any text value in the entry's before/after snapshots (old names,
+   * labels, notes…), or a person, seat, room, floor or building whose current name matches,
+   * whether the entry is about it, mentions it, or (people) was made by them.
+   */
+  private async search(tx: Prisma.TransactionClient, tenantId: string, text: string) {
+    const like = likePattern(text);
+    const named = await tx.$queryRaw<{ id: string }[]>`
+      SELECT id FROM people WHERE tenant_id = ${tenantId}::uuid
+        AND forgotten_at IS NULL AND (display_name ILIKE ${like} OR email ILIKE ${like})
+      UNION SELECT id FROM seats WHERE tenant_id = ${tenantId}::uuid AND label ILIKE ${like}
+      UNION SELECT id FROM rooms WHERE tenant_id = ${tenantId}::uuid AND name ILIKE ${like}
+      UNION SELECT id FROM floors WHERE tenant_id = ${tenantId}::uuid AND name ILIKE ${like}
+      UNION SELECT id FROM buildings WHERE tenant_id = ${tenantId}::uuid AND name ILIKE ${like}
+      LIMIT 500`;
+    const ids = named.map((r) => r.id);
+    const rows = await tx.$queryRaw<{ id: string }[]>`
+      SELECT a.id FROM audit_log a
+      WHERE a.tenant_id = ${tenantId}::uuid AND (
+        a.entity_id = ANY(${ids}::uuid[]) OR a.actor_id = ANY(${ids}::uuid[]) OR EXISTS (
+          SELECT 1 FROM jsonb_path_query(jsonb_build_array(a.before, a.after), 'strict $.**') v
+          WHERE jsonb_typeof(v) = 'string'
+            AND (
+              -- words, not ids or timestamps (a uuid contains "a3", a date "2026")
+              (v #>> '{}' ILIKE ${like} AND v #>> '{}' !~ ${MACHINE_VALUE})
+              OR v #>> '{}' = ANY(${ids}::text[])
+            )
+        )
+      )
+      ORDER BY a.created_at DESC
+      LIMIT ${SEARCH_LIMIT}`;
+    return rows.map((r) => r.id);
   }
 }
