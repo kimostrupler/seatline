@@ -1,6 +1,7 @@
 """The plan engine on made-up plans (samples/make_samples.py): DXF, PDF and a scan of one office."""
 
 import importlib.util
+import shutil
 from pathlib import Path
 
 import pytest
@@ -9,6 +10,7 @@ from fastapi.testclient import TestClient
 from app import main
 from app.analyze import analyze, analyze_isolated, kind_of, to_json
 from app.dxf_import import DrawingError
+from app.geometry import Text, join_words
 
 spec = importlib.util.spec_from_file_location("samples", Path(__file__).parents[1] / "samples" / "make_samples.py")
 samples = importlib.util.module_from_spec(spec)
@@ -65,14 +67,28 @@ def test_vector_pdf_reads_the_scale_note_names_and_desks(files):
     assert sum(s.rotation == 90 for s in d.seats) == 8  # the turned desks in 1.07
 
 
-def test_scan_finds_rooms_and_desks_but_no_names(files):
+def test_scan_finds_rooms_desks_and_most_names(files):
     d = analyze(files["scan.png"])
     assert d.source == "raster" and d.scale is None
     assert len(d.rooms) == len(NAMES) + 1
-    assert names(d) == set()
     assert len(d.seats) == DESKS  # thin drawn rectangles of a desk's size
     assert sum(s.rotation == 90 for s in d.seats) == 8
     assert {"scan", "no_scale"} <= set(d.warnings) and "no_seats" not in d.warnings
+    if not shutil.which("tesseract"):
+        pytest.skip("OCR (tesseract) isn't installed here")
+    ascii_names = {n.replace("ü", "ue") for n in NAMES}  # the scan's labels are ASCII
+    assert len(names(d) & ascii_names) >= 6, names(d)  # printed labels read by OCR
+    assert names(d) <= ascii_names  # and nothing made up
+
+
+def test_words_on_one_line_stay_in_their_room():
+    words = [
+        Text(x=150, y=100, text="1.01", height=14, width=35),
+        Text(x=200, y=101, text="Büro", height=13, width=48),
+        Text(x=400, y=99, text="1.02", height=14, width=35),
+        Text(x=720, y=102, text="Sitzungszimmer", height=18, width=136),
+    ]
+    assert [w.text for w in join_words(words)] == ["1.01 Büro", "1.02", "Sitzungszimmer"]
 
 
 def test_file_kinds():

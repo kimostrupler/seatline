@@ -13,10 +13,6 @@ param apiImage string = 'mcr.microsoft.com/k8se/quickstart:latest'
 param webImage string = 'mcr.microsoft.com/k8se/quickstart:latest'
 param planEngineImage string = 'mcr.microsoft.com/k8se/quickstart:latest'
 
-@description('Azure OpenAI for room names in scans (ai-setup.sh). Empty = off.')
-param aiEndpoint string = ''
-param aiDeployment string = ''
-
 @secure()
 @description('PostgreSQL admin password (owner of the tables; used only by the migration job).')
 param pgAdminPassword string
@@ -252,16 +248,7 @@ resource planEngine 'Microsoft.App/containerApps@2024-03-01' = {
           name: 'plan-engine'
           image: planEngineImage
           resources: { cpu: json('1.0'), memory: '2Gi' }
-          env: concat(
-            [{ name: 'PLAN_ENGINE_TOKEN', secretRef: 'internal-auth-secret' }],
-            empty(aiEndpoint)
-              ? []
-              : [
-                  { name: 'AZURE_OPENAI_ENDPOINT', value: aiEndpoint }
-                  { name: 'AZURE_OPENAI_DEPLOYMENT', value: aiDeployment }
-                  { name: 'AZURE_CLIENT_ID', value: pullIdentity.properties.clientId }
-                ]
-          )
+          env: [{ name: 'PLAN_ENGINE_TOKEN', secretRef: 'internal-auth-secret' }]
         }
       ]
       scale: { minReplicas: 0, maxReplicas: 2 }

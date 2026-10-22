@@ -42,10 +42,11 @@ class Seat:
 
 @dataclass
 class Text:
-    x: float
+    x: float  # centre
     y: float
     text: str
     height: float = 0.0
+    width: float = 0.0  # 0 = unknown
 
 
 @dataclass
@@ -169,6 +170,34 @@ _TYPES = [
         r"|vorplatz|entr[ée]e|eingang|lobby|schacht|kopier|print",
     ),
 ]
+
+
+def join_words(texts: list[Text]) -> list[Text]:
+    """Words (PDF text, OCR) → lines: words in the same row with a small gap between them.
+    Labels of neighbouring rooms at the same height stay apart."""
+    rows: list[list[Text]] = []
+    for t in sorted(texts, key=lambda t: t.y):
+        if rows and abs(rows[-1][0].y - t.y) < 0.5 * max(t.height, rows[-1][0].height, 1):
+            rows[-1].append(t)
+        else:
+            rows.append([t])
+    lines: list[Text] = []
+    for row in rows:
+        last: Text | None = None
+        for t in sorted(row, key=lambda t: t.x):
+            h = max(t.height, last.height if last else 0, 1)
+            if last is not None:
+                gap = (t.x - t.width / 2) - (last.x + last.width / 2)
+                limit = 1.5 * h if t.width and last.width else 6 * h  # without widths: centres only
+                if -h < gap < limit:
+                    left = last.x - last.width / 2
+                    right = max(last.x + last.width / 2, t.x + t.width / 2)
+                    last.text = f"{last.text} {t.text}"
+                    last.x, last.width = (left + right) / 2, right - left
+                    continue
+            last = Text(x=t.x, y=t.y, text=t.text, height=t.height, width=t.width)
+            lines.append(last)
+    return lines
 
 
 def type_from_name(name: str) -> str | None:

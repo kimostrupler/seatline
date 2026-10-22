@@ -4,6 +4,9 @@ ARG PYTHON_IMAGE=python:3.13-slim-bookworm
 FROM ${PYTHON_IMAGE}
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
 WORKDIR /app
+# OCR for room labels in scans (German, French, English)
+RUN apt-get update && apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-deu tesseract-ocr-fra \
+ && rm -rf /var/lib/apt/lists/*
 COPY apps/plan-engine/requirements.txt .
 RUN pip install -r requirements.txt
 COPY apps/plan-engine/app ./app
