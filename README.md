@@ -74,36 +74,49 @@ Changing the schema: edit `apps/api/prisma/schema.prisma`, then
 
 - Left: dev sign-in, building and floor pickers, people search (drag a person onto a seat).
 - Centre: floor map — scroll to zoom, drag to pan, drag someone onto another seat to move them.
+  **Find a desk** filters free desks by feature (standing desk, two screens…); meeting rooms
+  show their size and equipment, team zones are tinted, and markers (kitchen, printer, exits…)
+  help people find their way.
 - Right: the selected seat or person, with actions and full history. Every change can be undone.
 - **Edit layout** (editors; desktop, tablet and phone): switch at the top of the map. Tools on
-  the left — select/move (V), add seat (S), draw room by corners (P) or as a rectangle (B), ruler
-  to set the scale (M). ⌘C / ⌘X / ⌘V copy, cut and paste (also onto another floor), ⌘D
+  the left — select/move (V), add seat (S), draw room by corners (P) or as a rectangle (B),
+  marker (K: kitchen, printer, exit, first aid…), ruler to set the scale (M). Drag on empty
+  floor pans the map; Shift + drag selects several things. ⌘C / ⌘X / ⌘V copy, cut and paste (also onto another floor), ⌘D
   duplicates, R rotates, ⌫ deletes, arrows nudge, ⌘Z / ⇧⌘Z undo/redo, hold Space to pan,
   **?** lists every shortcut. Drag a room's corners or sides to resize it (or type its size).
   Several seats can be aligned and spaced evenly; "Add a row of desks" adds desks next to a
   seat. Changes save instantly; the inspector (right, or under the map on phones) edits the
-  selection or, with nothing selected, the floor (plan image, scale) and building.
-- **Home** (`/`): a dashboard of widgets — seats at a glance, floors, recent changes, seat
+  selection or, with nothing selected, the floor (plan image, scale) and building. Rooms can
+  be meeting rooms (seats, equipment) or a team's zone; desks carry features. Uploading or
+  importing a plan is in the floor's **Add plan / Change plan** menu.
+- **Home** (`/`): a dashboard of widgets (it replaced the old Overview page; `/overview`
+  redirects here, the Excel/CSV export sits in its header) — seats at a glance, floors, recent changes, seat
   changes per week, people without a seat, open reservations, departments, free and blocked
   seats, Microsoft 365 sync, my seat, quick actions. **Customize** to add, remove, reorder
   (drag or arrows) and resize; everyone has their own layout, admins can save the company
-  default. The map is at `/map` (old `/?floor=…` links redirect there).
+  default. Each widget's **⋯** menu moves, resizes or removes it; a newly added widget is
+  scrolled into view and highlighted. The map is at `/map` (old `/?floor=…` links redirect there).
 - **Moves** (editors and admins): prepare seat changes as a plan, see the floor "after" on the
   map (`/map?plan=…`, drag people as usual — it only changes the plan), move a whole team to a
   floor in one go, then apply now or schedule a day (applied early that morning by the nightly
   job). Problems (a seat someone keeps, blocked seats…) are shown and block applying.
+  **Moving list** (`/moves/:id/print`): who moves from where to where, sorted by starting
+  desk, with tick boxes — print it for the movers. IT/facility get an e-mail once it's applied.
 - **Team colours:** the map legend switches between colouring by status and by team.
-- **Exports:** seating list as Excel/CSV (Overview, or one floor from the map's download button;
+- **Exports:** seating list as Excel/CSV (Home, or one floor from the map's download button;
   CSV uses ";" for German/French Excel), seat history as Excel (editors), and "Print floor" — a
   print-ready page with the map and a name list (print or save as PDF in the browser). Exports
   are recorded in the activity log.
+- **People & access** (admins, `/people?tab=`): **People** (list with team, desk, role;
+  filters; Add person), **Teams** (seated meter per team, rename/remove, add people),
+  **Changes** (an HR table: team, role and leaving date for many people, saved together) and
+  **Settings** (who can join, e-mail notices, Microsoft 365, data protection).
+- **E-mail notices:** IT or facility addresses (Settings) get a short professional e-mail when
+  someone leaves or joins, changes team, or a move plan is carried out — which desks are free.
+  A leaving date in the future is carried out by the nightly job on that day.
 - **Data protection** (People & access, admins): how long seat history and the activity log are
   kept (default 2 years; deleted nightly), "Download their data" per person (access request) and
   "Forget this person" for people who left (their seat history stays, unnamed).
-- **Data protection** (People & access, admins): how long seat history and the activity log are
-  kept (default 2 years; deleted nightly), "Download their data" per person (access request) and
-  "Forget this person" for people who left (their seat history stays, unnamed).
-- **Overview** (everyone): free / taken / reserved seats per building and floor.
 - **Activity** (editors and admins): every change in plain words, newest first — filter by
   kind, person and date; each entry links to the seat or floor on the map.
 - **Languages:** German, French and English. The browser's language is used, or the person's
@@ -134,6 +147,8 @@ Changing the schema: edit `apps/api/prisma/schema.prisma`, then
 | POST             | `/assignments/reservations`                           | `{seatId, reservedFor}` — hold a free seat                                                                                                        |
 | POST             | `/assignments/:id/end`                                | free the seat (history is kept)                                                                                                                   |
 | GET              | `/people?search=`                                     | people search                                                                                                                                     |
+| POST/PATCH       | `/people`, `/people/:id`, `/people/:id/active`        | admins: add people by hand, correct them, mark left/back; `POST /people/changes` (HR table), `POST /people/teams/rename`                          |
+| PATCH            | `/floors/:id/layout`                                  | editors: one batch of room/seat/marker changes (all or nothing)                                                                                   |
 | GET              | `/people/:id/history`                                 | every seat this person had                                                                                                                        |
 | GET              | `/health`                                             | no auth                                                                                                                                           |
 
@@ -162,7 +177,8 @@ The database enforces the hard rules itself, so a bug in the API can't break the
 - **People sync** reads name, e-mail, department, job title and account status from Microsoft
   Graph every night (`nightly-sync` job) or on **Sync now**. Leavers become inactive and lose
   their seat; their history stays. A customer's Microsoft 365 admin approves Seatline once.
-- **People & access** (admins): roles, who can open Seatline, sync status.
+- **People & access** (admins): roles, who can open Seatline, sync status. A sync error 403
+  means the customer's Microsoft admin still has to approve Seatline (Settings → Approve).
 
 ## Plan import (architect plans)
 

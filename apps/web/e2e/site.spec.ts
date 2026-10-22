@@ -4,6 +4,8 @@ test('the landing page links to sign-in and the legal pages', async ({ page }) =
   await page.goto('/welcome');
   await expect(page.getByRole('heading', { name: 'Know who sits where.' })).toBeVisible();
   await expect(page.getByText('CHF 2', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Ready in an afternoon' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'E-mails to IT' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Try it free for 30 days' }).first()).toHaveAttribute(
     'href',
     /\/signin$/,
