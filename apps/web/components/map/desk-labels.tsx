@@ -9,13 +9,15 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useFloorMap } from '@/lib/queries';
 
-/** The address a desk's QR code opens: the map with that desk selected. */
-export const deskUrl = (origin: string, buildingId: string, floorId: string, seatId: string) =>
-  `${origin}/map?building=${buildingId}&floor=${floorId}&seat=${seatId}`;
+/** The address a desk's QR code opens: the desk's own page (who sits there, since when). */
+export const deskUrl = (origin: string, seatId: string) => `${origin}/desk/${seatId}`;
+
+/** Stickers per A4 sheet: 3 across, 4 down. */
+const PER_PAGE = 12;
 
 /**
- * Stickers for the desks of one floor (or one desk with ?seat=): a QR code that opens the desk
- * on the map — who sits there, since when — plus its number. Print on A4 and cut.
+ * Stickers for the desks of one floor (or one desk with ?seat=): a QR code that opens the desk's
+ * page — who sits there, since when — plus its number. Printed 12 per A4 sheet, never split.
  */
 export function DeskLabels() {
   const t = useTranslations('qr');
@@ -34,10 +36,11 @@ export function DeskLabels() {
     let live = true;
     void Promise.all(
       map.seats.map(async (s) => {
-        const svg = await QRCode.toString(
-          deskUrl(location.origin, map.floor.buildingId, map.floor.id, s.id),
-          { type: 'svg', margin: 0, errorCorrectionLevel: 'M' },
-        );
+        const svg = await QRCode.toString(deskUrl(location.origin, s.id), {
+          type: 'svg',
+          margin: 0,
+          errorCorrectionLevel: 'M',
+        });
         return [s.id, svg] as const;
       }),
     ).then((pairs) => live && setCodes(Object.fromEntries(pairs)));
@@ -63,30 +66,44 @@ export function DeskLabels() {
         </h1>
         <p className="text-sm text-muted-foreground">{t('body', { count: seats.length })}</p>
       </header>
-      <ul
-        className="grid grid-cols-2 gap-3 sm:grid-cols-3 print:grid-cols-3 print:gap-0"
-        data-testid="desk-labels"
-      >
-        {seats.map((s) => (
-          <li
-            key={s.id}
-            className="grid break-inside-avoid justify-items-center gap-2 rounded-lg border p-4 text-center print:rounded-none print:border-dashed"
+      {/* A4 without the browser's margins (and its header/footer lines): each sheet is a
+          fixed 3 × 4 grid, so a sticker is never cut between two pages */}
+      <style>{'@media print { @page { size: A4; margin: 0 } }'}</style>
+      <div className="grid gap-3 print:block" data-testid="desk-labels">
+        {pages(seats).map((page, i) => (
+          <ul
+            key={i}
+            className="grid grid-cols-2 gap-3 sm:grid-cols-3 print:h-[296mm] print:grid-cols-3 print:grid-rows-[repeat(4,69mm)] print:gap-0 print:overflow-hidden print:p-[10mm] print:break-after-page print:last:break-after-auto"
           >
-            <div
-              className="size-28 text-foreground [&_svg]:size-full print:size-32"
-              aria-label={t('codeFor', { label: s.label })}
-              role="img"
-              // generated locally by the qrcode library from our own URL
-              dangerouslySetInnerHTML={{ __html: codes[s.id] ?? '' }}
-            />
-            <p className="text-2xl font-semibold tabular-nums">{s.label}</p>
-            <p className="text-xs text-muted-foreground">
-              {map.floor.building.name} › {map.floor.name}
-            </p>
-            <p className="text-[11px] text-muted-foreground">{t('scan')}</p>
-          </li>
+            {page.map((s) => (
+              <li
+                key={s.id}
+                className="grid break-inside-avoid content-center justify-items-center gap-2 rounded-lg border p-4 text-center print:gap-1 print:rounded-none print:border-dashed print:p-2"
+              >
+                <div
+                  className="size-28 text-foreground [&_svg]:size-full print:size-[38mm]"
+                  aria-label={t('codeFor', { label: s.label })}
+                  role="img"
+                  // generated locally by the qrcode library from our own URL
+                  dangerouslySetInnerHTML={{ __html: codes[s.id] ?? '' }}
+                />
+                <p className="text-2xl font-semibold tabular-nums print:text-[18pt]">{s.label}</p>
+                <p className="text-xs text-muted-foreground print:text-[7pt]">
+                  {map.floor.building.name} › {map.floor.name}
+                </p>
+                <p className="text-[11px] text-muted-foreground print:text-[7pt]">{t('scan')}</p>
+              </li>
+            ))}
+          </ul>
         ))}
-      </ul>
+      </div>
     </main>
   );
+}
+
+/** The stickers in sheets of PER_PAGE. */
+function pages<T>(items: T[]): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < items.length; i += PER_PAGE) out.push(items.slice(i, i + PER_PAGE));
+  return out;
 }

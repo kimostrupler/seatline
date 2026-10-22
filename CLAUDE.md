@@ -268,7 +268,10 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   `seatline.privacy=purge`). Demo: billing state `off`, checkout refused, banner with "Start your
   free trial" (= sign out → sign-in page). `MailService` never sends to `.invalid` addresses.
 - **QR stickers**: Export menu → `/map/qr?floor=` (`components/map/desk-labels.tsx`, `qrcode`
-  lib, SVG made in the browser). A code opens `/map?building=&floor=&seat=`.
+  lib, SVG made in the browser), printed 12 per A4 sheet (fixed 3 × 4 grid, `@page` margin 0,
+  never split). A code opens `/desk/<seatId>` (`components/map/desk-page.tsx`, signed-in members
+  only): place, who sits there (name, job, team, e-mail, since), features, history, "Show on the
+  map". Old stickers (`/map?…&seat=`) still work.
 - **Legal**: `/legal/dpa` (data processing agreement, `lib/legal/dpa.ts`, same sections in all
   languages). Sub-processors listed there and in the privacy policy must stay in step.
 

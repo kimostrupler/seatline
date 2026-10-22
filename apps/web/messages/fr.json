@@ -1394,5 +1394,13 @@
   "loading": {
     "title": "Chargement de Seatline…",
     "hint": "Après un moment calme, le démarrage peut prendre quelques secondes."
+  },
+  "desk": {
+    "title": "Poste {label}",
+    "whoSitsHere": "Qui est assis ici",
+    "free": "Personne n’est assis ici – le poste est libre.",
+    "showOnMap": "Voir sur le plan",
+    "notFound": "Poste introuvable",
+    "notFoundHint": "Ce poste a été supprimé ou appartient à un autre espace de travail."
   }
 }

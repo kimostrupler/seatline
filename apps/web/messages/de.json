@@ -1394,5 +1394,13 @@
   "loading": {
     "title": "Seatline wird geladen…",
     "hint": "Nach einer ruhigen Phase dauert der Start ein paar Sekunden."
+  },
+  "desk": {
+    "title": "Arbeitsplatz {label}",
+    "whoSitsHere": "Wer hier sitzt",
+    "free": "Hier sitzt niemand – der Platz ist frei.",
+    "showOnMap": "Auf dem Plan zeigen",
+    "notFound": "Arbeitsplatz nicht gefunden",
+    "notFoundHint": "Dieser Platz wurde entfernt oder gehört zu einem anderen Arbeitsbereich."
   }
 }
