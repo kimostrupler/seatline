@@ -1,6 +1,6 @@
 'use client';
 
-import { useQueryClient } from '@tanstack/react-query';
+import { notifyManager, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -63,7 +63,9 @@ export function useLayoutEditor(map: FloorMap) {
           );
           await qc.invalidateQueries({ queryKey: keys.floorMap(floorId) });
         } finally {
-          setPending((p) => p.filter((x) => x !== c));
+          // React Query shows new data a tick later; dropping the change before that would make
+          // it vanish for a moment (and swap out a field someone is typing in)
+          notifyManager.schedule(() => setPending((p) => p.filter((x) => x !== c)));
         }
       });
     },

@@ -21,7 +21,11 @@ import {
   isEmpty,
   moveSelection,
   nextSeatLabel,
+  nextRoomSeatLabel,
+  renumberSeats,
+  roomNumber,
   rotateSeats,
+  seatLabelAt,
   snap,
 } from './ops';
 
@@ -304,5 +308,67 @@ describe('arranging seats', () => {
       () => 'd',
     );
     expect(down.changes.seats.create[0]).toMatchObject({ x: 100, y: 50 + 64 + 28 });
+  });
+});
+
+describe('numbering per room', () => {
+  const office = { ...room('r1', 0), name: '1.04 Open Space' };
+  const plain = { ...room('r2', 200), name: 'Kitchen' };
+  const at = (id: string, x: number, y: number, roomId: string | null, label = id): Seat => ({
+    ...seat(id, x, label),
+    y,
+    roomId,
+  });
+
+  it('finds the room number in its name', () => {
+    expect(roomNumber('1.04 Open Space')).toBe('1.04');
+    expect(roomNumber('Büro 12')).toBe('12');
+    expect(roomNumber('(B-3)')).toBe('B-3');
+    expect(roomNumber('Kitchen')).toBeNull();
+  });
+
+  it('labels desks A, B, … per room and fills gaps', () => {
+    const seats = [at('a', 10, 10, 'r1', '1.04-A'), at('c', 30, 10, 'r1', '1.04-C')];
+    expect(nextRoomSeatLabel(seats, '1.04')).toBe('1.04-B');
+    expect(nextRoomSeatLabel(seats, '1.04', new Set(['1.04-B']))).toBe('1.04-D');
+    const many = Array.from({ length: 26 }, (_, i) => ({
+      label: `9-${String.fromCharCode(65 + i)}`,
+    }));
+    expect(nextRoomSeatLabel(many, '9')).toBe('9-AA');
+  });
+
+  it('a new desk follows the floor setting and the room it lands in', () => {
+    const d = { rooms: [office, plain], seats: [at('x', 10, 10, 'r1', '1.04-A')] };
+    expect(seatLabelAt(d, 1, 'room', { x: 50, y: 50 })).toBe('1.04-B');
+    expect(seatLabelAt(d, 1, 'room', { x: 250, y: 50 })).toBe('1.01'); // room without a number
+    expect(seatLabelAt(d, 1, 'floor', { x: 50, y: 50 })).toBe('1.01');
+  });
+
+  it('renumbers room by room in reading order, sending only changed labels', () => {
+    const d = {
+      rooms: [plain, office],
+      seats: [
+        at('k1', 260, 20, 'r2', '1.07'),
+        at('o2', 60, 22, 'r1', '1.01'), // same row as o1 (within tolerance), right of it
+        at('o1', 20, 20, 'r1', '1.02'),
+        at('o3', 20, 70, 'r1', '1.03'),
+        at('free', 900, 0, null, '1.05'),
+      ],
+    };
+    const byFloor = renumberSeats(d, 1, 'floor', 10).seats.update;
+    // "1.04 Open Space" sorts before "Kitchen", seats without a room come last
+    expect(Object.fromEntries(byFloor.map((u) => [u.id, u.label]))).toEqual({
+      o1: '1.01',
+      o2: '1.02',
+      k1: '1.04',
+    });
+    const byRoom = renumberSeats(d, 1, 'room', 10).seats.update;
+    expect(Object.fromEntries(byRoom.map((u) => [u.id, u.label]))).toEqual({
+      o1: '1.04-A',
+      o2: '1.04-B',
+      o3: '1.04-C',
+      k1: '1.01',
+      free: '1.02',
+    });
   });
 });

@@ -142,18 +142,23 @@ model Building {
 }
 
 model Floor {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId    String   @map("tenant_id") @db.Uuid
-  buildingId  String   @map("building_id") @db.Uuid
-  name        String
-  level       Int
-  planFileKey String?  @map("plan_file_key")
-  planWidth   Float?   @map("plan_width")
-  planHeight  Float?   @map("plan_height")
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  buildingId    String   @map("building_id") @db.Uuid
+  name          String
+  level         Int
+  planFileKey   String?  @map("plan_file_key")
+  planWidth     Float?   @map("plan_width")
+  planHeight    Float?   @map("plan_height")
   /// plan units per metre
-  scale       Float?
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  scale         Float?
+  /// desk size in metres (null = 1.6 × 0.8); desks are drawn at this size once the scale is known
+  deskWidth     Float?   @map("desk_width")
+  deskDepth     Float?   @map("desk_depth")
+  /// "floor" = 1.01, 1.02…; "room" = 1.04-A, 1.04-B…
+  seatNumbering String   @default("floor") @map("seat_numbering")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   tenant   Tenant   @relation(fields: [tenantId], references: [id])
   building Building @relation(fields: [tenantId, buildingId], references: [tenantId, id], onDelete: Restrict)

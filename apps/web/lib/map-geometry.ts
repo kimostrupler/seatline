@@ -1,8 +1,32 @@
-import type { Point, Room, Seat } from './types';
+import type { Floor, Point, Room, Seat } from './types';
 
-/** Desk size in plan units. */
+/** Desk size in plan units when the floor has no scale. */
 export const SEAT_W = 64;
 export const SEAT_H = 44;
+/** A standard desk (1.6 × 0.8 m), used when the floor has a scale but no own desk size. */
+export const DESK_WIDTH_M = 1.6;
+export const DESK_DEPTH_M = 0.8;
+
+export interface SeatSize {
+  w: number;
+  h: number;
+}
+export const DEFAULT_SEAT_SIZE: SeatSize = { w: SEAT_W, h: SEAT_H };
+
+/**
+ * How big desks are drawn on a floor: their real size once the plan has a scale (so a desk fits
+ * in a small office), otherwise a fixed size.
+ */
+export function seatSize(floor: Pick<Floor, 'scale' | 'deskWidth' | 'deskDepth'>): SeatSize {
+  if (!floor.scale) return DEFAULT_SEAT_SIZE;
+  return {
+    w: Math.max(8, (floor.deskWidth ?? DESK_WIDTH_M) * floor.scale),
+    h: Math.max(6, (floor.deskDepth ?? DESK_DEPTH_M) * floor.scale),
+  };
+}
+
+/** Room under the desk for its chair and number. */
+export const labelGap = (size: SeatSize) => size.h / 2 + 16 * (size.h / SEAT_H);
 
 export function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -24,6 +48,7 @@ export function contentBounds(
   rooms: Room[],
   seats: Seat[],
   plan?: { width: number; height: number } | null,
+  size: SeatSize = DEFAULT_SEAT_SIZE,
 ): Bounds | null {
   const points: Point[] = [
     ...(plan
@@ -34,8 +59,8 @@ export function contentBounds(
       : []),
     ...rooms.flatMap((r) => r.polygon),
     ...seats.flatMap((s) => [
-      { x: s.x - SEAT_W / 2, y: s.y - SEAT_H / 2 },
-      { x: s.x + SEAT_W / 2, y: s.y + SEAT_H / 2 + 16 },
+      { x: s.x - size.w / 2, y: s.y - size.h / 2 },
+      { x: s.x + size.w / 2, y: s.y + labelGap(size) },
     ]),
   ];
   if (points.length === 0) return null;
@@ -83,9 +108,13 @@ export function toPlan(view: View, p: Point): Point {
 }
 
 /** The seat under a plan point (desks are small rectangles; rotation ignored for hit testing). */
-export function seatAt(seats: Seat[], p: Point): Seat | undefined {
+export function seatAt(
+  seats: Seat[],
+  p: Point,
+  size: SeatSize = DEFAULT_SEAT_SIZE,
+): Seat | undefined {
   return seats.find(
-    (s) => Math.abs(p.x - s.x) <= SEAT_W / 2 + 4 && Math.abs(p.y - s.y) <= SEAT_H / 2 + 4,
+    (s) => Math.abs(p.x - s.x) <= size.w / 2 + 4 && Math.abs(p.y - s.y) <= size.h / 2 + 4,
   );
 }
 

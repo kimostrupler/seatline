@@ -1,6 +1,6 @@
 'use client';
 
-import { polygonArea, ROOM_TYPES, SEAT_TYPES } from '@seatline/shared';
+import { polygonArea, ROOM_TYPES, SEAT_NUMBERINGS, SEAT_TYPES } from '@seatline/shared';
 import {
   AlignCenterHorizontal,
   AlignCenterVertical,
@@ -13,6 +13,7 @@ import {
   ArrowDown,
   ArrowRight,
   ClipboardCopy,
+  Ellipsis,
   Copy,
   ImageOff,
   Layers,
@@ -21,6 +22,7 @@ import {
   Trash2,
   Upload,
   FileInput,
+  ListOrdered,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useId, useRef, useState, type ReactNode } from 'react';
@@ -33,7 +35,6 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,13 +56,14 @@ import {
   distributeSeats,
   duplicateSelection,
   polygonBounds,
+  renumberSeats,
   resizePolygon,
   rotateSeats,
   seatRow,
   type Align,
 } from '@/lib/editor/ops';
 import { NO_SELECTION, type LayoutEditorState } from '@/lib/editor/use-layout-editor';
-import { SEAT_H, SEAT_W } from '@/lib/map-geometry';
+import { DESK_DEPTH_M, DESK_WIDTH_M, seatSize } from '@/lib/map-geometry';
 import {
   useDeleteBuilding,
   useDeleteFloor,
@@ -72,6 +74,13 @@ import {
   useUploadPlan,
 } from '@/lib/queries';
 import type { Building, Floor, FloorMap, Room, Seat } from '@/lib/types';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { CreateFloorDialog } from '@/components/workspace/place-dialogs';
 import { platformKeys } from '@/lib/platform-keys';
 import { usePlanOpacity } from '@/lib/use-plan-opacity';
@@ -116,14 +125,14 @@ export function Inspector({
   return (
     <div className="grid gap-4" data-testid="inspector">
       {seats.length === 1 && rooms.length === 0 ? (
-        <SeatForm key={seats[0]!.id} seat={seats[0]!} editor={editor} level={map.floor.level} />
+        <SeatForm key={seats[0]!.id} seat={seats[0]!} editor={editor} floor={map.floor} />
       ) : rooms.length === 1 && seats.length === 0 ? (
         <RoomForm key={rooms[0]!.id} room={rooms[0]!} editor={editor} scale={map.floor.scale} />
       ) : (
         <MultiForm seats={seats} rooms={rooms} editor={editor} />
       )}
       <Separator />
-      <SelectionActions editor={editor} level={map.floor.level} clipboard={clipboard} />
+      <SelectionActions editor={editor} floor={map.floor} clipboard={clipboard} />
     </div>
   );
 }
@@ -142,11 +151,11 @@ function Field({ label, children, hint }: { label: string; children: ReactNode; 
 function SeatForm({
   seat,
   editor,
-  level,
+  floor,
 }: {
   seat: Seat;
   editor: LayoutEditorState;
-  level: number;
+  floor: Floor;
 }) {
   const t = useTranslations('inspector');
   const room = editor.doc.rooms.find((r) => r.id === seat.roomId);
@@ -192,7 +201,7 @@ function SeatForm({
       <Field label={t('inRoom')}>
         <p className="text-sm">{room?.name ?? t('noRoom')}</p>
       </Field>
-      <SeatRowField seat={seat} editor={editor} level={level} />
+      <SeatRowField seat={seat} editor={editor} floor={floor} />
     </div>
   );
 }
@@ -201,11 +210,11 @@ function SeatForm({
 function SeatRowField({
   seat,
   editor,
-  level,
+  floor,
 }: {
   seat: Seat;
   editor: LayoutEditorState;
-  level: number;
+  floor: Floor;
 }) {
   const t = useTranslations('inspector');
   const [count, setCount] = useState('3');
@@ -216,9 +225,10 @@ function SeatRowField({
       seat,
       n,
       direction,
-      level,
-      { width: SEAT_W, height: SEAT_H, gap: 28 },
+      floor.level,
+      { width: seatSize(floor).w, height: seatSize(floor).h, gap: 28 },
       () => crypto.randomUUID(),
+      floor.seatNumbering,
     );
     editor.commit(c);
     editor.setSelection(selection);
@@ -496,11 +506,11 @@ function BlockSwitch({ editor, seats }: { editor: LayoutEditorState; seats: Seat
 
 function SelectionActions({
   editor,
-  level,
+  floor,
   clipboard,
 }: {
   editor: LayoutEditorState;
-  level: number;
+  floor: Floor;
   clipboard: ClipboardActions;
 }) {
   const t = useTranslations('inspector');
@@ -516,8 +526,8 @@ function SelectionActions({
           const { changes: c, selection } = duplicateSelection(
             editor.doc,
             editor.selection,
-            level,
-            SEAT_W + 16,
+            floor.level,
+            seatSize(floor).w + 16,
             0,
             () => crypto.randomUUID(),
             (name) => te('copy', { name }),
@@ -550,33 +560,6 @@ function SelectionActions({
 }
 
 /** "Duplicate floor": the new-floor dialog, starting as a copy of this floor. */
-function DuplicateFloor({
-  floor,
-  onCreated,
-}: {
-  floor: FloorMap['floor'];
-  onCreated: (floor: Floor) => void;
-}) {
-  const t = useTranslations('inspector');
-  const [open, setOpen] = useState(false);
-  const floors = useFloors(floor.buildingId);
-  return (
-    <Field label={t('duplicateFloor')} hint={t('duplicateFloorHint')}>
-      <Button variant="outline" className="justify-self-start" onClick={() => setOpen(true)}>
-        <Layers /> {t('duplicateFloor')}
-      </Button>
-      <CreateFloorDialog
-        open={open}
-        onOpenChange={setOpen}
-        buildingId={floor.buildingId}
-        floors={floors.data ?? []}
-        copyFrom={floor.id}
-        onCreated={onCreated}
-      />
-    </Field>
-  );
-}
-
 function FloorSettings({
   map,
   editor,
@@ -600,54 +583,77 @@ function FloorSettings({
   const removePlan = useRemovePlan();
   const updateBuilding = useUpdateBuilding();
   const deleteBuilding = useDeleteBuilding();
+  const floors = useFloors(floor.buildingId);
   const [opacity, setOpacity] = usePlanOpacity();
   const fileInput = useRef<HTMLInputElement>(null);
-  const [importing, setImporting] = useState(false);
+  const [dialog, setDialog] = useState<
+    'import' | 'duplicate' | 'deleteFloor' | 'deleteBuilding' | null
+  >(null);
 
   const run = (promise: Promise<unknown>, success?: string) =>
     promise.then(
       () => success && toast.success(success),
       (error: unknown) => toast.error(errorText(error)),
     );
+  const close = (open: boolean) => !open && setDialog(null);
 
   return (
-    <div className="grid gap-4" data-testid="floor-settings">
-      <h2 className="text-lg font-semibold">{t('floor')}</h2>
-      <Field label={t('name')}>
-        <CommitInput
-          aria-label={t('name')}
-          value={floor.name}
-          maxLength={200}
-          onCommit={(name) => run(updateFloor.mutateAsync({ id: floor.id, name }))}
-        />
-      </Field>
-      <Field label={t('level')}>
-        <CommitInput
-          aria-label={t('level')}
-          inputMode="numeric"
-          value={String(floor.level)}
-          onCommit={(v) => {
-            const level = Number(v);
-            if (Number.isInteger(level)) void run(updateFloor.mutateAsync({ id: floor.id, level }));
+    <div className="grid gap-6" data-testid="floor-settings">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <h2 className="truncate text-lg font-semibold">{floor.name}</h2>
+          {building && <p className="truncate text-sm text-muted-foreground">{building.name}</p>}
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="size-8 shrink-0" aria-label={t('more')}>
+              <Ellipsis />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuItem onSelect={() => setDialog('duplicate')}>
+              <Layers /> {t('duplicateFloor')}
+            </DropdownMenuItem>
+            {floor.planFileKey && (
+              <DropdownMenuItem onSelect={() => void run(removePlan.mutateAsync(floor.id))}>
+                <ImageOff /> {t('removePlan')}
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem variant="destructive" onSelect={() => setDialog('deleteFloor')}>
+              <Trash2 /> {t('deleteFloor')}
+            </DropdownMenuItem>
+            {building && (
+              <DropdownMenuItem variant="destructive" onSelect={() => setDialog('deleteBuilding')}>
+                <Trash2 /> {t('deleteBuilding')}
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <Section title={t('planSection')}>
+        <input
+          ref={fileInput}
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          className="sr-only"
+          data-testid="plan-file"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            e.target.value = '';
+            if (file) void run(upload.mutateAsync({ floorId: floor.id, file }), t('planUploaded'));
           }}
         />
-      </Field>
-
-      <Field label={t('plan')} hint={t('planHint')}>
-        <div className="flex flex-wrap gap-2">
-          <input
-            ref={fileInput}
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-            className="sr-only"
-            data-testid="plan-file"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              e.target.value = '';
-              if (file)
-                void run(upload.mutateAsync({ floorId: floor.id, file }), t('planUploaded'));
-            }}
-          />
+        {!floor.planFileKey && <p className="text-sm text-muted-foreground">{t('planEmpty')}</p>}
+        <div className="grid gap-2">
+          <Button
+            variant={floor.planFileKey ? 'outline' : 'default'}
+            onClick={() => setDialog('import')}
+            data-testid="import-plan"
+          >
+            <FileInput /> {t('importPlan')}
+          </Button>
           <Button
             variant="outline"
             disabled={upload.isPending}
@@ -655,58 +661,59 @@ function FloorSettings({
           >
             <Upload /> {floor.planFileKey ? t('replacePlan') : t('uploadPlan')}
           </Button>
-          <Button variant="outline" onClick={() => setImporting(true)} data-testid="import-plan">
-            <FileInput /> {t('importPlan')}
-          </Button>
-          {floor.planFileKey && (
-            <Button
-              variant="ghost"
-              disabled={removePlan.isPending}
-              onClick={() => run(removePlan.mutateAsync(floor.id))}
-            >
-              <ImageOff /> {t('removePlan')}
-            </Button>
-          )}
         </div>
-      </Field>
-      <ImportPlanDialog open={importing} onOpenChange={setImporting} map={map} editor={editor} />
-      {floor.planFileKey && (
-        <Field label={t('planOpacity')}>
-          <Slider
-            aria-label={t('planOpacity')}
-            min={0.1}
-            max={1}
-            step={0.05}
-            value={[opacity]}
-            onValueChange={([v]) => v !== undefined && setOpacity(v)}
-          />
+        {floor.planFileKey && (
+          <Field label={t('planOpacity')}>
+            <Slider
+              aria-label={t('planOpacity')}
+              min={0.1}
+              max={1}
+              step={0.05}
+              value={[opacity]}
+              onValueChange={([v]) => v !== undefined && setOpacity(v)}
+            />
+          </Field>
+        )}
+        <Field label={t('scale')}>
+          <p className="text-sm">
+            {floor.scale ? (
+              t('scaleSet', { units: Math.round(floor.scale) })
+            ) : (
+              <span className="text-muted-foreground">{t('scaleUnset')}</span>
+            )}
+          </p>
         </Field>
-      )}
-      <Field label={t('scale')}>
-        <p className="text-sm text-muted-foreground">
-          {floor.scale ? t('scaleSet', { units: Math.round(floor.scale) }) : t('scaleUnset')}
-        </p>
-      </Field>
-      <DuplicateFloor floor={floor} onCreated={onFloorCreated} />
-      <ConfirmDelete
-        label={t('deleteFloor')}
-        title={t('deleteFloorTitle', { name: floor.name })}
-        body={t('deleteFloorBody')}
-        onConfirm={() =>
-          deleteFloor.mutateAsync(floor.id).then(
-            () => {
-              toast.success(t('deleted', { name: floor.name }));
-              onFloorDeleted();
-            },
-            (error: unknown) => toast.error(errorText(error)),
-          )
-        }
-      />
+      </Section>
+
+      <Section title={t('floor')}>
+        <div className="grid grid-cols-[minmax(0,1fr)_5.5rem] gap-3">
+          <Field label={t('name')}>
+            <CommitInput
+              aria-label={t('name')}
+              value={floor.name}
+              maxLength={200}
+              onCommit={(name) => run(updateFloor.mutateAsync({ id: floor.id, name }))}
+            />
+          </Field>
+          <Field label={t('level')}>
+            <CommitInput
+              aria-label={t('level')}
+              inputMode="numeric"
+              value={String(floor.level)}
+              onCommit={(v) => {
+                const level = Number(v);
+                if (Number.isInteger(level))
+                  void run(updateFloor.mutateAsync({ id: floor.id, level }));
+              }}
+            />
+          </Field>
+        </div>
+      </Section>
+
+      <DeskSettings floor={floor} editor={editor} />
 
       {building && (
-        <>
-          <Separator />
-          <h2 className="text-lg font-semibold">{t('building')}</h2>
+        <Section title={t('building')}>
           <Field label={t('name')}>
             <CommitInput
               aria-label={t('building')}
@@ -723,45 +730,168 @@ function FloorSettings({
               onCommit={(address) => run(updateBuilding.mutateAsync({ id: building.id, address }))}
             />
           </Field>
-          <ConfirmDelete
-            label={t('deleteBuilding')}
-            title={t('deleteBuildingTitle', { name: building.name })}
-            body={t('deleteBuildingBody')}
-            onConfirm={() =>
-              deleteBuilding.mutateAsync(building.id).then(
-                () => {
-                  toast.success(t('deleted', { name: building.name }));
-                  onBuildingDeleted();
-                },
-                (error: unknown) => toast.error(errorText(error)),
-              )
-            }
-          />
-        </>
+        </Section>
+      )}
+
+      <ImportPlanDialog
+        open={dialog === 'import'}
+        onOpenChange={(o) => setDialog(o ? 'import' : null)}
+        map={map}
+        editor={editor}
+      />
+      <CreateFloorDialog
+        open={dialog === 'duplicate'}
+        onOpenChange={close}
+        buildingId={floor.buildingId}
+        floors={floors.data ?? []}
+        copyFrom={floor.id}
+        onCreated={onFloorCreated}
+      />
+      <ConfirmDelete
+        open={dialog === 'deleteFloor'}
+        onOpenChange={close}
+        title={t('deleteFloorTitle', { name: floor.name })}
+        body={t('deleteFloorBody')}
+        onConfirm={() =>
+          deleteFloor.mutateAsync(floor.id).then(
+            () => {
+              toast.success(t('deleted', { name: floor.name }));
+              onFloorDeleted();
+            },
+            (error: unknown) => toast.error(errorText(error)),
+          )
+        }
+      />
+      {building && (
+        <ConfirmDelete
+          open={dialog === 'deleteBuilding'}
+          onOpenChange={close}
+          title={t('deleteBuildingTitle', { name: building.name })}
+          body={t('deleteBuildingBody')}
+          onConfirm={() =>
+            deleteBuilding.mutateAsync(building.id).then(
+              () => {
+                toast.success(t('deleted', { name: building.name }));
+                onBuildingDeleted();
+              },
+              (error: unknown) => toast.error(errorText(error)),
+            )
+          }
+        />
       )}
     </div>
   );
 }
 
+/** How desks are numbered and how big they are drawn. */
+function DeskSettings({ floor, editor }: { floor: Floor; editor: LayoutEditorState }) {
+  const t = useTranslations('inspector');
+  const updateFloor = useUpdateFloor();
+  const save = (input: Partial<Pick<Floor, 'deskWidth' | 'deskDepth' | 'seatNumbering'>>) =>
+    updateFloor
+      .mutateAsync({ id: floor.id, ...input })
+      .catch((error: unknown) => toast.error(errorText(error)));
+  const metres = (v: string) => {
+    const n = Number(v.replace(',', '.'));
+    return v.trim() === '' ? null : n >= 0.3 && n <= 5 ? n : undefined;
+  };
+  const renumber = () => {
+    const c = renumberSeats(editor.doc, floor.level, floor.seatNumbering, seatSize(floor).h);
+    if (!c.seats.update.length) return toast.info(t('renumberNone'));
+    editor.commit(c);
+    toast.success(t('renumbered', { count: c.seats.update.length }));
+  };
+  return (
+    <Section title={t('desks')}>
+      <Field label={t('numbering')} hint={t('numberingHint')}>
+        <Select
+          value={floor.seatNumbering}
+          onValueChange={(v) => void save({ seatNumbering: v as Floor['seatNumbering'] })}
+        >
+          <SelectTrigger className="w-full" aria-label={t('numbering')}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {SEAT_NUMBERINGS.map((n) => (
+              <SelectItem key={n} value={n}>
+                {t(`numberingBy.${n}`, { level: floor.level })}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Field>
+      <Button
+        variant="outline"
+        onClick={renumber}
+        disabled={!editor.doc.seats.length}
+        data-testid="renumber"
+      >
+        <ListOrdered /> {t('renumber')}
+      </Button>
+      {floor.scale ? (
+        <Field label={t('deskSize')} hint={t('deskSizeHint')}>
+          <div className="flex items-center gap-2">
+            <CommitInput
+              aria-label={t('deskWidth')}
+              inputMode="decimal"
+              placeholder={String(DESK_WIDTH_M)}
+              value={floor.deskWidth == null ? '' : String(floor.deskWidth)}
+              onCommit={(v) => {
+                const deskWidth = metres(v);
+                if (deskWidth === undefined) toast.error(t('deskSizeInvalid'));
+                else void save({ deskWidth });
+              }}
+            />
+            <span className="text-muted-foreground">×</span>
+            <CommitInput
+              aria-label={t('deskDepth')}
+              inputMode="decimal"
+              placeholder={String(DESK_DEPTH_M)}
+              value={floor.deskDepth == null ? '' : String(floor.deskDepth)}
+              onCommit={(v) => {
+                const deskDepth = metres(v);
+                if (deskDepth === undefined) toast.error(t('deskSizeInvalid'));
+                else void save({ deskDepth });
+              }}
+            />
+            <span className="text-sm text-muted-foreground">m</span>
+          </div>
+        </Field>
+      ) : (
+        <p className="text-sm text-muted-foreground">{t('deskSizeNoScale')}</p>
+      )}
+    </Section>
+  );
+}
+
+/** A titled group in the floor panel. */
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section className="grid gap-3">
+      <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+        {title}
+      </h3>
+      {children}
+    </section>
+  );
+}
+
 function ConfirmDelete({
-  label,
+  open,
+  onOpenChange,
   title,
   body,
   onConfirm,
 }: {
-  label: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   title: string;
   body: string;
   onConfirm: () => void;
 }) {
   const t = useTranslations('inspector');
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button variant="outline" className="justify-self-start text-destructive">
-          <Trash2 /> {label}
-        </Button>
-      </AlertDialogTrigger>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogTitle>{title}</AlertDialogTitle>
         <AlertDialogDescription>{body}</AlertDialogDescription>

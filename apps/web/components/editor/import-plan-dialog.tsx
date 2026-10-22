@@ -17,7 +17,7 @@ import { Switch } from '@/components/ui/switch';
 import { ApiError, apiBlob } from '@/lib/api';
 import { importChanges, pickAll, type ImportPick } from '@/lib/editor/plan-import';
 import type { LayoutEditorState } from '@/lib/editor/use-layout-editor';
-import { SEAT_H, SEAT_W } from '@/lib/map-geometry';
+import { seatSize } from '@/lib/map-geometry';
 import { discardPlanImport, useAnalyzePlan, useApplyPlanImport } from '@/lib/queries';
 import type { FloorMap, PlanImport } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -217,14 +217,15 @@ export function ImportPlanDialog({
                 })}
                 {draft.seats.map((s, i) => {
                   const on = pick.seats.has(i);
+                  const { w, h } = seatSize({ ...floor, scale: draft.scale });
                   return (
                     <rect
                       key={`s${i}`}
-                      x={s.x - SEAT_W / 2}
-                      y={s.y - SEAT_H / 2}
-                      width={SEAT_W}
-                      height={SEAT_H}
-                      rx={8}
+                      x={s.x - w / 2}
+                      y={s.y - h / 2}
+                      width={w}
+                      height={h}
+                      rx={Math.min(8, h / 4)}
                       transform={`rotate(${s.rotation} ${s.x} ${s.y})`}
                       className="cursor-pointer"
                       fill={on ? 'var(--seat-free-fill)' : 'transparent'}

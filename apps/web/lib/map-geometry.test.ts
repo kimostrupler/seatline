@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { clampScale, fitView, initials, MAX_SCALE, seatAt, toPlan, zoomAt } from './map-geometry';
+import {
+  clampScale,
+  contentBounds,
+  fitView,
+  initials,
+  MAX_SCALE,
+  seatAt,
+  seatSize,
+  toPlan,
+  zoomAt,
+} from './map-geometry';
 import type { Seat } from './types';
 
 describe('initials', () => {
@@ -49,5 +59,20 @@ describe('seatAt', () => {
 
   it('finds nothing between desks', () => {
     expect(seatAt(seats, { x: 200, y: 100 })).toBeUndefined();
+  });
+});
+
+describe('seatSize', () => {
+  it('draws desks at real size once the floor has a scale', () => {
+    expect(seatSize({ scale: null, deskWidth: null, deskDepth: null })).toEqual({ w: 64, h: 44 });
+    expect(seatSize({ scale: 50, deskWidth: null, deskDepth: null })).toEqual({ w: 80, h: 40 });
+    expect(seatSize({ scale: 50, deskWidth: 1.4, deskDepth: 0.7 })).toEqual({ w: 70, h: 35 });
+  });
+
+  it("hit tests and frames with the floor's size", () => {
+    const s = { id: 's', x: 100, y: 100 } as Seat;
+    expect(seatAt([s], { x: 130, y: 100 })).toBe(s);
+    expect(seatAt([s], { x: 130, y: 100 }, { w: 20, h: 10 })).toBeUndefined();
+    expect(contentBounds([], [s], null, { w: 20, h: 10 })).toMatchObject({ minX: 90, maxX: 110 });
   });
 });

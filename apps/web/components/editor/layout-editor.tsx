@@ -17,6 +17,7 @@ import {
   FONT,
 } from '@/components/map/shapes';
 import { useViewport, ZoomControls } from '@/components/map/viewport';
+import { SeatSizeContext } from '@/components/map/seat-size';
 import {
   applyChanges,
   changes,
@@ -27,7 +28,7 @@ import {
   moveEdge,
   moveSelection,
   moveVertex,
-  nextSeatLabel,
+  seatLabelAt,
   removeVertex,
   rotateSeats,
   snap,
@@ -38,7 +39,7 @@ import {
   type LayoutEditorState,
   type Selection,
 } from '@/lib/editor/use-layout-editor';
-import { contentBounds, SEAT_W, toPlan } from '@/lib/map-geometry';
+import { contentBounds, seatSize, toPlan } from '@/lib/map-geometry';
 import type { FloorMap, Point } from '@/lib/types';
 import type { ClipboardActions } from './use-clipboard';
 import { useMediaQuery } from '@/lib/use-media-query';
@@ -86,6 +87,7 @@ export function LayoutEditor({
   const { doc, selection, setSelection, commit } = editor;
   const floor = map.floor;
   const grid = gridStep(floor.scale);
+  const size = useMemo(() => seatSize(floor), [floor]);
 
   const bounds = useMemo(
     () =>
@@ -95,6 +97,7 @@ export function LayoutEditor({
         floor.planFileKey && floor.planWidth && floor.planHeight
           ? { width: floor.planWidth, height: floor.planHeight }
           : { width: 1200, height: 800 }, // an empty floor still gets a sensible canvas
+        size,
       ),
     // fit once per floor; later edits shouldn't re-frame
     [floor.id, floor.planFileKey], // eslint-disable-line react-hooks/exhaustive-deps
@@ -153,7 +156,7 @@ export function LayoutEditor({
   const addSeat = (p: Point) => {
     const seat = {
       id: crypto.randomUUID(),
-      label: nextSeatLabel(doc.seats, floor.level),
+      label: seatLabelAt(doc, floor.level, floor.seatNumbering, p),
       x: p.x,
       y: p.y,
       rotation: lastRotation.current,
@@ -196,7 +199,7 @@ export function LayoutEditor({
       doc,
       selection,
       floor.level,
-      SEAT_W + 16,
+      size.w + 16,
       0,
       () => crypto.randomUUID(),
       (name) => t('copy', { name }),
@@ -454,206 +457,211 @@ export function LayoutEditor({
       data-view={JSON.stringify(view)}
     >
       {colors && vp.size.width > 0 && (
-        <Stage
-          ref={vp.stageRef}
-          width={vp.size.width}
-          height={vp.size.height}
-          x={view.x}
-          y={view.y}
-          scaleX={view.scale}
-          scaleY={view.scale}
-          draggable={spaceDown}
-          onDragEnd={(e) => {
-            if (e.target === e.target.getStage())
-              vp.setView((v) => ({ ...v, x: e.target.x(), y: e.target.y() }));
-          }}
-          onWheel={vp.onWheel}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={() => setDrag(null)}
-          onMouseLeave={() => {
-            setPointer(null);
-            setHover(null);
-          }}
-          onDblClick={onDoubleClick}
-          onDblTap={onDoubleClick}
-        >
-          <Layer listening={false}>
-            <PlanBackground image={plan} floor={floor} opacity={planOpacity} />
-            {!plan && (
-              <GridDots
-                width={floor.planWidth ?? 1200}
-                height={floor.planHeight ?? 800}
-                grid={grid * 10}
-                color={colors['room-stroke']}
-              />
-            )}
-          </Layer>
-          <Layer listening={tool === 'select'}>
-            {shown.rooms.map((room) => (
-              <RoomShape
-                key={room.id}
-                name={`room:${room.id}`}
-                room={room}
-                colors={colors}
-                textScale={vp.textScale}
-                selected={selectedRooms.has(room.id)}
-                translucent={!!plan}
-              />
-            ))}
-          </Layer>
-          <Layer listening={tool === 'select'}>
-            {shown.seats.map((seat) => (
-              <Group key={seat.id}>
-                <SeatDesk
-                  name={`seat:${seat.id}`}
-                  seat={seat}
-                  colors={colors}
-                  ring={selectedSeats.has(seat.id) ? 'selected' : null}
+        <SeatSizeContext.Provider value={size}>
+          <Stage
+            ref={vp.stageRef}
+            width={vp.size.width}
+            height={vp.size.height}
+            x={view.x}
+            y={view.y}
+            scaleX={view.scale}
+            scaleY={view.scale}
+            draggable={spaceDown}
+            onDragEnd={(e) => {
+              if (e.target === e.target.getStage())
+                vp.setView((v) => ({ ...v, x: e.target.x(), y: e.target.y() }));
+            }}
+            onWheel={vp.onWheel}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={() => setDrag(null)}
+            onMouseLeave={() => {
+              setPointer(null);
+              setHover(null);
+            }}
+            onDblClick={onDoubleClick}
+            onDblTap={onDoubleClick}
+          >
+            <Layer listening={false}>
+              <PlanBackground image={plan} floor={floor} opacity={planOpacity} />
+              {!plan && (
+                <GridDots
+                  width={floor.planWidth ?? 1200}
+                  height={floor.planHeight ?? 800}
+                  grid={grid * 10}
+                  color={colors['room-stroke']}
                 />
-                <SeatLabel seat={seat} colors={colors} textScale={vp.textScale} />
-                {seatContent(seat) && (
-                  <Group x={seat.x} y={seat.y} listening={false}>
-                    <SeatText seat={seat} colors={colors} textScale={vp.textScale} />
-                  </Group>
-                )}
-              </Group>
-            ))}
-            {/* side handles (drag to push a wall, double-click to add a corner) */}
-            {singleRoom?.polygon.map((p, i) => {
-              const q = singleRoom.polygon[(i + 1) % singleRoom.polygon.length]!;
-              return (
-                <Rect
-                  key={`e${i}`}
-                  name={`edge:${singleRoom.id}:${i}`}
-                  x={(p.x + q.x) / 2}
-                  y={(p.y + q.y) / 2}
-                  width={handle * 1.6}
-                  height={handle * 1.6}
-                  offsetX={handle * 0.8}
-                  offsetY={handle * 0.8}
-                  rotation={(Math.atan2(q.y - p.y, q.x - p.x) * 180) / Math.PI}
-                  cornerRadius={handle * 0.3}
-                  fill={colors.primary}
-                  stroke="#ffffff"
-                  strokeWidth={1.5}
+              )}
+            </Layer>
+            <Layer listening={tool === 'select'}>
+              {shown.rooms.map((room) => (
+                <RoomShape
+                  key={room.id}
+                  name={`room:${room.id}`}
+                  room={room}
+                  colors={colors}
+                  textScale={vp.textScale}
+                  selected={selectedRooms.has(room.id)}
+                  translucent={!!plan}
+                />
+              ))}
+            </Layer>
+            <Layer listening={tool === 'select'}>
+              {shown.seats.map((seat) => (
+                <Group key={seat.id}>
+                  <SeatDesk
+                    name={`seat:${seat.id}`}
+                    seat={seat}
+                    colors={colors}
+                    ring={selectedSeats.has(seat.id) ? 'selected' : null}
+                  />
+                  <SeatLabel seat={seat} colors={colors} textScale={vp.textScale} />
+                  {seatContent(seat) && (
+                    <Group x={seat.x} y={seat.y} listening={false}>
+                      <SeatText seat={seat} colors={colors} textScale={vp.textScale} />
+                    </Group>
+                  )}
+                </Group>
+              ))}
+              {/* side handles (drag to push a wall, double-click to add a corner) */}
+              {singleRoom?.polygon.map((p, i) => {
+                const q = singleRoom.polygon[(i + 1) % singleRoom.polygon.length]!;
+                return (
+                  <Rect
+                    key={`e${i}`}
+                    name={`edge:${singleRoom.id}:${i}`}
+                    x={(p.x + q.x) / 2}
+                    y={(p.y + q.y) / 2}
+                    width={handle * 1.6}
+                    height={handle * 1.6}
+                    offsetX={handle * 0.8}
+                    offsetY={handle * 0.8}
+                    rotation={(Math.atan2(q.y - p.y, q.x - p.x) * 180) / Math.PI}
+                    cornerRadius={handle * 0.3}
+                    fill={colors.primary}
+                    stroke="#ffffff"
+                    strokeWidth={1.5}
+                    strokeScaleEnabled={false}
+                    hitStrokeWidth={12}
+                  />
+                );
+              })}
+              {/* corner handles (drag to reshape, double-click to remove) */}
+              {singleRoom?.polygon.map((p, i) => (
+                <Circle
+                  key={`v${i}`}
+                  name={`vertex:${singleRoom.id}:${i}`}
+                  x={p.x}
+                  y={p.y}
+                  radius={handle}
+                  fill="#ffffff"
+                  stroke={colors.primary}
+                  strokeWidth={2}
                   strokeScaleEnabled={false}
                   hitStrokeWidth={12}
                 />
-              );
-            })}
-            {/* corner handles (drag to reshape, double-click to remove) */}
-            {singleRoom?.polygon.map((p, i) => (
-              <Circle
-                key={`v${i}`}
-                name={`vertex:${singleRoom.id}:${i}`}
-                x={p.x}
-                y={p.y}
-                radius={handle}
-                fill="#ffffff"
-                stroke={colors.primary}
-                strokeWidth={2}
-                strokeScaleEnabled={false}
-                hitStrokeWidth={12}
-              />
-            ))}
-          </Layer>
-          <Layer listening={false}>
-            {drag?.kind === 'marquee' && (
-              <Rect
-                x={Math.min(drag.start.x, drag.end.x)}
-                y={Math.min(drag.start.y, drag.end.y)}
-                width={Math.abs(drag.end.x - drag.start.x)}
-                height={Math.abs(drag.end.y - drag.start.y)}
-                stroke={colors.primary}
-                strokeWidth={1}
-                dash={[4, 4]}
-                fill={colors.primary}
-                opacity={0.12}
-                strokeScaleEnabled={false}
-              />
-            )}
-            {drag?.kind === 'rect' && (
-              <Rect
-                x={Math.min(drag.start.x, drag.end.x)}
-                y={Math.min(drag.start.y, drag.end.y)}
-                width={Math.abs(drag.end.x - drag.start.x)}
-                height={Math.abs(drag.end.y - drag.start.y)}
-                stroke={colors.primary}
-                strokeWidth={2}
-                dash={[6, 4]}
-                strokeScaleEnabled={false}
-              />
-            )}
-            {tool === 'room' && roomPoints.length > 0 && (
-              <>
-                <Line
-                  points={[...roomPoints, ...(pointer ? [pointer] : [])].flatMap((p) => [p.x, p.y])}
+              ))}
+            </Layer>
+            <Layer listening={false}>
+              {drag?.kind === 'marquee' && (
+                <Rect
+                  x={Math.min(drag.start.x, drag.end.x)}
+                  y={Math.min(drag.start.y, drag.end.y)}
+                  width={Math.abs(drag.end.x - drag.start.x)}
+                  height={Math.abs(drag.end.y - drag.start.y)}
+                  stroke={colors.primary}
+                  strokeWidth={1}
+                  dash={[4, 4]}
+                  fill={colors.primary}
+                  opacity={0.12}
+                  strokeScaleEnabled={false}
+                />
+              )}
+              {drag?.kind === 'rect' && (
+                <Rect
+                  x={Math.min(drag.start.x, drag.end.x)}
+                  y={Math.min(drag.start.y, drag.end.y)}
+                  width={Math.abs(drag.end.x - drag.start.x)}
+                  height={Math.abs(drag.end.y - drag.start.y)}
                   stroke={colors.primary}
                   strokeWidth={2}
                   dash={[6, 4]}
                   strokeScaleEnabled={false}
                 />
-                {roomPoints.map((p, i) => (
-                  <Circle
-                    key={i}
-                    x={p.x}
-                    y={p.y}
-                    radius={handle}
-                    fill={i === 0 ? colors.primary : '#ffffff'}
+              )}
+              {tool === 'room' && roomPoints.length > 0 && (
+                <>
+                  <Line
+                    points={[...roomPoints, ...(pointer ? [pointer] : [])].flatMap((p) => [
+                      p.x,
+                      p.y,
+                    ])}
+                    stroke={colors.primary}
+                    strokeWidth={2}
+                    dash={[6, 4]}
+                    strokeScaleEnabled={false}
+                  />
+                  {roomPoints.map((p, i) => (
+                    <Circle
+                      key={i}
+                      x={p.x}
+                      y={p.y}
+                      radius={handle}
+                      fill={i === 0 ? colors.primary : '#ffffff'}
+                      stroke={colors.primary}
+                      strokeWidth={2}
+                      strokeScaleEnabled={false}
+                    />
+                  ))}
+                </>
+              )}
+              {drag?.kind === 'measure' && (
+                <>
+                  <Line
+                    points={[drag.start.x, drag.start.y, drag.end.x, drag.end.y]}
                     stroke={colors.primary}
                     strokeWidth={2}
                     strokeScaleEnabled={false}
                   />
-                ))}
-              </>
-            )}
-            {drag?.kind === 'measure' && (
-              <>
-                <Line
-                  points={[drag.start.x, drag.start.y, drag.end.x, drag.end.y]}
-                  stroke={colors.primary}
-                  strokeWidth={2}
-                  strokeScaleEnabled={false}
-                />
-                <Text
-                  x={drag.end.x + 8 / view.scale}
-                  y={drag.end.y + 8 / view.scale}
-                  text={
-                    floor.scale
-                      ? `${(Math.hypot(drag.end.x - drag.start.x, drag.end.y - drag.start.y) / floor.scale).toFixed(2)} m`
-                      : `${Math.round(Math.hypot(drag.end.x - drag.start.x, drag.end.y - drag.start.y))}`
-                  }
-                  fontFamily={FONT}
-                  fontSize={12 * vp.textScale}
-                  fill={colors.primary}
-                />
-              </>
-            )}
-            {tool === 'seat' && pointer && (
-              <Group opacity={0.5}>
-                <SeatDesk
-                  seat={{
-                    id: 'ghost',
-                    floorId: floor.id,
-                    roomId: null,
-                    label: '',
-                    x: pointer.x,
-                    y: pointer.y,
-                    rotation: lastRotation.current,
-                    type: 'desk',
-                    status: 'active',
-                    occupancy: 'free',
-                    currentAssignment: null,
-                  }}
-                  colors={colors}
-                  ring={null}
-                />
-              </Group>
-            )}
-          </Layer>
-        </Stage>
+                  <Text
+                    x={drag.end.x + 8 / view.scale}
+                    y={drag.end.y + 8 / view.scale}
+                    text={
+                      floor.scale
+                        ? `${(Math.hypot(drag.end.x - drag.start.x, drag.end.y - drag.start.y) / floor.scale).toFixed(2)} m`
+                        : `${Math.round(Math.hypot(drag.end.x - drag.start.x, drag.end.y - drag.start.y))}`
+                    }
+                    fontFamily={FONT}
+                    fontSize={12 * vp.textScale}
+                    fill={colors.primary}
+                  />
+                </>
+              )}
+              {tool === 'seat' && pointer && (
+                <Group opacity={0.5}>
+                  <SeatDesk
+                    seat={{
+                      id: 'ghost',
+                      floorId: floor.id,
+                      roomId: null,
+                      label: '',
+                      x: pointer.x,
+                      y: pointer.y,
+                      rotation: lastRotation.current,
+                      type: 'desk',
+                      status: 'active',
+                      occupancy: 'free',
+                      currentAssignment: null,
+                    }}
+                    colors={colors}
+                    ring={null}
+                  />
+                </Group>
+              )}
+            </Layer>
+          </Stage>
+        </SeatSizeContext.Provider>
       )}
 
       {/* keyboard / screen reader access: select items, then use the inspector or shortcuts */}

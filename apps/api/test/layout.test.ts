@@ -108,6 +108,37 @@ describe('layout batch', () => {
     await layout(a, { seats: { create: [seat('Q2', 1, 1)] } }, a.viewerHeaders).expect(403);
   });
 
+  it('renumbering can swap labels in one batch', async () => {
+    const before = await owner.seat.findMany({
+      where: { id: { in: a.seatIds.slice(0, 2) } },
+    });
+    const label = (id: string) => before.find((s) => s.id === id)!.label;
+    const [x, y] = a.seatIds;
+    const res = await layout(a, {
+      seats: {
+        update: [
+          { id: x, label: label(y!) },
+          { id: y, label: label(x!) },
+        ],
+      },
+    }).expect(200);
+    const after = new Map(
+      res.body.seats.map((s: { id: string; label: string }) => [s.id, s.label]),
+    );
+    expect(after.get(x)).toBe(label(y!));
+    expect(after.get(y)).toBe(label(x!));
+  });
+
+  it('keeps desk size and numbering per floor', async () => {
+    const res = await api(app)
+      .patch(`/floors/${a.floorId}`)
+      .set(a.headers)
+      .send({ deskWidth: 1.4, deskDepth: 0.7, seatNumbering: 'room' })
+      .expect(200);
+    expect(res.body).toMatchObject({ deskWidth: 1.4, deskDepth: 0.7, seatNumbering: 'room' });
+    await api(app).patch(`/floors/${a.floorId}`).set(a.headers).send({ deskWidth: 9 }).expect(400);
+  });
+
   it('validates input', async () => {
     await layout(a, { seats: { create: [{ ...seat('B', 1, 1), id: 'nope' }] } }).expect(400);
     await layout(a, {

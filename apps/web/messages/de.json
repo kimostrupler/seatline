@@ -158,7 +158,8 @@
     "shortcuts": "Tastenkürzel (?)",
     "hintSelectTouch": "Tippen zum Auswählen · Platz oder Raum ziehen zum Verschieben · Stockwerk ziehen zum Umsehen · mit zwei Fingern zoomen",
     "closePanel": "Bereich schliessen",
-    "copied": "Kopiert – auf jedem Stockwerk mit ⌘V einfügen"
+    "copied": "Kopiert – auf jedem Stockwerk mit ⌘V einfügen",
+    "floorAndPlan": "Etage & Plan"
   },
   "inspector": {
     "floor": "Stockwerk",
@@ -166,16 +167,14 @@
     "name": "Name",
     "level": "Etage",
     "address": "Adresse",
-    "plan": "Grundriss-Bild",
-    "planHint": "PNG, JPG oder WebP, bis 10 MB. Zeichnen Sie Räume und Plätze darauf.",
-    "uploadPlan": "Grundriss hochladen",
+    "uploadPlan": "Bild hochladen",
     "replacePlan": "Grundriss ersetzen",
     "removePlan": "Grundriss entfernen",
     "planOpacity": "Sichtbarkeit des Grundrisses",
     "planUploaded": "Grundriss hochgeladen",
     "scale": "Massstab",
     "scaleSet": "1 m = {units} Einheiten",
-    "scaleUnset": "Nicht gesetzt. Messen Sie mit dem Lineal eine bekannte Länge.",
+    "scaleUnset": "Noch nicht festgelegt. Messen Sie eine bekannte Länge mit dem Lineal (M).",
     "deleteFloor": "Stockwerk löschen",
     "deleteFloorTitle": "{name} löschen?",
     "deleteFloorBody": "Nur leere Stockwerke können gelöscht werden. Entfernen Sie zuerst Räume und Plätze.",
@@ -242,7 +241,26 @@
     "distributeY": "Gleichmässig von oben nach unten verteilen",
     "duplicateFloor": "Stockwerk duplizieren",
     "duplicateFloorHint": "Ein neues Stockwerk mit denselben Räumen, Plätzen und dem Grundriss, ohne Personen.",
-    "importPlan": "Architektenplan importieren"
+    "importPlan": "Architektenplan importieren",
+    "planSection": "Plan",
+    "planEmpty": "Importieren Sie den Plan der Architektin, und Seatline zeichnet Räume und Plätze, oder laden Sie ein Bild hoch, um darauf zu zeichnen.",
+    "more": "Mehr",
+    "desks": "Arbeitsplätze",
+    "numbering": "Nummerierung",
+    "numberingHint": "Gilt für neue Arbeitsplätze. «Neu nummerieren» wendet sie auf alle Arbeitsplätze dieses Stockwerks an.",
+    "numberingBy": {
+      "floor": "Pro Stockwerk ({level}.01, {level}.02 …)",
+      "room": "Pro Raum (Raumnummer + A, B …)"
+    },
+    "renumber": "Arbeitsplätze neu nummerieren",
+    "renumbered": "{count, plural, one {# Arbeitsplatz neu nummeriert} other {# Arbeitsplätze neu nummeriert}}",
+    "renumberNone": "Die Arbeitsplätze sind bereits der Reihe nach nummeriert.",
+    "deskSize": "Tischgrösse",
+    "deskSizeHint": "Tische werden in dieser echten Grösse gezeichnet. Leer = 1,6 × 0,8 m.",
+    "deskWidth": "Tischbreite in Metern",
+    "deskDepth": "Tischtiefe in Metern",
+    "deskSizeNoScale": "Legen Sie den Massstab des Plans fest (Lineal), damit Tische in echter Grösse erscheinen.",
+    "deskSizeInvalid": "Geben Sie eine Grösse zwischen 0,3 und 5 m ein."
   },
   "auth": {
     "signInTitle": "Bei Seatline anmelden",

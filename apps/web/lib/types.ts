@@ -2,6 +2,7 @@ import type {
   AppRole,
   AssignmentKind,
   RoomType,
+  SeatNumbering,
   SeatOccupancy,
   SeatStatus,
   SeatType,
@@ -48,6 +49,11 @@ export interface Floor {
   planHeight: number | null;
   /** plan units per metre, null until set with the scale tool */
   scale: number | null;
+  /** desk size in metres (null = 1.6 × 0.8); only used once the floor has a scale */
+  deskWidth: number | null;
+  deskDepth: number | null;
+  /** how new desks are numbered: 1.01, 1.02… per floor, or 1.04-A, 1.04-B… per room */
+  seatNumbering: SeatNumbering;
 }
 
 export interface Point {

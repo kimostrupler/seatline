@@ -83,6 +83,13 @@ export class LayoutService {
         const { assignments: _, ...before } = seatById.get(id)!;
         await log('seat.delete', 'seat', id, before);
       }
+      // labels are unique per floor: changed labels step aside first, so a batch may swap them
+      const relabelled = changes.seats.update.filter(
+        (u) => u.label !== undefined && u.label !== seatById.get(u.id)!.label,
+      );
+      for (const u of relabelled) {
+        await tx.seat.update({ where: { id: u.id }, data: { label: `~${u.id}` } });
+      }
       for (const s of changes.seats.create) {
         const seat = await tx.seat.create({ data: { ...s, tenantId, floorId } });
         await log('seat.create', 'seat', seat.id, undefined, seat);
