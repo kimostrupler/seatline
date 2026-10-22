@@ -47,6 +47,13 @@ test('visitors try a demo workspace from the website, then start a real trial', 
     .getByRole('button', { name: 'Start your free trial' })
     .click();
   await expect(page).toHaveURL(/\/signin/);
+
+  // or leave it: back to the website
+  await page.goto('/welcome');
+  await page.getByRole('link', { name: 'Try the demo' }).first().click();
+  await page.getByRole('button', { name: 'Open the demo' }).click();
+  await page.getByTestId('demo-banner').getByRole('button', { name: 'Leave the demo' }).click();
+  await expect(page.getByRole('heading', { name: 'Know who sits where.' })).toBeVisible();
 });
 
 test('the Teams app: package to download, tab sign-in only with a valid Teams token', async ({

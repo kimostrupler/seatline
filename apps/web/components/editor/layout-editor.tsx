@@ -539,6 +539,10 @@ export function LayoutEditor({
             scaleX={view.scale}
             scaleY={view.scale}
             draggable={spaceDown}
+            onDragMove={(e) => {
+              if (e.target === e.target.getStage())
+                vp.setView((v) => ({ ...v, x: e.target.x(), y: e.target.y() }));
+            }}
             onDragEnd={(e) => {
               if (e.target === e.target.getStage())
                 vp.setView((v) => ({ ...v, x: e.target.x(), y: e.target.y() }));

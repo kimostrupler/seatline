@@ -64,6 +64,16 @@ function DemoBanner() {
           {t('startTrial')}
         </button>
       </form>
+      <span aria-hidden className="text-muted-foreground">
+        ·
+      </span>
+      {/* …or back to the website */}
+      <form method="post" action="/auth/logout" className="inline">
+        <input type="hidden" name="to" value="site" />
+        <button type="submit" className="font-medium underline underline-offset-2">
+          {t('leave')}
+        </button>
+      </form>
     </div>
   );
 }

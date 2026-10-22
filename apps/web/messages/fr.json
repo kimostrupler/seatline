@@ -1240,7 +1240,8 @@
     "busy": "Trop de démos en ce moment. Veuillez réessayer plus tard.",
     "failed": "La démo n’a pas pu être ouverte. Veuillez réessayer.",
     "banner": "Ceci est une démo avec des données d’exemple — elle est supprimée après un jour.",
-    "startTrial": "Commencer l’essai gratuit"
+    "startTrial": "Commencer l’essai gratuit",
+    "leave": "Quitter la démo"
   },
   "planning": {
     "title": "Planification des espaces",

@@ -1240,7 +1240,8 @@
     "busy": "Gerade sind zu viele Demos offen. Bitte versuchen Sie es später nochmals.",
     "failed": "Die Demo konnte nicht geöffnet werden. Bitte versuchen Sie es nochmals.",
     "banner": "Dies ist eine Demo mit Musterdaten — sie wird nach einem Tag gelöscht.",
-    "startTrial": "Gratis-Testphase starten"
+    "startTrial": "Gratis-Testphase starten",
+    "leave": "Demo verlassen"
   },
   "planning": {
     "title": "Flächenplanung",

@@ -1,4 +1,4 @@
-import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import type { MailLanguage } from '@seatline/shared';
 import { createHash, randomBytes } from 'node:crypto';
 import { TenantDb } from '../db/tenant-db.service';
@@ -18,6 +18,8 @@ export const hashToken = (token: string) => createHash('sha256').update(token).d
  */
 @Injectable()
 export class EmailSignInService {
+  private readonly logger = new Logger(EmailSignInService.name);
+
   constructor(
     private readonly db: TenantDb,
     private readonly mail: MailService,
@@ -47,6 +49,8 @@ export class EmailSignInService {
       );
     const link = `${this.mail.appUrl}/auth/email?token=${token}`;
     await this.mail.send(signInMail(email, link, language));
+    // no address in the log (personal data); the domain helps to spot delivery problems
+    this.logger.log(`Sign-in link sent (to an address at ${email.split('@')[1] ?? '?'})`);
     return { sent: true };
   }
 
