@@ -15,7 +15,13 @@ export async function middleware(req: NextRequest) {
     .toLowerCase();
   if (siteHosts(appUrl).includes(host)) {
     if (pathname === '/') return NextResponse.rewrite(new URL('/welcome', req.url));
-    if (isPublicPath(pathname) || pathname === '/client-errors') return NextResponse.next();
+    // /.well-known: domain checks (e.g. Azure's certificate validation) must not be redirected
+    if (
+      isPublicPath(pathname) ||
+      pathname === '/client-errors' ||
+      pathname.startsWith('/.well-known/')
+    )
+      return NextResponse.next();
     return NextResponse.redirect(new URL(pathname + search, appUrl));
   }
 
