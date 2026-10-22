@@ -81,13 +81,16 @@ jobs:
 
       - name: Update the apps
         env:
-          # GitHub variable KEEP_WARM=true keeps one copy of each app running (faster first
-          # page, ~CHF 10–20/month more); otherwise they sleep when nobody uses them.
+          # GitHub variable KEEP_WARM: "true" keeps one copy of the web app and the API running
+          # (no wake-up wait, ~CHF 10–20/month more), "web" only the web app (pages appear at
+          # once, the first data still waits a few seconds; about half the cost); otherwise
+          # both sleep when nobody uses them.
           MIN_REPLICAS: ${{ vars.KEEP_WARM == 'true' && '1' || '0' }}
+          WEB_MIN_REPLICAS: ${{ (vars.KEEP_WARM == 'true' || vars.KEEP_WARM == 'web') && '1' || '0' }}
         run: |
           bash infra/azure/plan-engine.sh "$ENGINE_IMAGE"
           az containerapp update -n api -g "$RG" --image "$API_IMAGE" --min-replicas "$MIN_REPLICAS" -o none
-          az containerapp update -n web -g "$RG" --image "$WEB_IMAGE" --min-replicas "$MIN_REPLICAS" -o none
+          az containerapp update -n web -g "$RG" --image "$WEB_IMAGE" --min-replicas "$WEB_MIN_REPLICAS" -o none
           az containerapp job update -n nightly-sync -g "$RG" --image "$API_IMAGE" -o none
 
       - name: Error alerts by e-mail

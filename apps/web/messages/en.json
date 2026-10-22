@@ -358,7 +358,8 @@
     "yourName": "Your name",
     "onboardingBodyEmail": "Create your company’s workspace — you’ll be its first admin. Then add colleagues under People & access; they sign in with an e-mail link.",
     "useMicrosoftTitle": "Sign in with Microsoft",
-    "useMicrosoftBody": "Your company signs in to Seatline with Microsoft 365. Please use “Sign in with Microsoft”."
+    "useMicrosoftBody": "Your company signs in to Seatline with Microsoft 365. Please use “Sign in with Microsoft”.",
+    "backToWebsite": "Back to the website"
   },
   "admin": {
     "link": "People & access",
@@ -1343,5 +1344,9 @@
       "admins": "Admins",
       "email": "E-mail link"
     }
+  },
+  "loading": {
+    "title": "Loading Seatline…",
+    "hint": "Waking up after a quiet moment — this can take a few seconds."
   }
 }

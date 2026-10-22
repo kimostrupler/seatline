@@ -1,5 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { Centered } from '@/components/auth/centered';
+import { webConfig } from '@/lib/server/config';
+import { websiteHref } from '@/lib/site';
 import { SignOutButton } from '@/components/auth/sign-out-button';
 import { userLabel } from '@/lib/server/session';
 import { currentUser } from '@/lib/server/auth';
@@ -15,7 +17,7 @@ export default async function NoAccess({
   const inactive = reason === 'inactive';
   const microsoft = reason === 'use_microsoft';
   return (
-    <Centered>
+    <Centered backHref={websiteHref(webConfig().APP_URL)}>
       <div className="grid gap-1">
         <h1 className="text-xl font-semibold">
           {microsoft ? t('useMicrosoftTitle') : inactive ? t('inactiveTitle') : t('noAccessTitle')}

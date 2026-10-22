@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 import { Centered } from '@/components/auth/centered';
+import { websiteHref } from '@/lib/site';
 import { Button } from '@/components/ui/button';
 import { webConfig } from '@/lib/server/config';
 
@@ -23,7 +24,7 @@ export default async function DemoPage({
   const { error } = await searchParams;
   const t = await getTranslations('demo');
   return (
-    <Centered>
+    <Centered backHref={websiteHref(webConfig().APP_URL)}>
       <div className="grid gap-1">
         <h1 className="text-xl font-semibold">{t('title')}</h1>
         <p className="text-sm text-muted-foreground">{t('body')}</p>

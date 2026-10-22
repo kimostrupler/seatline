@@ -358,7 +358,8 @@
     "yourName": "Ihr Name",
     "onboardingBodyEmail": "Erstellen Sie den Arbeitsbereich Ihrer Firma – Sie werden der erste Admin. Fügen Sie danach unter «Personen & Zugriff» Kolleginnen und Kollegen hinzu; sie melden sich mit einem E-Mail-Link an.",
     "useMicrosoftTitle": "Mit Microsoft anmelden",
-    "useMicrosoftBody": "Ihre Firma meldet sich bei Seatline mit Microsoft 365 an. Bitte verwenden Sie «Mit Microsoft anmelden»."
+    "useMicrosoftBody": "Ihre Firma meldet sich bei Seatline mit Microsoft 365 an. Bitte verwenden Sie «Mit Microsoft anmelden».",
+    "backToWebsite": "Zurück zur Website"
   },
   "admin": {
     "link": "Personen & Zugang",
@@ -1343,5 +1344,9 @@
       "admins": "Admins",
       "email": "E-Mail-Link"
     }
+  },
+  "loading": {
+    "title": "Seatline wird geladen…",
+    "hint": "Nach einer ruhigen Phase dauert der Start ein paar Sekunden."
   }
 }

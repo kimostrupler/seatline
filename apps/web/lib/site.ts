@@ -37,3 +37,8 @@ export const SITE_LANGUAGE_PATHS = { en: '/', de: '/de', fr: '/fr' } as const;
 
 /** Price per active seat per month, as shown on the website (the real price lives in Stripe). */
 export const SITE_PRICE_CHF = 2;
+
+/** The landing page as seen from the app: the website's own domain, else /welcome on the app. */
+export function websiteHref(appUrl: string): string {
+  return siteHosts(appUrl).length ? `${siteUrl(appUrl)}/` : '/welcome';
+}

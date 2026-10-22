@@ -107,8 +107,10 @@ Outlook → download the app and upload it in Teams.
 ### Faster first page (~CHF 10–20/month more)
 
 To save money the apps sleep when nobody uses them, so the first visit after a quiet time takes
-~15–30 seconds. Add the variable **`KEEP_WARM`** = `true` to keep one copy running. Remove it
-(or set `false`) to go back.
+~15–30 seconds (a loading screen shows meanwhile). Add the variable **`KEEP_WARM`** = `true`
+to keep one copy of the web app and the API running, or `web` for only the web app (pages
+appear at once, the first data waits a few seconds; about half the cost). Remove it (or set
+`false`) to go back.
 
 ### Your own web address (e.g. `app.yourcompany.ch`)
 
