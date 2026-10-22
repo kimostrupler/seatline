@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { LanguageSelect } from '@/components/common/language-select';
+import { Logo } from '@/components/common/logo';
 import { BackToWebsite } from './back-to-website';
 
 /** Calm single-column page for sign-in, onboarding and access messages. */
@@ -21,8 +22,13 @@ export function Centered({
       <div className="absolute top-3 right-3">
         <LanguageSelect compact />
       </div>
-      <div className="grid w-full max-w-sm gap-5 rounded-xl border bg-background p-6 shadow-sm">
-        {children}
+      <div className="grid w-full max-w-sm justify-items-center gap-4">
+        <p className="flex items-center gap-2 font-semibold">
+          <Logo className="size-8" /> Seatline
+        </p>
+        <div className="grid w-full gap-5 rounded-xl border bg-background p-6 shadow-sm">
+          {children}
+        </div>
       </div>
     </main>
   );
