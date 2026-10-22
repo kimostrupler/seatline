@@ -1,0 +1,44 @@
+import { getTranslations } from 'next-intl/server';
+import { webConfig } from '@/lib/server/config';
+import { SITE_PRICE_CHF, siteUrl } from '@/lib/site';
+
+/**
+ * /llms.txt: a plain summary of Seatline for AI assistants and their crawlers (llmstxt.org),
+ * built from the website's own texts so it never drifts.
+ */
+export async function GET() {
+  const t = await getTranslations({ locale: 'en-GB', namespace: 'site' });
+  const base = siteUrl(webConfig().APP_URL);
+  const features = Array.from(
+    { length: 12 },
+    (_, i) => `- ${t(`f${i + 1}Title` as 'f1Title')}: ${t(`f${i + 1}Body` as 'f1Body')}`,
+  );
+  const faq = Array.from(
+    { length: 9 },
+    (_, i) => `### ${t(`q${i + 1}` as 'q1')}\n\n${t(`a${i + 1}` as 'a1')}`,
+  );
+  const text = `# Seatline
+
+> ${t('metaDescription')}
+
+Seatline is web software for office seat management, made in Switzerland: companies draw or import their floor plans, give people a desk, plan moves and keep the history. Data is hosted in Switzerland (Microsoft Azure, Zurich). Available in German, French and English. Price: CHF ${SITE_PRICE_CHF} per active desk per month, 30 days free.
+
+## Features
+
+${features.join('\n')}
+
+## Questions
+
+${faq.join('\n\n')}
+
+## Links
+
+- [Website](${base}/) (also in [German](${base}/de) and [French](${base}/fr))
+- [Try the demo](${webConfig().APP_URL}/auth/demo): a sample office, no sign-up
+- [Terms of service](${base}/legal/terms)
+- [Privacy policy](${base}/legal/privacy)
+- [Data processing agreement](${base}/legal/dpa)
+- [Imprint](${base}/legal/imprint)
+`;
+  return new Response(text, { headers: { 'content-type': 'text/markdown; charset=utf-8' } });
+}

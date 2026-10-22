@@ -1,9 +1,11 @@
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { LanguageSelect } from '@/components/common/language-select';
 import { Button } from '@/components/ui/button';
 import { OPERATOR } from '@/lib/legal/operator';
+import { LANGUAGES, LANGUAGE_NAMES } from '@/lib/locales';
+import { SITE_LANGUAGE_PATHS } from '@/lib/site';
 import { SiteBeacon } from './site-beacon';
 import { webConfig } from '@/lib/server/config';
 
@@ -23,6 +25,35 @@ export function Logo({ className }: { className?: string }) {
 export const signInUrl = () => `${webConfig().APP_URL}/signin`;
 /** A demo workspace with sample data, no sign-up. */
 export const demoUrl = () => `${webConfig().APP_URL}/auth/demo`;
+
+/**
+ * The landing page's languages as plain links (/, /de, /fr): each language has its own address,
+ * which search engines index separately.
+ */
+async function LanguageLinks() {
+  const current = (await getLocale()).slice(0, 2);
+  return (
+    <nav aria-label="Language" className="flex items-center gap-1 text-xs font-medium">
+      {LANGUAGES.map((l) => (
+        <a
+          key={l}
+          href={SITE_LANGUAGE_PATHS[l]}
+          hrefLang={l}
+          lang={l}
+          title={LANGUAGE_NAMES[l]}
+          aria-current={l === current ? 'page' : undefined}
+          className={
+            l === current
+              ? 'rounded px-1.5 py-1 text-foreground'
+              : 'rounded px-1.5 py-1 text-muted-foreground hover:text-foreground'
+          }
+        >
+          {l.toUpperCase()}
+        </a>
+      ))}
+    </nav>
+  );
+}
 
 /** Top bar of the public website (landing page and legal pages). */
 export async function SiteHeader({ sections = false }: { sections?: boolean }) {
@@ -49,7 +80,7 @@ export async function SiteHeader({ sections = false }: { sections?: boolean }) {
             ))}
           </nav>
         )}
-        <LanguageSelect compact />
+        {sections ? <LanguageLinks /> : <LanguageSelect compact />}
         <Button asChild variant="outline" size="sm">
           <a href={signInUrl()}>{t('signIn')}</a>
         </Button>

@@ -11,7 +11,8 @@ export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('app');
-  return { title: t('name'), description: t('tagline') };
+  // the app isn't for search engines; the website's pages say otherwise themselves
+  return { title: t('name'), description: t('tagline'), robots: { index: false, follow: false } };
 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {

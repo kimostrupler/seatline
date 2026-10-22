@@ -20,11 +20,20 @@ export function siteUrl(appUrl: string): string {
 export function isPublicPath(pathname: string): boolean {
   return (
     pathname === '/welcome' ||
+    pathname === '/de' ||
+    pathname === '/fr' ||
+    pathname === '/llms.txt' ||
+    pathname === '/og-image' ||
+    pathname.startsWith('/icon') ||
+    pathname.startsWith('/apple-icon') ||
     pathname.startsWith('/legal/') ||
     pathname === '/robots.txt' ||
     pathname === '/sitemap.xml'
   );
 }
+
+/** The landing page in German and French has its own address (for search engines). */
+export const SITE_LANGUAGE_PATHS = { en: '/', de: '/de', fr: '/fr' } as const;
 
 /** Price per active seat per month, as shown on the website (the real price lives in Stripe). */
 export const SITE_PRICE_CHF = 2;
