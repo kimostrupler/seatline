@@ -4,6 +4,9 @@ import { webConfig } from '@/lib/server/config';
 import { languageAlternates } from '@/lib/seo';
 import { siteUrl, SITE_LANGUAGE_PATHS } from '@/lib/site';
 
+// built per request: APP_URL is only known at runtime (a build-time sitemap said localhost)
+export const dynamic = 'force-dynamic';
+
 /** The website's pages: the landing page in each language (with hreflang) and the legal pages. */
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteUrl(webConfig().APP_URL);
