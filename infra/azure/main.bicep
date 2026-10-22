@@ -59,6 +59,9 @@ param mailFrom string = 'Seatline <hello@seatline.ch>'
 @secure()
 param smtpPassword string = ''
 
+@description('The operator\'s sign-in addresses (comma-separated): only they see the owner dashboard')
+param ownerEmails string = ''
+
 var suffix = uniqueString(resourceGroup().id)
 // Container Apps refuse empty secrets, so Stripe is only added once all three are set
 var stripeOn = !empty(stripeSecretKey) && !empty(stripeWebhookSecret) && !empty(stripePriceId)
@@ -86,6 +89,12 @@ var mailEnv = mailOn
       { name: 'MAIL_FROM', value: mailFrom }
     ]
   : []
+// owner dashboard: who may see it, and Azure costs read with the apps' identity
+var ownerEnv = [
+  { name: 'OWNER_EMAILS', value: ownerEmails }
+  { name: 'COST_SCOPE', value: resourceGroup().id }
+  { name: 'COST_IDENTITY_CLIENT_ID', value: pullIdentity.properties.clientId }
+]
 var pgAdmin = 'seatlineadmin'
 
 resource logs 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
@@ -116,6 +125,16 @@ resource acrPull 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   scope: registry
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d')
+    principalId: pullIdentity.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// …and may read this resource group's costs (Cost Management Reader) for the owner dashboard
+resource costReader 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, pullIdentity.id, 'costreader')
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '72fafb9e-0641-4937-9268-a91bfd8191a3')
     principalId: pullIdentity.properties.principalId
     principalType: 'ServicePrincipal'
   }
@@ -241,7 +260,8 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
               { name: 'APP_URL', value: webUrl } // links in e-mails
             ],
             stripeEnv,
-            mailEnv
+            mailEnv,
+            ownerEnv
           )
         }
       ]

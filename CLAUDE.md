@@ -389,6 +389,22 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - A new sub-processor, tracking or retention change must be reflected in the privacy policy
   (`docs/legal.md`). Infra: `infra/azure/site-domain.sh`, bicep `siteDomains`.
 
+## Owner dashboard (operator only)
+
+- `/owner` (not linked, `noindex`): sign-ups per day, every workspace (counts, billing state,
+  last change, admins' e-mails), Stripe (MRR, subscriptions by status, balance, payments) and
+  Azure costs (month to date by service and day, last month). Refreshes every 30 s.
+- Access: `GET /owner/overview` checks `OWNER_EMAILS` against the caller's person **and** that
+  their workspace has no Microsoft (an e-mail link proves the address; an Entra directory could
+  claim any address). Anyone else gets Nest's exact "Cannot GET …" 404, and the page calls
+  `notFound()` — indistinguishable from a missing page. Its texts (`owner.*`) are left out of
+  the layout's client messages and sent only with this page.
+- Data: SECURITY DEFINER `owner_workspaces()` (counts only, no seat history),
+  `BillingService.ownerSummary()` (Stripe), `AzureCostService` (Cost Management query API with
+  the apps' managed identity, role Cost Management Reader, cached 15 min; `COST_SCOPE`,
+  `COST_IDENTITY_CLIENT_ID`). Setup: `infra/azure/owner-setup.sh <email>`; bicep + setup.sh keep
+  it (`ownerEmails` param read back from the API's env).
+
 ## Operations
 
 - Browser errors are posted to the web app's `/client-errors` (sanitized, rate-limited) and

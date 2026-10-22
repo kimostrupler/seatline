@@ -1278,5 +1278,69 @@
     "signingIn": "Connexion avec votre compte Microsoft…",
     "failed": "La connexion dans Teams n’a pas fonctionné. Votre IT doit peut-être encore autoriser Seatline pour Teams.",
     "openInBrowser": "Ouvrir Seatline dans le navigateur"
+  },
+  "owner": {
+    "title": "Vue d’ensemble de l’activité",
+    "updated": "Mis à jour {time}",
+    "refresh": "Actualiser",
+    "kpi": {
+      "mrr": "Revenu mensuel (MRR)",
+      "paying": "Espaces payants",
+      "inTrial": "En essai gratuit",
+      "signups30": "Inscriptions, 30 jours",
+      "signups7": "{count} ces 7 derniers jours",
+      "azureMonth": "Azure ce mois",
+      "result": "MRR − Azure",
+      "resultHint": "Revenu mensuel moins les coûts Azure de ce mois jusqu’ici"
+    },
+    "signups": {
+      "title": "Inscriptions par jour (30 jours)",
+      "summary": "{total} espaces · {active} actifs cette semaine · {people} personnes · {seats} places · {ended} essais terminés · {demos} démos ouvertes"
+    },
+    "stripe": {
+      "off": "La facturation n’est pas configurée (stripe-setup.sh).",
+      "error": "Stripe n’a pas pu être joint à l’instant.",
+      "testMode": "Mode test",
+      "paid30": "Payé, 30 jours",
+      "available": "Solde",
+      "pending": "En cours",
+      "noSubscriptions": "Pas encore d’abonnement",
+      "noPayments": "Aucun paiement ces 30 derniers jours",
+      "status": {
+        "active": "Actif",
+        "trialing": "Essai",
+        "past_due": "Paiement en retard",
+        "canceled": "Résilié",
+        "unpaid": "Impayé",
+        "incomplete": "Incomplet",
+        "incomplete_expired": "Expiré",
+        "paused": "En pause"
+      }
+    },
+    "azure": {
+      "off": "Les coûts Azure ne sont pas connectés (owner-setup.sh).",
+      "error": "Les coûts Azure n’ont pas pu être lus à l’instant.",
+      "month": "Ce mois jusqu’ici",
+      "lastMonth": "Mois dernier",
+      "note": "Azure met à jour les coûts quelques fois par jour (lu à {time})."
+    },
+    "status": {
+      "demo": "Démo",
+      "trialUntil": "Essai jusqu’au {date}",
+      "trialEnded": "Essai terminé"
+    },
+    "workspaces": {
+      "title": "Espaces ({count})",
+      "showDemos": "Afficher les démos",
+      "name": "Espace",
+      "created": "Inscrit",
+      "signIn": "Connexion",
+      "people": "Personnes",
+      "desks": "Occupées/places",
+      "status": "Statut",
+      "lastActivity": "Dernier changement",
+      "admins": "Admins",
+      "email": "Lien e-mail"
+    }
   }
 }

@@ -25,6 +25,9 @@ import { NotifyService } from './mail/notify.service';
 import { DeskMailService } from './mail/desk-mail.service';
 import { DemoService } from './demo/demo.service';
 import { PlanningController } from './planning/planning.controller';
+import { OwnerController } from './owner/owner.controller';
+import { OwnerService } from './owner/owner.service';
+import { AzureCostService } from './owner/azure-cost';
 import { PlanningService } from './planning/planning.service';
 import { BuildingsController } from './buildings/buildings.controller';
 import { BuildingsService } from './buildings/buildings.service';
@@ -70,6 +73,7 @@ import { PeopleSyncService } from './sync/people-sync.service';
     PrivacyController,
     BillingController,
     PlanningController,
+    OwnerController,
   ],
   providers: [
     BillingService,
@@ -96,6 +100,8 @@ import { PeopleSyncService } from './sync/people-sync.service';
     DeskMailService,
     DemoService,
     PlanningService,
+    OwnerService,
+    AzureCostService,
     GraphClient,
     PeopleSyncService,
     JobQueue,

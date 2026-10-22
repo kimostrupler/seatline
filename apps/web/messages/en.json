@@ -1278,5 +1278,69 @@
     "signingIn": "Signing you in with your Microsoft account…",
     "failed": "Sign-in inside Teams didn’t work. Your IT may still need to approve Seatline for Teams.",
     "openInBrowser": "Open Seatline in the browser"
+  },
+  "owner": {
+    "title": "Business overview",
+    "updated": "Updated {time}",
+    "refresh": "Refresh now",
+    "kpi": {
+      "mrr": "Monthly revenue (MRR)",
+      "paying": "Paying workspaces",
+      "inTrial": "In free trial",
+      "signups30": "Sign-ups, 30 days",
+      "signups7": "{count} in the last 7 days",
+      "azureMonth": "Azure this month",
+      "result": "MRR − Azure",
+      "resultHint": "Revenue per month minus this month’s Azure costs so far"
+    },
+    "signups": {
+      "title": "Sign-ups per day (30 days)",
+      "summary": "{total} workspaces · {active} active this week · {people} people · {seats} desks · {ended} trials ended · {demos} demos open"
+    },
+    "stripe": {
+      "off": "Billing isn’t set up (stripe-setup.sh).",
+      "error": "Stripe couldn’t be reached just now.",
+      "testMode": "Test mode",
+      "paid30": "Paid, 30 days",
+      "available": "Balance",
+      "pending": "On the way",
+      "noSubscriptions": "No subscriptions yet",
+      "noPayments": "No payments in the last 30 days",
+      "status": {
+        "active": "Active",
+        "trialing": "Trial",
+        "past_due": "Payment overdue",
+        "canceled": "Cancelled",
+        "unpaid": "Unpaid",
+        "incomplete": "Incomplete",
+        "incomplete_expired": "Expired",
+        "paused": "Paused"
+      }
+    },
+    "azure": {
+      "off": "Azure costs aren’t connected (owner-setup.sh).",
+      "error": "Azure costs couldn’t be read just now.",
+      "month": "This month so far",
+      "lastMonth": "Last month",
+      "note": "Azure updates costs a few times a day (read at {time})."
+    },
+    "status": {
+      "demo": "Demo",
+      "trialUntil": "Trial until {date}",
+      "trialEnded": "Trial ended"
+    },
+    "workspaces": {
+      "title": "Workspaces ({count})",
+      "showDemos": "Show demos",
+      "name": "Workspace",
+      "created": "Signed up",
+      "signIn": "Sign-in",
+      "people": "People",
+      "desks": "Seated/desks",
+      "status": "Status",
+      "lastActivity": "Last change",
+      "admins": "Admins",
+      "email": "E-mail link"
+    }
   }
 }

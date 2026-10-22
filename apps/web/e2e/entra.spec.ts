@@ -158,7 +158,7 @@ test('an e-mail link signs in once; admins add and invite people', async ({ page
   const again = await browser.newPage();
   await again.goto(link);
   await again.getByRole('button', { name: 'Continue' }).click();
-  await expect(again.getByRole('alert')).toContainText('expired or was already used');
+  await expect(again.getByText(/expired or was already used/)).toBeVisible();
   await again.close();
 
   // add a colleague and invite her

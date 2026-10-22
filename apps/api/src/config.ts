@@ -49,6 +49,19 @@ const envSchema = z.object({
   MAIL_FROM: z.string().default('Seatline <hello@seatline.ch>'),
   /** public address of the web app: sign-in links point there (never taken from a request) */
   APP_URL: z.url().optional(),
+  /** the operator's sign-in addresses: only they get the owner dashboard (/owner) */
+  OWNER_EMAILS: z
+    .string()
+    .default('')
+    .transform((v) =>
+      v
+        .split(',')
+        .map((e) => e.trim().toLowerCase())
+        .filter(Boolean),
+    ),
+  /** Azure costs on the owner dashboard: the scope (resource group id) and the identity to read it */
+  COST_SCOPE: z.string().optional(),
+  COST_IDENTITY_CLIENT_ID: z.string().optional(),
   /** tests only: write e-mails as JSON files into this folder instead of sending them */
   MAIL_OUTBOX: z.string().optional(),
   /** Trust x-tenant-id / x-user-id headers. Dev only — replaced by Entra ID in Phase 4. */

@@ -54,6 +54,28 @@ export class TenantDb {
     return rows.map((r) => r.id);
   }
 
+  /** Owner dashboard only: every workspace with counts (see the owner_workspaces function). */
+  ownerWorkspaces() {
+    return this.prisma.$queryRaw<
+      Array<{
+        id: string;
+        name: string;
+        created_at: Date;
+        is_demo: boolean;
+        microsoft: boolean;
+        people: bigint;
+        seats: bigint;
+        seated: bigint;
+        billing_status: string | null;
+        trial_ends_at: Date;
+        billed_seats: number | null;
+        subscribed: boolean;
+        last_activity: Date | null;
+        admin_emails: string[];
+      }>
+    >`SELECT * FROM owner_workspaces()`;
+  }
+
   /** The database answers (health check). */
   async ping(): Promise<void> {
     await this.prisma.$queryRaw`SELECT 1`;
