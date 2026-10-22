@@ -4,7 +4,8 @@ import type { ReactNode } from 'react';
 import { LanguageSelect } from '@/components/common/language-select';
 import { Button } from '@/components/ui/button';
 import { OPERATOR } from '@/lib/legal/operator';
-import { LANGUAGES, LANGUAGE_NAMES } from '@/lib/locales';
+import { LANGUAGES, LANGUAGE_NAMES, type Language } from '@/lib/locales';
+import { GUIDES, GUIDE_TEXT, guidePath } from '@/lib/guides';
 import { SITE_LANGUAGE_PATHS } from '@/lib/site';
 import { SiteBeacon } from './site-beacon';
 import { webConfig } from '@/lib/server/config';
@@ -30,14 +31,18 @@ export const demoUrl = () => `${webConfig().APP_URL}/auth/demo`;
  * The landing page's languages as plain links (/, /de, /fr): each language has its own address,
  * which search engines index separately.
  */
-async function LanguageLinks() {
+async function LanguageLinks({
+  paths = SITE_LANGUAGE_PATHS,
+}: {
+  paths?: Record<Language, string>;
+}) {
   const current = (await getLocale()).slice(0, 2);
   return (
     <nav aria-label="Language" className="flex items-center gap-1 text-xs font-medium">
       {LANGUAGES.map((l) => (
         <a
           key={l}
-          href={SITE_LANGUAGE_PATHS[l]}
+          href={paths[l]}
           hrefLang={l}
           lang={l}
           title={LANGUAGE_NAMES[l]}
@@ -56,7 +61,14 @@ async function LanguageLinks() {
 }
 
 /** Top bar of the public website (landing page and legal pages). */
-export async function SiteHeader({ sections = false }: { sections?: boolean }) {
+export async function SiteHeader({
+  sections = false,
+  languagePaths,
+}: {
+  sections?: boolean;
+  /** pages whose address says their language (landing page, guides) link to the others */
+  languagePaths?: Record<Language, string>;
+}) {
   const t = await getTranslations('site');
   return (
     <header className="sticky top-0 z-20 border-b bg-background/90 backdrop-blur">
@@ -80,7 +92,11 @@ export async function SiteHeader({ sections = false }: { sections?: boolean }) {
             ))}
           </nav>
         )}
-        {sections ? <LanguageLinks /> : <LanguageSelect compact />}
+        {sections || languagePaths ? (
+          <LanguageLinks paths={languagePaths} />
+        ) : (
+          <LanguageSelect compact />
+        )}
         <Button asChild variant="outline" size="sm">
           <a href={signInUrl()}>{t('signIn')}</a>
         </Button>
@@ -107,11 +123,28 @@ export async function SiteFooter() {
         >
           <LegalLinks />
         </nav>
+        <GuideLinks />
         <span className="w-full text-xs">
           {t('site.copyright', { year: new Date().getFullYear() })}
         </span>
       </div>
     </footer>
+  );
+}
+
+/** The guides in the page's language (they help people and search engines find Seatline). */
+async function GuideLinks() {
+  const t = await getTranslations('site');
+  const language = (await getLocale()).slice(0, 2) as Language;
+  return (
+    <nav aria-label={t('guides')} className="flex w-full flex-wrap gap-x-4 gap-y-1">
+      <span className="font-medium text-foreground">{t('guides')}</span>
+      {GUIDES.map((g) => (
+        <Link key={g} href={guidePath(g, language)} className="hover:text-foreground">
+          {GUIDE_TEXT[language][g].title}
+        </Link>
+      ))}
+    </nav>
   );
 }
 
@@ -125,10 +158,18 @@ export async function LegalLinks({ className }: { className?: string }) {
   ));
 }
 
-export function SitePage({ children, sections }: { children: ReactNode; sections?: boolean }) {
+export function SitePage({
+  children,
+  sections,
+  languagePaths,
+}: {
+  children: ReactNode;
+  sections?: boolean;
+  languagePaths?: Record<Language, string>;
+}) {
   return (
     <div className="flex min-h-dvh flex-col bg-background">
-      <SiteHeader sections={sections} />
+      <SiteHeader sections={sections} languagePaths={languagePaths} />
       <main className="flex-1">{children}</main>
       <SiteFooter />
       <SiteBeacon />

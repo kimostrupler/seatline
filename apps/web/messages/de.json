@@ -171,7 +171,21 @@
     "copied": "Kopiert – auf jedem Stockwerk mit ⌘V einfügen",
     "floorAndPlan": "Etage & Plan",
     "addMarker": "Markierung setzen (K)",
-    "hintMarker": "Klicken Sie, wo die Küche, der Drucker oder der Ausgang ist – wählen Sie dann rechts, was es ist"
+    "hintMarker": "Klicken Sie, wo die Küche, der Drucker oder der Ausgang ist – wählen Sie dann rechts, was es ist",
+    "templates": {
+      "title": "Mit einem Beispielbüro beginnen",
+      "hint": "Arbeitsplätze, Sitzungszimmer und eine Küche, bereit zum Anpassen. Oder zeichnen Sie selbst mit den Werkzeugen – Sie können danach alles ändern.",
+      "small": "Klein",
+      "medium": "Mittel",
+      "large": "Gross",
+      "desks": "{count} Arbeitsplätze",
+      "openSpace": "Grossraum {letter}",
+      "meeting": "Sitzungszimmer {n}",
+      "office": "Büro {n}",
+      "common": "Empfang & Küche",
+      "added": "Beispielbüro hinzugefügt – verschieben, umbenennen oder löschen Sie, was Sie möchten. Rückgängig entfernt es.",
+      "dismiss": "Mit leerem Stockwerk beginnen"
+    }
   },
   "inspector": {
     "floor": "Stockwerk",
@@ -914,7 +928,36 @@
     "sizeLabel": "Grösse",
     "removeShort": "Vom Dashboard entfernen",
     "addedWidget": "{name} hinzugefügt – ganz oben",
-    "approveMicrosoft": "Unter «Personen & Zugriff» freigeben"
+    "approveMicrosoft": "Unter «Personen & Zugriff» freigeben",
+    "gettingStarted": {
+      "title": "Erste Schritte mit Seatline",
+      "progress": "{done} von {total} erledigt",
+      "hide": "Diese Checkliste ausblenden",
+      "done": "erledigt",
+      "todo": "offen",
+      "steps": {
+        "building": {
+          "title": "Gebäude hinzufügen",
+          "hint": "Name und Adresse. Die Stockwerke kommen dort hinein.",
+          "action": "Gebäude hinzufügen"
+        },
+        "desks": {
+          "title": "Ein Stockwerk mit Arbeitsplätzen zeichnen",
+          "hint": "Mit einem Beispielbüro beginnen, einen Architektenplan importieren oder selbst zeichnen.",
+          "action": "Stockwerk zeichnen"
+        },
+        "people": {
+          "title": "Mitarbeitende hinzufügen",
+          "hint": "Eine Excel- oder CSV-Liste importieren, einzeln hinzufügen – oder sie kommen aus Microsoft 365.",
+          "action": "Personen hinzufügen"
+        },
+        "seated": {
+          "title": "Arbeitsplätze zuteilen",
+          "hint": "Ziehen Sie eine Person aus der Liste auf einen Arbeitsplatz auf dem Plan.",
+          "action": "Plan öffnen"
+        }
+      }
+    }
   },
   "errors": {
     "title": "Etwas ist schiefgelaufen",
@@ -1179,7 +1222,10 @@
     "finalTitle": "Testen Sie es mit Ihren eigenen Etagen",
     "contact": "Fragen? Schreiben Sie an <mail>{email}</mail>",
     "madeIn": "Made in Switzerland",
-    "copyright": "© {year} Seatline"
+    "copyright": "© {year} Seatline",
+    "guides": "Ratgeber",
+    "moreGuides": "Weitere Ratgeber",
+    "guideTopic": "Thema"
   },
   "planImport": {
     "title": "Architektenplan importieren",

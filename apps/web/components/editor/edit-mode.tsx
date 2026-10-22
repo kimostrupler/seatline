@@ -14,6 +14,7 @@ import { EditorToolbar } from './editor-toolbar';
 import { Inspector } from './inspector';
 import { LayoutEditor, type Tool } from './layout-editor';
 import { ShortcutsDialog } from './shortcuts-dialog';
+import { TemplatePicker } from './template-picker';
 import { useClipboard } from './use-clipboard';
 
 /**
@@ -50,6 +51,8 @@ export function EditMode({
   const [floorPanel, setFloorPanel] = useState(
     () => !map.floor.planFileKey && !map.rooms.length && !map.seats.length,
   );
+  // an empty floor offers example offices until something is drawn (or "Start empty")
+  const [noTemplate, setNoTemplate] = useState(false);
   const [opacity] = usePlanOpacity();
   const isDesktop = useMediaQuery('(min-width: 1024px)');
 
@@ -66,6 +69,11 @@ export function EditMode({
   );
   const hasSelection = editor.selection.seats.length > 0 || editor.selection.rooms.length > 0;
   const panelOpen = !isDesktop && (hasSelection || floorPanel);
+  const emptyFloor =
+    !map.floor.planFileKey &&
+    !editor.doc.rooms.length &&
+    !editor.doc.seats.length &&
+    !editor.doc.markers?.length;
 
   return (
     <Shell
@@ -106,6 +114,9 @@ export function EditMode({
               onShowShortcuts={() => setShortcuts(true)}
               clipboard={clipboard}
             />
+            {emptyFloor && !noTemplate && (
+              <TemplatePicker map={map} editor={editor} onDismiss={() => setNoTemplate(true)} />
+            )}
             <EditorToolbar
               tool={tool}
               setTool={setTool}

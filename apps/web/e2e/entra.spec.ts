@@ -30,6 +30,21 @@ test('the website and legal pages need no sign-in', async ({ page }) => {
   await page.goto('/signin');
   await page.getByRole('link', { name: 'terms of service' }).click();
   await expect(page.getByRole('heading', { name: 'Terms of service' })).toBeVisible();
+
+  // guides: each address in its own language, linked from the footer and the sitemap
+  await page.goto('/welcome');
+  await page.getByRole('link', { name: 'Seatline vs. an Excel seating plan' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Seatline vs. an Excel seating plan',
+  );
+  await page.goto('/guides/seatline-vs-excel-sitzplan');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Seatline oder ein Sitzplan in Excel',
+  );
+  await expect(page.getByRole('link', { name: '30 Tage gratis testen' }).first()).toBeVisible();
+  expect(await (await page.request.get('/sitemap.xml')).text()).toContain(
+    '/guides/plan-de-places-ou-reservation-de-postes',
+  );
 });
 
 test('visitors try a demo workspace from the website, then start a real trial', async ({
@@ -197,4 +212,15 @@ test('a new company signs up with an e-mail link', async ({ page }) => {
   await page.getByLabel('Your name').fill('Fiona Founder');
   await page.getByRole('button', { name: 'Create workspace' }).click();
   await expect(page.getByTestId('account-menu')).toContainText('Small GmbH');
+
+  // Home shows the first steps until they're done (or hidden)
+  await page.goto('/');
+  const steps = page.getByTestId('getting-started');
+  await expect(steps).toContainText('0 of 4 done');
+  await expect(steps.getByRole('link', { name: 'Add building' })).toHaveAttribute('href', '/map');
+  await steps.getByRole('button', { name: 'Hide this checklist' }).click();
+  await expect(steps).toBeHidden();
+  await page.reload();
+  await expect(page.getByTestId('dashboard')).toBeVisible();
+  await expect(steps).toBeHidden();
 });

@@ -168,6 +168,10 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   `MarkerOverlay`) over the canvas; in the editor invisible Konva circles (`marker:<id>`) make
   them selectable/draggable. The view map has **Find a desk** (`desk-finder.tsx`, filter free
   desks by feature) and an accessible marker list. Copying a floor copies markers too.
+- **Example offices**: an empty floor (no plan, rooms, seats, markers) shows `TemplatePicker`
+  (small 12 / medium 33 / large 74 desks). `templateChanges` (`lib/editor/templates.ts`, pure,
+  unit-tested) builds rooms, desks (labels by the floor's numbering, scaled to its desk size)
+  and markers as ONE editor batch, so Undo removes it.
 - The shadcn CLI stops at "overwrite?" prompts and re-adds an npm package called `cn`. If it
   does, fetch the component JSON from the registry instead and fix the `cn` import.
 
@@ -307,6 +311,9 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - Widgets: catalog + role rules + pure layout helpers in `lib/dashboard.ts`; bodies in
   `components/dashboard/widgets.tsx`. New widget = `WIDGET_TYPES` + `WIDGETS` + body + texts.
   Numbers come from `GET /stats` (one snapshot; weeks are Swiss weeks starting Monday).
+- **Getting started** (`components/dashboard/getting-started.tsx`, admins, not in demos): 4 steps
+  ticked from `/overview` + `/people/directory` (`setupProgress`, `lib/getting-started.ts`);
+  hidden per browser + workspace, and by itself once all are done.
 - Customize mode: each widget has one **⋯** menu (move earlier/later, size, remove) — no rows
   of small buttons. A newly added widget is scrolled into view and highlighted, plus a toast.
 - The `/api` proxy must export every HTTP method the API uses (PUT was missing once).
@@ -386,6 +393,10 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   `app/icon.svg` + `apple-icon.png`, `/llms.txt` (built from the `site.*` texts), robots that
   welcome AI crawlers on the site and block the app (app pages are `noindex` by default), and a
   sitemap with hreflang. The landing header uses language links, not the cookie switch.
+- **Guides** (`/guides/<slug>`, `lib/guides.ts`, tested): comparison pages (vs Excel, Swiss
+  software, seating plan vs desk booking), one slug per language; the middleware sets the
+  page language from the slug. Linked from the footer, sitemap (hreflang) and llms.txt. Only
+  true facts about Seatline, never named competitors.
 - A new sub-processor, tracking or retention change must be reflected in the privacy policy
   (`docs/legal.md`). Infra: `infra/azure/site-domain.sh`, bicep `siteDomains`.
 

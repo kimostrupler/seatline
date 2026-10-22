@@ -351,6 +351,21 @@ test('create a building and a floor', async ({ page }) => {
   await page.getByRole('dialog').getByRole('button', { name: 'Create' }).click();
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Annex › EG');
   await expect(page.getByTestId('floor-settings')).toBeVisible(); // straight into the editor
+
+  // the empty floor offers example offices: one action, Undo removes it
+  const picker = page.getByTestId('template-picker');
+  await picker.getByRole('button', { name: /Medium/ }).click();
+  await expect(picker).toBeHidden();
+  await saved(page);
+  const map = await floorMap(page);
+  expect(map.seats).toHaveLength(33);
+  expect(map.rooms.filter((r) => r.capacity)).toHaveLength(2); // the meeting rooms
+  await page.keyboard.press('ControlOrMeta+z');
+  await saved(page);
+  await expect.poll(async () => (await floorMap(page)).seats.length).toBe(0);
+  await expect(picker).toBeVisible();
+  await picker.getByRole('button', { name: 'Start with an empty floor' }).click();
+  await expect(picker).toBeHidden();
 });
 
 test('viewers don’t get the editor', async ({ page }) => {
