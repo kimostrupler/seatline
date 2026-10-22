@@ -827,7 +827,7 @@
     "intro": "Seatline liest den Plan und schlägt Räume und Plätze vor. Sie prüfen alles, bevor etwas gespeichert wird.",
     "kindDxf": "DXF aus dem CAD: am besten — Räume, Namen, Plätze und Massstab. (DWG: zuerst als DXF speichern.)",
     "kindPdf": "PDF aus dem CAD: Räume, Namen und Plätze; der Massstab, wenn «1:100» draufsteht.",
-    "kindImage": "Scan oder Foto (PDF, PNG, JPG): der Hintergrund und die Räume.",
+    "kindImage": "Scan oder Foto (PDF, PNG, JPG): der Hintergrund, Räume und Plätze; Raumnamen liest eine KI (Azure OpenAI in der Schweiz).",
     "existing": "Diese Etage hat schon {rooms} Räume und {seats} Plätze. Sie bleiben; importierte kommen dazu.",
     "replacesPlan": "Der importierte Plan ersetzt das aktuelle Hintergrundbild.",
     "choose": "Datei wählen",
@@ -848,8 +848,10 @@
       "units_guessed": "Die Zeichnung hat keine Einheit; Seatline hat sie aus der Grösse geschätzt. Prüfen Sie den Massstab.",
       "no_rooms": "Keine Räume gefunden. Zeichnen Sie sie mit dem Raum-Werkzeug.",
       "no_seats": "Keine Plätze gefunden. Fügen Sie sie mit dem Platz-Werkzeug oder «Platzreihe» hinzu.",
-      "scan": "Das ist ein Scan: Räume werden an den Wänden erkannt, Namen und Plätze aber nicht.",
-      "first_page_only": "Nur die erste Seite des PDFs wird verwendet."
+      "scan": "Das ist ein Scan: Räume und Plätze werden aus der Zeichnung erkannt — bitte prüfen Sie sie genau.",
+      "first_page_only": "Nur die erste Seite des PDFs wird verwendet.",
+      "ai_names": "Die Raumnamen hat eine KI gelesen. Bitte prüfen Sie sie.",
+      "ai_failed": "Die Raumnamen konnten diesmal nicht gelesen werden. Sie können die Räume nach dem Import benennen."
     },
     "errors": {
       "plan_dwg": "DWG-Dateien können nicht direkt gelesen werden. Speichern Sie den Plan im CAD als DXF und importieren Sie diese Datei.",

@@ -93,6 +93,10 @@ kv_get() { az keyvault secret show --vault-name "$KV" -n "$1" --query value -o t
 STRIPE_KEY=$(kv_get stripe-secret-key)
 STRIPE_WEBHOOK=$(kv_get stripe-webhook-secret)
 STRIPE_PRICE=$(kv_get stripe-price-id)
+# AI room names, if ai-setup.sh switched them on
+engine_env() { az containerapp show -n plan-engine -g "$RG" --query "properties.template.containers[0].env[?name=='$1'].value | [0]" -o tsv 2>/dev/null || true; }
+AI_ENDPOINT=$(engine_env AZURE_OPENAI_ENDPOINT)
+AI_DEPLOYMENT=$(engine_env AZURE_OPENAI_DEPLOYMENT)
 az deployment group create -g "$RG" -n seatline -f "$HERE/main.bicep" -o none --parameters \
   location="$LOCATION" \
   apiImage="${API_IMAGE:-$PLACEHOLDER}" webImage="${WEB_IMAGE:-$PLACEHOLDER}" \
@@ -101,7 +105,8 @@ az deployment group create -g "$RG" -n seatline -f "$HERE/main.bicep" -o none --
   sessionSecret="$SESSION_SECRET" internalAuthSecret="$INTERNAL_SECRET" \
   entraClientId="$APP_ID" entraClientSecret="$ENTRA_SECRET" \
   customDomain="$CUSTOM_DOMAIN" customDomainCertificateId="$CUSTOM_CERT" siteDomains="$SITE_DOMAINS" \
-  stripeSecretKey="$STRIPE_KEY" stripeWebhookSecret="$STRIPE_WEBHOOK" stripePriceId="$STRIPE_PRICE"
+  stripeSecretKey="$STRIPE_KEY" stripeWebhookSecret="$STRIPE_WEBHOOK" stripePriceId="$STRIPE_PRICE" \
+  aiEndpoint="$AI_ENDPOINT" aiDeployment="$AI_DEPLOYMENT"
 output() { az deployment group show -g "$RG" -n seatline --query "properties.outputs.$1.value" -o tsv; }
 WEB_URL=$(output webUrl)
 REGISTRY=$(output registryName)

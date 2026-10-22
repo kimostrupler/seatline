@@ -12,4 +12,4 @@ export const OPERATOR = {
 };
 
 /** Date of the current legal texts (YYYY-MM-DD). Change it whenever a text changes. */
-export const LEGAL_UPDATED = '2026-10-21';
+export const LEGAL_UPDATED = '2026-10-22';

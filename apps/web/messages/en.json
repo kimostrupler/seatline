@@ -827,7 +827,7 @@
     "intro": "Seatline reads the plan and suggests rooms and desks. You check them before anything is saved.",
     "kindDxf": "DXF from CAD: best results — rooms, names, desks and the scale. (DWG: save as DXF first.)",
     "kindPdf": "PDF exported from CAD: rooms, names and desks; the scale if it says “1:100”.",
-    "kindImage": "Scan or photo (PDF, PNG, JPG): the background and the rooms.",
+    "kindImage": "Scan or photo (PDF, PNG, JPG): the background, rooms and desks; room names are read with AI (Azure OpenAI in Switzerland).",
     "existing": "This floor already has {rooms} rooms and {seats} desks. They stay; imported ones are added.",
     "replacesPlan": "The imported plan replaces the current background image.",
     "choose": "Choose a file",
@@ -848,8 +848,10 @@
       "units_guessed": "The drawing has no units; Seatline guessed them from its size. Check the scale.",
       "no_rooms": "No rooms found. Draw them on the plan with the room tool.",
       "no_seats": "No desks found. Add them with the desk tool or “Desk row”.",
-      "scan": "This is a scan: rooms are found from the walls, but not their names or desks.",
-      "first_page_only": "Only the first page of the PDF is used."
+      "scan": "This is a scan: rooms and desks are found from the drawing — please check them carefully.",
+      "first_page_only": "Only the first page of the PDF is used.",
+      "ai_names": "Room names were read by AI. Please check them.",
+      "ai_failed": "Room names couldn’t be read this time. You can name the rooms after importing."
     },
     "errors": {
       "plan_dwg": "DWG files can’t be read directly. In your CAD program, save the plan as DXF and import that.",

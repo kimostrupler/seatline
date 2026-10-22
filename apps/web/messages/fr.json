@@ -827,7 +827,7 @@
     "intro": "Seatline lit le plan et propose des salles et des places. Vous vérifiez tout avant l’enregistrement.",
     "kindDxf": "DXF issu du CAO : meilleur résultat — salles, noms, places et échelle. (DWG : enregistrez d’abord en DXF.)",
     "kindPdf": "PDF exporté du CAO : salles, noms et places ; l’échelle si « 1:100 » y figure.",
-    "kindImage": "Scan ou photo (PDF, PNG, JPG) : le fond et les salles.",
+    "kindImage": "Scan ou photo (PDF, PNG, JPG) : le fond, les salles et les places ; les noms des salles sont lus par une IA (Azure OpenAI en Suisse).",
     "existing": "Cet étage a déjà {rooms} salles et {seats} places. Elles restent ; les éléments importés s’ajoutent.",
     "replacesPlan": "Le plan importé remplace l’image de fond actuelle.",
     "choose": "Choisir un fichier",
@@ -848,8 +848,10 @@
       "units_guessed": "Le dessin n’a pas d’unité ; Seatline l’a estimée d’après sa taille. Vérifiez l’échelle.",
       "no_rooms": "Aucune salle trouvée. Dessinez-les avec l’outil salle.",
       "no_seats": "Aucune place trouvée. Ajoutez-les avec l’outil place ou « Rangée de places ».",
-      "scan": "C’est un scan : les salles sont trouvées d’après les murs, mais pas leurs noms ni les places.",
-      "first_page_only": "Seule la première page du PDF est utilisée."
+      "scan": "C’est un scan : les salles et les places sont reconnues d’après le dessin — vérifiez-les attentivement.",
+      "first_page_only": "Seule la première page du PDF est utilisée.",
+      "ai_names": "Les noms des salles ont été lus par une IA. Veuillez les vérifier.",
+      "ai_failed": "Les noms des salles n’ont pas pu être lus cette fois. Vous pouvez nommer les salles après l’import."
     },
     "errors": {
       "plan_dwg": "Les fichiers DWG ne peuvent pas être lus directement. Enregistrez le plan en DXF dans votre CAO et importez ce fichier.",

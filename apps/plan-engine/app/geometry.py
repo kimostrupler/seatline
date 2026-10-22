@@ -171,10 +171,18 @@ _TYPES = [
 ]
 
 
-def guess_type(name: str, seats: int, area_m2: float | None) -> str:
+def type_from_name(name: str) -> str | None:
+    """Office / meeting / open space / other from words in the name, if any (de/fr/en)."""
     for kind, pattern in _TYPES:
         if re.search(pattern, name, re.I):
             return kind
+    return None
+
+
+def guess_type(name: str, seats: int, area_m2: float | None) -> str:
+    by_name = type_from_name(name)
+    if by_name:
+        return by_name
     if seats >= 6 or (area_m2 is not None and area_m2 >= 60 and seats > 0):
         return "open_space"
     return "office" if seats else "other"
