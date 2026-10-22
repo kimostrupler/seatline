@@ -21,6 +21,7 @@ import {
   RotateCw,
   Trash2,
   Upload,
+  ChevronDown,
   FileInput,
   ListOrdered,
 } from 'lucide-react';
@@ -614,11 +615,6 @@ function FloorSettings({
             <DropdownMenuItem onSelect={() => setDialog('duplicate')}>
               <Layers /> {t('duplicateFloor')}
             </DropdownMenuItem>
-            {floor.planFileKey && (
-              <DropdownMenuItem onSelect={() => void run(removePlan.mutateAsync(floor.id))}>
-                <ImageOff /> {t('removePlan')}
-              </DropdownMenuItem>
-            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive" onSelect={() => setDialog('deleteFloor')}>
               <Trash2 /> {t('deleteFloor')}
@@ -645,22 +641,52 @@ function FloorSettings({
             if (file) void run(upload.mutateAsync({ floorId: floor.id, file }), t('planUploaded'));
           }}
         />
-        {!floor.planFileKey && <p className="text-sm text-muted-foreground">{t('planEmpty')}</p>}
-        <div className="grid gap-2">
-          <Button
-            variant={floor.planFileKey ? 'outline' : 'default'}
-            onClick={() => setDialog('import')}
-            data-testid="import-plan"
-          >
-            <FileInput /> {t('importPlan')}
-          </Button>
-          <Button
-            variant="outline"
-            disabled={upload.isPending}
-            onClick={() => fileInput.current?.click()}
-          >
-            <Upload /> {floor.planFileKey ? t('replacePlan') : t('uploadPlan')}
-          </Button>
+        {/* set up once per floor, so it stays small: one line + a menu */}
+        <div className="flex items-center justify-between gap-2">
+          <p className="min-w-0 text-sm">
+            {floor.planFileKey ? (
+              t('planSet')
+            ) : (
+              <span className="text-muted-foreground">{t('planNone')}</span>
+            )}
+          </p>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="shrink-0"
+                disabled={upload.isPending}
+                data-testid="plan-menu"
+              >
+                {floor.planFileKey ? t('changePlan') : t('addPlan')} <ChevronDown />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuItem onSelect={() => setDialog('import')} data-testid="import-plan">
+                <FileInput />
+                <span className="grid">
+                  {t('importPlan')}
+                  <span className="text-xs text-muted-foreground">{t('importPlanHint')}</span>
+                </span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => fileInput.current?.click()}>
+                <Upload />
+                <span className="grid">
+                  {floor.planFileKey ? t('replacePlan') : t('uploadPlan')}
+                  <span className="text-xs text-muted-foreground">{t('uploadPlanHint')}</span>
+                </span>
+              </DropdownMenuItem>
+              {floor.planFileKey && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => void run(removePlan.mutateAsync(floor.id))}>
+                    <ImageOff /> {t('removePlan')}
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         {floor.planFileKey && (
           <Field label={t('planOpacity')}>

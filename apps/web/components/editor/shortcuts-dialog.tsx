@@ -24,6 +24,7 @@ const SHORTCUTS = [
   ['Space', 'pan'],
   ['Alt', 'noSnap'],
   ['Shift', 'addToSelection'],
+  ['Shift', 'box'],
   ['2×', 'corners'],
   ['?', 'help'],
 ] as const;

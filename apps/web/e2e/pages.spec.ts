@@ -8,14 +8,19 @@ test.beforeEach(async ({ page }) => {
   await expect(page.getByTestId('floor-map').locator('canvas').first()).toBeVisible();
 });
 
-test('overview shows how full each floor is and opens its map', async ({ page }) => {
+test('Home shows how full each floor is and opens its map; /overview leads there', async ({
+  page,
+}) => {
   const map = await floorMap(page);
-  await page.getByRole('link', { name: 'Overview' }).click();
-  await expect(page.getByRole('heading', { name: 'Overview', level: 1 })).toBeVisible();
-  await expect(page.getByTestId('overview-totals')).toContainText('Seats');
-  const floor = page.getByRole('listitem').filter({ hasText: '2. OG' });
-  await expect(floor.getByRole('img')).toHaveAttribute('aria-label', /free, .* of 8 seats/);
-  await floor.getByRole('link', { name: 'Open map' }).click();
+  await page.goto('/overview');
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole('link', { name: 'Overview' })).toHaveCount(0);
+  const floors = page.getByRole('region', { name: 'Floors', exact: true });
+  await expect(floors.getByRole('img', { name: /^2\. OG:/ })).toHaveAttribute(
+    'aria-label',
+    /free, .* of 8 seats/,
+  );
+  await floors.getByRole('link', { name: '2. OG' }).click();
   await expect(page.getByTestId('floor-select')).toHaveText('2. OG');
   expect(new URL(page.url()).searchParams.get('floor')).not.toBe(map.floor.id);
 });
@@ -55,9 +60,9 @@ test('activity lists every change in plain words, filters by person, links to th
   await expect(page.getByTestId('seat-panel')).toContainText('Reserved for New hire');
 });
 
-test('viewers see the overview but not the change history', async ({ page }) => {
+test('viewers see Home but not the change history', async ({ page }) => {
   await switchUser(page, 'Luca Rossi');
-  await expect(page.getByRole('link', { name: 'Overview' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Home' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Activity' })).toHaveCount(0);
   await page.goto('/activity');
   await expect(page.getByText('Only editors and admins can see the change history.')).toBeVisible();

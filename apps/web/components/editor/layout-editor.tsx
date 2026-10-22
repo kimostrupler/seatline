@@ -344,14 +344,15 @@ export function LayoutEditor({
       setDrag({ kind: 'move', start: raw, delta: { x: 0, y: 0 } });
       return;
     }
-    if (!e.evt.shiftKey) setSelection(NO_SELECTION);
-    // fingers move around the floor; a mouse draws a selection box
-    if (touch) {
-      const screen = vp.stageRef.current?.getPointerPosition();
-      if (screen) setDrag({ kind: 'pan', start: screen, origin: { x: view.x, y: view.y } });
+    // Shift + drag draws a selection box (adding to the selection); otherwise dragging the
+    // empty floor moves around, like on the map (a click without moving deselects)
+    if (e.evt.shiftKey && !touch) {
+      setDrag({ kind: 'marquee', start: raw, end: raw, additive: true });
       return;
     }
-    setDrag({ kind: 'marquee', start: raw, end: raw, additive: e.evt.shiftKey });
+    setSelection(NO_SELECTION);
+    const screen = vp.stageRef.current?.getPointerPosition();
+    if (screen) setDrag({ kind: 'pan', start: screen, origin: { x: view.x, y: view.y } });
   };
 
   const onPointerMove = (e: Konva.KonvaEventObject<PointerEvent>) => {
@@ -444,7 +445,7 @@ export function LayoutEditor({
         ? 'crosshair'
         : hover || drag?.kind === 'vertex' || drag?.kind === 'edge'
           ? 'move'
-          : 'default';
+          : 'grab'; // empty floor: drag to move around
   // bigger handles for fingers
   const handle = (coarse ? 10 : 6) / view.scale;
 

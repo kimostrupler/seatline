@@ -3,8 +3,8 @@ import { resetE2eDb } from './db';
 
 test.beforeEach(() => resetE2eDb());
 
-test('download the seating list from the overview', async ({ page }) => {
-  await page.goto('/overview');
+test('download the seating list from Home', async ({ page }) => {
+  await page.goto('/');
   await page.getByRole('button', { name: 'Export' }).click();
   const download = page.waitForEvent('download');
   await page.getByRole('menuitem', { name: 'Seating list (Excel)' }).click();

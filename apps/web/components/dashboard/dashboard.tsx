@@ -16,6 +16,7 @@ import Link from 'next/link';
 import { useNow, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { ExportMenu } from '@/components/common/export-menu';
 import { PageFrame } from '@/components/common/page-frame';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
@@ -109,13 +110,17 @@ export function Dashboard() {
             </Button>
           </>
         ) : (
-          <Button
-            variant="outline"
-            onClick={() => setDraft(dashboard.data?.widgets ?? [])}
-            disabled={!dashboard.data}
-          >
-            <LayoutGrid /> {t('customize')}
-          </Button>
+          <>
+            {/* the seating list etc. (Home replaced the separate Overview page) */}
+            <ExportMenu />
+            <Button
+              variant="outline"
+              onClick={() => setDraft(dashboard.data?.widgets ?? [])}
+              disabled={!dashboard.data}
+            >
+              <LayoutGrid /> {t('customize')}
+            </Button>
+          </>
         )
       }
     >
