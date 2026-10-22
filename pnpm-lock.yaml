@@ -116,6 +116,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@microsoft/teams-js':
+        specifier: 2.38.0
+        version: 2.38.0
       '@seatline/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -131,6 +134,9 @@ importers:
       cmdk:
         specifier: 1.1.1
         version: 1.1.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      fflate:
+        specifier: 0.8.2
+        version: 0.8.2
       jose:
         specifier: 6.2.13
         version: 6.2.13
@@ -933,6 +939,9 @@ packages:
 
   '@microsoft/applicationinsights-web-snippet@1.2.3':
     resolution: {integrity: sha512-59ex4x1/PabGQIg+o0GKG5olqAJYBvMOiXec/9HCD3hK2y36YMWT0ivq5mequvtS5+21kco3SOnMB6QyScLPIA==}
+
+  '@microsoft/teams-js@2.38.0':
+    resolution: {integrity: sha512-qK8jPR0B30oAh8yo48YqG8enxABFEsNO28+xM5KImeZg4KWspax2xmm70uPyR0sjxfj7qtiTnReA0Mo6GUboyQ==}
 
   '@napi-rs/lzma-linux-x64-gnu@1.5.1':
     resolution: {integrity: sha512-oTXEIha4SsuXdTA4Iyskj0kpdx2yVXdhd75c2v3xGrHFfVMsbhTPZU/nMPL4sWKo4pBHm3aucLaqGlF696dTyQ==}
@@ -3560,6 +3569,9 @@ packages:
 
   fecha@4.2.3:
     resolution: {integrity: sha512-OP2IUU6HeYKJi3i0z4A19kHMQoLVs4Hc+DPqqxI2h/DPZHTm/vjsfC6P0b4jCMy14XizLBqvndQ+UilD7707Jw==}
+
+  fflate@0.8.2:
+    resolution: {integrity: sha512-cPJU47OaAoCbg0pBvzsgpTPhmhqI5eJjh/JIu8tPj5q+T7iLvW/JAYUqmE7KOB4R1ZyEhzBaIQpQpardBF5z8A==}
 
   file-type@21.3.4:
     resolution: {integrity: sha512-Ievi/yy8DS3ygGvT47PjSfdFoX+2isQueoYP1cntFW1JLYAuS4GD7NUPGg4zv2iZfV52uDyk5w5Z0TdpRS6Q1g==}
@@ -6542,6 +6554,13 @@ snapshots:
 
   '@microsoft/applicationinsights-web-snippet@1.2.3': {}
 
+  '@microsoft/teams-js@2.38.0':
+    dependencies:
+      base64-js: 1.5.1
+      debug: 4.4.3
+    transitivePeerDependencies:
+      - supports-color
+
   '@napi-rs/lzma-linux-x64-gnu@1.5.1':
     optional: true
 
@@ -9394,6 +9413,8 @@ snapshots:
       picomatch: 4.0.7
 
   fecha@4.2.3: {}
+
+  fflate@0.8.2: {}
 
   file-type@21.3.4:
     dependencies:

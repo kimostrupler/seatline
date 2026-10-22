@@ -24,6 +24,8 @@ import { MailService } from './mail/mail.service';
 import { NotifyService } from './mail/notify.service';
 import { DeskMailService } from './mail/desk-mail.service';
 import { DemoService } from './demo/demo.service';
+import { PlanningController } from './planning/planning.controller';
+import { PlanningService } from './planning/planning.service';
 import { BuildingsController } from './buildings/buildings.controller';
 import { BuildingsService } from './buildings/buildings.service';
 import { PrismaExceptionFilter } from './common/prisma-exception.filter';
@@ -67,6 +69,7 @@ import { PeopleSyncService } from './sync/people-sync.service';
     ExportsController,
     PrivacyController,
     BillingController,
+    PlanningController,
   ],
   providers: [
     BillingService,
@@ -92,6 +95,7 @@ import { PeopleSyncService } from './sync/people-sync.service';
     NotifyService,
     DeskMailService,
     DemoService,
+    PlanningService,
     GraphClient,
     PeopleSyncService,
     JobQueue,

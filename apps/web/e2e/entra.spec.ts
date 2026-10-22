@@ -49,6 +49,25 @@ test('visitors try a demo workspace from the website, then start a real trial', 
   await expect(page).toHaveURL(/\/signin/);
 });
 
+test('the Teams app: package to download, tab sign-in only with a valid Teams token', async ({
+  page,
+  baseURL,
+}) => {
+  const zip = await page.request.get('/teams-app');
+  expect(zip.status()).toBe(200);
+  expect(zip.headers()['content-type']).toBe('application/zip');
+  const bad = await page.request.post('/auth/teams', {
+    data: { token: 'not-a-token' },
+    headers: { origin: new URL(baseURL!).origin },
+  });
+  expect(bad.status()).toBe(401);
+  const elsewhere = await page.request.post('/auth/teams', {
+    data: { token: 'x' },
+    headers: { origin: 'https://evil.example' },
+  });
+  expect(elsewhere.status()).toBe(403);
+});
+
 test('a new organisation creates its workspace; a colleague joins as viewer', async ({
   page,
   browser,

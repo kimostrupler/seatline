@@ -118,6 +118,10 @@ Changing the schema: edit `apps/api/prisma/schema.prisma`, then
   sign-up; deleted after a day. Only with sign-in on (`AUTH_MODE=entra`).
 - **QR stickers** (map → Export → Desk QR codes): one per desk; scanning opens the desk on the
   map (who sits there).
+- **Planning** (`/planning`, editors): expected headcount per team (and by when) against the
+  free desks — "6 desks short" before it happens.
+- **Teams & Outlook app** (People & access → Settings, after `infra/azure/teams-setup.sh`): the
+  map as a tab in Teams and Outlook, signed in automatically (Teams single sign-on).
 - **"Your new desk" e-mails** to the person who got a desk (2 minutes later, so an undone move
   sends nothing), switchable in Settings. Admins get a reminder 7 days and 1 day before the
   free trial ends.
@@ -147,6 +151,7 @@ Changing the schema: edit `apps/api/prisma/schema.prisma`, then
 | GET/POST         | `/privacy/people/:id/export`, `…/forget`              | admins: a person's data as JSON; forget someone who left                                                                                          |
 | POST/GET/DELETE  | `/floors/:id/imports`, `…/:importId/image`, `…/apply` | editors: read an architect plan (DXF/PDF/image) → suggested plan, rooms, desks; apply = use its image (+ scale)                                   |
 | GET/POST         | `/billing`, `/billing/checkout`, `…/portal`           | admins: plan and trial; open Stripe Checkout / customer portal. `POST /billing/webhook`: Stripe only (signed)                                     |
+| GET/PUT          | `/planning`, `/planning/teams`                        | editors: space planning (expected headcount per team vs free desks)                                                                               |
 | GET              | `/overview`                                           | seat counts per building and floor                                                                                                                |
 | GET              | `/activity`                                           | change history (editors/admins): `kind personId from to cursor`                                                                                   |
 | GET/POST         | `/floors?buildingId=`                                 | POST with `copyFromFloorId` copies rooms, seats, plan, scale                                                                                      |

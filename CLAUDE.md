@@ -268,6 +268,23 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - **Legal**: `/legal/dpa` (data processing agreement, `lib/legal/dpa.ts`, same sections in all
   languages). Sub-processors listed there and in the privacy policy must stay in step.
 
+## Space planning, Teams & Outlook app
+
+- **Planning** (`/planning`, editors/admins, `@EditorsOnly`): `team_plans` (team, headcount,
+  by_date; RLS like everything). `GET /planning` = `spacePlan()` (`apps/api/src/planning/plan.ts`,
+  pure, unit-tested): per team people / seated / expected / desks needed / team-zone desks, desks
+  free, growth and how many desks are short. `PUT /planning/teams` (headcount null = remove),
+  audited as `team_plan.set`.
+- **Teams/Outlook tab**: the app package is built at `/teams-app` (`lib/teams/manifest.ts`,
+  manifest 1.17, personal static tab → `/teams`, icons in `icons.ts`, id derived from the host).
+  `/teams` (public) uses `@microsoft/teams-js` `getAuthToken()` → POST `/auth/teams` →
+  `verifyTeamsToken` (audience `api://<host>/<clientId>`, issuer = the token's tenant, v2 or v1
+  sts) → ordinary Microsoft session, cookie `SameSite=None; Partitioned` (https only) so it only
+  lives inside the Teams frame. Outside Teams `/teams` goes to `/map`. CSP `frame-ancestors`
+  allows Teams/Outlook/M365 hosts only (no X-Frame-Options). The `/api` proxy refuses changes
+  whose Origin isn't the app. One-time Entra setup: `infra/azure/teams-setup.sh` (Application ID
+  URI, `access_as_user` scope, Teams/Outlook/M365 clients pre-authorized, v2 tokens).
+
 ## Activity
 
 - `GET /activity` reads `audit_log` (editors/admins, `@EditorsOnly`), newest first with a cursor,

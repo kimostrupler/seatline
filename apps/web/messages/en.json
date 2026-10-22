@@ -612,6 +612,14 @@
         "empty": "The file is empty.",
         "too_many": "At most 2000 people per file — split the list."
       }
+    },
+    "teamsApp": {
+      "title": "Teams & Outlook",
+      "body": "Add Seatline as an app in Microsoft Teams and Outlook: people see the map and find colleagues there, signed in automatically.",
+      "step1": "Download the app below.",
+      "step2": "In the Teams admin center: Teams apps → Manage apps → Upload new app (for everyone), or in Teams: Apps → Manage your apps → Upload an app (just you).",
+      "step3": "Open Seatline from the Teams or Outlook app bar.",
+      "download": "Download the Teams app"
     }
   },
   "shortcuts": {
@@ -650,7 +658,8 @@
     "map": "Map",
     "language": "Language",
     "moves": "Moves",
-    "billing": "Billing"
+    "billing": "Billing",
+    "planning": "Planning"
   },
   "overview": {
     "title": "Overview",
@@ -767,7 +776,9 @@
       "leavingSet": "set {person}’s leaving date to {day}",
       "leavingCleared": "removed {person}’s leaving date",
       "teamRenamed": "renamed team {old} to {team}",
-      "teamDeleted": "removed team {team}"
+      "teamDeleted": "removed team {team}",
+      "teamPlanSet": "expects {count} people in {team}",
+      "teamPlanRemoved": "removed the headcount plan for {team}"
     },
     "showPlan": "Open the plan",
     "search": "Search activity",
@@ -1216,5 +1227,42 @@
     "failed": "The demo couldn’t be opened. Please try again.",
     "banner": "This is a demo with sample data — it’s deleted after a day.",
     "startTrial": "Start your free trial"
+  },
+  "planning": {
+    "title": "Space planning",
+    "onlyEditors": "Only editors and admins can see space planning.",
+    "intro": "Enter how many people each team expects (for example after hiring) and by when. Seatline compares it with the free desks.",
+    "freeNow": "Free desks now",
+    "freeOf": "{free} of {total}",
+    "growth": "Expected new people",
+    "outlook": "Outlook",
+    "short": "{count, plural, one {# desk short} other {# desks short}}",
+    "enough": "Enough desks",
+    "explain": "{needed, plural, one {# person needs} other {# people need}} a desk (without one now, plus expected new people); {free} desks are free.",
+    "teams": "Teams",
+    "columns": {
+      "team": "Team",
+      "people": "People",
+      "seated": "With a desk",
+      "expected": "Expected",
+      "by": "By",
+      "needs": "Desks needed",
+      "zone": "Team zone"
+    },
+    "expectedOf": "Expected people in {team}",
+    "byOf": "Expected by (date) for {team}",
+    "zoneFree": "{free} of {total} free",
+    "noTeam": "No team",
+    "saved": "Plan for {team} saved",
+    "addTeam": "Plan a new team",
+    "newTeam": "Team name",
+    "add": "Add",
+    "cancel": "Cancel",
+    "floors": "Free desks per floor"
+  },
+  "teamsTab": {
+    "signingIn": "Signing you in with your Microsoft account…",
+    "failed": "Sign-in inside Teams didn’t work. Your IT may still need to approve Seatline for Teams.",
+    "openInBrowser": "Open Seatline in the browser"
   }
 }

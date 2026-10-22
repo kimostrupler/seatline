@@ -25,6 +25,7 @@ export function NavLinks({
     ...(role !== 'viewer'
       ? [
           { href: '/moves', label: t('nav.moves'), icon: ArrowRightLeft },
+          { href: '/planning', label: t('nav.planning'), icon: ChartPie },
           { href: '/activity', label: t('nav.activity'), icon: History },
         ]
       : []),

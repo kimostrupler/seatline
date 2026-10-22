@@ -28,6 +28,7 @@ import type {
   Stats,
   DirectoryPerson,
   TenantInfo,
+  SpacePlan,
 } from './types';
 
 export const keys = {
@@ -45,6 +46,7 @@ export const keys = {
   movePlans: (status: string) => ['movePlans', status] as const,
   movePlan: (id: string) => ['movePlan', id] as const,
   stats: ['stats'] as const,
+  planning: ['planning'] as const,
 };
 
 export interface ActivityFilters {
@@ -358,6 +360,19 @@ export function useSyncNow() {
 
 export const useDashboard = () =>
   useQuery({ queryKey: keys.dashboard, queryFn: () => api<DashboardData>('/dashboard') });
+
+export const usePlanning = () =>
+  useQuery({ queryKey: keys.planning, queryFn: () => api<SpacePlan>('/planning') });
+
+/** Set (or remove: headcount null) a team's expected headcount. */
+export function useSetTeamPlan() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: { team: string; headcount: number | null; byDate?: string | null }) =>
+      api<SpacePlan>('/planning/teams', { method: 'PUT', body }),
+    onSuccess: (data) => qc.setQueryData(keys.planning, data),
+  });
+}
 
 export const useStats = () =>
   useQuery({ queryKey: keys.stats, queryFn: () => api<Stats>('/stats') });

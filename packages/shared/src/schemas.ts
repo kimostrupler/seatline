@@ -481,3 +481,14 @@ export type ImportPeopleInput = z.infer<typeof importPeopleSchema>;
 export type SetActiveInput = z.infer<typeof setActiveSchema>;
 export type InviteInput = z.infer<typeof inviteSchema>;
 export type ListPeopleQuery = z.infer<typeof listPeopleQuerySchema>;
+
+/** Space planning: a team's expected headcount (null = remove the plan), by when. */
+export const setTeamPlanSchema = z.strictObject({
+  team: z.string().trim().min(1).max(100),
+  headcount: z.number().int().min(0).max(100_000).nullable(),
+  byDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD')
+    .nullish(),
+});
+export type SetTeamPlanInput = z.infer<typeof setTeamPlanSchema>;
