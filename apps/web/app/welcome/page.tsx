@@ -7,7 +7,10 @@ import {
   Languages,
   Lock,
   Map,
+  Mail,
   MousePointerClick,
+  Presentation,
+  Table2,
   RefreshCw,
   ShieldCheck,
   type LucideIcon,
@@ -25,13 +28,16 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t('metaTitle'), description: t('metaDescription') };
 }
 
-const FEATURES: [LucideIcon, `f${1 | 2 | 3 | 4 | 5 | 6}`][] = [
+const FEATURES: [LucideIcon, `f${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}`][] = [
   [Map, 'f1'],
   [FileUp, 'f2'],
   [MousePointerClick, 'f3'],
   [CalendarClock, 'f4'],
   [History, 'f5'],
   [RefreshCw, 'f6'],
+  [Presentation, 'f7'],
+  [Table2, 'f8'],
+  [Mail, 'f9'],
 ];
 
 /** The public landing page: seatline.ch (and /welcome on any address). */
@@ -101,6 +107,24 @@ export default async function Welcome() {
         </ul>
       </section>
 
+      {/* how to start */}
+      <section className="border-t bg-canvas">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-20 sm:px-6">
+          <h2 className="text-3xl font-semibold tracking-tight text-balance">{t('stepsTitle')}</h2>
+          <ol className="grid gap-8 sm:grid-cols-3">
+            {(['1', '2', '3'] as const).map((n) => (
+              <li key={n} className="grid content-start gap-2">
+                <span className="grid size-9 place-items-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+                  {n}
+                </span>
+                <h3 className="font-medium">{t(`s${n}Title`)}</h3>
+                <p className="text-sm text-muted-foreground">{t(`s${n}Body`)}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
       {/* pricing */}
       <section
         id="pricing"
@@ -139,7 +163,7 @@ export default async function Welcome() {
         <div className="mx-auto grid max-w-3xl scroll-mt-20 gap-8 px-4 py-20 sm:px-6">
           <h2 className="text-3xl font-semibold tracking-tight">{t('faqTitle')}</h2>
           <div className="grid gap-3">
-            {(['1', '2', '3', '4'] as const).map((n) => (
+            {(['1', '2', '3', '4', '5'] as const).map((n) => (
               <details key={n} className="group rounded-xl border bg-background px-5 py-4">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">
                   {t(`q${n}`)}

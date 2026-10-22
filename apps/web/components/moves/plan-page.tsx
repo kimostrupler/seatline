@@ -6,6 +6,7 @@ import {
   Check,
   ChevronDown,
   Map as MapIcon,
+  Printer,
   TriangleAlert,
   Users,
   X,
@@ -98,52 +99,59 @@ export function PlanPage({ id }: { id: string }) {
         </span>
       }
       actions={
-        open && (
-          <>
-            <Button asChild variant="outline">
-              <Link href={`/map?plan=${p.id}`}>
-                <MapIcon /> {draft ? t('editOnMap') : t('viewOnMap')}
-              </Link>
-            </Button>
-            {draft && (
-              <Button variant="outline" onClick={() => setDialog('team')}>
-                <Users /> {t('moveTeam')}
+        <>
+          <Button asChild variant="ghost">
+            <Link href={`/moves/${p.id}/print`}>
+              <Printer /> {t('list.button')}
+            </Link>
+          </Button>
+          {open && (
+            <>
+              <Button asChild variant="outline">
+                <Link href={`/map?plan=${p.id}`}>
+                  <MapIcon /> {draft ? t('editOnMap') : t('viewOnMap')}
+                </Link>
               </Button>
-            )}
-            <Button
-              variant="outline"
-              disabled={blocked || !p.items.length}
-              onClick={() => setDialog('schedule')}
-            >
-              <CalendarClock /> {p.status === 'scheduled' ? t('reschedule') : t('schedule')}
-            </Button>
-            <Button disabled={blocked || !p.items.length} onClick={() => setDialog('apply')}>
-              <Check /> {t('applyNow')}
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" aria-label={t('more')}>
-                  {t('more')} <ChevronDown />
+              {draft && (
+                <Button variant="outline" onClick={() => setDialog('team')}>
+                  <Users /> {t('moveTeam')}
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {!draft && (
+              )}
+              <Button
+                variant="outline"
+                disabled={blocked || !p.items.length}
+                onClick={() => setDialog('schedule')}
+              >
+                <CalendarClock /> {p.status === 'scheduled' ? t('reschedule') : t('schedule')}
+              </Button>
+              <Button disabled={blocked || !p.items.length} onClick={() => setDialog('apply')}>
+                <Check /> {t('applyNow')}
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" aria-label={t('more')}>
+                    {t('more')} <ChevronDown />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {!draft && (
+                    <DropdownMenuItem
+                      onSelect={() => run(actions.unschedule.mutateAsync(), t('backToDraftDone'))}
+                    >
+                      {t('backToDraft')}
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem
-                    onSelect={() => run(actions.unschedule.mutateAsync(), t('backToDraftDone'))}
+                    variant="destructive"
+                    onSelect={() => run(actions.cancel.mutateAsync(), t('cancelled'))}
                   >
-                    {t('backToDraft')}
+                    {t('cancelPlan')}
                   </DropdownMenuItem>
-                )}
-                <DropdownMenuItem
-                  variant="destructive"
-                  onSelect={() => run(actions.cancel.mutateAsync(), t('cancelled'))}
-                >
-                  {t('cancelPlan')}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </>
-        )
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          )}
+        </>
       }
     >
       {draft && (

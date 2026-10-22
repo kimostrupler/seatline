@@ -61,8 +61,12 @@ All tables except `tenants` have a `tenant_id`.
 - **people**: id, tenant_id, entra_object_id, email, display_name, department, job_title, app_role (`admin` | `editor` | `viewer` | null = no app access), active, synced_at
 - **buildings**: id, tenant_id, name, address
 - **floors**: id, tenant_id, building_id, name, level (int), plan_file_key, plan_width, plan_height, scale
-- **rooms**: id, tenant_id, floor_id, name, type (`office` | `open_space` | `meeting` | `other`), polygon (jsonb, list of points)
-- **seats**: id, tenant_id, floor_id, room_id (nullable), label, x, y, rotation, type (`desk` | `office`), status (`active` | `blocked`)
+- **rooms**: id, tenant_id, floor_id, name, type (`office` | `open_space` | `meeting` | `other`), polygon (jsonb, list of points), capacity, equipment (text[]), team (zone)
+- **seats**: id, tenant_id, floor_id, room_id (nullable), label, x, y, rotation, type (`desk` | `office`), status (`active` | `blocked`), features (text[])
+- **floor_markers**: id, tenant_id, floor_id, kind (kitchen, printer, exit…), x, y, label
+
+(Later tables — e-mail sign-ins, dashboard layouts, move plans, notices — are described in their sections below; the Prisma schema is the source of truth.)
+
 - **seat_assignments**: id, tenant_id, seat_id, person_id (nullable), kind (`assigned` | `reserved`), reserved_for (text, nullable), start_at, end_at (nullable), assigned_by, note
 - **audit_log**: id, tenant_id, actor_id, action, entity_type, entity_id, before (jsonb), after (jsonb), created_at
 
@@ -152,6 +156,18 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - Room handles: corners (rectangles stay rectangular, `moveVertex`) and side midpoints
   (`moveEdge`); double-click a side handle adds a corner, a corner removes it.
 - Edit mode also works on phones/tablets: the inspector becomes a panel under the canvas.
+- Mouse: drag on empty floor **pans** (cursor = grab); **Shift + drag** draws a selection box
+  (adds to the selection).
+- The floor's plan image upload/import lives in the inspector's **Add plan / Change plan** menu
+  (rarely used, so it's not a main button).
+- Rich layout (`20261025090000_rich_layout`): rooms carry `capacity`/`equipment` (meeting rooms)
+  and `team` (a tinted team zone); seats carry `features`; `floor_markers` (kitchen, printer,
+  exit, first aid…) — lists in `ROOM_EQUIPMENT`, `SEAT_FEATURES`, `MARKER_KINDS` (packages/shared).
+  Markers are part of the layout batch (`markers` create/update/delete, inverse in ops.ts) and
+  tool **K**. They're drawn as an HTML overlay with lucide icons (`components/map/markers.tsx`
+  `MarkerOverlay`) over the canvas; in the editor invisible Konva circles (`marker:<id>`) make
+  them selectable/draggable. The view map has **Find a desk** (`desk-finder.tsx`, filter free
+  desks by feature) and an accessible marker list. Copying a floor copies markers too.
 - The shadcn CLI stops at "overwrite?" prompts and re-adds an npm package called `cn`. If it
   does, fetch the component JSON from the registry instead and fix the `cn` import.
 
@@ -217,7 +233,7 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   saved (never undoes it): manual leave/add/team, HR changes (incl. "leaving on"), sync
   (joined/left), carried-out move plans (who moved from → to). One plain-text e-mail per batch.
 
-## Activity & overview
+## Activity
 
 - `GET /activity` reads `audit_log` (editors/admins, `@EditorsOnly`), newest first with a cursor,
   plus `refs` (current names of the people/seats/rooms/floors/buildings it mentions). The web
@@ -225,7 +241,8 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   named from the entry's own before/after snapshot. New audit actions need a case there.
 - `?q=` searches: text values in before/after (not ids/timestamps) + current names of people, seats,
   rooms, floors, buildings (entries about, mentioning or made by them). Raw SQL in `ActivityService.search`.
-- `GET /overview` counts seats per floor with the same rule as the map (`seatOccupancy`).
+- `GET /overview` counts seats per floor with the same rule as the map (`seatOccupancy`). There
+  is no Overview page any more: `/overview` redirects to Home, whose header has the export menu.
 
 ## Home dashboard
 
@@ -238,6 +255,8 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - Widgets: catalog + role rules + pure layout helpers in `lib/dashboard.ts`; bodies in
   `components/dashboard/widgets.tsx`. New widget = `WIDGET_TYPES` + `WIDGETS` + body + texts.
   Numbers come from `GET /stats` (one snapshot; weeks are Swiss weeks starting Monday).
+- Customize mode: each widget has one **⋯** menu (move earlier/later, size, remove) — no rows
+  of small buttons. A newly added widget is scrolled into view and highlighted, plus a toast.
 - The `/api` proxy must export every HTTP method the API uses (PUT was missing once).
 
 ## Move plans (planned moves)
@@ -254,6 +273,9 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   made by whoever scheduled the plan; the audit actor is the system.
 - Web: `/moves`, `/moves/[id]`, and plan mode on the map (`/map?plan=…`): `projectFloor`
   (`lib/moves.ts`) shows the floor after the plan; the usual gestures add plan items instead.
+- **Moving list** `/moves/[id]/print` (`components/moves/moving-list.tsx`): a print page for the
+  movers, sorted by starting place, tick box per move, signature lines. Applying a plan sends
+  the "moves" notice e-mail (see notices).
 
 ## Privacy (nDSG)
 
