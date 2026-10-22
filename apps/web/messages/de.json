@@ -530,7 +530,6 @@
     },
     "seeAll": "Alle zeigen",
     "andMore": "und {count} weitere",
-    "usedShare": "{percent} % der Plätze sind belegt oder reserviert{blocked, plural, =0 {} other {, # gesperrt}}.",
     "noBuildings": "Noch keine Gebäude.",
     "noFreeSeats": "Im Moment keine freien Plätze.",
     "freeOn": "{count} frei auf {floor}",
@@ -540,10 +539,6 @@
     "waiting": "reserviert {since}",
     "everyoneSeated": "Alle haben einen Platz.",
     "noPeople": "Noch keine Personen.",
-    "department": "Abteilung",
-    "people": "Personen",
-    "seated": "Mit Platz",
-    "where": "Wo sie sitzen",
     "noDepartment": "Keine Abteilung",
     "noSeatMine": "Sie haben noch keinen Platz.",
     "nearYou": "In Ihrer Nähe:",
@@ -618,7 +613,14 @@
       }
     },
     "noMoves": "Keine Umzüge geplant.",
-    "movesCount": "{count, plural, one {# Umzug} other {# Umzüge}}"
+    "movesCount": "{count, plural, one {# Umzug} other {# Umzüge}}",
+    "statUsed": "der {seats} Arbeitsplätze sind besetzt oder reserviert",
+    "statFree": "{count, plural, one {freier Arbeitsplatz} other {freie Arbeitsplätze}} im Moment",
+    "statBlocked": "{count, plural, one {Arbeitsplatz ist} other {Arbeitsplätze sind}} gesperrt",
+    "statReservations": "{count, plural, one {Reservation wartet} other {Reservationen warten}} auf jemanden",
+    "statUnseated": "{count, plural, one {Person hat} other {Personen haben}} keinen Arbeitsplatz",
+    "statMoves": "{count, plural, one {Umzugsplan} other {Umzugspläne}} offen",
+    "seatedOf": "{seated} von {people} mit Platz"
   },
   "errors": {
     "title": "Etwas ist schiefgelaufen",

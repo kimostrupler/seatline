@@ -1,14 +1,32 @@
 'use client';
 
 import type { WidgetType } from '@seatline/shared';
-import { ArrowRight, Map as MapIcon, Search } from 'lucide-react';
+import {
+  ArmchairIcon,
+  ArrowRight,
+  ArrowRightLeft,
+  Ban,
+  BookmarkCheck,
+  Building2,
+  ChartColumn,
+  Gauge,
+  History,
+  MapPin,
+  Map as MapIcon,
+  RefreshCw,
+  Search,
+  UserRoundX,
+  Users,
+  Zap,
+  type LucideIcon,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
 import { useState, type ReactNode } from 'react';
 import { EntryRow, mergeRefs } from '@/components/activity/activity-page';
 import { StatusDot } from '@/components/map/status-dot';
-import { OccupancyBar, Tile } from '@/components/overview/overview-page';
+import { OccupancyBar } from '@/components/overview/overview-page';
 import { Button } from '@/components/ui/button';
 import {
   Command,
@@ -30,7 +48,9 @@ import {
   useStats,
   useTenant,
 } from '@/lib/queries';
+import { teamSlots } from '@/lib/team-colors';
 import type { Stats } from '@/lib/types';
+import { cn } from '@/lib/utils';
 import { PlanStatus } from '@/components/moves/plan-status';
 
 const mapHref = (params: Record<string, string>) => `/map?${new URLSearchParams(params)}`;
@@ -67,6 +87,23 @@ export function WidgetBody({ type }: { type: WidgetType }) {
   }
 }
 
+/** Each widget's own icon, so it is recognised at a glance without reading its title. */
+export const WIDGET_ICONS: Record<WidgetType, LucideIcon> = {
+  summary: Gauge,
+  occupancy: Building2,
+  activity: History,
+  trend: ChartColumn,
+  unseated: UserRoundX,
+  reservations: BookmarkCheck,
+  departments: Users,
+  freeSeats: ArmchairIcon,
+  blocked: Ban,
+  sync: RefreshCw,
+  mySeat: MapPin,
+  quickActions: Zap,
+  moves: ArrowRightLeft,
+};
+
 /** "See all" style link in a widget's header. */
 export const WIDGET_LINKS: Partial<Record<WidgetType, string>> = {
   summary: '/overview',
@@ -89,6 +126,23 @@ function More({ count }: { count: number }) {
   ) : null;
 }
 
+/**
+ * The number a widget leads with, and what it counts. `hero` is the dashboard's one big figure
+ * (seats at a glance); every other widget's number is a size smaller.
+ */
+function Stat({ value, label, hero }: { value: ReactNode; label: string; hero?: boolean }) {
+  return (
+    <div className="grid gap-1">
+      <p
+        className={cn('leading-none font-semibold tracking-tight', hero ? 'text-5xl' : 'text-3xl')}
+      >
+        {value}
+      </p>
+      <p className="text-sm text-muted-foreground">{label}</p>
+    </div>
+  );
+}
+
 function useStatsOr() {
   const stats = useStats();
   return stats.data;
@@ -102,16 +156,9 @@ function Summary() {
   if (!o) return <Loading />;
   const used = o.seats ? Math.round(((o.taken + o.reserved) / o.seats) * 100) : 0;
   return (
-    <div className="grid gap-3">
-      <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <Tile label={t('overview.seats')} value={o.seats} />
-        <Tile label={t('overview.free')} value={o.free} status="free" />
-        <Tile label={t('overview.taken')} value={o.taken} status="taken" />
-        <Tile label={t('overview.reserved')} value={o.reserved} status="reserved" />
-      </dl>
-      <p className="text-sm text-muted-foreground">
-        {t('dashboard.usedShare', { percent: used, blocked: o.blocked })}
-      </p>
+    <div className="grid gap-4">
+      <Stat hero value={`${used}%`} label={t('dashboard.statUsed', { seats: o.seats })} />
+      <OccupancyBar counts={o} label={t('dashboard.widgets.summary.title')} />
     </div>
   );
 }
@@ -126,12 +173,19 @@ function Occupancy() {
       {o.buildings.flatMap((b) =>
         b.floors.map((f) => (
           <li key={f.id} className="grid gap-1">
-            <Link
-              href={mapHref({ building: b.id, floor: f.id })}
-              className="text-sm font-medium underline-offset-2 hover:underline"
-            >
-              {o.buildings.length > 1 ? `${b.name} › ${f.name}` : f.name}
-            </Link>
+            <div className="flex items-baseline justify-between gap-2">
+              <Link
+                href={mapHref({ building: b.id, floor: f.id })}
+                className="truncate text-sm font-medium underline-offset-2 hover:underline"
+              >
+                {o.buildings.length > 1 ? `${b.name} › ${f.name}` : f.name}
+              </Link>
+              {f.seats > 0 && (
+                <span className="shrink-0 text-sm font-semibold tabular-nums">
+                  {Math.round(((f.taken + f.reserved) / f.seats) * 100)}%
+                </span>
+              )}
+            </div>
             <OccupancyBar counts={f} label={f.name} compact />
           </li>
         )),
@@ -145,23 +199,27 @@ function FreeSeats() {
   const s = useStatsOr();
   if (!s) return <Loading />;
   if (!s.freeSeats.length) return <Empty>{t('noFreeSeats')}</Empty>;
+  const total = s.freeSeats.reduce((n, f) => n + f.free, 0);
   return (
-    <ul className="grid gap-2.5">
-      {s.freeSeats.map((f) => (
-        <li key={f.floorId} className="text-sm">
-          <Link
-            href={mapHref({ building: f.buildingId, floor: f.floorId })}
-            className="flex items-center gap-1.5 font-medium underline-offset-2 hover:underline"
-          >
-            <StatusDot status="free" /> {t('freeOn', { count: f.free, floor: f.floorName })}
-          </Link>
-          <p className="truncate text-xs text-muted-foreground">
-            {f.labels.join(', ')}
-            {f.free > f.labels.length && ' …'}
-          </p>
-        </li>
-      ))}
-    </ul>
+    <div className="grid gap-3">
+      <Stat value={total} label={t('statFree', { count: total })} />
+      <ul className="grid gap-2.5">
+        {s.freeSeats.map((f) => (
+          <li key={f.floorId} className="text-sm">
+            <Link
+              href={mapHref({ building: f.buildingId, floor: f.floorId })}
+              className="flex items-center gap-1.5 font-medium underline-offset-2 hover:underline"
+            >
+              <StatusDot status="free" /> {t('freeOn', { count: f.free, floor: f.floorName })}
+            </Link>
+            <p className="truncate text-xs text-muted-foreground">
+              {f.labels.join(', ')}
+              {f.free > f.labels.length && ' …'}
+            </p>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -172,7 +230,8 @@ function Blocked() {
   if (!s) return <Loading />;
   if (!s.blocked.total) return <Empty>{t('noBlocked')}</Empty>;
   return (
-    <div className="grid gap-2">
+    <div className="grid gap-3">
+      <Stat value={s.blocked.total} label={t('statBlocked', { count: s.blocked.total })} />
       <ul className="grid gap-2">
         {s.blocked.items.map((b) => (
           <li key={b.seatId} className="flex items-baseline justify-between gap-2 text-sm">
@@ -201,7 +260,11 @@ function Reservations() {
   if (!s) return <Loading />;
   if (!s.reservations.total) return <Empty>{t('noReservations')}</Empty>;
   return (
-    <div className="grid gap-2">
+    <div className="grid gap-3">
+      <Stat
+        value={s.reservations.total}
+        label={t('statReservations', { count: s.reservations.total })}
+      />
       <ul className="grid gap-2">
         {s.reservations.items.map((r) => (
           <li key={r.id} className="grid text-sm">
@@ -231,8 +294,8 @@ function Unseated() {
   if (!s) return <Loading />;
   if (!s.unseated.total) return <Empty>{t('everyoneSeated')}</Empty>;
   return (
-    <div className="grid gap-2">
-      <p className="text-2xl font-semibold tabular-nums">{s.unseated.total}</p>
+    <div className="grid gap-3">
+      <Stat value={s.unseated.total} label={t('statUnseated', { count: s.unseated.total })} />
       <ul className="grid gap-1.5">
         {s.unseated.people.slice(0, 8).map((p) => (
           <li key={p.id} className="flex items-baseline justify-between gap-2 text-sm">
@@ -253,52 +316,64 @@ function Unseated() {
   );
 }
 
+/**
+ * Per team: how many of its people have a desk (a meter in the team's map colour, so a team
+ * looks the same here and on the map), and on which floors they sit.
+ */
 function Departments() {
   const t = useTranslations('dashboard');
   const s = useStatsOr();
   if (!s) return <Loading />;
   if (!s.departments.length) return <Empty>{t('noPeople')}</Empty>;
+  const slots = teamSlots(s.departments);
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="text-left text-xs text-muted-foreground">
-          <tr>
-            <th className="py-1.5 pr-3 font-medium">{t('department')}</th>
-            <th className="py-1.5 pr-3 text-right font-medium">{t('people')}</th>
-            <th className="py-1.5 pr-3 text-right font-medium">{t('seated')}</th>
-            <th className="py-1.5 font-medium">{t('where')}</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y">
-          {s.departments.map((d) => (
-            <tr key={d.name ?? ''}>
-              <td className="py-2 pr-3 font-medium">{d.name ?? t('noDepartment')}</td>
-              <td className="py-2 pr-3 text-right tabular-nums">{d.people}</td>
-              <td className="py-2 pr-3 text-right tabular-nums">
-                {d.seated}{' '}
-                <span className="text-xs text-muted-foreground">
-                  ({Math.round((d.seated / d.people) * 100)}%)
-                </span>
-              </td>
-              <td className="py-2">
-                <span className="flex flex-wrap gap-1">
-                  {d.floors.length === 0 && <span className="text-muted-foreground">–</span>}
-                  {d.floors.map((f) => (
-                    <Link
-                      key={f.floorId}
-                      href={mapHref({ building: f.buildingId, floor: f.floorId })}
-                      className="rounded-md border px-1.5 py-0.5 text-xs hover:bg-muted"
-                    >
-                      {f.floorName} · {f.count}
-                    </Link>
-                  ))}
-                </span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <ul className="grid gap-x-8 gap-y-4 lg:grid-cols-2">
+      {s.departments.map((d) => {
+        const slot = d.name ? slots.get(d.name) : undefined;
+        const color = slot ? `var(--team-${slot})` : 'var(--muted-foreground)';
+        const share = d.people ? Math.round((d.seated / d.people) * 100) : 0;
+        return (
+          <li key={d.name ?? ''} className="grid gap-1.5">
+            <div className="flex items-baseline justify-between gap-3 text-sm">
+              <span className="flex min-w-0 items-center gap-2 font-medium">
+                <span
+                  aria-hidden
+                  className="size-2.5 shrink-0 rounded-full"
+                  style={{ background: color }}
+                />
+                <span className="truncate">{d.name ?? t('noDepartment')}</span>
+              </span>
+              <span className="shrink-0 text-muted-foreground tabular-nums">
+                {t('seatedOf', { seated: d.seated, people: d.people })}
+              </span>
+            </div>
+            <div
+              role="img"
+              aria-label={`${d.name ?? t('noDepartment')}: ${t('seatedOf', { seated: d.seated, people: d.people })}`}
+              className="h-2 overflow-hidden rounded-full bg-muted"
+            >
+              <div
+                className="h-full rounded-full"
+                style={{ width: `${share}%`, background: color }}
+              />
+            </div>
+            {d.floors.length > 0 && (
+              <span className="flex flex-wrap gap-1">
+                {d.floors.map((f) => (
+                  <Link
+                    key={f.floorId}
+                    href={mapHref({ building: f.buildingId, floor: f.floorId })}
+                    className="rounded-md border px-1.5 py-0.5 text-xs hover:bg-muted"
+                  >
+                    {f.floorName} · {f.count}
+                  </Link>
+                ))}
+              </span>
+            )}
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 
@@ -401,10 +476,11 @@ function Trend() {
   const label = (w: { start: string }) =>
     format.dateTime(new Date(`${w.start}T12:00:00Z`), { day: 'numeric', month: 'short' });
   const shown = active === null ? null : weeks[active]!;
+  if (!total) return <Empty>{t('trendTotal', { count: 0 })}</Empty>;
   return (
     <div className="grid gap-3">
-      <div className="flex items-baseline justify-between gap-2">
-        <p className="text-sm text-muted-foreground">{t('trendTotal', { count: total })}</p>
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <Stat value={total} label={t('trendTotal', { count: total })} />
         <p className="text-xs text-muted-foreground tabular-nums" aria-live="polite">
           {shown
             ? t('trendWeek', {
@@ -417,26 +493,38 @@ function Trend() {
             : t('trendHint')}
         </p>
       </div>
-      <div className="flex h-28 items-end gap-1 border-b" onPointerLeave={() => setActive(null)}>
-        {weeks.map((w, i) => (
-          <button
-            key={w.start}
-            type="button"
-            className="group flex h-full flex-1 items-end focus-visible:outline-none"
-            aria-label={`${label(w)}: ${w.total}`}
-            onPointerEnter={() => setActive(i)}
-            onFocus={() => setActive(i)}
-            onBlur={() => setActive(null)}
-          >
-            <span
-              className="w-full rounded-t bg-(--chart-1) opacity-85 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 group-focus-visible:ring-2 group-focus-visible:ring-ring"
-              style={{
-                height: w.total ? `${(w.total / max) * 100}%` : 0,
-                minHeight: w.total ? 3 : 0,
-              }}
-            />
-          </button>
-        ))}
+      <div className="relative">
+        <span className="absolute -top-1 right-0 text-xs text-muted-foreground tabular-nums">
+          {max}
+        </span>
+        <div
+          className="flex h-28 items-end gap-1 border-t border-b border-t-border/50 pt-3"
+          onPointerLeave={() => setActive(null)}
+        >
+          {weeks.map((w, i) => (
+            <button
+              key={w.start}
+              type="button"
+              className="group flex h-full flex-1 items-end focus-visible:outline-none"
+              aria-label={`${label(w)}: ${w.total}`}
+              onPointerEnter={() => setActive(i)}
+              onFocus={() => setActive(i)}
+              onBlur={() => setActive(null)}
+            >
+              <span
+                className={cn(
+                  'w-full rounded-t bg-(--chart-1) transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 group-focus-visible:ring-2 group-focus-visible:ring-ring',
+                  // this week in the full colour, earlier weeks quieter
+                  i === weeks.length - 1 || i === active ? 'opacity-100' : 'opacity-45',
+                )}
+                style={{
+                  height: w.total ? `${(w.total / max) * 100}%` : 0,
+                  minHeight: w.total ? 3 : 0,
+                }}
+              />
+            </button>
+          ))}
+        </div>
       </div>
       <div className="flex justify-between text-xs text-muted-foreground">
         <span>{label(weeks[0]!)}</span>
@@ -540,21 +628,24 @@ function UpcomingMoves() {
   if (!plans) return <Loading />;
   if (!plans.length) return <Empty>{t('noMoves')}</Empty>;
   return (
-    <ul className="grid gap-2.5">
-      {plans.slice(0, 6).map((p) => (
-        <li key={p.id} className="grid gap-1 text-sm">
-          <Link
-            href={`/moves/${p.id}`}
-            className="truncate font-medium underline-offset-2 hover:underline"
-          >
-            {p.name}
-          </Link>
-          <span className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            <PlanStatus status={p.status} effectiveDate={p.effectiveDate} />
-            {t('movesCount', { count: p.moves })}
-          </span>
-        </li>
-      ))}
-    </ul>
+    <div className="grid gap-3">
+      <Stat value={plans.length} label={t('statMoves', { count: plans.length })} />
+      <ul className="grid gap-2.5">
+        {plans.slice(0, 6).map((p) => (
+          <li key={p.id} className="grid gap-1 text-sm">
+            <Link
+              href={`/moves/${p.id}`}
+              className="truncate font-medium underline-offset-2 hover:underline"
+            >
+              {p.name}
+            </Link>
+            <span className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+              <PlanStatus status={p.status} effectiveDate={p.effectiveDate} />
+              {t('movesCount', { count: p.moves })}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

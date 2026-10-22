@@ -530,7 +530,6 @@
     },
     "seeAll": "Tout voir",
     "andMore": "et {count} de plus",
-    "usedShare": "{percent} % des places sont occupées ou réservées{blocked, plural, =0 {} other {, # bloquées}}.",
     "noBuildings": "Aucun bâtiment pour l’instant.",
     "noFreeSeats": "Aucune place libre pour le moment.",
     "freeOn": "{count} libres à l’étage {floor}",
@@ -540,10 +539,6 @@
     "waiting": "réservée {since}",
     "everyoneSeated": "Tout le monde a une place.",
     "noPeople": "Pas encore de personnes.",
-    "department": "Service",
-    "people": "Personnes",
-    "seated": "Avec place",
-    "where": "Où elles sont assises",
     "noDepartment": "Sans service",
     "noSeatMine": "Vous n’avez pas encore de place.",
     "nearYou": "Près de vous :",
@@ -618,7 +613,14 @@
       }
     },
     "noMoves": "Aucun déménagement prévu.",
-    "movesCount": "{count, plural, one {# déménagement} other {# déménagements}}"
+    "movesCount": "{count, plural, one {# déménagement} other {# déménagements}}",
+    "statUsed": "des {seats} postes sont occupés ou réservés",
+    "statFree": "{count, plural, one {poste libre} other {postes libres}} en ce moment",
+    "statBlocked": "{count, plural, one {poste est bloqué} other {postes sont bloqués}}",
+    "statReservations": "{count, plural, one {réservation attend} other {réservations attendent}} quelqu’un",
+    "statUnseated": "{count, plural, one {personne n’a} other {personnes n’ont}} pas de poste",
+    "statMoves": "{count, plural, one {plan de déménagement ouvert} other {plans de déménagement ouverts}}",
+    "seatedOf": "{seated} sur {people} placés"
   },
   "errors": {
     "title": "Un problème est survenu",

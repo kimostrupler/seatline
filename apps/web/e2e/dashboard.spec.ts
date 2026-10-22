@@ -15,7 +15,7 @@ const titles = (page: Page) =>
 
 test('home shows the company at a glance', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Alpenblick AG');
-  await expect(widget(page, 'Seats at a glance')).toContainText('Free');
+  await expect(widget(page, 'Seats at a glance')).toContainText('desks are taken or reserved');
   await expect(widget(page, 'Floors')).toContainText('1. OG');
   await expect(widget(page, 'People without a seat')).toContainText('Mia Schmid');
   await expect(widget(page, 'Seat changes per week')).toContainText('in the last 12 weeks');
