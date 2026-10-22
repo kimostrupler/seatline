@@ -9,4 +9,8 @@
 !**/.env.example
 .git
 .claude
-apps/plan-engine
+**/.venv
+**/__pycache__
+**/.pytest_cache
+apps/plan-engine/samples
+apps/plan-engine/tests
