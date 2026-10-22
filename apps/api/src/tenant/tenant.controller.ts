@@ -18,6 +18,7 @@ const select = {
   notifyEmails: true,
   notifyEvents: true,
   notifyLanguage: true,
+  notifyPeople: true,
 } as const;
 
 const settings = (t: {
@@ -27,6 +28,7 @@ const settings = (t: {
   notifyEmails: string[];
   notifyEvents: string[];
   notifyLanguage: string;
+  notifyPeople: boolean;
 }) => ({
   name: t.name,
   defaultAppRole: t.defaultAppRole,
@@ -34,6 +36,7 @@ const settings = (t: {
   notifyEmails: t.notifyEmails,
   notifyEvents: t.notifyEvents,
   notifyLanguage: t.notifyLanguage,
+  notifyPeople: t.notifyPeople,
 });
 
 /** The caller's workspace and its settings. */

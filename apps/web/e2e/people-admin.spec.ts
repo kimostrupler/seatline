@@ -28,6 +28,25 @@ test('admins manage roles and who can open Seatline', async ({ page }) => {
   );
 });
 
+test('admins import people from a spreadsheet', async ({ page }) => {
+  await page.goto('/people');
+  await page.getByRole('button', { name: 'Import list' }).click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByTestId('import-file').setInputFiles({
+    name: 'people.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from(
+      'Vorname;Nachname;E-Mail;Abteilung\nLina;Graf;lina.graf@example.ch;Finance\nTim;Roth;tim.roth@example.ch;Finance\nOhne;Mail;;\n',
+    ),
+  });
+  await expect(dialog.getByTestId('import-summary')).toHaveText(
+    '2 new people · 1 row with a problem',
+  );
+  await dialog.getByRole('button', { name: 'Import 2 people' }).click();
+  await expect(page.getByText('2 people added')).toBeVisible();
+  await expect(page.getByText('Lina Graf')).toBeVisible();
+});
+
 test('admins put people in a team', async ({ page }) => {
   await page.goto('/people');
   await page.getByRole('button', { name: 'More for Marc Dubois' }).click();

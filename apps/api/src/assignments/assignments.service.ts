@@ -5,6 +5,7 @@ import type { RequestContext } from '../auth/request-context';
 import { audit } from '../common/audit';
 import { orNotFound } from '../common/errors';
 import { TenantDb, type Tx } from '../db/tenant-db.service';
+import { JobQueue } from '../jobs/job-queue.service';
 
 const historyInclude = {
   person: { select: { id: true, displayName: true, department: true } },
@@ -19,14 +20,18 @@ const historyInclude = {
  */
 @Injectable()
 export class AssignmentsService {
-  constructor(private readonly db: TenantDb) {}
+  constructor(
+    private readonly db: TenantDb,
+    private readonly jobs: JobQueue,
+  ) {}
 
   /**
    * Gives a person a seat. If they sit somewhere else, that's a move: the old
    * assignment is closed. A reservation on the target seat is closed too.
+   * The person gets a "your new desk" e-mail a little later — unless the move was undone.
    */
-  assign(ctx: RequestContext, input: AssignSeatInput) {
-    return this.db.run(ctx.tenantId, async (tx) => {
+  async assign(ctx: RequestContext, input: AssignSeatInput) {
+    const result = await this.db.run(ctx.tenantId, async (tx) => {
       await this.activeSeat(tx, ctx, input.seatId);
       const person = orNotFound(
         await tx.person.findFirst({ where: { id: input.personId, tenantId: ctx.tenantId } }),
@@ -67,6 +72,8 @@ export class AssignmentsService {
       });
       return { assignment, closed };
     });
+    await this.jobs.enqueueDeskMail(ctx.tenantId, [result.assignment.id]);
+    return result;
   }
 
   /** Holds a free seat for someone not in the directory yet (new hire, team…). */

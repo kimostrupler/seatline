@@ -23,3 +23,13 @@ test('legal pages follow the chosen language', async ({ page, context }) => {
   await expect(page.getByRole('heading', { name: 'Impressum' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'hello@seatline.ch' }).first()).toBeVisible();
 });
+
+test('pages are sent with security headers', async ({ request }) => {
+  const res = await request.get('/welcome');
+  const headers = res.headers();
+  expect(headers['content-security-policy']).toContain("default-src 'self'");
+  expect(headers['content-security-policy']).toContain("frame-ancestors 'none'");
+  expect(headers['x-content-type-options']).toBe('nosniff');
+  expect(headers['strict-transport-security']).toContain('max-age=');
+  expect(headers['x-powered-by']).toBeUndefined();
+});

@@ -12,6 +12,7 @@ import { audit } from '../common/audit';
 import { orNotFound } from '../common/errors';
 import { TenantDb, type Tx } from '../db/tenant-db.service';
 import type { Notice } from '../mail/notices';
+import { JobQueue } from '../jobs/job-queue.service';
 import { NotifyService } from '../mail/notify.service';
 import { checkPlan, placeTeam, type PlanCheck, type PlanItem, type Seating } from './check';
 
@@ -45,6 +46,7 @@ export class MovesService {
   constructor(
     private readonly db: TenantDb,
     private readonly notify: NotifyService,
+    private readonly jobs: JobQueue,
   ) {}
 
   list(ctx: RequestContext, query: ListMovePlansQuery) {
@@ -216,15 +218,17 @@ export class MovesService {
 
   /** Apply now (any open plan). All or nothing: any problem → nothing changes. */
   async applyNow(ctx: RequestContext, id: string) {
+    const created: string[] = [];
     const { detail, notice } = await this.db.run(ctx.tenantId, async (tx) => {
       const plan = await this.editable(tx, ctx.tenantId, id, ['draft', 'scheduled', 'failed']);
       const check = await this.check(tx, ctx.tenantId, id);
       if (!check.moves.length) throw new ConflictException('This plan has no moves');
       if (check.problems.length) throw new ConflictException('Fix the problems in this plan first');
-      const notice = await this.apply(tx, ctx, ctx.actorId, plan, check);
+      const notice = await this.apply(tx, ctx, ctx.actorId, plan, check, created);
       return { detail: await this.detail(tx, ctx.tenantId, id), notice };
     });
     await this.notify.send(ctx.tenantId, [notice]);
+    await this.jobs.enqueueDeskMail(ctx.tenantId, created, 0);
     return detail;
   }
 
@@ -247,6 +251,7 @@ export class MovesService {
     const results: Array<{ id: string; ok: boolean }> = [];
     for (const plan of due) {
       const system: Actor = { tenantId, actorId: null };
+      const created: string[] = [];
       const ok = await this.db.run(tenantId, async (tx) => {
         const check = await this.check(tx, tenantId, plan.id);
         if (check.problems.length || !check.moves.length) {
@@ -264,9 +269,12 @@ export class MovesService {
           return false;
         }
         // the person who scheduled it is recorded as having made the moves
-        return this.apply(tx, system, plan.scheduledById ?? plan.createdById, plan, check);
+        return this.apply(tx, system, plan.scheduledById ?? plan.createdById, plan, check, created);
       });
-      if (ok) await this.notify.send(tenantId, [ok]);
+      if (ok) {
+        await this.notify.send(tenantId, [ok]);
+        await this.jobs.enqueueDeskMail(tenantId, created, 0);
+      }
       if (!ok) this.logger.warn(`Move plan ${plan.id} (${tenantId}) could not be applied`);
       results.push({ id: plan.id, ok: !!ok });
     }
@@ -281,6 +289,8 @@ export class MovesService {
     assignedById: string,
     plan: MovePlan,
     check: PlanCheck,
+    /** the new assignments' ids are added here (each person gets a "your new desk" e-mail) */
+    created: string[],
   ): Promise<Notice> {
     const now = new Date();
     const tenantId = actor.tenantId;
@@ -329,6 +339,7 @@ export class MovesService {
           note: plan.name,
         },
       });
+      created.push(assignment.id);
       await audit(tx, actor, {
         action: previous ? 'assignment.move' : 'assignment.create',
         entityType: 'seat_assignment',

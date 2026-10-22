@@ -3,6 +3,7 @@ import type { Person, Prisma } from '@prisma/client';
 import type {
   AppRole,
   CreatePersonInput,
+  ImportPeopleInput,
   PeopleChangesInput,
   RenameTeamInput,
   ListPeopleQuery,
@@ -17,6 +18,7 @@ import type { Notice } from '../mail/notices';
 import { NotifyService, openSeats } from '../mail/notify.service';
 import { zurichToday } from '../moves/moves.service';
 import { inviteMail } from '../mail/texts';
+import { readPeopleFile } from './import-file';
 import { audit } from '../common/audit';
 import type { RequestContext } from '../auth/request-context';
 import { orNotFound } from '../common/errors';
@@ -178,11 +180,104 @@ export class PeopleService {
       });
       return created;
     });
+    await this.notify.send(ctx.tenantId, [
+      { kind: 'joined', person: person.displayName, team: person.department },
+    ]);
     const invited =
       input.invite && person.appRole
         ? await this.sendInvite(ctx, person.id, input.language)
         : false;
     return { ...person, invited };
+  }
+
+  /**
+   * Read a spreadsheet (Excel or CSV) of people: each row with what would happen to it —
+   * new, already in the list, twice in the file, or a problem (no name, bad e-mail).
+   * Nothing is saved; the admin checks the list and then imports.
+   */
+  async readImport(ctx: RequestContext, file: Buffer, filename: string) {
+    const rows = await readPeopleFile(file, filename);
+    const taken = await this.db.run(ctx.tenantId, async (tx) =>
+      tx.person.findMany({
+        where: {
+          tenantId: ctx.tenantId,
+          email: { in: rows.map((r) => r.email), mode: 'insensitive' },
+        },
+        select: { email: true },
+      }),
+    );
+    const known = new Set(taken.map((p) => p.email.toLowerCase()));
+    const seen = new Set<string>();
+    return {
+      rows: rows.map((r) => {
+        const status = r.problem
+          ? ('invalid' as const)
+          : known.has(r.email)
+            ? ('exists' as const)
+            : seen.has(r.email)
+              ? ('duplicate' as const)
+              : ('new' as const);
+        seen.add(r.email);
+        return { ...r, status };
+      }),
+    };
+  }
+
+  /** Add many people at once (all or nothing). People already in the list are skipped. */
+  async importPeople(ctx: RequestContext, input: ImportPeopleInput) {
+    const created = await this.db.run(ctx.tenantId, async (tx) => {
+      const taken = await tx.person.findMany({
+        where: {
+          tenantId: ctx.tenantId,
+          email: { in: input.people.map((p) => p.email), mode: 'insensitive' },
+        },
+        select: { email: true },
+      });
+      const skip = new Set(taken.map((p) => p.email.toLowerCase()));
+      const out: Person[] = [];
+      for (const p of input.people) {
+        if (skip.has(p.email)) continue;
+        skip.add(p.email);
+        const person = await tx.person.create({
+          data: {
+            tenantId: ctx.tenantId,
+            displayName: p.displayName,
+            email: p.email,
+            department: p.department || null,
+            teamManual: !!p.department,
+            jobTitle: p.jobTitle || null,
+            appRole: input.appRole,
+          },
+        });
+        await audit(tx, ctx, {
+          action: 'person.create',
+          entityType: 'person',
+          entityId: person.id,
+          after: {
+            displayName: person.displayName,
+            email: person.email,
+            department: person.department,
+            appRole: person.appRole,
+            imported: true,
+          },
+        });
+        out.push(person);
+      }
+      return out;
+    });
+    await this.notify.send(
+      ctx.tenantId,
+      created.map((p) => ({ kind: 'joined', person: p.displayName, team: p.department })),
+    );
+    let invited = 0;
+    if (input.invite && input.appRole)
+      for (const p of created)
+        if (await this.sendInvite(ctx, p.id, input.language).catch(() => false)) invited++;
+    return {
+      created: created.length,
+      skipped: input.people.length - created.length,
+      invited,
+    };
   }
 
   /** Correct name, e-mail or job title of someone added by hand. */

@@ -1,6 +1,21 @@
-import { Body, Controller, Get, HttpCode, Param, Patch, Post, Query } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   createPersonSchema,
+  importPeopleSchema,
+  type ImportPeopleInput,
   peopleChangesSchema,
   renameTeamSchema,
   type PeopleChangesInput,
@@ -55,6 +70,26 @@ export class PeopleController {
     @Body(new ZodPipe(createPersonSchema)) body: CreatePersonInput,
   ) {
     return this.people.create(ctx, body);
+  }
+
+  /** Read a spreadsheet of people (field "file": Excel or CSV, up to 2 MB). Saves nothing. */
+  @AdminOnly()
+  @Post('import/read')
+  @HttpCode(200)
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 2 * 1024 * 1024, files: 1 } }))
+  readImport(@Ctx() ctx: RequestContext, @UploadedFile() file: Express.Multer.File | undefined) {
+    if (!file) throw new BadRequestException('Attach the file as "file"');
+    return this.people.readImport(ctx, file.buffer, file.originalname);
+  }
+
+  /** Add the people read from the file (those already in the list are skipped). */
+  @AdminOnly()
+  @Post('import')
+  importPeople(
+    @Ctx() ctx: RequestContext,
+    @Body(new ZodPipe(importPeopleSchema)) body: ImportPeopleInput,
+  ) {
+    return this.people.importPeople(ctx, body);
   }
 
   /** HR table: several people's team / role / leaving date at once. */

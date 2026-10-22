@@ -44,3 +44,63 @@ export function inviteMail(
   }[language];
   return { to, ...t };
 }
+
+/** To a person: they have a new desk (single move or a carried-out move plan). */
+export function deskMail(
+  to: string,
+  name: string,
+  desk: { label: string; place: string; room: string | null },
+  link: string | null,
+  language: MailLanguage,
+): Mail {
+  const where = desk.room ? `${desk.place} › ${desk.room}` : desk.place;
+  const t = {
+    en: {
+      subject: `Your desk: ${desk.label}`,
+      text: `Hello ${name},\n\nFrom now on your desk is ${desk.label} (${where}).${link ? `\n\nSee it on the map:\n${link}` : ''}\n\nQuestions? Ask your office team.\n\nSeatline`,
+    },
+    de: {
+      subject: `Ihr Arbeitsplatz: ${desk.label}`,
+      text: `Guten Tag ${name}\n\nAb jetzt ist Ihr Arbeitsplatz ${desk.label} (${where}).${link ? `\n\nAuf dem Plan ansehen:\n${link}` : ''}\n\nFragen? Wenden Sie sich an Ihr Office-Team.\n\nSeatline`,
+    },
+    fr: {
+      subject: `Votre place : ${desk.label}`,
+      text: `Bonjour ${name},\n\nDésormais, votre place est ${desk.label} (${where}).${link ? `\n\nLa voir sur le plan :\n${link}` : ''}\n\nDes questions ? Adressez-vous à votre équipe office.\n\nSeatline`,
+    },
+  }[language];
+  return { to, ...t };
+}
+
+/** To a workspace's admins: the free trial ends in `days` days. */
+export function trialMail(
+  to: string,
+  workspace: string,
+  days: number,
+  link: string,
+  language: MailLanguage,
+): Mail {
+  const t = {
+    en: {
+      subject:
+        days <= 1
+          ? `Your Seatline trial ends tomorrow`
+          : `Your Seatline trial ends in ${days} days`,
+      text: `Hello,\n\nThe free trial of ${workspace} on Seatline ends ${days <= 1 ? 'tomorrow' : `in ${days} days`}.\n\nTo keep making changes, an admin can subscribe in a few clicks:\n${link}\n\nIf nobody subscribes, the workspace becomes read-only. Nothing is deleted, and you can subscribe at any time later.\n\nQuestions? Just reply to this e-mail.\n\nSeatline`,
+    },
+    de: {
+      subject:
+        days <= 1
+          ? `Ihre Seatline-Testphase endet morgen`
+          : `Ihre Seatline-Testphase endet in ${days} Tagen`,
+      text: `Guten Tag\n\nDie Gratis-Testphase von ${workspace} auf Seatline endet ${days <= 1 ? 'morgen' : `in ${days} Tagen`}.\n\nDamit Sie weiter Änderungen machen können, schliesst ein Admin mit wenigen Klicks ein Abo ab:\n${link}\n\nOhne Abo wird der Arbeitsbereich schreibgeschützt. Gelöscht wird nichts, und Sie können jederzeit später abonnieren.\n\nFragen? Antworten Sie einfach auf diese E-Mail.\n\nSeatline`,
+    },
+    fr: {
+      subject:
+        days <= 1
+          ? `Votre essai Seatline se termine demain`
+          : `Votre essai Seatline se termine dans ${days} jours`,
+      text: `Bonjour,\n\nL’essai gratuit de ${workspace} sur Seatline se termine ${days <= 1 ? 'demain' : `dans ${days} jours`}.\n\nPour continuer à faire des changements, un admin peut s’abonner en quelques clics :\n${link}\n\nSans abonnement, l’espace passe en lecture seule. Rien n’est supprimé, et vous pouvez vous abonner plus tard à tout moment.\n\nDes questions ? Répondez simplement à cet e-mail.\n\nSeatline`,
+    },
+  }[language];
+  return { to, ...t };
+}

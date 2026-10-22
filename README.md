@@ -111,6 +111,12 @@ Changing the schema: edit `apps/api/prisma/schema.prisma`, then
   filters; Add person), **Teams** (seated meter per team, rename/remove, add people),
   **Changes** (an HR table: team, role and leaving date for many people, saved together) and
   **Settings** (who can join, e-mail notices, Microsoft 365, data protection).
+- **Import a list** (People & access → People): an Excel or CSV file with name and e-mail
+  (team, job title optional; titles in English, German or French). Seatline shows what happens
+  to each row before anything is saved; there's a template to download.
+- **"Your new desk" e-mails** to the person who got a desk (2 minutes later, so an undone move
+  sends nothing), switchable in Settings. Admins get a reminder 7 days and 1 day before the
+  free trial ends.
 - **E-mail notices:** IT or facility addresses (Settings) get a short professional e-mail when
   someone leaves or joins, changes team, or a move plan is carried out — which desks are free.
   A leaving date in the future is carried out by the nightly job on that day.
@@ -148,6 +154,7 @@ Changing the schema: edit `apps/api/prisma/schema.prisma`, then
 | POST             | `/assignments/:id/end`                                | free the seat (history is kept)                                                                                                                   |
 | GET              | `/people?search=`                                     | people search                                                                                                                                     |
 | POST/PATCH       | `/people`, `/people/:id`, `/people/:id/active`        | admins: add people by hand, correct them, mark left/back; `POST /people/changes` (HR table), `POST /people/teams/rename`                          |
+| POST             | `/people/import/read`, `/people/import`               | admins: read an Excel/CSV list (nothing saved) → add the new people                                                                               |
 | PATCH            | `/floors/:id/layout`                                  | editors: one batch of room/seat/marker changes (all or nothing)                                                                                   |
 | GET              | `/people/:id/history`                                 | every seat this person had                                                                                                                        |
 | GET              | `/health`                                             | no auth                                                                                                                                           |
