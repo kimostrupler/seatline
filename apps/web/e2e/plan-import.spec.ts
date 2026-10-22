@@ -11,6 +11,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/map');
   await page.getByTestId('mode-edit').click();
   await expect(page.getByTestId('layout-editor').locator('canvas').first()).toBeVisible();
+  await page.getByTestId('plan-menu').click();
   await page.getByTestId('import-plan').click();
 });
 

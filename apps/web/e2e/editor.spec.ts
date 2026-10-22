@@ -162,6 +162,24 @@ test('resize a room by dragging its side, or by typing its size', async ({ page 
   expect((await room()).polygon.map((p) => p.y)).toEqual([50, 50, 250, 250]);
 });
 
+test('dragging the empty floor moves around; Shift-drag selects a box', async ({ page }) => {
+  const view = async () => JSON.parse((await editor(page).getAttribute('data-view'))!);
+  const before = await view();
+  await dragPlan(page, { x: 900, y: 600 }, { x: 1000, y: 650 }); // empty floor
+  const after = await view();
+  expect(after.x).toBeGreaterThan(before.x + 20);
+  expect(after.scale).toBe(before.scale);
+
+  // Shift + drag from empty floor draws a box: what it covers is selected
+  const seat = (await floorMap(page)).seats[0]!;
+  const away = (v: number, from: number) => (v < from ? v - 40 : v + 40);
+  await page.keyboard.down('Shift');
+  await dragPlan(page, { x: 900, y: 600 }, { x: away(seat.x, 900), y: away(seat.y, 600) });
+  await page.keyboard.up('Shift');
+  await expect(page.getByTestId('inspector')).toBeVisible();
+  await expect(page.getByTestId('floor-settings')).toHaveCount(0);
+});
+
 test('align seats and add a row of desks', async ({ page }) => {
   const map = await floorMap(page);
   const a = map.seats.find((s) => s.label === '1.01')!;
@@ -224,7 +242,8 @@ test('upload a floor plan and set the scale', async ({ page }) => {
     .getByTestId('plan-file')
     .setInputFiles({ name: 'plan.png', mimeType: 'image/png', buffer: makePng(1400, 900) });
   await expect(page.getByText('Floor plan uploaded')).toBeVisible();
-  await expect(settings.getByRole('button', { name: 'Replace plan' })).toBeVisible();
+  await expect(settings).toContainText('Floor plan added');
+  await expect(settings.getByRole('button', { name: 'Change plan' })).toBeVisible();
   expect((await floorMap(page)).floor.planFileKey).toBeTruthy();
 
   await page.keyboard.press('m');
@@ -316,7 +335,7 @@ test.describe('on a phone', () => {
     await expect(panel).toBeHidden();
     await page.getByTestId('floor-panel-toggle').click();
     await expect(panel.getByTestId('floor-settings')).toBeVisible();
-    await expect(panel.getByRole('button', { name: 'Import architect plan' })).toBeVisible();
+    await expect(panel.getByRole('button', { name: /Add plan|Change plan/ })).toBeVisible();
     await expect(panel.getByRole('textbox', { name: 'Name' })).toHaveValue('1. OG');
     await page.getByTestId('floor-panel-toggle').click();
     await expect(panel).toBeHidden();

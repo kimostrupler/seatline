@@ -22,7 +22,6 @@ export function NavLinks({
   const links = [
     { href: '/', label: t('nav.home'), icon: House },
     { href: '/map', label: t('nav.map'), icon: Map },
-    { href: '/overview', label: t('nav.overview'), icon: ChartPie },
     ...(role !== 'viewer'
       ? [
           { href: '/moves', label: t('nav.moves'), icon: ArrowRightLeft },

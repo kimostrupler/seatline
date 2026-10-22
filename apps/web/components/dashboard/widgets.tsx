@@ -106,8 +106,6 @@ export const WIDGET_ICONS: Record<WidgetType, LucideIcon> = {
 
 /** "See all" style link in a widget's header. */
 export const WIDGET_LINKS: Partial<Record<WidgetType, string>> = {
-  summary: '/overview',
-  occupancy: '/overview',
   activity: '/activity',
   sync: '/people',
   moves: '/moves',
@@ -609,11 +607,6 @@ function QuickActions() {
       <Button asChild variant="ghost" className="justify-between">
         <Link href="/map">
           {t('openFloorMap')} <ArrowRight />
-        </Link>
-      </Button>
-      <Button asChild variant="ghost" className="justify-between">
-        <Link href="/overview">
-          {t('seeAllFloors')} <ArrowRight />
         </Link>
       </Button>
     </div>

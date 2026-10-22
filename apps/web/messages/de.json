@@ -137,10 +137,10 @@
     "drawRoom": "Raum über Ecken zeichnen (P)",
     "drawRect": "Rechteckigen Raum zeichnen (B)",
     "measure": "Massstab mit bekannter Länge setzen (M)",
-    "pan": "Leertaste halten und ziehen, um sich zu bewegen",
+    "pan": "Boden ziehen (oder Leertaste halten und ziehen), um sich zu bewegen",
     "undo": "Rückgängig (⌘Z)",
     "redo": "Wiederholen (⇧⌘Z)",
-    "hintSelect": "Klicken zum Auswählen · Shift-Klick zum Hinzufügen · Rahmen ziehen für mehrere · Ecken oder Seiten eines Raums ziehen zum Ändern der Grösse · ? für alle Tastenkürzel",
+    "hintSelect": "Klicken zum Auswählen · Shift-Klick zum Hinzufügen · Boden ziehen zum Verschieben · Shift-Rahmen ziehen für mehrere · Ecken oder Seiten eines Raums ziehen zum Ändern der Grösse · ? für alle Tastenkürzel",
     "hintSeat": "Klicken, um einen Platz zu setzen · Esc zum Beenden",
     "hintRoom": "Jede Ecke anklicken · Doppelklick oder erste Ecke anklicken zum Abschliessen · Esc zum Abbrechen",
     "hintRect": "Ziehen, um einen rechteckigen Raum zu zeichnen",
@@ -243,7 +243,6 @@
     "duplicateFloorHint": "Ein neues Stockwerk mit denselben Räumen, Plätzen und dem Grundriss, ohne Personen.",
     "importPlan": "Architektenplan importieren",
     "planSection": "Plan",
-    "planEmpty": "Importieren Sie den Plan der Architektin, und Seatline zeichnet Räume und Plätze, oder laden Sie ein Bild hoch, um darauf zu zeichnen.",
     "more": "Mehr",
     "desks": "Arbeitsplätze",
     "numbering": "Nummerierung",
@@ -260,7 +259,13 @@
     "deskWidth": "Tischbreite in Metern",
     "deskDepth": "Tischtiefe in Metern",
     "deskSizeNoScale": "Legen Sie den Massstab des Plans fest (Lineal), damit Tische in echter Grösse erscheinen.",
-    "deskSizeInvalid": "Geben Sie eine Grösse zwischen 0,3 und 5 m ein."
+    "deskSizeInvalid": "Geben Sie eine Grösse zwischen 0,3 und 5 m ein.",
+    "planSet": "Grundriss hinterlegt",
+    "planNone": "Noch kein Grundriss",
+    "addPlan": "Plan hinzufügen",
+    "changePlan": "Plan ändern",
+    "importPlanHint": "DXF, PDF oder Scan – Räume und Arbeitsplätze werden für Sie gezeichnet",
+    "uploadPlanHint": "PNG oder JPG zum Darüberzeichnen"
   },
   "auth": {
     "signInTitle": "Bei Seatline anmelden",
@@ -423,7 +428,8 @@
     "noSnap": "Beim Ziehen halten, um frei zu platzieren (ohne Raster)",
     "addToSelection": "Klicken, um zur Auswahl hinzuzufügen",
     "corners": "Doppelklick auf den Seitengriff eines Raums fügt eine Ecke hinzu, auf eine Ecke entfernt sie",
-    "help": "Diese Liste zeigen"
+    "help": "Diese Liste zeigen",
+    "box": "Rahmen ziehen, um mehrere auszuwählen"
   },
   "nav": {
     "label": "Seiten",

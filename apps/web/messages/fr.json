@@ -137,10 +137,10 @@
     "drawRoom": "Dessiner une pièce par ses coins (P)",
     "drawRect": "Dessiner une pièce rectangulaire (B)",
     "measure": "Définir l’échelle avec une longueur connue (M)",
-    "pan": "Maintenez Espace et glissez pour vous déplacer",
+    "pan": "Glissez le sol (ou maintenez Espace et glissez) pour vous déplacer",
     "undo": "Annuler (⌘Z)",
     "redo": "Rétablir (⇧⌘Z)",
-    "hintSelect": "Cliquez pour sélectionner · Maj-clic pour ajouter · tracez un cadre pour en choisir plusieurs · glissez les coins ou côtés d’une pièce pour la redimensionner · ? pour tous les raccourcis",
+    "hintSelect": "Cliquez pour sélectionner · Maj-clic pour ajouter · glissez le sol pour vous déplacer · Maj + cadre pour en choisir plusieurs · glissez les coins ou côtés d’une pièce pour la redimensionner · ? pour tous les raccourcis",
     "hintSeat": "Cliquez pour placer une place · Échap pour terminer",
     "hintRoom": "Cliquez chaque coin · double-clic ou clic sur le premier coin pour terminer · Échap pour annuler",
     "hintRect": "Glissez pour dessiner une pièce rectangulaire",
@@ -243,7 +243,6 @@
     "duplicateFloorHint": "Un nouvel étage avec les mêmes pièces, places et plan, sans les personnes.",
     "importPlan": "Importer un plan d’architecte",
     "planSection": "Plan",
-    "planEmpty": "Importez le plan de l’architecte et Seatline dessine les salles et les places, ou importez une image pour dessiner dessus.",
     "more": "Plus",
     "desks": "Postes de travail",
     "numbering": "Numérotation",
@@ -260,7 +259,13 @@
     "deskWidth": "Largeur du bureau en mètres",
     "deskDepth": "Profondeur du bureau en mètres",
     "deskSizeNoScale": "Définissez l’échelle du plan (outil règle) pour dessiner les bureaux à leur taille réelle.",
-    "deskSizeInvalid": "Saisissez une taille entre 0,3 et 5 m."
+    "deskSizeInvalid": "Saisissez une taille entre 0,3 et 5 m.",
+    "planSet": "Plan d’étage ajouté",
+    "planNone": "Pas encore de plan d’étage",
+    "addPlan": "Ajouter un plan",
+    "changePlan": "Changer le plan",
+    "importPlanHint": "DXF, PDF ou scan — les pièces et postes sont dessinés pour vous",
+    "uploadPlanHint": "PNG ou JPG sur lequel dessiner"
   },
   "auth": {
     "signInTitle": "Se connecter à Seatline",
@@ -423,7 +428,8 @@
     "noSnap": "Maintenir en glissant pour placer librement (sans grille)",
     "addToSelection": "Cliquer pour ajouter à la sélection",
     "corners": "Double-clic sur la poignée d’un côté ajoute un coin, sur un coin le supprime",
-    "help": "Afficher cette liste"
+    "help": "Afficher cette liste",
+    "box": "Tracer un cadre pour en choisir plusieurs"
   },
   "nav": {
     "label": "Pages",

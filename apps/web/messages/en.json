@@ -137,10 +137,10 @@
     "drawRoom": "Draw room by corners (P)",
     "drawRect": "Draw rectangular room (B)",
     "measure": "Set scale with a known length (M)",
-    "pan": "Hold Space and drag to move around",
+    "pan": "Drag the floor (or hold Space and drag) to move around",
     "undo": "Undo (⌘Z)",
     "redo": "Redo (⇧⌘Z)",
-    "hintSelect": "Click to select · Shift-click to add · drag a box to select several · drag a room’s corners or sides to resize · ? for all shortcuts",
+    "hintSelect": "Click to select · Shift-click to add · drag the floor to move around · Shift-drag a box to select several · drag a room’s corners or sides to resize · ? for all shortcuts",
     "hintSeat": "Click to place a seat · Esc when done",
     "hintRoom": "Click each corner · double-click or click the first corner to finish · Esc to cancel",
     "hintRect": "Drag to draw a rectangular room",
@@ -243,7 +243,6 @@
     "duplicateFloorHint": "A new floor with the same rooms, seats and plan, without people.",
     "importPlan": "Import architect plan",
     "planSection": "Plan",
-    "planEmpty": "Import your architect’s plan and Seatline draws the rooms and desks, or upload a picture to draw on.",
     "more": "More",
     "desks": "Desks",
     "numbering": "Numbering",
@@ -260,7 +259,13 @@
     "deskWidth": "Desk width in metres",
     "deskDepth": "Desk depth in metres",
     "deskSizeNoScale": "Set the plan’s scale (ruler tool) to draw desks at their real size.",
-    "deskSizeInvalid": "Enter a size between 0.3 and 5 m."
+    "deskSizeInvalid": "Enter a size between 0.3 and 5 m.",
+    "planSet": "Floor plan added",
+    "planNone": "No floor plan yet",
+    "addPlan": "Add plan",
+    "changePlan": "Change plan",
+    "importPlanHint": "DXF, PDF or a scan — rooms and desks are drawn for you",
+    "uploadPlanHint": "PNG or JPG to draw on"
   },
   "auth": {
     "signInTitle": "Sign in to Seatline",
@@ -423,7 +428,8 @@
     "noSnap": "Hold while dragging to place freely (no grid)",
     "addToSelection": "Click to add to the selection",
     "corners": "Double-click a room’s side handle to add a corner, a corner to remove it",
-    "help": "Show this list"
+    "help": "Show this list",
+    "box": "Drag a box to select several"
   },
   "nav": {
     "label": "Pages",
