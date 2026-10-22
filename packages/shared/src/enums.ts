@@ -16,3 +16,7 @@ export type AssignmentKind = (typeof ASSIGNMENT_KINDS)[number];
 /** What the floor map shows for a seat. */
 export const SEAT_OCCUPANCY = ['free', 'taken', 'reserved', 'blocked'] as const;
 export type SeatOccupancy = (typeof SEAT_OCCUPANCY)[number];
+
+/** How desks on a floor are numbered: 1.01, 1.02… or by room: 1.04-A, 1.04-B… */
+export const SEAT_NUMBERINGS = ['floor', 'room'] as const;
+export type SeatNumbering = (typeof SEAT_NUMBERINGS)[number];

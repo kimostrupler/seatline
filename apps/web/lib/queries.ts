@@ -222,6 +222,9 @@ export function useUpdateFloor() {
       name?: string;
       level?: number;
       scale?: number | null;
+      deskWidth?: number | null;
+      deskDepth?: number | null;
+      seatNumbering?: Floor['seatNumbering'];
     }) => api<Floor>(`/floors/${id}`, { method: 'PATCH', body: input }),
     onSettled: invalidate,
   });

@@ -4,7 +4,7 @@ import type Konva from 'konva';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { Group, Layer, Rect, Stage } from 'react-konva';
-import { contentBounds, seatAt, toPlan } from '@/lib/map-geometry';
+import { contentBounds, seatAt, seatSize, toPlan } from '@/lib/map-geometry';
 import type { FloorMap as FloorMapData, Seat } from '@/lib/types';
 import { withAlpha } from '@/lib/team-colors';
 import type { ColorBy } from '@/lib/use-map-colors-mode';
@@ -23,6 +23,7 @@ import {
   type SeatLook,
 } from './shapes';
 import { useViewport, ZoomControls } from './viewport';
+import { SeatSizeContext } from './seat-size';
 
 const NO_TEAMS = new Map<string, number>();
 
@@ -66,6 +67,7 @@ export function FloorMap({
   const ts = useTranslations('status');
   const colors = useMapColors();
   const plan = usePlanImage(map.floor);
+  const size = useMemo(() => seatSize(map.floor), [map.floor]);
   const bounds = useMemo(
     () =>
       contentBounds(
@@ -74,8 +76,9 @@ export function FloorMap({
         map.floor.planFileKey && map.floor.planWidth && map.floor.planHeight
           ? { width: map.floor.planWidth, height: map.floor.planHeight }
           : null,
+        size,
       ),
-    [map.rooms, map.seats, map.floor],
+    [map.rooms, map.seats, map.floor, size],
   );
   const vp = useViewport(bounds, map.floor.id);
   const { view } = vp;
@@ -116,7 +119,7 @@ export function FloorMap({
   const seatUnderClient = (clientX: number, clientY: number): Seat | undefined => {
     const rect = vp.containerRef.current?.getBoundingClientRect();
     if (!rect) return undefined;
-    return seatAt(map.seats, toPlan(view, { x: clientX - rect.left, y: clientY - rect.top }));
+    return seatAt(map.seats, toPlan(view, { x: clientX - rect.left, y: clientY - rect.top }), size);
   };
   const accepts = (seat: Seat | undefined) =>
     !!seat && seat.status === 'active' && seat.occupancy !== 'taken';
@@ -143,7 +146,7 @@ export function FloorMap({
   // ---- drag someone from one seat to another (inside the canvas) ------------
   const pointerSeat = (): Seat | undefined => {
     const pointer = vp.stageRef.current?.getPointerPosition();
-    return pointer ? seatAt(map.seats, toPlan(view, pointer)) : undefined;
+    return pointer ? seatAt(map.seats, toPlan(view, pointer), size) : undefined;
   };
   const onTokenDragMove = (from: Seat) => {
     const target = pointerSeat();
@@ -183,66 +186,68 @@ export function FloorMap({
       data-view={JSON.stringify(view)}
     >
       {colors && vp.size.width > 0 && (
-        <Stage
-          ref={vp.stageRef}
-          width={vp.size.width}
-          height={vp.size.height}
-          x={view.x}
-          y={view.y}
-          scaleX={view.scale}
-          scaleY={view.scale}
-          draggable
-          onWheel={vp.onWheel}
-          onDragEnd={(e) => {
-            if (e.target === e.target.getStage())
-              vp.setView((v) => ({ ...v, x: e.target.x(), y: e.target.y() }));
-          }}
-          onClick={(e) => {
-            if (e.target === e.target.getStage()) onSelectSeat(null);
-          }}
-          onTap={(e) => {
-            if (e.target === e.target.getStage()) onSelectSeat(null);
-          }}
-        >
-          <Layer listening={false}>
-            <PlanBackground image={plan} floor={map.floor} opacity={planOpacity} />
-            {map.rooms.map((room) => (
-              <RoomShape
-                key={room.id}
-                room={room}
-                colors={colors}
-                textScale={vp.textScale}
-                translucent={!!plan}
-              />
-            ))}
-          </Layer>
-          <Layer>
-            {map.seats.map((seat) => (
-              <ViewSeat
-                key={seat.id}
-                seat={seat}
-                colors={colors}
-                textScale={vp.textScale}
-                showLabel={showLabels}
-                look={lookOf(seat, colors)}
-                dimmed={dimmed(seat)}
-                selected={seat.id === selectedSeatId}
-                highlighted={
-                  seat.id === highlightSeatId ||
-                  seat.id === focusedSeatId ||
-                  !!markedSeatIds?.has(seat.id)
-                }
-                dropTarget={seat.id === dropTargetId}
-                dragging={seat.id === draggingSeatId}
-                canDrag={canEdit && seat.occupancy === 'taken'}
-                onSelect={() => onSelectSeat(seat.id)}
-                onDragStart={() => setDraggingSeatId(seat.id)}
-                onDragMove={() => onTokenDragMove(seat)}
-                onDragEnd={(node) => onTokenDragEnd(seat, node)}
-              />
-            ))}
-          </Layer>
-        </Stage>
+        <SeatSizeContext.Provider value={size}>
+          <Stage
+            ref={vp.stageRef}
+            width={vp.size.width}
+            height={vp.size.height}
+            x={view.x}
+            y={view.y}
+            scaleX={view.scale}
+            scaleY={view.scale}
+            draggable
+            onWheel={vp.onWheel}
+            onDragEnd={(e) => {
+              if (e.target === e.target.getStage())
+                vp.setView((v) => ({ ...v, x: e.target.x(), y: e.target.y() }));
+            }}
+            onClick={(e) => {
+              if (e.target === e.target.getStage()) onSelectSeat(null);
+            }}
+            onTap={(e) => {
+              if (e.target === e.target.getStage()) onSelectSeat(null);
+            }}
+          >
+            <Layer listening={false}>
+              <PlanBackground image={plan} floor={map.floor} opacity={planOpacity} />
+              {map.rooms.map((room) => (
+                <RoomShape
+                  key={room.id}
+                  room={room}
+                  colors={colors}
+                  textScale={vp.textScale}
+                  translucent={!!plan}
+                />
+              ))}
+            </Layer>
+            <Layer>
+              {map.seats.map((seat) => (
+                <ViewSeat
+                  key={seat.id}
+                  seat={seat}
+                  colors={colors}
+                  textScale={vp.textScale}
+                  showLabel={showLabels}
+                  look={lookOf(seat, colors)}
+                  dimmed={dimmed(seat)}
+                  selected={seat.id === selectedSeatId}
+                  highlighted={
+                    seat.id === highlightSeatId ||
+                    seat.id === focusedSeatId ||
+                    !!markedSeatIds?.has(seat.id)
+                  }
+                  dropTarget={seat.id === dropTargetId}
+                  dragging={seat.id === draggingSeatId}
+                  canDrag={canEdit && seat.occupancy === 'taken'}
+                  onSelect={() => onSelectSeat(seat.id)}
+                  onDragStart={() => setDraggingSeatId(seat.id)}
+                  onDragMove={() => onTokenDragMove(seat)}
+                  onDragEnd={(node) => onTokenDragEnd(seat, node)}
+                />
+              ))}
+            </Layer>
+          </Stage>
+        </SeatSizeContext.Provider>
       )}
 
       {/* The canvas is invisible to keyboards and screen readers: this list is the accessible map. */}

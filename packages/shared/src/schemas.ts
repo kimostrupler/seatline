@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { APP_ROLES, ROOM_TYPES, SEAT_STATUSES, SEAT_TYPES } from './enums';
+import { APP_ROLES, ROOM_TYPES, SEAT_NUMBERINGS, SEAT_STATUSES, SEAT_TYPES } from './enums';
 
 const id = z.uuid();
 const name = z.string().trim().min(1).max(200);
@@ -24,6 +24,10 @@ export const createFloorSchema = z.strictObject({
   planHeight: z.number().positive().nullish(),
   /** Plan units per metre. */
   scale: z.number().positive().nullish(),
+  /** Desk size in metres (null = 1.6 × 0.8). */
+  deskWidth: z.number().min(0.3).max(5).nullish(),
+  deskDepth: z.number().min(0.3).max(5).nullish(),
+  seatNumbering: z.enum(SEAT_NUMBERINGS).optional(),
   /** Start with a copy of this floor's rooms, seats, plan image and scale (no people). */
   copyFromFloorId: id.nullish(),
 });

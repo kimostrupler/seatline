@@ -244,7 +244,23 @@
     "importPlan": "Import architect plan",
     "planSection": "Plan",
     "planEmpty": "Import your architect’s plan and Seatline draws the rooms and desks, or upload a picture to draw on.",
-    "more": "More"
+    "more": "More",
+    "desks": "Desks",
+    "numbering": "Numbering",
+    "numberingHint": "Used for new desks. “Renumber desks” applies it to all desks on this floor.",
+    "numberingBy": {
+      "floor": "Per floor ({level}.01, {level}.02 …)",
+      "room": "Per room (room number + A, B …)"
+    },
+    "renumber": "Renumber desks",
+    "renumbered": "{count, plural, one {# desk renumbered} other {# desks renumbered}}",
+    "renumberNone": "The desks are already numbered in order.",
+    "deskSize": "Desk size",
+    "deskSizeHint": "Desks are drawn at this real size. Empty = 1.6 × 0.8 m.",
+    "deskWidth": "Desk width in metres",
+    "deskDepth": "Desk depth in metres",
+    "deskSizeNoScale": "Set the plan’s scale (ruler tool) to draw desks at their real size.",
+    "deskSizeInvalid": "Enter a size between 0.3 and 5 m."
   },
   "auth": {
     "signInTitle": "Sign in to Seatline",

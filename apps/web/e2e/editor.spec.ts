@@ -1,7 +1,7 @@
 import { DEMO_TENANTS } from '@seatline/shared';
 import { expect, test, type Page } from '@playwright/test';
 import { resetE2eDb } from './db';
-import { floorMap, makePng, switchUser, toScreen } from './helpers';
+import { adminHeaders, currentFloorId, floorMap, makePng, switchUser, toScreen } from './helpers';
 
 test.beforeEach(async ({ page }) => {
   resetE2eDb();
@@ -136,7 +136,7 @@ test('copy a seat and paste it on another floor', async ({ page }) => {
   await expect(page.getByTestId('inspector').getByRole('heading')).toHaveText('Seat 2.09');
   await saved(page);
   const pasted = (await floorMap(page)).seats.find((s) => s.label === '2.09');
-  expect(pasted).toMatchObject({ x: seat.x + 80, y: seat.y });
+  expect(pasted).toMatchObject({ x: seat.x + 96, y: seat.y }); // an 80-unit desk (1.6 m at 50 units/m) + 16
 });
 
 test('resize a room by dragging its side, or by typing its size', async ({ page }) => {
@@ -235,6 +235,45 @@ test('upload a floor plan and set the scale', async ({ page }) => {
   await dialog.getByRole('textbox', { name: 'Length in metres' }).fill('10');
   await dialog.getByRole('button', { name: 'Set scale' }).click();
   await expect(settings).toContainText('1 m = 50 units');
+
+  // with a scale, desks are drawn at their real size, which can be changed per floor
+  await settings.getByRole('textbox', { name: 'Desk width in metres' }).fill('1.4');
+  await settings.getByRole('textbox', { name: 'Desk width in metres' }).press('Enter');
+  await expect.poll(async () => (await floorMap(page)).floor).toMatchObject({ deskWidth: 1.4 });
+});
+
+test('number desks per room, then undo', async ({ page }) => {
+  const before = await floorMap(page);
+  const open = before.rooms.find((r) => r.name === 'Open Space')!;
+  const res = await page.request.patch(`/api/floors/${currentFloorId(page)}/layout`, {
+    headers: adminHeaders,
+    data: { rooms: { update: [{ id: open.id, name: '1.20 Open Space' }] } },
+  });
+  expect(res.ok()).toBe(true);
+  await page.reload();
+  await page.getByTestId('mode-edit').click();
+
+  const settings = page.getByTestId('floor-settings');
+  await settings.getByRole('combobox', { name: 'Numbering' }).click();
+  await page.getByRole('option', { name: /Per room/ }).click();
+  await expect
+    .poll(async () => (await floorMap(page)).floor)
+    .toMatchObject({
+      seatNumbering: 'room',
+    });
+  await settings.getByTestId('renumber').click();
+  await expect(page.getByText(/desks? renumbered/)).toBeVisible();
+  await saved(page);
+  const inRoom = (await floorMap(page)).seats.filter((s) => s.roomId === open.id);
+  expect(inRoom.length).toBeGreaterThan(0);
+  expect(inRoom.map((s) => s.label).sort()).toEqual(
+    inRoom.map((_, i) => `1.20-${String.fromCharCode(65 + i)}`),
+  );
+
+  await page.keyboard.press('ControlOrMeta+z');
+  await saved(page);
+  const labels = async () => (await floorMap(page)).seats.map((s) => s.label).sort();
+  await expect.poll(labels).toEqual(before.seats.map((s) => s.label).sort());
 });
 
 test('create a building and a floor', async ({ page }) => {

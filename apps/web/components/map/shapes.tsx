@@ -4,9 +4,10 @@ import type Konva from 'konva';
 import { useEffect, useState, type ComponentProps } from 'react';
 import { Group, Image as KonvaImage, Line, Rect, Text } from 'react-konva';
 import { apiBlob } from '@/lib/api';
-import { initials, roomLabelPoint, SEAT_H, SEAT_W } from '@/lib/map-geometry';
+import { initials, labelGap, roomLabelPoint, SEAT_H } from '@/lib/map-geometry';
 import type { Floor, Room, Seat } from '@/lib/types';
 import { useCssVars } from '@/lib/use-css-vars';
+import { useSeatSize } from './seat-size';
 
 // Drawing shared by the floor map (view mode) and the layout editor.
 
@@ -109,15 +110,17 @@ export function SeatDesk({
 >) {
   const state = seat.occupancy;
   const stroke = look?.stroke ?? colors[`seat-${state}-stroke`];
+  const { w, h } = useSeatSize();
+  const k = h / SEAT_H; // chair, corners and cross shrink with small desks
   return (
     <Group x={seat.x} y={seat.y} rotation={seat.rotation} {...groupProps}>
       {ring && (
         <Rect
-          x={-SEAT_W / 2 - 6}
-          y={-SEAT_H / 2 - 6}
-          width={SEAT_W + 12}
-          height={SEAT_H + 12}
-          cornerRadius={12}
+          x={-w / 2 - 6}
+          y={-h / 2 - 6}
+          width={w + 12}
+          height={h + 12}
+          cornerRadius={4 + 8 * k}
           stroke={colors.primary}
           strokeWidth={ring === 'selected' ? 3 : 2}
           dash={ring === 'selected' ? undefined : [6, 4]}
@@ -125,20 +128,20 @@ export function SeatDesk({
         />
       )}
       <Rect
-        x={-14}
-        y={SEAT_H / 2 + 3}
-        width={28}
-        height={9}
-        cornerRadius={4}
+        x={-14 * k}
+        y={h / 2 + 3 * k}
+        width={28 * k}
+        height={9 * k}
+        cornerRadius={4 * k}
         fill={stroke}
         opacity={0.55}
       />
       <Rect
-        x={-SEAT_W / 2}
-        y={-SEAT_H / 2}
-        width={SEAT_W}
-        height={SEAT_H}
-        cornerRadius={8}
+        x={-w / 2}
+        y={-h / 2}
+        width={w}
+        height={h}
+        cornerRadius={8 * k}
         fill={look?.fill ?? colors[`seat-${state}-fill`]}
         stroke={stroke}
         strokeWidth={1.5}
@@ -147,7 +150,7 @@ export function SeatDesk({
       />
       {state === 'blocked' && (
         <Line
-          points={[-10, -10, 10, 10, 0, 0, 10, -10, -10, 10]}
+          points={[-10, -10, 10, 10, 0, 0, 10, -10, -10, 10].map((v) => v * k)}
           stroke={stroke}
           strokeWidth={1.5}
           strokeScaleEnabled={false}
@@ -168,11 +171,13 @@ export function SeatLabel({
   colors: Colors;
   textScale: number;
 }) {
+  const size = useSeatSize();
+  const w = Math.max(size.w, 64);
   return (
     <Text
-      x={seat.x - SEAT_W}
-      y={seat.y + SEAT_H / 2 + 16}
-      width={SEAT_W * 2}
+      x={seat.x - w}
+      y={seat.y + labelGap(size)}
+      width={w * 2}
       align="center"
       text={seat.label}
       fontFamily={FONT}
@@ -201,17 +206,18 @@ export function SeatText({
   textScale: number;
   color?: string;
 }) {
+  const { w, h } = useSeatSize();
   return (
     <Text
-      x={-SEAT_W / 2}
-      y={-SEAT_H / 2}
-      width={SEAT_W}
-      height={SEAT_H}
+      x={-w / 2}
+      y={-h / 2}
+      width={w}
+      height={h}
       align="center"
       verticalAlign="middle"
       text={seatContent(seat)}
       fontFamily={FONT}
-      fontSize={Math.min(15 * textScale, 22)}
+      fontSize={Math.min(15 * textScale, 22, h * 0.6)}
       fontStyle="600"
       fill={color ?? colors[`seat-${seat.occupancy}-text`]}
     />

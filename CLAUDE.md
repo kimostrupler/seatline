@@ -136,6 +136,10 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   instantly and sends batches one at a time, in order.
 - A seat's room is **derived on the server** from its position (smallest containing room,
   `roomForPoint` in `packages/shared`). Don't let clients set `roomId` in the editor.
+- Desk size: real size once the floor has a scale (`floors.desk_width/depth`, default 1.6 × 0.8 m),
+  else 64 × 44 units. `seatSize(floor)` + `SeatSizeContext` feed the shapes, hit tests and bounds.
+- Numbering per floor (`seat_numbering`): `floor` = 1.01…, `room` = room number + A, B… (`roomNumber`,
+  `seatLabelAt`, `renumberSeats` in ops.ts). A batch may swap labels (the server relabels in two steps).
 - Seats with any assignment history can't be deleted (block them) — enforced in
   `LayoutService`, and the history rows' FK restrict backs it up.
 - Plan images: raster only (PNG/JPG/WebP, checked by content). The image's pixel size is the

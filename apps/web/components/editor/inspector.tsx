@@ -1,6 +1,6 @@
 'use client';
 
-import { polygonArea, ROOM_TYPES, SEAT_TYPES } from '@seatline/shared';
+import { polygonArea, ROOM_TYPES, SEAT_NUMBERINGS, SEAT_TYPES } from '@seatline/shared';
 import {
   AlignCenterHorizontal,
   AlignCenterVertical,
@@ -22,6 +22,7 @@ import {
   Trash2,
   Upload,
   FileInput,
+  ListOrdered,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useId, useRef, useState, type ReactNode } from 'react';
@@ -55,13 +56,14 @@ import {
   distributeSeats,
   duplicateSelection,
   polygonBounds,
+  renumberSeats,
   resizePolygon,
   rotateSeats,
   seatRow,
   type Align,
 } from '@/lib/editor/ops';
 import { NO_SELECTION, type LayoutEditorState } from '@/lib/editor/use-layout-editor';
-import { SEAT_H, SEAT_W } from '@/lib/map-geometry';
+import { DESK_DEPTH_M, DESK_WIDTH_M, seatSize } from '@/lib/map-geometry';
 import {
   useDeleteBuilding,
   useDeleteFloor,
@@ -123,14 +125,14 @@ export function Inspector({
   return (
     <div className="grid gap-4" data-testid="inspector">
       {seats.length === 1 && rooms.length === 0 ? (
-        <SeatForm key={seats[0]!.id} seat={seats[0]!} editor={editor} level={map.floor.level} />
+        <SeatForm key={seats[0]!.id} seat={seats[0]!} editor={editor} floor={map.floor} />
       ) : rooms.length === 1 && seats.length === 0 ? (
         <RoomForm key={rooms[0]!.id} room={rooms[0]!} editor={editor} scale={map.floor.scale} />
       ) : (
         <MultiForm seats={seats} rooms={rooms} editor={editor} />
       )}
       <Separator />
-      <SelectionActions editor={editor} level={map.floor.level} clipboard={clipboard} />
+      <SelectionActions editor={editor} floor={map.floor} clipboard={clipboard} />
     </div>
   );
 }
@@ -149,11 +151,11 @@ function Field({ label, children, hint }: { label: string; children: ReactNode; 
 function SeatForm({
   seat,
   editor,
-  level,
+  floor,
 }: {
   seat: Seat;
   editor: LayoutEditorState;
-  level: number;
+  floor: Floor;
 }) {
   const t = useTranslations('inspector');
   const room = editor.doc.rooms.find((r) => r.id === seat.roomId);
@@ -199,7 +201,7 @@ function SeatForm({
       <Field label={t('inRoom')}>
         <p className="text-sm">{room?.name ?? t('noRoom')}</p>
       </Field>
-      <SeatRowField seat={seat} editor={editor} level={level} />
+      <SeatRowField seat={seat} editor={editor} floor={floor} />
     </div>
   );
 }
@@ -208,11 +210,11 @@ function SeatForm({
 function SeatRowField({
   seat,
   editor,
-  level,
+  floor,
 }: {
   seat: Seat;
   editor: LayoutEditorState;
-  level: number;
+  floor: Floor;
 }) {
   const t = useTranslations('inspector');
   const [count, setCount] = useState('3');
@@ -223,9 +225,10 @@ function SeatRowField({
       seat,
       n,
       direction,
-      level,
-      { width: SEAT_W, height: SEAT_H, gap: 28 },
+      floor.level,
+      { width: seatSize(floor).w, height: seatSize(floor).h, gap: 28 },
       () => crypto.randomUUID(),
+      floor.seatNumbering,
     );
     editor.commit(c);
     editor.setSelection(selection);
@@ -503,11 +506,11 @@ function BlockSwitch({ editor, seats }: { editor: LayoutEditorState; seats: Seat
 
 function SelectionActions({
   editor,
-  level,
+  floor,
   clipboard,
 }: {
   editor: LayoutEditorState;
-  level: number;
+  floor: Floor;
   clipboard: ClipboardActions;
 }) {
   const t = useTranslations('inspector');
@@ -523,8 +526,8 @@ function SelectionActions({
           const { changes: c, selection } = duplicateSelection(
             editor.doc,
             editor.selection,
-            level,
-            SEAT_W + 16,
+            floor.level,
+            seatSize(floor).w + 16,
             0,
             () => crypto.randomUUID(),
             (name) => te('copy', { name }),
@@ -707,6 +710,8 @@ function FloorSettings({
         </div>
       </Section>
 
+      <DeskSettings floor={floor} editor={editor} />
+
       {building && (
         <Section title={t('building')}>
           <Field label={t('name')}>
@@ -775,6 +780,87 @@ function FloorSettings({
         />
       )}
     </div>
+  );
+}
+
+/** How desks are numbered and how big they are drawn. */
+function DeskSettings({ floor, editor }: { floor: Floor; editor: LayoutEditorState }) {
+  const t = useTranslations('inspector');
+  const updateFloor = useUpdateFloor();
+  const save = (input: Partial<Pick<Floor, 'deskWidth' | 'deskDepth' | 'seatNumbering'>>) =>
+    updateFloor
+      .mutateAsync({ id: floor.id, ...input })
+      .catch((error: unknown) => toast.error(errorText(error)));
+  const metres = (v: string) => {
+    const n = Number(v.replace(',', '.'));
+    return v.trim() === '' ? null : n >= 0.3 && n <= 5 ? n : undefined;
+  };
+  const renumber = () => {
+    const c = renumberSeats(editor.doc, floor.level, floor.seatNumbering, seatSize(floor).h);
+    if (!c.seats.update.length) return toast.info(t('renumberNone'));
+    editor.commit(c);
+    toast.success(t('renumbered', { count: c.seats.update.length }));
+  };
+  return (
+    <Section title={t('desks')}>
+      <Field label={t('numbering')} hint={t('numberingHint')}>
+        <Select
+          value={floor.seatNumbering}
+          onValueChange={(v) => void save({ seatNumbering: v as Floor['seatNumbering'] })}
+        >
+          <SelectTrigger className="w-full" aria-label={t('numbering')}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {SEAT_NUMBERINGS.map((n) => (
+              <SelectItem key={n} value={n}>
+                {t(`numberingBy.${n}`, { level: floor.level })}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Field>
+      <Button
+        variant="outline"
+        onClick={renumber}
+        disabled={!editor.doc.seats.length}
+        data-testid="renumber"
+      >
+        <ListOrdered /> {t('renumber')}
+      </Button>
+      {floor.scale ? (
+        <Field label={t('deskSize')} hint={t('deskSizeHint')}>
+          <div className="flex items-center gap-2">
+            <CommitInput
+              aria-label={t('deskWidth')}
+              inputMode="decimal"
+              placeholder={String(DESK_WIDTH_M)}
+              value={floor.deskWidth == null ? '' : String(floor.deskWidth)}
+              onCommit={(v) => {
+                const deskWidth = metres(v);
+                if (deskWidth === undefined) toast.error(t('deskSizeInvalid'));
+                else void save({ deskWidth });
+              }}
+            />
+            <span className="text-muted-foreground">×</span>
+            <CommitInput
+              aria-label={t('deskDepth')}
+              inputMode="decimal"
+              placeholder={String(DESK_DEPTH_M)}
+              value={floor.deskDepth == null ? '' : String(floor.deskDepth)}
+              onCommit={(v) => {
+                const deskDepth = metres(v);
+                if (deskDepth === undefined) toast.error(t('deskSizeInvalid'));
+                else void save({ deskDepth });
+              }}
+            />
+            <span className="text-sm text-muted-foreground">m</span>
+          </div>
+        </Field>
+      ) : (
+        <p className="text-sm text-muted-foreground">{t('deskSizeNoScale')}</p>
+      )}
+    </Section>
   );
 }
 

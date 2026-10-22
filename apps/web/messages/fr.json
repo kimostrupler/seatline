@@ -244,7 +244,23 @@
     "importPlan": "Importer un plan d’architecte",
     "planSection": "Plan",
     "planEmpty": "Importez le plan de l’architecte et Seatline dessine les salles et les places, ou importez une image pour dessiner dessus.",
-    "more": "Plus"
+    "more": "Plus",
+    "desks": "Postes de travail",
+    "numbering": "Numérotation",
+    "numberingHint": "S’applique aux nouveaux postes. «Renuméroter» l’applique à tous les postes de cet étage.",
+    "numberingBy": {
+      "floor": "Par étage ({level}.01, {level}.02 …)",
+      "room": "Par pièce (numéro de pièce + A, B …)"
+    },
+    "renumber": "Renuméroter les postes",
+    "renumbered": "{count, plural, one {# poste renuméroté} other {# postes renumérotés}}",
+    "renumberNone": "Les postes sont déjà numérotés dans l’ordre.",
+    "deskSize": "Taille des bureaux",
+    "deskSizeHint": "Les bureaux sont dessinés à cette taille réelle. Vide = 1,6 × 0,8 m.",
+    "deskWidth": "Largeur du bureau en mètres",
+    "deskDepth": "Profondeur du bureau en mètres",
+    "deskSizeNoScale": "Définissez l’échelle du plan (outil règle) pour dessiner les bureaux à leur taille réelle.",
+    "deskSizeInvalid": "Saisissez une taille entre 0,3 et 5 m."
   },
   "auth": {
     "signInTitle": "Se connecter à Seatline",

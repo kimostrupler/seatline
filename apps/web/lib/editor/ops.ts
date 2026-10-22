@@ -1,4 +1,10 @@
-import { relabel, roomForPoint, type LayoutRoom, type LayoutSeat } from '@seatline/shared';
+import {
+  relabel,
+  roomForPoint,
+  type LayoutRoom,
+  type LayoutSeat,
+  type SeatNumbering,
+} from '@seatline/shared';
 
 export { relabel };
 import type { Point, Room, Seat } from '../types';
@@ -133,6 +139,98 @@ export function nextSeatLabel(
     label = `${prefix}${String(n).padStart(2, '0')}`;
   } while (used.has(label));
   return label;
+}
+
+/** A room's number: the first word of its name with a digit in it ("1.04 Open Space" → "1.04"). */
+export function roomNumber(name: string): string | null {
+  const word = name.split(/\s+/).find((w) => /\d/.test(w));
+  return word ? word.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '') || null : null;
+}
+
+/** A, B, … Z, AA, AB, … */
+function letters(i: number): string {
+  let out = '';
+  for (let n = i + 1; n > 0; n = Math.floor((n - 1) / 26))
+    out = String.fromCharCode(65 + ((n - 1) % 26)) + out;
+  return out;
+}
+
+/** Next free label in a room: "<room>-A", "<room>-B", … */
+export function nextRoomSeatLabel(
+  seats: Pick<Seat, 'label'>[],
+  room: string,
+  taken = new Set<string>(),
+): string {
+  const used = new Set([...seats.map((s) => s.label), ...taken]);
+  let i = 0;
+  while (used.has(`${room}-${letters(i)}`)) i += 1;
+  return `${room}-${letters(i)}`;
+}
+
+/** The label for a new desk at `point`, following the floor's numbering. */
+export function seatLabelAt(
+  doc: LayoutDoc,
+  level: number,
+  numbering: SeatNumbering,
+  point: Point,
+  taken = new Set<string>(),
+): string {
+  const room = numbering === 'room' ? roomForPoint(point, doc.rooms) : undefined;
+  const number = room && roomNumber(room.name);
+  return number
+    ? nextRoomSeatLabel(doc.seats, number, taken)
+    : nextSeatLabel(doc.seats, level, taken);
+}
+
+/** Seats in reading order: rows top to bottom (within `rowTolerance`), then left to right. */
+function readingOrder<T extends Point>(seats: T[], rowTolerance: number): T[] {
+  const byY = [...seats].sort((a, b) => a.y - b.y || a.x - b.x);
+  const rows: T[][] = [];
+  for (const s of byY) {
+    const row = rows.at(-1);
+    if (row && s.y - row[0]!.y <= rowTolerance) row.push(s);
+    else rows.push([s]);
+  }
+  return rows.flatMap((row) => row.sort((a, b) => a.x - b.x));
+}
+
+/**
+ * Number every desk again, room by room (rooms in name order), in reading order inside each
+ * room. "floor": 1.01, 1.02, …; "room": 1.04-A, 1.04-B, … (desks outside a numbered room get
+ * floor numbers). Only changed labels are sent.
+ */
+export function renumberSeats(
+  doc: LayoutDoc,
+  level: number,
+  numbering: SeatNumbering,
+  rowTolerance: number,
+): Changes {
+  const rooms = [...doc.rooms].sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { numeric: true }),
+  );
+  const groups = [
+    ...rooms.map((r) => ({ room: r, seats: doc.seats.filter((s) => s.roomId === r.id) })),
+    { room: null, seats: doc.seats.filter((s) => !rooms.some((r) => r.id === s.roomId)) },
+  ];
+  const labels = new Map<string, string>();
+  let n = 0;
+  const pad = doc.seats.length > 99 ? 3 : 2;
+  for (const { room, seats } of groups) {
+    const number = numbering === 'room' && room ? roomNumber(room.name) : null;
+    readingOrder(seats, rowTolerance).forEach((s, i) => {
+      labels.set(
+        s.id,
+        number ? `${number}-${letters(i)}` : `${level}.${String(++n).padStart(pad, '0')}`,
+      );
+    });
+  }
+  return changes({
+    seats: {
+      update: doc.seats
+        .filter((s) => labels.get(s.id) !== s.label)
+        .map((s) => ({ id: s.id, label: labels.get(s.id)! })),
+    },
+  });
 }
 
 export const snap = (v: number, grid: number) => Math.round(v / grid) * grid;
@@ -390,6 +488,7 @@ export function seatRow(
   level: number,
   size: { width: number; height: number; gap: number },
   newId: () => string,
+  numbering: SeatNumbering = 'floor',
 ): { changes: Changes; selection: SelectionIds } {
   const turned = Math.round(seat.rotation / 90) % 2 !== 0;
   const w = turned ? size.height : size.width;
@@ -397,7 +496,8 @@ export function seatRow(
   const step = direction === 'right' ? { x: w, y: 0 } : { x: 0, y: h + size.gap };
   const taken = new Set<string>();
   const seats = Array.from({ length: count }, (_, i) => {
-    const label = nextSeatLabel(doc.seats, level, taken);
+    // the row continues the first desk's room numbering
+    const label = seatLabelAt(doc, level, numbering, seat, taken);
     taken.add(label);
     return {
       ...toLayoutSeat(seat),
