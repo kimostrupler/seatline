@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BillingBanner } from '@/components/billing/billing-banner';
+import { TopBar } from '@/components/common/top-bar';
 
-/** Three columns on desktop (sidebar · main · details); on phones the sidebar is a sheet. */
+/** The top bar, then three columns on desktop (sidebar · map · details); on phones the sidebar is a sheet. */
 export function Shell({
   sidebar,
   title,
@@ -29,39 +30,42 @@ export function Shell({
 }) {
   const t = useTranslations('map');
   return (
-    <div className="grid h-dvh grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)_340px]">
-      <aside className="hidden min-h-0 border-r lg:block">{sidebar}</aside>
-      <main className="flex min-h-0 flex-col">
-        <BillingBanner />
-        <header className="flex h-12 shrink-0 items-center gap-2 border-b px-3">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-8 lg:hidden"
-                aria-label={t('openSidebar')}
-              >
-                <Menu />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-80 p-0 pt-10">
-              <SheetTitle className="sr-only">{t('openSidebar')}</SheetTitle>
-              {/* room above for the sheet's close button, so it never covers the account menu */}
-              {sidebar}
-            </SheetContent>
-          </Sheet>
-          <h1 className="min-w-0 flex-1 truncate text-sm">{title}</h1>
-          {headerEnd}
-        </header>
-        <div className="relative min-h-0 flex-1">{main}</div>
-      </main>
-      <aside
-        className="hidden min-h-0 overflow-y-auto border-l p-4 lg:block"
-        aria-label={detailsLabel}
-      >
-        {details}
-      </aside>
+    <div className="flex h-dvh flex-col">
+      <BillingBanner />
+      <TopBar />
+      <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)_340px]">
+        <aside className="hidden min-h-0 border-r lg:block">{sidebar}</aside>
+        <main className="flex min-h-0 flex-col">
+          <header className="flex h-12 shrink-0 items-center gap-2 border-b px-3">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-8 lg:hidden"
+                  aria-label={t('openSidebar')}
+                >
+                  <Menu />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-80 p-0 pt-10">
+                <SheetTitle className="sr-only">{t('openSidebar')}</SheetTitle>
+                {/* room above for the sheet's close button */}
+                {sidebar}
+              </SheetContent>
+            </Sheet>
+            <h1 className="min-w-0 flex-1 truncate text-sm">{title}</h1>
+            {headerEnd}
+          </header>
+          <div className="relative min-h-0 flex-1">{main}</div>
+        </main>
+        <aside
+          className="hidden min-h-0 overflow-y-auto border-l p-4 lg:block"
+          aria-label={detailsLabel}
+        >
+          {details}
+        </aside>
+      </div>
       {mobileDetails}
     </div>
   );

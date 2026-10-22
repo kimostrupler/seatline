@@ -188,7 +188,8 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 ## Home dashboard
 
 - `/` is the dashboard, the map lives at `/map` (`app/page.tsx` redirects old `/?floor=…` links).
-  Pages share `PageFrame` + `NavLinks` (top bar); the map's sidebar shows the same `NavLinks`.
+  Every page, the map (view + edit) included, has the same `TopBar` (`components/common/top-bar.tsx`:
+  `NavLinks`, language, `AccountMenu`); the map's sidebar only has the place picker + people.
 - Layouts: `dashboard_layouts` (person_id null = company default; RLS like everything else).
   `GET /dashboard` falls back personal → company → `DEFAULT_DASHBOARD` (packages/shared).
   Saving one's own layout is allowed for viewers too (`@OwnSettings`). Audited.
