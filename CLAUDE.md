@@ -379,6 +379,13 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - Website texts are `site.*` messages, used only server-side (`app/layout.tsx` keeps them out
   of the client). Legal texts live in `lib/legal/docs.ts` (same sections in all languages,
   tested); the operator's details in `lib/legal/operator.ts` — never invent them.
+- SEO / AI: the landing page has an address per language (`/` en, `/de`, `/fr`; the middleware
+  rewrites to `/welcome` with the `x-seatline-language` header, which `i18n/request.ts` prefers),
+  canonical + hreflang (`lib/seo.ts`), Open Graph/Twitter cards with `/og-image` (next/og),
+  schema.org JSON-LD (Organization, SoftwareApplication with price, WebPage, FAQPage),
+  `app/icon.svg` + `apple-icon.png`, `/llms.txt` (built from the `site.*` texts), robots that
+  welcome AI crawlers on the site and block the app (app pages are `noindex` by default), and a
+  sitemap with hreflang. The landing header uses language links, not the cookie switch.
 - A new sub-processor, tracking or retention change must be reflected in the privacy policy
   (`docs/legal.md`). Infra: `infra/azure/site-domain.sh`, bicep `siteDomains`.
 

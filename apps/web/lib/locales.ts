@@ -3,6 +3,8 @@ export const LOCALES = { de: 'de-CH', fr: 'fr-CH', en: 'en-GB' } as const;
 export type Language = keyof typeof LOCALES;
 export const LANGUAGES = Object.keys(LOCALES) as Language[];
 export const LANGUAGE_COOKIE = 'seatline-language';
+/** Set by the middleware for the website's /de and /fr pages (one address per language for search engines). */
+export const PAGE_LANGUAGE_HEADER = 'x-seatline-language';
 export const LANGUAGE_NAMES: Record<Language, string> = {
   de: 'Deutsch',
   fr: 'Français',

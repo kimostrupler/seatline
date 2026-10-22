@@ -48,3 +48,25 @@ test('health check for the uptime monitor; website visits are counted anonymousl
   expect(visit.status()).toBe(204);
   expect(visit.headers()['set-cookie']).toBeUndefined();
 });
+
+test('search engines: a page per language, structured data, llms.txt', async ({
+  page,
+  request,
+}) => {
+  await page.goto('/de');
+  await expect(page.getByRole('heading', { name: 'Wissen, wer wo sitzt.' })).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'de-CH');
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/de$/);
+  await expect(page.locator('link[rel="alternate"][hreflang="fr"]')).toHaveAttribute(
+    'href',
+    /\/fr$/,
+  );
+  const ld = JSON.parse((await page.locator('script[type="application/ld+json"]').textContent())!);
+  expect(ld['@graph'].map((x: { '@type': string }) => x['@type'])).toContain('FAQPage');
+  await page.getByRole('link', { name: 'FR', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Savoir qui est assis où.' })).toBeVisible();
+
+  const llms = await request.get('/llms.txt');
+  expect(await llms.text()).toContain('# Seatline');
+  expect((await request.get('/og-image')).headers()['content-type']).toBe('image/png');
+});

@@ -19,16 +19,42 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { Metadata } from 'next';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { FloorIllustration } from '@/components/site/floor-illustration';
 import { demoUrl, SitePage, signInUrl } from '@/components/site/site-chrome';
 import { Button } from '@/components/ui/button';
 import { OPERATOR } from '@/lib/legal/operator';
-import { SITE_PRICE_CHF } from '@/lib/site';
+import { LOCALES, type Language } from '@/lib/locales';
+import { webConfig } from '@/lib/server/config';
+import { landingJsonLd, languageAlternates, pageUrl } from '@/lib/seo';
+import { SITE_PRICE_CHF, siteUrl } from '@/lib/site';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('site');
-  return { title: t('metaTitle'), description: t('metaDescription') };
+  const language = (await getLocale()).slice(0, 2) as Language;
+  const base = siteUrl(webConfig().APP_URL);
+  const url = pageUrl(base, language);
+  return {
+    title: { absolute: t('metaTitle') },
+    description: t('metaDescription'),
+    alternates: { canonical: url, languages: languageAlternates(base) },
+    openGraph: {
+      type: 'website',
+      url,
+      siteName: 'Seatline',
+      title: t('metaTitle'),
+      description: t('metaDescription'),
+      locale: LOCALES[language].replace('-', '_'),
+      images: [{ url: `${base}/og-image`, width: 1200, height: 630, alt: t('heroTitle') }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: t('metaTitle'),
+      description: t('metaDescription'),
+      images: [`${base}/og-image`],
+    },
+    robots: { index: true, follow: true },
+  };
 }
 
 const FEATURES: [LucideIcon, `f${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12}`][] = [
@@ -47,11 +73,25 @@ const FEATURES: [LucideIcon, `f${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 1
 ];
 
 /** The public landing page: seatline.ch (and /welcome on any address). */
+const FAQ = ['1', '2', '3', '4', '5', '6', '7', '8', '9'] as const;
+
 export default async function Welcome() {
   const t = await getTranslations('site');
   const price = `CHF ${SITE_PRICE_CHF}`;
+  const jsonLd = landingJsonLd({
+    base: siteUrl(webConfig().APP_URL),
+    language: (await getLocale()).slice(0, 2) as Language,
+    name: t('metaTitle'),
+    description: t('metaDescription'),
+    faq: FAQ.map((n) => ({ q: t(`q${n}`), a: t(`a${n}`) })),
+  });
   return (
     <SitePage sections>
+      <script
+        type="application/ld+json"
+        // our own data; "<" escaped so text can never end the script tag
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
+      />
       {/* hero */}
       <section className="mx-auto grid max-w-6xl items-center gap-12 px-4 pt-14 pb-20 sm:px-6 lg:grid-cols-[1fr_1.1fr] lg:pt-20">
         <div className="grid gap-6">
@@ -174,7 +214,7 @@ export default async function Welcome() {
         <div className="mx-auto grid max-w-3xl scroll-mt-20 gap-8 px-4 py-20 sm:px-6">
           <h2 className="text-3xl font-semibold tracking-tight">{t('faqTitle')}</h2>
           <div className="grid gap-3">
-            {(['1', '2', '3', '4', '5', '6', '7', '8', '9'] as const).map((n) => (
+            {FAQ.map((n) => (
               <details key={n} className="group rounded-xl border bg-background px-5 py-4">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">
                   {t(`q${n}`)}

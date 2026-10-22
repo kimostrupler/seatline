@@ -5,6 +5,8 @@ import { SitePage } from '@/components/site/site-chrome';
 import { legalText, LEGAL_DOCS, type LegalDoc } from '@/lib/legal/docs';
 import { LEGAL_UPDATED, OPERATOR } from '@/lib/legal/operator';
 import type { Language } from '@/lib/locales';
+import { webConfig } from '@/lib/server/config';
+import { siteUrl } from '@/lib/site';
 
 const DOCS = [...LEGAL_DOCS, 'imprint'] as const;
 type Doc = (typeof DOCS)[number];
@@ -18,7 +20,12 @@ export async function generateMetadata({
   const { doc } = await params;
   if (!isDoc(doc)) return {};
   const t = await getTranslations('legal');
-  return { title: `${t(doc)} · Seatline` };
+  const url = `${siteUrl(webConfig().APP_URL)}/legal/${doc}`;
+  return {
+    title: `${t(doc)} · Seatline`,
+    alternates: { canonical: url },
+    robots: { index: true, follow: true },
+  };
 }
 
 /** Terms of service, privacy policy and imprint — public, on the website and the app. */
