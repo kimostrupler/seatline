@@ -32,6 +32,8 @@ export function useLayoutEditor(map: FloorMap) {
   const floorId = map.floor.id;
   const [pending, setPending] = useState<Changes[]>([]);
   const [selection, setSelection] = useState<Selection>(NO_SELECTION);
+  /** a selected map marker (kept apart from rooms/seats: it has its own small form) */
+  const [marker, setMarker] = useState<string | null>(null);
   const [stacks, setStacks] = useState<{ undo: HistoryEntry[]; redo: HistoryEntry[] }>({
     undo: [],
     redo: [],
@@ -40,8 +42,12 @@ export function useLayoutEditor(map: FloorMap) {
 
   const doc: LayoutDoc = useMemo(
     () =>
-      pending.reduce((d, c) => applyChanges(d, c, floorId), { rooms: map.rooms, seats: map.seats }),
-    [map.rooms, map.seats, pending, floorId],
+      pending.reduce<LayoutDoc>((d, c) => applyChanges(d, c, floorId), {
+        rooms: map.rooms,
+        seats: map.seats,
+        markers: map.markers ?? [],
+      }),
+    [map.rooms, map.seats, map.markers, pending, floorId],
   );
   const docRef = useRef(doc);
   docRef.current = doc;
@@ -84,6 +90,7 @@ export function useLayoutEditor(map: FloorMap) {
         seats: sel.seats.filter((id) => !c.seats.delete.includes(id)),
         rooms: sel.rooms.filter((id) => !c.rooms.delete.includes(id)),
       }));
+      setMarker((m) => (m && c.markers.delete.includes(m) ? null : m));
     },
     [send],
   );
@@ -107,6 +114,8 @@ export function useLayoutEditor(map: FloorMap) {
     doc,
     selection,
     setSelection,
+    marker,
+    setMarker,
     commit,
     undo,
     redo,

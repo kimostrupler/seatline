@@ -139,6 +139,49 @@ describe('layout batch', () => {
     await api(app).patch(`/floors/${a.floorId}`).set(a.headers).send({ deskWidth: 9 }).expect(400);
   });
 
+  it('meeting rooms, team zones, desk features and markers', async () => {
+    const room = {
+      id: randomUUID(),
+      name: 'Rigi',
+      type: 'meeting',
+      polygon: square(400, 400, 100),
+      capacity: 8,
+      equipment: ['screen', 'video'],
+    };
+    const desk = { ...seat('W1', 10, 10), features: ['standing', 'window'] };
+    const kitchen = { id: randomUUID(), kind: 'kitchen', x: 50, y: 60, label: 'Café' };
+    await layout(a, {
+      rooms: { create: [room], update: [{ id: a.roomId, team: 'Finance' }] },
+      seats: { create: [desk] },
+      markers: { create: [kitchen] },
+    }).expect(200);
+    let map = (await api(app).get(`/floors/${a.floorId}/map`).set(a.headers).expect(200)).body;
+    expect(map.rooms.find((r: { id: string }) => r.id === room.id)).toMatchObject({
+      capacity: 8,
+      equipment: ['screen', 'video'],
+    });
+    expect(map.rooms.find((r: { id: string }) => r.id === a.roomId).team).toBe('Finance');
+    expect(map.seats.find((s: { id: string }) => s.id === desk.id).features).toEqual([
+      'standing',
+      'window',
+    ]);
+    expect(map.markers).toEqual([{ id: kitchen.id, kind: 'kitchen', x: 50, y: 60, label: 'Café' }]);
+
+    await layout(a, { markers: { update: [{ id: kitchen.id, x: 70 }] } }).expect(200);
+    await layout(b, { markers: { delete: [kitchen.id] } }).expect(404); // other company
+    await layout(a, { markers: { delete: [kitchen.id] } }).expect(200);
+    map = (await api(app).get(`/floors/${a.floorId}/map`).set(a.headers).expect(200)).body;
+    expect(map.markers).toEqual([]);
+
+    await layout(a, { seats: { create: [{ ...seat('X', 1, 1), features: ['jacuzzi'] }] } }).expect(
+      400,
+    );
+    await layout(a, { rooms: { update: [{ id: a.roomId, capacity: 0 }] } }).expect(400);
+    await layout(a, {
+      markers: { create: [{ id: randomUUID(), kind: 'pool', x: 1, y: 1 }] },
+    }).expect(400);
+  });
+
   it('validates input', async () => {
     await layout(a, { seats: { create: [{ ...seat('B', 1, 1), id: 'nope' }] } }).expect(400);
     await layout(a, {

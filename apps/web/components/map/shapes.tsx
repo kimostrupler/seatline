@@ -6,6 +6,7 @@ import { Group, Image as KonvaImage, Line, Rect, Text } from 'react-konva';
 import { apiBlob } from '@/lib/api';
 import { initials, labelGap, roomLabelPoint, SEAT_H } from '@/lib/map-geometry';
 import type { Floor, Room, Seat } from '@/lib/types';
+import { withAlpha } from '@/lib/team-colors';
 import { useCssVars } from '@/lib/use-css-vars';
 import { useSeatSize } from './seat-size';
 
@@ -53,6 +54,8 @@ export function RoomShape({
   textScale,
   selected = false,
   translucent = false,
+  zoneColor,
+  caption,
   ...groupProps
 }: {
   room: Room;
@@ -61,6 +64,10 @@ export function RoomShape({
   selected?: boolean;
   /** let the plan image show through */
   translucent?: boolean;
+  /** a team's zone: tinted in the team's colour */
+  zoneColor?: string;
+  /** a second line under the name ("8 seats", "Finance zone") */
+  caption?: string;
 } & Omit<ComponentProps<typeof Group>, 'children'>) {
   const label = roomLabelPoint(room.polygon);
   return (
@@ -68,7 +75,13 @@ export function RoomShape({
       <Line
         points={room.polygon.flatMap((p) => [p.x, p.y])}
         closed
-        fill={room.type === 'meeting' ? colors['room-meeting-fill'] : colors['room-fill']}
+        fill={
+          zoneColor
+            ? withAlpha(zoneColor, 0.14)
+            : room.type === 'meeting'
+              ? colors['room-meeting-fill']
+              : colors['room-fill']
+        }
         opacity={translucent ? 0.55 : 1}
         stroke={selected ? colors.primary : colors['room-stroke']}
         strokeWidth={selected ? 2.5 : 1.5}
@@ -84,6 +97,18 @@ export function RoomShape({
         fill={colors['room-label']}
         listening={false}
       />
+      {caption && (
+        <Text
+          x={label.x}
+          y={label.y + 16 * textScale}
+          text={caption}
+          fontFamily={FONT}
+          fontSize={11 * textScale}
+          fill={colors['room-label']}
+          opacity={0.8}
+          listening={false}
+        />
+      )}
     </Group>
   );
 }

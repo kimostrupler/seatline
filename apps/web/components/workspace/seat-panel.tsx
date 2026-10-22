@@ -2,6 +2,7 @@
 
 import { X } from 'lucide-react';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
+import { FEATURE_ICONS } from '@/components/map/markers';
 import { StatusDot } from '@/components/map/status-dot';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -34,6 +35,8 @@ export function SeatPanel({
   const now = useNow({ updateInterval: 60_000 });
   const history = useSeatHistory(seat.id);
   const current = seat.currentAssignment;
+  const ti = useTranslations('inspector');
+  const tz = useTranslations('map');
 
   return (
     <div className="grid gap-4" data-testid="seat-panel">
@@ -42,7 +45,24 @@ export function SeatPanel({
           <h2 className="text-lg font-semibold">{t('title', { label: seat.label })}</h2>
           <p className="text-sm text-muted-foreground">
             {room ? t('room', { room: room.name }) : t('noRoom')}
+            {room?.team && ` · ${tz('zone', { team: room.team })}`}
           </p>
+          {!!seat.features?.length && (
+            <ul className="mt-2 flex flex-wrap gap-1.5" aria-label={ti('features')}>
+              {seat.features.map((f) => {
+                const Icon = FEATURE_ICONS[f];
+                return (
+                  <li
+                    key={f}
+                    className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs"
+                  >
+                    <Icon className="size-3.5 text-muted-foreground" aria-hidden />
+                    {ti(`feature.${f}`)}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
         <Button
           variant="ghost"

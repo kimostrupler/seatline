@@ -6,6 +6,7 @@ import {
   Keyboard,
   Loader2,
   MousePointer2,
+  MapPinPlus,
   PenTool,
   Redo2,
   Ruler,
@@ -22,12 +23,13 @@ import type { Tool } from './layout-editor';
 const TOOLS: Array<{
   tool: Tool;
   icon: typeof Square;
-  label: 'select' | 'addSeat' | 'drawRoom' | 'drawRect' | 'measure';
+  label: 'select' | 'addSeat' | 'drawRoom' | 'drawRect' | 'measure' | 'addMarker';
 }> = [
   { tool: 'select', icon: MousePointer2, label: 'select' },
   { tool: 'seat', icon: Armchair, label: 'addSeat' },
   { tool: 'room', icon: PenTool, label: 'drawRoom' },
   { tool: 'rect', icon: Square, label: 'drawRect' },
+  { tool: 'marker', icon: MapPinPlus, label: 'addMarker' },
   { tool: 'measure', icon: Ruler, label: 'measure' },
 ];
 
@@ -37,6 +39,7 @@ const HINTS = {
   room: 'hintRoom',
   rect: 'hintRect',
   measure: 'hintMeasure',
+  marker: 'hintMarker',
 } as const;
 
 export function EditorToolbar({

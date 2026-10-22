@@ -372,3 +372,25 @@ describe('numbering per room', () => {
     });
   });
 });
+
+describe('markers', () => {
+  it('are created, moved and deleted with undo like rooms and seats', () => {
+    const base = { ...doc, markers: [{ id: 'm1', kind: 'kitchen' as const, x: 10, y: 10 }] };
+    const c = changes({
+      markers: {
+        create: [{ id: 'm2', kind: 'printer', x: 5, y: 5, label: 'P1' }],
+        update: [{ id: 'm1', x: 99 }],
+      },
+    });
+    const after = applyChanges(base, c, 'f');
+    expect(after.markers).toEqual([
+      { id: 'm1', kind: 'kitchen', x: 99, y: 10 },
+      { id: 'm2', kind: 'printer', x: 5, y: 5, label: 'P1' },
+    ]);
+    const undone = applyChanges(after, inverse(base, c), 'f');
+    expect(undone.markers).toEqual(base.markers);
+    const removed = applyChanges(base, changes({ markers: { delete: ['m1'] } }), 'f');
+    expect(removed.markers).toEqual([]);
+    expect(isEmpty(changes({ markers: { delete: ['m1'] } }))).toBe(false);
+  });
+});

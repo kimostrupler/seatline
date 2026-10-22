@@ -17,6 +17,7 @@ import {
   FONT,
 } from '@/components/map/shapes';
 import { useViewport, ZoomControls } from '@/components/map/viewport';
+import { MarkerOverlay } from '@/components/map/markers';
 import { SeatSizeContext } from '@/components/map/seat-size';
 import {
   applyChanges,
@@ -40,11 +41,14 @@ import {
   type Selection,
 } from '@/lib/editor/use-layout-editor';
 import { contentBounds, seatSize, toPlan } from '@/lib/map-geometry';
-import type { FloorMap, Point } from '@/lib/types';
+import type { MarkerKind } from '@seatline/shared';
+import type { FloorMap, Point, Room } from '@/lib/types';
+import { useStats } from '@/lib/queries';
+import { teamSlots } from '@/lib/team-colors';
 import type { ClipboardActions } from './use-clipboard';
 import { useMediaQuery } from '@/lib/use-media-query';
 
-export type Tool = 'select' | 'seat' | 'room' | 'rect' | 'measure';
+export type Tool = 'select' | 'seat' | 'room' | 'rect' | 'measure' | 'marker';
 
 type Drag =
   | { kind: 'move'; start: Point; delta: Point }
@@ -53,7 +57,8 @@ type Drag =
   | { kind: 'edge'; roomId: string; index: number; point: Point }
   | { kind: 'pan'; start: Point; origin: Point }
   | { kind: 'rect'; start: Point; end: Point }
-  | { kind: 'measure'; start: Point; end: Point };
+  | { kind: 'measure'; start: Point; end: Point }
+  | { kind: 'marker'; id: string; start: Point; at: Point };
 
 const isTyping = (target: EventTarget | null) =>
   target instanceof HTMLElement &&
@@ -145,6 +150,22 @@ export function LayoutEditor({
     return doc;
   }, [doc, drag, selection, floor.id]);
 
+  // team zones and meeting-room sizes, as on the map
+  const tMap = useTranslations('map');
+  const stats = useStats().data;
+  const slots = useMemo(() => teamSlots(stats?.departments ?? []), [stats]);
+  const zoneColor = (room: Room) => {
+    if (!room.team || !colors) return undefined;
+    const slot = slots.get(room.team);
+    return slot ? colors[`team-${slot}` as keyof typeof colors] : colors['room-stroke'];
+  };
+  const roomCaption = (room: Room) =>
+    room.type === 'meeting' && room.capacity
+      ? tMap('capacity', { count: room.capacity })
+      : room.team
+        ? tMap('zone', { team: room.team })
+        : undefined;
+
   const selectedSeats = new Set(selection.seats);
   const selectedRooms = new Set(selection.rooms);
   const singleRoom =
@@ -153,6 +174,20 @@ export function LayoutEditor({
       : undefined;
 
   // ---- actions ---------------------------------------------------------------
+  const lastMarkerKind = useRef<MarkerKind>('kitchen');
+  const addMarker = (p: Point) => {
+    const id = crypto.randomUUID();
+    commit(
+      changes({
+        markers: {
+          create: [{ id, kind: lastMarkerKind.current, x: Math.round(p.x), y: Math.round(p.y) }],
+        },
+      }),
+    );
+    setSelection(NO_SELECTION);
+    editor.setMarker(id);
+    setTool('select');
+  };
   const addSeat = (p: Point) => {
     const seat = {
       id: crypto.randomUUID(),
@@ -247,14 +282,16 @@ export function LayoutEditor({
       } else if (e.key === '?') {
         onShowShortcuts();
       } else if (e.key === 'Escape') {
-        if (roomPoints.length) setRoomPoints([]);
+        if (editor.marker) editor.setMarker(null);
+        else if (roomPoints.length) setRoomPoints([]);
         else if (tool !== 'select') setTool('select');
         else setSelection(NO_SELECTION);
       } else if (e.key === 'Enter' && tool === 'room') {
         finishRoom(roomPoints);
       } else if (e.key === 'Delete' || e.key === 'Backspace') {
         e.preventDefault();
-        removeSelection();
+        if (editor.marker) commit(changes({ markers: { delete: [editor.marker] } }));
+        else removeSelection();
       } else if (e.key.startsWith('Arrow')) {
         e.preventDefault();
         const step = e.shiftKey ? grid * 10 : grid;
@@ -268,6 +305,7 @@ export function LayoutEditor({
       else if (key === 'p') setTool('room');
       else if (key === 'b') setTool('rect');
       else if (key === 'm') setTool('measure');
+      else if (key === 'k') setTool('marker');
     };
     const onKeyUp = (e: KeyboardEvent) => {
       if (e.key === ' ') setSpaceDown(false);
@@ -288,10 +326,21 @@ export function LayoutEditor({
   // ---- mouse -----------------------------------------------------------------
   const hit = (
     target: Konva.Node,
-  ): { kind: 'seat' | 'room' | 'vertex' | 'edge'; id: string; index?: number } | null => {
+  ): {
+    kind: 'seat' | 'room' | 'vertex' | 'edge' | 'marker';
+    id: string;
+    index?: number;
+  } | null => {
     for (let n: Konva.Node | null = target; n; n = n.getParent()) {
       const [kind, id, index] = n.name().split(':');
-      if ((kind === 'seat' || kind === 'room' || kind === 'vertex' || kind === 'edge') && id)
+      if (
+        (kind === 'seat' ||
+          kind === 'room' ||
+          kind === 'vertex' ||
+          kind === 'edge' ||
+          kind === 'marker') &&
+        id
+      )
         return { kind, id, index: index === undefined ? undefined : Number(index) };
     }
     return null;
@@ -308,6 +357,7 @@ export function LayoutEditor({
     const p = snapPoint(raw, free);
 
     if (tool === 'seat') return addSeat(p);
+    if (tool === 'marker') return addMarker(p);
     if (tool === 'room') {
       const first = roomPoints[0];
       if (
@@ -325,6 +375,12 @@ export function LayoutEditor({
 
     // select tool
     const target = hit(e.target);
+    if (target?.kind === 'marker') {
+      setSelection(NO_SELECTION);
+      editor.setMarker(target.id);
+      return setDrag({ kind: 'marker', id: target.id, start: raw, at: raw });
+    }
+    editor.setMarker(null);
     if (target?.kind === 'vertex' || target?.kind === 'edge') {
       return setDrag({ kind: target.kind, roomId: target.id, index: target.index!, point: p });
     }
@@ -376,6 +432,7 @@ export function LayoutEditor({
       setHover(over?.kind === 'vertex' || over?.kind === 'edge' ? over.kind : null);
       return;
     }
+    if (drag.kind === 'marker') return setDrag({ ...drag, at: raw });
     if (drag.kind === 'move') {
       const d = { x: raw.x - drag.start.x, y: raw.y - drag.start.y };
       setDrag({ ...drag, delta: free ? d : { x: snap(d.x, grid), y: snap(d.y, grid) } });
@@ -388,6 +445,20 @@ export function LayoutEditor({
   const onPointerUp = (e: Konva.KonvaEventObject<PointerEvent>) => {
     if (!drag || !e.evt.isPrimary) return;
     setDrag(null);
+    if (drag.kind === 'marker') {
+      const m = doc.markers?.find((x) => x.id === drag.id);
+      const dx = drag.at.x - drag.start.x;
+      const dy = drag.at.y - drag.start.y;
+      if (m && Math.hypot(dx, dy) * view.scale > 3)
+        commit(
+          changes({
+            markers: {
+              update: [{ id: m.id, x: Math.round(m.x + dx), y: Math.round(m.y + dy) }],
+            },
+          }),
+        );
+      return;
+    }
     if (drag.kind === 'move') {
       commit(moveSelection(doc, selection, drag.delta.x, drag.delta.y));
     } else if (drag.kind === 'vertex' || drag.kind === 'edge') {
@@ -505,6 +576,8 @@ export function LayoutEditor({
                   textScale={vp.textScale}
                   selected={selectedRooms.has(room.id)}
                   translucent={!!plan}
+                  zoneColor={zoneColor(room)}
+                  caption={roomCaption(room)}
                 />
               ))}
             </Layer>
@@ -561,6 +634,17 @@ export function LayoutEditor({
                   strokeWidth={2}
                   strokeScaleEnabled={false}
                   hitStrokeWidth={12}
+                />
+              ))}
+              {/* map markers: invisible hit areas (the icons are drawn on top, in HTML) */}
+              {(doc.markers ?? []).map((m) => (
+                <Circle
+                  key={m.id}
+                  name={`marker:${m.id}`}
+                  x={m.x}
+                  y={m.y}
+                  radius={15 / view.scale}
+                  fill="rgba(0,0,0,0.001)"
                 />
               ))}
             </Layer>
@@ -664,6 +748,25 @@ export function LayoutEditor({
           </Stage>
         </SeatSizeContext.Provider>
       )}
+      <MarkerOverlay
+        markers={doc.markers ?? []}
+        view={view}
+        selectedId={editor.marker}
+        moving={
+          drag?.kind === 'marker'
+            ? (() => {
+                const m = doc.markers?.find((x) => x.id === drag.id);
+                return m
+                  ? {
+                      id: m.id,
+                      x: m.x + drag.at.x - drag.start.x,
+                      y: m.y + drag.at.y - drag.start.y,
+                    }
+                  : null;
+              })()
+            : null
+        }
+      />
 
       {/* keyboard / screen reader access: select items, then use the inspector or shortcuts */}
       <ul className="sr-only" aria-label={t('accessibleList')}>

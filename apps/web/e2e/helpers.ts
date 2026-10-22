@@ -25,7 +25,14 @@ export interface MapData {
     deskWidth: number | null;
     seatNumbering: string;
   };
-  rooms: Array<{ id: string; name: string; polygon: Array<{ x: number; y: number }> }>;
+  rooms: Array<{
+    id: string;
+    name: string;
+    polygon: Array<{ x: number; y: number }>;
+    capacity?: number | null;
+    equipment?: string[];
+  }>;
+  markers?: Array<{ id: string; kind: string; x: number; y: number; label?: string | null }>;
   seats: MapSeat[];
 }
 

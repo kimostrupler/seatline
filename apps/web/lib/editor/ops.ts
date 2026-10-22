@@ -1,18 +1,20 @@
 import {
   relabel,
   roomForPoint,
+  type LayoutMarker,
   type LayoutRoom,
   type LayoutSeat,
   type SeatNumbering,
 } from '@seatline/shared';
 
 export { relabel };
-import type { Point, Room, Seat } from '../types';
+import type { Marker, Point, Room, Seat } from '../types';
 
 /** What the editor works on: the floor's rooms and seats. */
 export interface LayoutDoc {
   rooms: Room[];
   seats: Seat[];
+  markers?: Marker[];
 }
 
 type Update<T> = Partial<T> & { id: string };
@@ -21,30 +23,40 @@ type Update<T> = Partial<T> & { id: string };
 export interface Changes {
   rooms: { create: LayoutRoom[]; update: Update<LayoutRoom>[]; delete: string[] };
   seats: { create: LayoutSeat[]; update: Update<LayoutSeat>[]; delete: string[] };
+  markers: { create: LayoutMarker[]; update: Update<LayoutMarker>[]; delete: string[] };
 }
 
 export function changes(partial: {
   rooms?: Partial<Changes['rooms']>;
   seats?: Partial<Changes['seats']>;
+  markers?: Partial<Changes['markers']>;
 }): Changes {
   return {
     rooms: { create: [], update: [], delete: [], ...partial.rooms },
     seats: { create: [], update: [], delete: [], ...partial.seats },
+    markers: { create: [], update: [], delete: [], ...partial.markers },
   };
 }
 
 export function isEmpty(c: Changes): boolean {
-  return [c.rooms, c.seats].every((x) => !x.create.length && !x.update.length && !x.delete.length);
+  return [c.rooms, c.seats, c.markers ?? changes({}).markers].every(
+    (x) => !x.create.length && !x.update.length && !x.delete.length,
+  );
 }
 
-const ROOM_KEYS = ['name', 'type', 'polygon'] as const;
-const SEAT_KEYS = ['label', 'x', 'y', 'rotation', 'type', 'status'] as const;
+const ROOM_KEYS = ['name', 'type', 'polygon', 'capacity', 'equipment', 'team'] as const;
+const SEAT_KEYS = ['label', 'x', 'y', 'rotation', 'type', 'status', 'features'] as const;
+const MARKER_KEYS = ['kind', 'x', 'y', 'label'] as const;
 
 export const toLayoutRoom = (r: Room): LayoutRoom => ({
   id: r.id,
   name: r.name,
   type: r.type,
   polygon: r.polygon,
+  // the newer details only when the room has them (older data / tests don't)
+  ...(r.capacity !== undefined && { capacity: r.capacity }),
+  ...(r.equipment !== undefined && { equipment: r.equipment }),
+  ...(r.team !== undefined && { team: r.team }),
 });
 export const toLayoutSeat = (s: Seat): LayoutSeat => ({
   id: s.id,
@@ -54,6 +66,14 @@ export const toLayoutSeat = (s: Seat): LayoutSeat => ({
   rotation: s.rotation,
   type: s.type,
   status: s.status,
+  ...(s.features !== undefined && { features: s.features }),
+});
+export const toLayoutMarker = (m: Marker): LayoutMarker => ({
+  id: m.id,
+  kind: m.kind,
+  x: m.x,
+  y: m.y,
+  label: m.label ?? null,
 });
 
 /** Apply changes locally (instant feedback); the server's answer replaces this afterwards. */
@@ -86,7 +106,15 @@ export function applyChanges(doc: LayoutDoc, c: Changes, floorId: string): Layou
     occupancy:
       s.status === 'blocked' ? 'blocked' : s.occupancy === 'blocked' ? 'free' : s.occupancy,
   }));
-  return { rooms, seats };
+  const markerUpdates = new Map((c.markers?.update ?? []).map((u) => [u.id, u]));
+  const createdMarkers = new Set((c.markers?.create ?? []).map((m) => m.id));
+  const markers: Marker[] = [
+    ...(doc.markers ?? [])
+      .filter((m) => !c.markers?.delete.includes(m.id) && !createdMarkers.has(m.id))
+      .map((m) => ({ ...m, ...markerUpdates.get(m.id) })),
+    ...(c.markers?.create ?? []),
+  ];
+  return { rooms, seats, markers };
 }
 
 function pick<T extends object, K extends keyof T>(
@@ -103,7 +131,14 @@ function pick<T extends object, K extends keyof T>(
 export function inverse(before: LayoutDoc, c: Changes): Changes {
   const room = (id: string) => before.rooms.find((r) => r.id === id)!;
   const seat = (id: string) => before.seats.find((s) => s.id === id)!;
+  const marker = (id: string) => (before.markers ?? []).find((m) => m.id === id)!;
+  const m = c.markers ?? changes({}).markers;
   return changes({
+    markers: {
+      create: m.delete.map((id) => toLayoutMarker(marker(id))),
+      update: m.update.map((u) => ({ id: u.id, ...pick(marker(u.id), MARKER_KEYS, u) })),
+      delete: m.create.map((x) => x.id),
+    },
     rooms: {
       create: c.rooms.delete.map((id) => toLayoutRoom(room(id))),
       update: c.rooms.update.map((u) => ({ id: u.id, ...pick(room(u.id), ROOM_KEYS, u) })),

@@ -1,5 +1,14 @@
 import { z } from 'zod';
-import { APP_ROLES, ROOM_TYPES, SEAT_NUMBERINGS, SEAT_STATUSES, SEAT_TYPES } from './enums';
+import {
+  APP_ROLES,
+  MARKER_KINDS,
+  ROOM_EQUIPMENT,
+  ROOM_TYPES,
+  SEAT_FEATURES,
+  SEAT_NUMBERINGS,
+  SEAT_STATUSES,
+  SEAT_TYPES,
+} from './enums';
 
 const id = z.uuid();
 const calendarDay = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD');
@@ -78,6 +87,11 @@ const layoutRoom = z.strictObject({
   name,
   type: z.enum(ROOM_TYPES),
   polygon: polygonSchema,
+  /** meeting rooms: how many people fit */
+  capacity: z.number().int().min(1).max(500).nullable().optional(),
+  equipment: z.array(z.enum(ROOM_EQUIPMENT)).max(ROOM_EQUIPMENT.length).optional(),
+  /** team zone: this team's area (department name) */
+  team: z.string().trim().min(1).max(100).nullable().optional(),
 });
 const layoutSeat = z.strictObject({
   id,
@@ -87,6 +101,14 @@ const layoutSeat = z.strictObject({
   rotation: z.number().min(0).lt(360),
   type: z.enum(SEAT_TYPES),
   status: z.enum(SEAT_STATUSES),
+  features: z.array(z.enum(SEAT_FEATURES)).max(SEAT_FEATURES.length).optional(),
+});
+const layoutMarker = z.strictObject({
+  id,
+  kind: z.enum(MARKER_KINDS),
+  x: z.number(),
+  y: z.number(),
+  label: z.string().trim().max(60).nullable().optional(),
 });
 
 export const layoutChangesSchema = z.strictObject({
@@ -108,6 +130,16 @@ export const layoutChangesSchema = z.strictObject({
         .max(2000)
         .default([]),
       delete: z.array(id).max(2000).default([]),
+    })
+    .default({ create: [], update: [], delete: [] }),
+  markers: z
+    .strictObject({
+      create: z.array(layoutMarker).max(200).default([]),
+      update: z
+        .array(layoutMarker.partial().required({ id: true }))
+        .max(200)
+        .default([]),
+      delete: z.array(id).max(200).default([]),
     })
     .default({ create: [], update: [], delete: [] }),
 });
@@ -405,6 +437,7 @@ export type ApplyPlanImportInput = z.infer<typeof applyPlanImportSchema>;
 export type LayoutChangesInput = z.input<typeof layoutChangesSchema>;
 export type LayoutRoom = z.infer<typeof layoutRoom>;
 export type LayoutSeat = z.infer<typeof layoutSeat>;
+export type LayoutMarker = z.infer<typeof layoutMarker>;
 export type AssignSeatInput = z.infer<typeof assignSeatSchema>;
 export type ReserveSeatInput = z.infer<typeof reserveSeatSchema>;
 export type EndAssignmentInput = z.infer<typeof endAssignmentSchema>;
