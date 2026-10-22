@@ -1,6 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
-import type { ListPeopleQuery, SetRoleInput } from '@seatline/shared';
+import type { ListPeopleQuery, SetRoleInput, SetTeamInput } from '@seatline/shared';
 import { audit } from '../common/audit';
 import type { RequestContext } from '../auth/request-context';
 import { orNotFound } from '../common/errors';
@@ -72,6 +72,7 @@ export class PeopleService {
           displayName: true,
           email: true,
           department: true,
+          teamManual: true,
           jobTitle: true,
           appRole: true,
           active: true,
@@ -107,6 +108,32 @@ export class PeopleService {
         after: { appRole: after.appRole },
       });
       return { id: after.id, appRole: after.appRole };
+    });
+  }
+
+  /**
+   * Set someone's team (department) by hand. For people from Microsoft this sticks: the sync
+   * leaves it alone until `fromDirectory` hands the team back to Microsoft (next sync).
+   */
+  setTeam(ctx: RequestContext, id: string, input: SetTeamInput) {
+    return this.db.run(ctx.tenantId, async (tx) => {
+      const before = orNotFound(
+        await tx.person.findFirst({ where: { id, tenantId: ctx.tenantId, forgottenAt: null } }),
+        'Person',
+      );
+      const data =
+        'fromDirectory' in input
+          ? { teamManual: false }
+          : { department: input.team || null, teamManual: true };
+      const after = await tx.person.update({ where: { id }, data });
+      await audit(tx, ctx, {
+        action: 'person.team',
+        entityType: 'person',
+        entityId: id,
+        before: { department: before.department },
+        after: { department: after.department },
+      });
+      return { id: after.id, department: after.department, teamManual: after.teamManual };
     });
   }
 }

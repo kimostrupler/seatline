@@ -116,7 +116,7 @@ export class PeopleSyncService {
           entraObjectId: u.oid,
           email: emailFree ? u.email : match.email,
           displayName: u.displayName,
-          department: u.department,
+          department: match.teamManual ? match.department : u.department, // an admin's team wins
           jobTitle: u.jobTitle,
           active: u.active,
           leftAt: u.active ? null : (match.leftAt ?? at),

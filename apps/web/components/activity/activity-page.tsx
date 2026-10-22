@@ -1,10 +1,10 @@
 'use client';
 
-import { Check, ChevronsUpDown, Loader2, X } from 'lucide-react';
+import { Check, ChevronsUpDown, Loader2, Search, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PageFrame } from '@/components/common/page-frame';
 import { Button } from '@/components/ui/button';
 import {
@@ -31,6 +31,35 @@ import { usePersonName } from '@/lib/use-person-name';
 import { useActivity, useMe, usePeople, type ActivityFilters } from '@/lib/queries';
 import type { ActivityEntry, ActivityKind, ActivityRefs } from '@/lib/types';
 
+/** Searches as you type (after a short pause), so the URL and the list don't jump per key. */
+function SearchBox({ value, onChange }: { value: string; onChange: (q: string) => void }) {
+  const t = useTranslations('activity');
+  const [text, setText] = useState(value);
+  useEffect(() => setText(value), [value]);
+  useEffect(() => {
+    if (text.trim() === value) return;
+    const timer = setTimeout(() => onChange(text.trim()), 300);
+    return () => clearTimeout(timer);
+  }, [text]); // eslint-disable-line react-hooks/exhaustive-deps -- only typing starts a search
+  return (
+    <div className="relative sm:col-span-2">
+      <Search
+        className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+        aria-hidden
+      />
+      <Input
+        type="search"
+        value={text}
+        maxLength={100}
+        onChange={(e) => setText(e.target.value)}
+        placeholder={t('searchPlaceholder')}
+        aria-label={t('search')}
+        className="pl-9"
+      />
+    </div>
+  );
+}
+
 const KINDS: ActivityKind[] = ['seating', 'moves', 'layout', 'places', 'people'];
 const ALL = 'all';
 
@@ -44,6 +73,7 @@ export function ActivityPage() {
 
   // filters live in the URL, so a filtered view can be shared or opened from a person
   const filters: ActivityFilters = {
+    q: search.get('q') ?? undefined,
     kind: (KINDS as string[]).includes(search.get('kind') ?? '')
       ? (search.get('kind') as ActivityKind)
       : undefined,
@@ -75,6 +105,7 @@ export function ActivityPage() {
   return (
     <PageFrame title={t('title')}>
       <div className="grid gap-3 sm:grid-cols-2" role="group" aria-label={t('filters')}>
+        <SearchBox value={filters.q ?? ''} onChange={(q) => setFilter('q', q || undefined)} />
         <div className="grid gap-1.5">
           <Label htmlFor="activity-kind">{t('kind')}</Label>
           <Select

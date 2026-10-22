@@ -202,6 +202,12 @@ export function describe(e: ActivityEntry, refs: ActivityRefs, unknownName: stri
         values: { person: person(e.entityId), role: str(a.appRole) ?? '' },
         link: { person: e.entityId },
       };
+    case 'person.team':
+      return {
+        key: a.department ? 'teamChanged' : 'teamRemoved',
+        values: { person: person(e.entityId), team: str(a.department) ?? '' },
+        link: { person: e.entityId },
+      };
     case 'person.first_sign_in':
       return {
         key: 'firstSignIn',

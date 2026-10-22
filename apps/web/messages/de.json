@@ -335,6 +335,19 @@
       "forgetBody": "Name, E-Mail, Abteilung und Funktion werden endgültig aus Seatline entfernt – auch aus dem Aktivitätsprotokoll. Der Platzverlauf bleibt, als «Ehemalige Person». Das kann nicht rückgängig gemacht werden.",
       "forgotten": "Personendaten entfernt",
       "cancel": "Abbrechen"
+    },
+    "teams": {
+      "hint": "Teams gruppieren Personen auf dem Plan und in den Statistiken. Sie kommen aus der Abteilung in Microsoft 365; setzen oder ändern Sie ein Team über ⋯ → Team festlegen.",
+      "setTeam": "Team festlegen",
+      "title": "Team von {name}",
+      "label": "Team",
+      "placeholder": "z. B. Finanzen",
+      "microsoftHint": "Wählen Sie ein bestehendes Team oder geben Sie ein neues ein. Ein hier gesetztes Team bleibt, auch wenn Microsoft 365 etwas anderes meldet.",
+      "manualHint": "Wählen Sie ein bestehendes Team oder geben Sie ein neues ein. Leer lassen für kein Team.",
+      "fromMicrosoft": "Team aus Microsoft übernehmen",
+      "saved": "Team von {name} gespeichert",
+      "cancel": "Abbrechen",
+      "save": "Speichern"
     }
   },
   "shortcuts": {
@@ -477,9 +490,13 @@
       "billingCheckout": "hat den Abo-Checkout geöffnet",
       "billingSubscription": "Abo ist jetzt «{status}»",
       "billingSeats": "verrechnet jetzt {seats} Plätze",
-      "planImported": "hat einen Grundriss für {floor} importiert"
+      "planImported": "hat einen Grundriss für {floor} importiert",
+      "teamChanged": "hat {person} dem Team {team} zugeteilt",
+      "teamRemoved": "hat {person} aus dem Team genommen"
     },
-    "showPlan": "Plan öffnen"
+    "showPlan": "Plan öffnen",
+    "search": "Aktivität durchsuchen",
+    "searchPlaceholder": "Personen, Arbeitsplätze, Räume, Stockwerke, Notizen suchen …"
   },
   "dashboard": {
     "title": "Start",

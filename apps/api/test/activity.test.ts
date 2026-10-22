@@ -73,6 +73,29 @@ describe('activity (change history)', () => {
     expect(next.body.nextCursor).toBeNull();
   });
 
+  it('searches names, labels and old values; other companies never match', async () => {
+    const actions = async (text: string) =>
+      (await activity(a, `?q=${encodeURIComponent(text)}`).expect(200)).body.items.map(
+        (e: { action: string }) => e.action,
+      );
+    // a person's current name finds the changes about them
+    expect(await actions('ALPHA P1')).toEqual(['assignment.move', 'assignment.create']);
+    // the old label (only in the log) and the new one both find the rename
+    expect(await actions('A3')).toEqual(['seat.update']);
+    expect(await actions('z9')).toEqual(['seat.update']);
+    // a seat finds the assignments that mention it
+    expect(await actions('A1')).toEqual(['assignment.move', 'assignment.create']);
+    // whoever made the change
+    expect(await actions('alpha admin')).toHaveLength(3);
+    // combined with other filters; LIKE wildcards are plain text
+    expect(await activity(a, '?q=A1&kind=layout').expect(200)).toMatchObject({
+      body: { items: [] },
+    });
+    expect(await actions('%')).toEqual([]);
+    expect(await actions('beta')).toEqual([]);
+    await activity(a, `?q=${'x'.repeat(101)}`).expect(400);
+  });
+
   it('is only for editors and admins, and only shows the own company', async () => {
     await activity(a, '', a.viewerHeaders).expect(403);
     expect((await activity(b).expect(200)).body.items).toHaveLength(0);

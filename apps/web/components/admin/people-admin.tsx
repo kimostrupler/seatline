@@ -1,9 +1,9 @@
 'use client';
 
 import { APP_ROLES, type AppRole } from '@seatline/shared';
-import { Download, EllipsisVertical, Loader2, RefreshCw, UserX } from 'lucide-react';
+import { Download, EllipsisVertical, Loader2, RefreshCw, Users, UserX } from 'lucide-react';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
-import { useDeferredValue, useEffect, useState } from 'react';
+import { useDeferredValue, useEffect, useId, useState } from 'react';
 import { toast } from 'sonner';
 import { PageFrame, PageSection } from '@/components/common/page-frame';
 import {
@@ -17,6 +17,14 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -25,6 +33,7 @@ import {
 import { apiDownload } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -38,6 +47,7 @@ import {
   useForgetPerson,
   useMe,
   useSetRole,
+  useSetTeam,
   useSyncNow,
   useTenant,
   useUpdateTenant,
@@ -265,6 +275,9 @@ function PeopleSection() {
       !q || [p.displayName, p.email, p.department ?? ''].some((v) => v.toLowerCase().includes(q)),
   );
   const roleLabel = (role: AppRole | null) => (role ? tRole(role) : t('roleNone'));
+  const teams = [
+    ...new Set((directory.data ?? []).flatMap((p) => (p.department ? [p.department] : []))),
+  ].sort((a, b) => a.localeCompare(b));
 
   return (
     <Section title={t('peopleTitle')}>
@@ -276,6 +289,7 @@ function PeopleSection() {
         aria-label={t('search')}
         className="sm:w-96"
       />
+      <p className="text-xs text-muted-foreground">{t('teams.hint')}</p>
       {directory.isPending && <Skeleton className="h-40" />}
       <ul className="divide-y rounded-lg border" data-testid="directory">
         {people.map((p) => (
@@ -321,7 +335,7 @@ function PeopleSection() {
                 <SelectItem value={NONE}>{t('roleNone')}</SelectItem>
               </SelectContent>
             </Select>
-            <PersonMenu person={p} />
+            <PersonMenu person={p} teams={teams} />
           </li>
         ))}
       </ul>
@@ -330,10 +344,12 @@ function PeopleSection() {
 }
 
 /** Per person: their data as a file (access request), and forgetting people who left. */
-function PersonMenu({ person }: { person: DirectoryPerson }) {
+function PersonMenu({ person, teams }: { person: DirectoryPerson; teams: string[] }) {
   const t = useTranslations('admin.privacy');
+  const tt = useTranslations('admin.teams');
   const forget = useForgetPerson();
   const [confirm, setConfirm] = useState(false);
+  const [teamOpen, setTeamOpen] = useState(false);
   const name = person.forgottenAt ? t('formerEmployee') : person.displayName;
   return (
     <>
@@ -344,6 +360,9 @@ function PersonMenu({ person }: { person: DirectoryPerson }) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-60">
+          <DropdownMenuItem disabled={!!person.forgottenAt} onSelect={() => setTeamOpen(true)}>
+            <Users /> {tt('setTeam')}
+          </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() =>
               void apiDownload(`/privacy/people/${person.id}/export`).catch((e: unknown) =>
@@ -362,6 +381,7 @@ function PersonMenu({ person }: { person: DirectoryPerson }) {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      {teamOpen && <TeamDialog person={person} teams={teams} onClose={() => setTeamOpen(false)} />}
       <AlertDialog open={confirm} onOpenChange={setConfirm}>
         <AlertDialogContent>
           <AlertDialogTitle>{t('forgetTitle', { name })}</AlertDialogTitle>
@@ -382,5 +402,81 @@ function PersonMenu({ person }: { person: DirectoryPerson }) {
         </AlertDialogContent>
       </AlertDialog>
     </>
+  );
+}
+
+/** Set someone's team by hand (or hand it back to Microsoft 365). */
+function TeamDialog({
+  person,
+  teams,
+  onClose,
+}: {
+  person: DirectoryPerson;
+  teams: string[];
+  onClose: () => void;
+}) {
+  const t = useTranslations('admin.teams');
+  const setTeam = useSetTeam();
+  const [team, setTeamText] = useState(person.department ?? '');
+  const listId = useId();
+  const save = (body: { team: string | null } | { fromDirectory: true }) =>
+    setTeam.mutateAsync({ id: person.id, ...body }).then(
+      () => {
+        toast.success(t('saved', { name: person.displayName }));
+        onClose();
+      },
+      (error: unknown) => toast.error(errorText(error)),
+    );
+  return (
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{t('title', { name: person.displayName })}</DialogTitle>
+          <DialogDescription>
+            {person.entraObjectId ? t('microsoftHint') : t('manualHint')}
+          </DialogDescription>
+        </DialogHeader>
+        <form
+          className="grid gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void save({ team: team.trim() || null });
+          }}
+        >
+          <Label htmlFor={`${listId}-team`}>{t('label')}</Label>
+          <Input
+            id={`${listId}-team`}
+            list={listId}
+            value={team}
+            maxLength={100}
+            onChange={(e) => setTeamText(e.target.value)}
+            placeholder={t('placeholder')}
+          />
+          <datalist id={listId}>
+            {teams.map((name) => (
+              <option key={name} value={name} />
+            ))}
+          </datalist>
+          <DialogFooter className="mt-2">
+            {person.entraObjectId && person.teamManual && (
+              <Button
+                type="button"
+                variant="ghost"
+                className="sm:mr-auto"
+                onClick={() => void save({ fromDirectory: true })}
+              >
+                {t('fromMicrosoft')}
+              </Button>
+            )}
+            <Button type="button" variant="outline" onClick={onClose}>
+              {t('cancel')}
+            </Button>
+            <Button type="submit" disabled={setTeam.isPending}>
+              {t('save')}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

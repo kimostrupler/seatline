@@ -335,6 +335,19 @@
       "forgetBody": "Their name, e-mail, department and job title are removed from Seatline for good — also from the activity log. Their seat history stays, as “Former employee”. This can’t be undone.",
       "forgotten": "Personal data removed",
       "cancel": "Cancel"
+    },
+    "teams": {
+      "hint": "Teams group people on the map and in the statistics. They come from the department in Microsoft 365; to set or change one, use ⋯ → Set team.",
+      "setTeam": "Set team",
+      "title": "Team of {name}",
+      "label": "Team",
+      "placeholder": "e.g. Finance",
+      "microsoftHint": "Pick an existing team or type a new one. A team set here stays, even when Microsoft 365 says otherwise.",
+      "manualHint": "Pick an existing team or type a new one. Leave it empty for no team.",
+      "fromMicrosoft": "Use Microsoft’s team",
+      "saved": "Team of {name} saved",
+      "cancel": "Cancel",
+      "save": "Save"
     }
   },
   "shortcuts": {
@@ -477,9 +490,13 @@
       "billingCheckout": "opened the subscription checkout",
       "billingSubscription": "subscription is now {status}",
       "billingSeats": "now billed for {seats} seats",
-      "planImported": "imported a floor plan for {floor}"
+      "planImported": "imported a floor plan for {floor}",
+      "teamChanged": "put {person} in team {team}",
+      "teamRemoved": "removed {person} from their team"
     },
-    "showPlan": "Open the plan"
+    "showPlan": "Open the plan",
+    "search": "Search activity",
+    "searchPlaceholder": "Search people, desks, rooms, floors, notes…"
   },
   "dashboard": {
     "title": "Home",

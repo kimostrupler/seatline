@@ -101,6 +101,8 @@ model Person {
   email         String
   displayName   String    @map("display_name")
   department    String?
+  /// team set by an admin: the Microsoft sync doesn't overwrite `department`
+  teamManual    Boolean   @default(false) @map("team_manual")
   jobTitle      String?   @map("job_title")
   /// null = no access to the app (still assignable to a seat)
   appRole       AppRole?  @map("app_role")

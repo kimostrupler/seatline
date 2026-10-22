@@ -335,6 +335,19 @@
       "forgetBody": "Son nom, son e-mail, son service et sa fonction sont définitivement supprimés de Seatline – aussi du journal d’activité. L’historique de ses places reste, sous « Ancien·ne employé·e ». Action irréversible.",
       "forgotten": "Données personnelles supprimées",
       "cancel": "Annuler"
+    },
+    "teams": {
+      "hint": "Les équipes regroupent les personnes sur le plan et dans les statistiques. Elles viennent du service dans Microsoft 365 ; pour en définir ou modifier une, utilisez ⋯ → Définir l’équipe.",
+      "setTeam": "Définir l’équipe",
+      "title": "Équipe de {name}",
+      "label": "Équipe",
+      "placeholder": "p. ex. Finances",
+      "microsoftHint": "Choisissez une équipe existante ou saisissez-en une nouvelle. Une équipe définie ici est conservée, même si Microsoft 365 indique autre chose.",
+      "manualHint": "Choisissez une équipe existante ou saisissez-en une nouvelle. Laissez vide pour aucune équipe.",
+      "fromMicrosoft": "Utiliser l’équipe de Microsoft",
+      "saved": "Équipe de {name} enregistrée",
+      "cancel": "Annuler",
+      "save": "Enregistrer"
     }
   },
   "shortcuts": {
@@ -477,9 +490,13 @@
       "billingCheckout": "a ouvert le paiement de l’abonnement",
       "billingSubscription": "l’abonnement est maintenant « {status} »",
       "billingSeats": "facture maintenant {seats} places",
-      "planImported": "a importé un plan pour {floor}"
+      "planImported": "a importé un plan pour {floor}",
+      "teamChanged": "a placé {person} dans l’équipe {team}",
+      "teamRemoved": "a retiré {person} de son équipe"
     },
-    "showPlan": "Ouvrir le plan"
+    "showPlan": "Ouvrir le plan",
+    "search": "Rechercher dans l’activité",
+    "searchPlaceholder": "Rechercher des personnes, postes, pièces, étages, notes…"
   },
   "dashboard": {
     "title": "Accueil",
