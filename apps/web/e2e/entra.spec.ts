@@ -42,6 +42,7 @@ test('the website and legal pages need no sign-in', async ({ page }) => {
     'Seatline oder ein Sitzplan in Excel',
   );
   await expect(page.getByRole('link', { name: '30 Tage gratis testen' }).first()).toBeVisible();
+  expect(await (await page.request.get('/indexnow.txt')).text()).toMatch(/^[0-9a-f]{32}$/);
   expect(await (await page.request.get('/sitemap.xml')).text()).toContain(
     '/guides/plan-de-places-ou-reservation-de-postes',
   );

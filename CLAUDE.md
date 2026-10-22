@@ -393,6 +393,8 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   `app/icon.svg` + `apple-icon.png`, `/llms.txt` (built from the `site.*` texts), robots that
   welcome AI crawlers on the site and block the app (app pages are `noindex` by default), and a
   sitemap with hreflang. The landing header uses language links, not the cookie switch.
+  IndexNow (Bing & co.): key `INDEXNOW_KEY` (public) served at `/indexnow.txt`; the deploy
+  (`infra/azure/indexnow.sh`) posts the live sitemap's pages after each release.
 - **Guides** (`/guides/<slug>`, `lib/guides.ts`, tested): comparison pages (vs Excel, Swiss
   software, seating plan vs desk booking), one slug per language; the middleware sets the
   page language from the slug. Linked from the footer, sitemap (hreflang) and llms.txt. Only

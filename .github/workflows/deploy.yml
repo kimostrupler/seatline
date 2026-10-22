@@ -115,3 +115,8 @@ jobs:
           done
           echo "::error::$URL/signin did not answer"
           exit 1
+
+      - name: Tell search engines about the website (IndexNow)
+        if: env.STAGING != 'true'
+        # Bing & co. learn about new or changed pages at once; a failure never blocks a release
+        run: bash infra/azure/indexnow.sh || echo "::warning::IndexNow ping failed — see the log above"
