@@ -14,6 +14,7 @@ export function BillingBanner() {
   const now = useNow({ updateInterval: 3_600_000 });
   const me = useMe().data;
   if (!me) return null;
+  if (me.tenant.isDemo) return <DemoBanner />;
   const { state, trialEndsAt } = me.billing;
   const admin = me.role === 'admin';
   const days = Math.max(0, Math.ceil((+new Date(trialEndsAt) - +now) / 86_400_000));
@@ -43,6 +44,26 @@ export function BillingBanner() {
           {t('open')}
         </Link>
       )}
+    </div>
+  );
+}
+
+/** In a demo workspace: it's sample data, deleted after a day — and the way to a real trial. */
+function DemoBanner() {
+  const t = useTranslations('demo');
+  return (
+    <div
+      role="status"
+      className="flex flex-wrap items-center justify-center gap-x-2 border-b bg-primary/10 px-4 py-1.5 text-center text-sm"
+      data-testid="demo-banner"
+    >
+      <span>{t('banner')}</span>
+      {/* signing out of the demo leads to the sign-in page, where the trial starts */}
+      <form method="post" action="/auth/logout" className="inline">
+        <button type="submit" className="font-medium underline underline-offset-2">
+          {t('startTrial')}
+        </button>
+      </form>
     </div>
   );
 }

@@ -54,6 +54,19 @@ export class TenantDb {
     return rows.map((r) => r.id);
   }
 
+  /** How many demo workspaces exist right now. */
+  async countDemoTenants(): Promise<number> {
+    const [row] = await this.prisma.$queryRaw<{ n: bigint }[]>`SELECT count_demo_tenants() AS n`;
+    return Number(row?.n ?? 0);
+  }
+
+  /** Delete demo workspaces older than `olderThan` (a Postgres interval, e.g. '1 day'). */
+  async purgeDemoTenants(olderThan: string): Promise<number> {
+    const [row] = await this.prisma.$queryRaw<{ n: number }[]>`
+      SELECT purge_demo_tenants(${olderThan}::interval) AS n`;
+    return row?.n ?? 0;
+  }
+
   /** Workspaces whose free trial ends within 8 days, without a subscription. */
   async listTrialTenants(): Promise<string[]> {
     const rows = await this.prisma.$queryRaw<{ id: string }[]>`

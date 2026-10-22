@@ -23,3 +23,17 @@ test('print a floor: map and who sits where', async ({ page }) => {
   await expect(page.getByRole('row', { name: /1\.01 Anna Meier Finance/ })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Print / save as PDF' })).toBeVisible();
 });
+
+test('QR stickers for the desks open the desk on the map', async ({ page }) => {
+  await page.goto('/map');
+  await expect(page.getByTestId('floor-map').locator('canvas').first()).toBeVisible();
+  await page.getByRole('button', { name: 'Export' }).click();
+  await page.getByRole('menuitem', { name: /Desk QR codes/ }).click();
+  await expect(page).toHaveURL(/\/map\/qr\?floor=/);
+  const labels = page.getByTestId('desk-labels').getByRole('listitem');
+  await expect(labels).toHaveCount(8);
+  await expect(labels.first()).toContainText('1.01');
+  await expect(
+    page.getByRole('img', { name: 'QR code for desk 1.01' }).locator('svg'),
+  ).toBeVisible();
+});

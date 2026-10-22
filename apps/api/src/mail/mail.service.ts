@@ -33,6 +33,13 @@ export class MailService {
 
   async send(mail: Mail): Promise<void> {
     if (!this.configured) throw new ServiceUnavailableException('E-mail is not set up');
+    // .invalid can never receive e-mail (RFC 2606): demo workspaces, forgotten people
+    const to = mail.to
+      .split(',')
+      .map((a) => a.trim())
+      .filter((a) => a && !/\.invalid$/i.test(a));
+    if (!to.length) return;
+    mail = { ...mail, to: to.join(', ') };
     if (this.config.MAIL_OUTBOX) {
       await mkdir(this.config.MAIL_OUTBOX, { recursive: true });
       const file = `${Date.now()}-${randomUUID()}.json`;

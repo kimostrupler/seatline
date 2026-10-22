@@ -16,7 +16,7 @@ import type {
 
 export interface Me {
   person: { id: string; displayName: string; email: string };
-  tenant: { id: string; name: string };
+  tenant: { id: string; name: string; isDemo?: boolean };
   role: AppRole;
   billing: { state: BillingState; trialEndsAt: string };
 }

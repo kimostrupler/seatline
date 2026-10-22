@@ -1,6 +1,6 @@
 'use client';
 
-import { Download, Printer } from 'lucide-react';
+import { Download, Printer, QrCode } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -19,11 +19,14 @@ import { useMe } from '@/lib/queries';
 export function ExportMenu({
   floorId,
   onPrint,
+  onLabels,
   compact,
 }: {
   /** limit the seating list to one floor (on the map) */
   floorId?: string;
   onPrint?: () => void;
+  /** QR stickers for this floor's desks */
+  onLabels?: () => void;
   compact?: boolean;
 }) {
   const t = useTranslations('exports');
@@ -58,6 +61,11 @@ export function ExportMenu({
         {onPrint && (
           <DropdownMenuItem onSelect={onPrint}>
             <Printer /> {t('print')}
+          </DropdownMenuItem>
+        )}
+        {onLabels && (
+          <DropdownMenuItem onSelect={onLabels}>
+            <QrCode /> {t('labels')}
           </DropdownMenuItem>
         )}
         {role && role !== 'viewer' && (

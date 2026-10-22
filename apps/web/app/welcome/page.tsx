@@ -18,7 +18,7 @@ import {
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { FloorIllustration } from '@/components/site/floor-illustration';
-import { SitePage, signInUrl } from '@/components/site/site-chrome';
+import { demoUrl, SitePage, signInUrl } from '@/components/site/site-chrome';
 import { Button } from '@/components/ui/button';
 import { OPERATOR } from '@/lib/legal/operator';
 import { SITE_PRICE_CHF } from '@/lib/site';
@@ -58,6 +58,9 @@ export default async function Welcome() {
               <a href={signInUrl()}>
                 {t('ctaTrial')} <ArrowRight />
               </a>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <a href={demoUrl()}>{t('ctaDemo')}</a>
             </Button>
           </div>
           <p className="text-sm text-muted-foreground">{t('ctaNote')}</p>
@@ -184,11 +187,16 @@ export default async function Welcome() {
       {/* final call */}
       <section className="mx-auto grid max-w-6xl justify-items-center gap-4 px-4 py-20 text-center sm:px-6">
         <h2 className="text-3xl font-semibold tracking-tight text-balance">{t('finalTitle')}</h2>
-        <Button asChild size="lg">
-          <a href={signInUrl()}>
-            {t('ctaTrial')} <ArrowRight />
-          </a>
-        </Button>
+        <div className="flex flex-wrap justify-center gap-3">
+          <Button asChild size="lg">
+            <a href={signInUrl()}>
+              {t('ctaTrial')} <ArrowRight />
+            </a>
+          </Button>
+          <Button asChild size="lg" variant="outline">
+            <a href={demoUrl()}>{t('ctaDemo')}</a>
+          </Button>
+        </div>
         <p className="text-sm text-muted-foreground">
           {t.rich('contact', {
             email: OPERATOR.email,

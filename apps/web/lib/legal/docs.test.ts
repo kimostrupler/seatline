@@ -19,7 +19,9 @@ describe('legal texts', () => {
 
   it('German is Swiss German (ss, not ß)', () => {
     expect(
-      JSON.stringify(LEGAL_TEXTS.terms.de) + JSON.stringify(LEGAL_TEXTS.privacy.de),
+      JSON.stringify(LEGAL_TEXTS.terms.de) +
+        JSON.stringify(LEGAL_TEXTS.privacy.de) +
+        JSON.stringify(LEGAL_TEXTS.dpa.de),
     ).not.toContain('ß');
   });
 });

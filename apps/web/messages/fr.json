@@ -1026,6 +1026,7 @@
     "seatingCsv": "Liste d’occupation (CSV)",
     "historyExcel": "Historique des places (Excel)",
     "print": "Imprimer l’étage / PDF",
+    "labels": "QR codes des places (étiquettes)",
     "failed": "L’export n’a pas fonctionné : {message}",
     "back": "Retour",
     "printNow": "Imprimer / enregistrer en PDF",
@@ -1072,6 +1073,7 @@
   "legal": {
     "terms": "Conditions d’utilisation",
     "privacy": "Politique de confidentialité",
+    "dpa": "Accord de sous-traitance",
     "imprint": "Mentions légales",
     "updated": "Mise à jour : {date}",
     "contact": "Contact",
@@ -1095,6 +1097,7 @@
     "heroTitle": "Savoir qui est assis où.",
     "heroBody": "Le plan de places de votre bureau. Dessinez vos étages, attribuez les places, planifiez les déménagements et informez l’IT automatiquement. Hébergé en Suisse.",
     "ctaTrial": "Essayer 30 jours gratuitement",
+    "ctaDemo": "Essayer la démo",
     "ctaNote": "Sans carte de crédit. Connexion avec Microsoft 365 ou par e-mail.",
     "mapAlt": "Un plan Seatline : places libres en vert, occupées en gris, réservées en jaune.",
     "mapFloor": "Zurich · 3e étage",
@@ -1193,5 +1196,25 @@
       "plan_engine_unreachable": "Le lecteur de plans démarre. Veuillez réessayer dans une minute.",
       "failed": "La lecture du plan a échoué. Veuillez essayer un autre fichier."
     }
+  },
+  "qr": {
+    "back": "Retour",
+    "print": "Imprimer",
+    "title": "QR codes · {place}",
+    "body": "{count, plural, one {# étiquette} other {# étiquettes}}. Collez-en une sur chaque place : en la scannant, on voit qui y est assis (après connexion).",
+    "codeFor": "QR code de la place {label}",
+    "scan": "Scanner : qui est assis ici ?"
+  },
+  "demo": {
+    "title": "Essayer Seatline",
+    "body": "Un bureau d’exemple avec deux étages, des salles de réunion et 22 personnes. Changez ce que vous voulez — rien n’est envoyé, et tout est supprimé après un jour.",
+    "point1": "Déplacez des personnes en les glissant sur une autre place",
+    "point2": "Dessinez salles et places dans « Modifier le plan »",
+    "point3": "Planifiez un déménagement et voyez l’étage avant et après",
+    "button": "Ouvrir la démo",
+    "busy": "Trop de démos en ce moment. Veuillez réessayer plus tard.",
+    "failed": "La démo n’a pas pu être ouverte. Veuillez réessayer.",
+    "banner": "Ceci est une démo avec des données d’exemple — elle est supprimée après un jour.",
+    "startTrial": "Commencer l’essai gratuit"
   }
 }

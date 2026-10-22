@@ -1,7 +1,8 @@
 # Legal pages — what to do before selling
 
-The website has a privacy policy, terms of service and an imprint in German, French and English
-(`/legal/privacy`, `/legal/terms`, `/legal/imprint`). They are written in plain words for a
+The website has a privacy policy, terms of service, a data processing agreement (DPA/AVV) and an
+imprint in German, French and English (`/legal/privacy`, `/legal/terms`, `/legal/dpa`,
+`/legal/imprint`). They are written in plain words for a
 Swiss B2B SaaS, but **they are not legal advice** — have a Swiss lawyer review them before the
 first paying customer.
 
@@ -12,7 +13,7 @@ and, once registered, the company number (`CHE-…`). Seatline is run as a sole 
 so the imprint shows the owner's name and address, as Swiss law requires (UWG art. 3 s).
 When you change a text, update `LEGAL_UPDATED`.
 
-The texts themselves are in `apps/web/lib/legal/docs.ts` (every language must keep the same
+The texts themselves are in `apps/web/lib/legal/docs.ts` (the DPA in `dpa.ts`) (every language must keep the same
 sections — `docs.test.ts` checks it).
 
 ## 2. Promises the texts make (keep them true)
@@ -27,10 +28,13 @@ sections — `docs.test.ts` checks it).
 - **Deleting workspaces**: on request, and at the latest 6 months after the subscription or
   trial ended. This is a **manual task for now**.
 - **30 days’ notice** for price or important terms changes, by e-mail to workspace admins.
-- **Data breaches** are reported to affected customers without undue delay.
+- **Data breaches** are reported to affected customers without undue delay (DPA: as a rule
+  within 48 hours).
+- **DPA promises**: sub-processor changes announced 30 days ahead; one audit per year on
+  request; backups overwritten within 35 days after a workspace is deleted. Customers asking
+  for a signed copy get a PDF (print `/legal/dpa` to PDF and sign it).
 
 ## 3. Worth considering
 
 - Swiss VAT only once turnover exceeds CHF 100,000 a year; then add VAT (Stripe Tax can do it).
-- A separate data processing agreement (DPA/AVV) document: some customers' legal teams ask for
-  one. Section 6 of the terms covers the essentials; a lawyer can turn it into a standalone DPA.
+- Have a lawyer check the DPA (`/legal/dpa`) together with the terms.

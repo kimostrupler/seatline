@@ -7,7 +7,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteUrl(webConfig().APP_URL);
   return [
     { url: `${base}/`, changeFrequency: 'monthly', priority: 1 },
-    ...['terms', 'privacy', 'imprint'].map((doc) => ({
+    ...['terms', 'privacy', 'dpa', 'imprint'].map((doc) => ({
       url: `${base}/legal/${doc}`,
       lastModified: LEGAL_UPDATED,
       priority: 0.3,
