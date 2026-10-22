@@ -38,6 +38,7 @@ test('visitors try a demo workspace from the website, then start a real trial', 
   await page.goto('/welcome');
   await page.getByRole('link', { name: 'Try the demo' }).first().click();
   await expect(page.getByRole('heading', { name: 'Try Seatline' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Back to the website' })).toBeVisible();
   await page.getByRole('button', { name: 'Open the demo' }).click();
   await expect(page.getByTestId('demo-banner')).toBeVisible();
   await page.goto('/map');

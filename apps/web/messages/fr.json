@@ -358,7 +358,8 @@
     "yourName": "Votre nom",
     "onboardingBodyEmail": "Créez l’espace de travail de votre entreprise – vous en serez le premier admin. Ajoutez ensuite vos collègues sous « Personnes et accès » ; ils se connectent avec un lien envoyé par e-mail.",
     "useMicrosoftTitle": "Se connecter avec Microsoft",
-    "useMicrosoftBody": "Votre entreprise se connecte à Seatline avec Microsoft 365. Veuillez utiliser « Se connecter avec Microsoft »."
+    "useMicrosoftBody": "Votre entreprise se connecte à Seatline avec Microsoft 365. Veuillez utiliser « Se connecter avec Microsoft ».",
+    "backToWebsite": "Retour au site"
   },
   "admin": {
     "link": "Personnes et accès",
@@ -1343,5 +1344,9 @@
       "admins": "Admins",
       "email": "Lien e-mail"
     }
+  },
+  "loading": {
+    "title": "Chargement de Seatline…",
+    "hint": "Après un moment calme, le démarrage peut prendre quelques secondes."
   }
 }

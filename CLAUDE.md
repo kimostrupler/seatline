@@ -411,7 +411,9 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   logged as `ERROR [client-error] …`; `app/error.tsx` is the friendly crash page.
 - Error alerts: `infra/azure/alerts.sh` (Azure Monitor log alert → e-mail), run by the deploy
   when the GitHub variable `ALERT_EMAIL` is set. No third-party error service: logs must stay in
-  Switzerland. `KEEP_WARM=true` sets min replicas to 1 on deploy.
+  Switzerland. `KEEP_WARM=true` sets min replicas to 1 on deploy (`web`: only the web app).
+- `app/loading.tsx` is the loading screen (shown e.g. while sleeping apps wake up); sign-in /
+  sign-up pages pass `backHref` to `Centered` for "Back to the website" (`websiteHref`).
 - Uptime: `/healthz` (web → API `/health`, which runs `SELECT 1`), pinged every 15 min from
   Zurich by an Application Insights availability test (`infra/azure/uptime.sh`, run by the deploy
   with `ALERT_EMAIL`; rare enough that the apps still scale to zero).

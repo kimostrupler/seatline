@@ -2,6 +2,8 @@ import Link from 'next/link';
 import type React from 'react';
 import { getTranslations } from 'next-intl/server';
 import { Centered } from '@/components/auth/centered';
+import { webConfig } from '@/lib/server/config';
+import { websiteHref } from '@/lib/site';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -35,7 +37,7 @@ export default async function SignIn({
   const options = await publicApi<{ email: boolean }>('/auth/options').catch(() => null);
   const byEmail = options?.status === 200 && !!options.body?.email;
   return (
-    <Centered>
+    <Centered backHref={websiteHref(webConfig().APP_URL)}>
       <div className="grid gap-1">
         <h1 className="text-xl font-semibold">{t('signInTitle')}</h1>
         <p className="text-sm text-muted-foreground">

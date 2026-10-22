@@ -155,3 +155,14 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* loading screen: the "waking up" hint only after a few seconds (quick loads show no text) */
+.loading-hint {
+  opacity: 0;
+  animation: loading-hint-in 0.4s ease 3s forwards;
+}
+@keyframes loading-hint-in {
+  to {
+    opacity: 1;
+  }
+}
