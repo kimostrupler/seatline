@@ -26,7 +26,7 @@ export function asApp<T>(
 export async function resetDb() {
   // TRUNCATE doesn't fire the row-level append-only triggers.
   await owner.$executeRawUnsafe(
-    'TRUNCATE audit_log, seat_assignments, seats, rooms, floors, buildings, people, tenants CASCADE',
+    'TRUNCATE audit_log, seat_assignments, seats, rooms, floors, buildings, people, tenants, email_sign_ins CASCADE',
   );
 }
 
@@ -118,6 +118,18 @@ export async function msToken(
     .setIssuedAt()
     .setExpirationTime(options.expiresIn ?? '60s')
     .sign(new TextEncoder().encode(options.secret ?? process.env.INTERNAL_AUTH_SECRET!));
+  return { authorization: `Bearer ${token}` };
+}
+
+/** What the web app sends after an e-mail link was used: the proven address (+ picked workspace). */
+export async function emailToken(email: string, tenantId: string | null = null) {
+  const token = await new SignJWT({ kind: 'email', email, tenantId })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuer('seatline-web')
+    .setAudience('seatline-api')
+    .setIssuedAt()
+    .setExpirationTime('60s')
+    .sign(new TextEncoder().encode(process.env.INTERNAL_AUTH_SECRET!));
   return { authorization: `Bearer ${token}` };
 }
 

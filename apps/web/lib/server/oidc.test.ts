@@ -3,7 +3,7 @@ import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { finishLogin, SignInError, startLogin, verifyIdToken } from './oidc';
-import { internalToken, readSession, sealSession } from './session';
+import { internalToken, readSession, seal, sealSession } from './session';
 
 const TID = '72f988bf-86f1-41af-91ab-2d7cd011db47';
 const OID = '00000000-0000-4000-8000-000000000001';
@@ -66,6 +66,7 @@ const verify = (token: string, nonce = 'n-1') =>
 describe('Microsoft ID token checks', () => {
   it('accepts a valid token and reads the identity', async () => {
     expect(await verify(await idToken())).toEqual({
+      kind: 'microsoft',
       tid: TID,
       oid: OID,
       name: 'Anna Meier',
@@ -119,7 +120,13 @@ describe('Microsoft ID token checks', () => {
 });
 
 describe('session cookie', () => {
-  const user = { tid: TID, oid: OID, name: 'Anna', email: 'anna@contoso.com' };
+  const user = {
+    kind: 'microsoft' as const,
+    tid: TID,
+    oid: OID,
+    name: 'Anna',
+    email: 'anna@contoso.com',
+  };
   const secret = 's'.repeat(40);
 
   it('round-trips, and refuses tampered cookies or another secret', async () => {
@@ -129,6 +136,18 @@ describe('session cookie', () => {
     expect(await readSession(cookie.slice(0, -4) + 'AAAA', secret)).toBeNull();
     expect(await readSession(undefined, secret)).toBeNull();
     expect(cookie).not.toContain('anna'); // encrypted, not just signed
+  });
+
+  it('e-mail sign-ins, and Microsoft cookies from before there was a kind', async () => {
+    const byEmail = { kind: 'email' as const, email: 'nora@example.com', tenantId: null };
+    expect(await readSession(await sealSession(byEmail, secret), secret)).toEqual(byEmail);
+    const old = await seal(
+      { tid: TID, oid: OID, name: 'Anna', email: 'a@b.ch' },
+      secret,
+      'session',
+      '1h',
+    );
+    expect(await readSession(old, secret)).toMatchObject({ kind: 'microsoft', oid: OID });
   });
 
   it('mints the API token', async () => {

@@ -1,4 +1,6 @@
 import swc from 'unplugin-swc';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { defineConfig } from 'vitest/config';
 
 // Tests run against a separate database (seatline_test) that they wipe freely.
@@ -28,6 +30,9 @@ export default defineConfig({
         'DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10100/devstoreaccount1;',
       AZURE_STORAGE_CONTAINER: 'test-floor-plans',
       INTERNAL_AUTH_SECRET: 'test-internal-secret-0123456789-abcdefghijkl',
+      // e-mails land as JSON files here (test/mail.ts reads them)
+      MAIL_OUTBOX: join(tmpdir(), 'seatline-test-mail'),
+      APP_URL: 'https://app.seatline.test',
     },
   },
 });

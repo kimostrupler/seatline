@@ -9,10 +9,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { api } from '@/lib/api';
 
-export function OnboardingForm({ signedInAs }: { signedInAs: string }) {
+export function OnboardingForm({ signedInAs, askName }: { signedInAs: string; askName: boolean }) {
   const t = useTranslations('auth');
   const router = useRouter();
   const [name, setName] = useState('');
+  const [yourName, setYourName] = useState('');
+  const ready = name.trim().length >= 2 && (!askName || yourName.trim().length >= 2);
   const [busy, setBusy] = useState(false);
   return (
     <form
@@ -21,7 +23,8 @@ export function OnboardingForm({ signedInAs }: { signedInAs: string }) {
         e.preventDefault();
         setBusy(true);
         try {
-          await api('/onboarding', { method: 'POST', body: { companyName: name.trim() } });
+          const body = { companyName: name.trim(), ...(askName && { yourName: yourName.trim() }) };
+          await api('/onboarding', { method: 'POST', body });
           router.replace('/map');
           router.refresh();
         } catch (error) {
@@ -41,7 +44,21 @@ export function OnboardingForm({ signedInAs }: { signedInAs: string }) {
           required
         />
       </div>
-      <Button type="submit" disabled={busy || name.trim().length < 2}>
+      {askName && (
+        <div className="grid gap-1.5">
+          <Label htmlFor="your-name">{t('yourName')}</Label>
+          <Input
+            id="your-name"
+            value={yourName}
+            onChange={(e) => setYourName(e.target.value)}
+            autoComplete="name"
+            minLength={2}
+            maxLength={200}
+            required
+          />
+        </div>
+      )}
+      <Button type="submit" disabled={busy || !ready}>
         {t('createWorkspace')}
       </Button>
       <p className="text-xs text-muted-foreground">{signedInAs}</p>

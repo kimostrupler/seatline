@@ -136,7 +136,12 @@ describe('session check and onboarding', () => {
       .post('/auth/session')
       .set(await msToken(id))
       .expect(200);
-    expect(session.body).toEqual({ status: 'no_workspace', workspace: null, role: null });
+    expect(session.body).toEqual({
+      status: 'no_workspace',
+      workspace: null,
+      workspaces: [],
+      role: null,
+    });
     await api(app)
       .get('/me')
       .set(await msToken(id))

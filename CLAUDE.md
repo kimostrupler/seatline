@@ -92,7 +92,7 @@ All tables except `tenants` have a `tenant_id`.
 6. **SaaS**: onboarding, Stripe billing, retention settings, exports (CSV/PDF)
 
 Locally (`AUTH_MODE=dev` / `DEV_AUTH=true`) the API trusts dev headers `x-tenant-id` / `x-user-id`;
-online only Microsoft sign-in works (`DEV_AUTH` is refused in production).
+online people sign in with Microsoft or with an e-mail link (`DEV_AUTH` is refused in production).
 
 ## UI direction
 
@@ -181,6 +181,26 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - Azure: `infra/azure/main.bicep` + `setup.sh` (Cloud Shell, idempotent, secrets in Key Vault);
   `.github/workflows/deploy.yml` deploys after CI on main (OIDC, no stored Azure secrets).
   Docker Hub may rate-limit; Dockerfiles take `--build-arg NODE_IMAGE=…` for a mirror.
+
+## Sign-in by e-mail link + people added by hand
+
+- For companies without Microsoft 365. `MailService` (`src/mail/`, nodemailer → Hostpoint SMTP as
+  hello@seatline.ch; texts en/de/fr in `mail/texts.ts`). Off unless `APP_URL` + SMTP (or the test
+  `MAIL_OUTBOX` folder) are set; `GET /auth/options` tells the sign-in page.
+- Links: `POST /auth/email/start` (any address gets one — no account enumeration; 3 per address per
+  15 min, plus a per-IP limit in the web route), 32 random bytes, only the SHA-256 is stored
+  (`email_sign_ins`, no tenant, reachable only through SECURITY DEFINER functions), single use,
+  15 minutes. `POST /auth/email/verify` returns the address.
+- Web: `/auth/email?token=` is a page with a button (mail scanners open links and would burn
+  the token); the POST routes check `Origin` (login CSRF). The session cookie is a union
+  (`kind: 'microsoft' | 'email'`; old cookies = microsoft). Email identity = address + picked
+  workspace (`tenantId`); `IdentityService.resolveEmail` only lets in people of workspaces
+  WITHOUT Microsoft (those keep Microsoft sign-in: `use_microsoft`); several workspaces → `choose`
+  (`/signin/workspace`). It never creates people; a new address gets onboarding (+ "Your name").
+- Admins add people by hand (`POST /people`, optional invitation e-mail), correct them
+  (`PATCH /people/:id`), mark them left/back (`PATCH /people/:id/active`: leaving ends open seats,
+  history stays). People from Microsoft (`entra_object_id`) are changed in Microsoft (409
+  `from_microsoft`). Infra: `infra/azure/mail-setup.sh` stores the SMTP password in Key Vault.
 
 ## Activity & overview
 

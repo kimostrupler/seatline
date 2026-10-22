@@ -22,7 +22,7 @@ export function migrateE2eDb() {
 export function resetE2eDb() {
   run(
     `pnpm exec prisma db execute --url "${E2E_DATABASE_URL}" --stdin`,
-    'TRUNCATE audit_log, seat_assignments, seats, rooms, floors, buildings, people, tenants CASCADE;',
+    'TRUNCATE audit_log, seat_assignments, seats, rooms, floors, buildings, people, tenants, email_sign_ins CASCADE;',
   );
   run('pnpm exec tsx prisma/seed.ts');
 }

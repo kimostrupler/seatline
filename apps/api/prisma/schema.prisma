@@ -331,3 +331,17 @@ model MovePlanItem {
   @@unique([planId, personId])
   @@map("move_plan_items")
 }
+
+/// One-time sign-in links (only the token's hash). Used only through SQL functions
+/// (email_sign_in_create / email_sign_in_use), never by the app role directly.
+model EmailSignIn {
+  tokenHash String    @id @map("token_hash")
+  email     String
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(3)
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(3)
+
+  @@index([email, createdAt])
+  @@map("email_sign_ins")
+  @@ignore
+}

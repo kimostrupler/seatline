@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import { MAIL_OUTBOX } from './e2e/mail';
 
 // End-to-end tests: the real web app + real API against a separate database
 // (seatline_e2e), which every test resets and re-seeds. Run `pnpm build` first.
@@ -72,6 +73,9 @@ export default defineConfig({
         AZURE_STORAGE_CONTAINER: 'e2e-floor-plans',
         INTERNAL_AUTH_SECRET,
         PLAN_ENGINE_URL: `http://127.0.0.1:${PLAN_ENGINE_PORT}`,
+        // e-mail sign-in: links point to the entra web app, e-mails land in a folder
+        APP_URL: `http://localhost:${ENTRA_WEB_PORT}`,
+        MAIL_OUTBOX,
       },
       reuseExistingServer: false,
     },

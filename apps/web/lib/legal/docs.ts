@@ -272,6 +272,7 @@ const TEXTS: Texts = {
         paragraphs: [
           'Website: we use no tracking, no analytics, no advertising and no third-party cookies. Our servers record technical logs (IP address, time, page, browser) for security and error analysis.',
           'Sign-in: from your Microsoft work account we receive your name, e-mail address and Microsoft user and organisation IDs. Your password never reaches us.',
+          'Sign-in by e-mail: if you ask for a sign-in link, we e-mail it to the address you enter (sent through Hostpoint in Switzerland). We keep only a scrambled form of the link, for at most one day; it works once and for 15 minutes. Admins can add colleagues by name and e-mail address and send them an invitation.',
           'People directory: if your company’s Microsoft 365 admin approves it, Seatline reads each employee’s name, e-mail, department, job title and whether the account is active, once a night. Nothing else.',
           'Seating: seats, floor plans, assignments, reservations, planned moves, and a history of who changed what and when.',
           'Plan import: architect plans you upload are read on our servers in Switzerland.',
@@ -295,7 +296,7 @@ const TEXTS: Texts = {
       {
         heading: '6. Service providers',
         paragraphs: [
-          'Microsoft (hosting and sign-in, Switzerland), Stripe (payments, Ireland/USA), Hostpoint (domain and e-mail, Switzerland). They process data only as needed for their service and under contracts that protect it.',
+          'Microsoft (hosting and sign-in, Switzerland), Stripe (payments, Ireland/USA), Hostpoint (domain and e-mail incl. sign-in links, Switzerland). They process data only as needed for their service and under contracts that protect it.',
         ],
       },
       {
@@ -348,6 +349,7 @@ const TEXTS: Texts = {
         paragraphs: [
           'Website: Wir verwenden kein Tracking, keine Analyse-Tools, keine Werbung und keine Cookies von Dritten. Unsere Server zeichnen technische Protokolle auf (IP-Adresse, Zeit, Seite, Browser), für Sicherheit und Fehleranalyse.',
           'Anmeldung: Von Ihrem Microsoft-Geschäftskonto erhalten wir Name, E-Mail-Adresse sowie Microsoft-Benutzer- und Organisations-ID. Ihr Passwort erreicht uns nie.',
+          'Anmeldung per E-Mail: Wenn Sie einen Anmeldelink anfordern, senden wir ihn an die eingegebene Adresse (über Hostpoint in der Schweiz). Wir speichern nur eine verschlüsselte Form des Links, höchstens einen Tag lang; er funktioniert einmal und 15 Minuten lang. Admins können Kolleginnen und Kollegen mit Name und E-Mail-Adresse hinzufügen und ihnen eine Einladung senden.',
           'Personenverzeichnis: Wenn der Microsoft-365-Admin Ihres Unternehmens zustimmt, liest Seatline einmal pro Nacht Name, E-Mail, Abteilung, Funktion und Kontostatus (aktiv oder nicht) der Mitarbeitenden. Sonst nichts.',
           'Arbeitsplätze: Plätze, Grundrisse, Zuweisungen, Reservationen, geplante Umzüge und ein Verlauf, wer wann was geändert hat.',
           'Planimport: Hochgeladene Architektenpläne werden auf unseren Servern in der Schweiz gelesen.',
@@ -371,7 +373,7 @@ const TEXTS: Texts = {
       {
         heading: '6. Dienstleister',
         paragraphs: [
-          'Microsoft (Hosting und Anmeldung, Schweiz), Stripe (Zahlungen, Irland/USA), Hostpoint (Domain und E-Mail, Schweiz). Sie bearbeiten Daten nur soweit für ihre Leistung nötig und unter Verträgen, die sie schützen.',
+          'Microsoft (Hosting und Anmeldung, Schweiz), Stripe (Zahlungen, Irland/USA), Hostpoint (Domain und E-Mail inkl. Anmeldelinks, Schweiz). Sie bearbeiten Daten nur soweit für ihre Leistung nötig und unter Verträgen, die sie schützen.',
         ],
       },
       {
@@ -424,6 +426,7 @@ const TEXTS: Texts = {
         paragraphs: [
           'Site web : aucun suivi, aucun outil d’analyse, aucune publicité ni cookie tiers. Nos serveurs enregistrent des journaux techniques (adresse IP, heure, page, navigateur) pour la sécurité et l’analyse des erreurs.',
           'Connexion : de votre compte professionnel Microsoft, nous recevons votre nom, votre adresse e-mail et vos identifiants Microsoft d’utilisateur et d’organisation. Votre mot de passe ne nous parvient jamais.',
+          'Connexion par e-mail : si vous demandez un lien de connexion, nous l’envoyons à l’adresse saisie (par Hostpoint, en Suisse). Nous ne conservons qu’une forme brouillée du lien, au plus un jour ; il fonctionne une seule fois, pendant 15 minutes. Les admins peuvent ajouter des collègues avec leur nom et leur adresse e-mail et leur envoyer une invitation.',
           'Annuaire : si l’admin Microsoft 365 de votre entreprise l’approuve, Seatline lit une fois par nuit le nom, l’e-mail, le service, la fonction et le statut (actif ou non) des collaborateurs. Rien d’autre.',
           'Places : places, plans d’étage, attributions, réservations, déménagements planifiés et un historique de qui a modifié quoi et quand.',
           'Import de plans : les plans d’architecte que vous importez sont lus sur nos serveurs en Suisse.',
@@ -447,7 +450,7 @@ const TEXTS: Texts = {
       {
         heading: '6. Prestataires',
         paragraphs: [
-          'Microsoft (hébergement et connexion, Suisse), Stripe (paiements, Irlande/États-Unis), Hostpoint (domaine et e-mail, Suisse). Ils ne traitent les données que dans la mesure nécessaire à leur service et selon des contrats qui les protègent.',
+          'Microsoft (hébergement et connexion, Suisse), Stripe (paiements, Irlande/États-Unis), Hostpoint (domaine et e-mail, y compris les liens de connexion, Suisse). Ils ne traitent les données que dans la mesure nécessaire à leur service et selon des contrats qui les protègent.',
         ],
       },
       {

@@ -20,6 +20,8 @@ sections — `docs.test.ts` checks it).
 - **Data in Switzerland**: hosting, backups and logs in Azure Switzerland North.
 - **No tracking**: no analytics, ads or third-party cookies. Adding any needs a policy update
   (and possibly a consent banner).
+- **E-mail** (sign-in links, invitations) goes out through Hostpoint's SMTP as hello@seatline.ch;
+  only a hash of each link is stored, for at most a day.
 - **Sub-processors**: Microsoft, Stripe, Hostpoint. A new one (e.g. an e-mail service) must be added to the privacy policy and
   announced to customers in advance.
 - **Deleting workspaces**: on request, and at the latest 6 months after the subscription or

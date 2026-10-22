@@ -36,6 +36,19 @@ const envSchema = z.object({
   PLAN_ENGINE_URL: z.url().optional(),
   /** Sent to the plan engine as x-internal-token (same value as its PLAN_ENGINE_TOKEN). */
   PLAN_ENGINE_TOKEN: z.string().optional(),
+  /**
+   * E-mail (sign-in links, invitations), sent through SMTP — Hostpoint for seatline.ch.
+   * Unset = sign-in by e-mail is off (Microsoft only).
+   */
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().int().default(465),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASSWORD: z.string().optional(),
+  MAIL_FROM: z.string().default('Seatline <hello@seatline.ch>'),
+  /** public address of the web app: sign-in links point there (never taken from a request) */
+  APP_URL: z.url().optional(),
+  /** tests only: write e-mails as JSON files into this folder instead of sending them */
+  MAIL_OUTBOX: z.string().optional(),
   /** Trust x-tenant-id / x-user-id headers. Dev only — replaced by Entra ID in Phase 4. */
   DEV_AUTH: z
     .enum(['true', 'false'])
@@ -49,6 +62,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const config = envSchema.parse(env);
   if (config.DEV_AUTH && config.NODE_ENV === 'production') {
     throw new Error('DEV_AUTH must never be enabled in production');
+  }
+  if (config.MAIL_OUTBOX && config.NODE_ENV === 'production') {
+    throw new Error('MAIL_OUTBOX is for tests only');
   }
   return config;
 }

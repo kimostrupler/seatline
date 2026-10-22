@@ -1,8 +1,20 @@
 'use client';
 
 import { APP_ROLES, type AppRole } from '@seatline/shared';
-import { Download, EllipsisVertical, Loader2, RefreshCw, Users, UserX } from 'lucide-react';
-import { useFormatter, useNow, useTranslations } from 'next-intl';
+import {
+  Download,
+  EllipsisVertical,
+  Loader2,
+  LogOut,
+  Mail,
+  Pencil,
+  RefreshCw,
+  Undo2,
+  UserPlus,
+  Users,
+  UserX,
+} from 'lucide-react';
+import { useFormatter, useLocale, useNow, useTranslations } from 'next-intl';
 import { useDeferredValue, useEffect, useId, useState } from 'react';
 import { toast } from 'sonner';
 import { PageFrame, PageSection } from '@/components/common/page-frame';
@@ -47,6 +59,8 @@ import {
   useForgetPerson,
   useMe,
   useSetRole,
+  useInvitePerson,
+  useSetActive,
   useSetTeam,
   useSyncNow,
   useTenant,
@@ -54,6 +68,7 @@ import {
 } from '@/lib/queries';
 import type { DirectoryPerson, TenantInfo } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { AddPersonDialog, EditPersonDialog } from './person-dialogs';
 
 const NONE = 'none';
 const errorText = (error: unknown) => (error instanceof Error ? error.message : String(error));
@@ -265,6 +280,9 @@ function MicrosoftSection({
 
 function PeopleSection() {
   const t = useTranslations('admin');
+  const tenant = useTenant().data;
+  const [adding, setAdding] = useState(false);
+  const emailWorkspace = !!tenant && !tenant.entraTenantId;
   const tRole = useTranslations('devLogin.role');
   const directory = useDirectory();
   const setRole = useSetRole();
@@ -281,14 +299,26 @@ function PeopleSection() {
 
   return (
     <Section title={t('peopleTitle')}>
-      <Input
-        type="search"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder={t('search')}
-        aria-label={t('search')}
-        className="sm:w-96"
-      />
+      <div className="flex flex-wrap items-center gap-2">
+        <Input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={t('search')}
+          aria-label={t('search')}
+          className="min-w-0 flex-1 sm:max-w-96"
+        />
+        <Button onClick={() => setAdding(true)}>
+          <UserPlus /> {t('add.button')}
+        </Button>
+      </div>
+      {adding && (
+        <AddPersonDialog
+          teams={teams}
+          canInvite={emailWorkspace}
+          onClose={() => setAdding(false)}
+        />
+      )}
       <p className="text-xs text-muted-foreground">{t('teams.hint')}</p>
       {directory.isPending && <Skeleton className="h-40" />}
       <ul className="divide-y rounded-lg border" data-testid="directory">
@@ -335,7 +365,7 @@ function PeopleSection() {
                 <SelectItem value={NONE}>{t('roleNone')}</SelectItem>
               </SelectContent>
             </Select>
-            <PersonMenu person={p} teams={teams} />
+            <PersonMenu person={p} teams={teams} emailWorkspace={emailWorkspace} />
           </li>
         ))}
       </ul>
@@ -344,9 +374,24 @@ function PeopleSection() {
 }
 
 /** Per person: their data as a file (access request), and forgetting people who left. */
-function PersonMenu({ person, teams }: { person: DirectoryPerson; teams: string[] }) {
+function PersonMenu({
+  person,
+  teams,
+  emailWorkspace,
+}: {
+  person: DirectoryPerson;
+  teams: string[];
+  emailWorkspace: boolean;
+}) {
   const t = useTranslations('admin.privacy');
   const tt = useTranslations('admin.teams');
+  const ta = useTranslations('admin.add');
+  const locale = useLocale().slice(0, 2); // 'de-CH' → 'de' (e-mail language)
+  const setActive = useSetActive();
+  const invite = useInvitePerson();
+  const [editing, setEditing] = useState(false);
+  // people from Microsoft 365 are changed there (and leave through the sync)
+  const byHand = !person.entraObjectId && !person.forgottenAt;
   const forget = useForgetPerson();
   const [confirm, setConfirm] = useState(false);
   const [teamOpen, setTeamOpen] = useState(false);
@@ -363,6 +408,41 @@ function PersonMenu({ person, teams }: { person: DirectoryPerson; teams: string[
           <DropdownMenuItem disabled={!!person.forgottenAt} onSelect={() => setTeamOpen(true)}>
             <Users /> {tt('setTeam')}
           </DropdownMenuItem>
+          {byHand && (
+            <DropdownMenuItem onSelect={() => setEditing(true)}>
+              <Pencil /> {ta('edit')}
+            </DropdownMenuItem>
+          )}
+          {byHand && emailWorkspace && person.active && person.appRole && (
+            <DropdownMenuItem
+              onSelect={() =>
+                invite.mutateAsync({ id: person.id, language: locale }).then(
+                  (r) =>
+                    r.invited
+                      ? toast.success(ta('invited', { name: person.displayName }))
+                      : toast.error(ta('notInvited')),
+                  (error: unknown) => toast.error(errorText(error)),
+                )
+              }
+            >
+              <Mail /> {ta('sendInvite')}
+            </DropdownMenuItem>
+          )}
+          {byHand && (
+            <DropdownMenuItem
+              onSelect={() =>
+                setActive.mutateAsync({ id: person.id, active: !person.active }).then(
+                  () =>
+                    toast.success(
+                      ta(person.active ? 'leftDone' : 'backDone', { name: person.displayName }),
+                    ),
+                  (error: unknown) => toast.error(errorText(error)),
+                )
+              }
+            >
+              {person.active ? <LogOut /> : <Undo2 />} {ta(person.active ? 'leave' : 'back')}
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem
             onSelect={() =>
               void apiDownload(`/privacy/people/${person.id}/export`).catch((e: unknown) =>
@@ -381,6 +461,7 @@ function PersonMenu({ person, teams }: { person: DirectoryPerson; teams: string[
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      {editing && <EditPersonDialog person={person} onClose={() => setEditing(false)} />}
       {teamOpen && <TeamDialog person={person} teams={teams} onClose={() => setTeamOpen(false)} />}
       <AlertDialog open={confirm} onOpenChange={setConfirm}>
         <AlertDialogContent>

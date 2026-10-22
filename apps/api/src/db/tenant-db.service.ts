@@ -20,6 +20,26 @@ export class TenantDb {
     return rows[0]?.id ?? null;
   }
 
+  /** Every workspace where someone has this e-mail address (e-mail sign-in, before the tenant is known). */
+  emailWorkspaces(email: string) {
+    return this.prisma.$queryRaw<{ tenant_id: string; name: string; microsoft: boolean }[]>`
+      SELECT tenant_id, name, microsoft FROM email_workspaces(${email})`;
+  }
+
+  /** Stores a sign-in link's hash; false when this address asked for too many links lately. */
+  async createEmailSignIn(email: string, tokenHash: string, minutes: number, maxRecent: number) {
+    const rows = await this.prisma.$queryRaw<{ ok: boolean }[]>`
+      SELECT email_sign_in_create(${email}, ${tokenHash}, make_interval(mins => ${minutes}::int), ${maxRecent}::int) AS ok`;
+    return rows[0]?.ok === true;
+  }
+
+  /** Uses a sign-in link once: its e-mail address while valid, else null. */
+  async useEmailSignIn(tokenHash: string): Promise<string | null> {
+    const rows = await this.prisma.$queryRaw<{ email: string | null }[]>`
+      SELECT email_sign_in_use(${tokenHash}) AS email`;
+    return rows[0]?.email ?? null;
+  }
+
   /** Workspaces connected to Microsoft 365 (for the nightly people sync). */
   listSyncTenants() {
     return this.prisma.$queryRaw<{ id: string; entra_tenant_id: string }[]>`
