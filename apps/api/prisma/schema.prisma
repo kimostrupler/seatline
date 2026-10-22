@@ -84,16 +84,17 @@ model Tenant {
   /// seats on the subscription (synced nightly with the active seats)
   billedSeats            Int?      @map("billed_seats")
 
-  people      Person[]
-  buildings   Building[]
-  floors      Floor[]
-  rooms       Room[]
-  seats       Seat[]
-  assignments SeatAssignment[]
-  auditLog    AuditLog[]
-  dashboards  DashboardLayout[]
-  movePlans   MovePlan[]
-  moveItems   MovePlanItem[]
+  people       Person[]
+  buildings    Building[]
+  floors       Floor[]
+  rooms        Room[]
+  seats        Seat[]
+  assignments  SeatAssignment[]
+  auditLog     AuditLog[]
+  dashboards   DashboardLayout[]
+  movePlans    MovePlan[]
+  moveItems    MovePlanItem[]
+  floorMarkers FloorMarker[]
 
   @@map("tenants")
 }
@@ -168,10 +169,11 @@ model Floor {
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  tenant   Tenant   @relation(fields: [tenantId], references: [id])
-  building Building @relation(fields: [tenantId, buildingId], references: [tenantId, id], onDelete: Restrict)
+  tenant   Tenant        @relation(fields: [tenantId], references: [id])
+  building Building      @relation(fields: [tenantId, buildingId], references: [tenantId, id], onDelete: Restrict)
   rooms    Room[]
   seats    Seat[]
+  markers  FloorMarker[]
 
   @@unique([tenantId, id])
   @@index([tenantId, buildingId])
@@ -186,6 +188,11 @@ model Room {
   type      RoomType @default(office)
   /// [{ x, y }, …] in plan units
   polygon   Json
+  /// meeting rooms: how many people fit, and what's in it (screen, video, whiteboard, phone)
+  capacity  Int?
+  equipment String[] @default([])
+  /// team zone: the area of this team (department name)
+  team      String?
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
@@ -210,6 +217,8 @@ model Seat {
   rotation  Float      @default(0)
   type      SeatType   @default(desk)
   status    SeatStatus @default(active)
+  /// standing, two_screens, docking, window, quiet, accessible
+  features  String[]   @default([])
   createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
 
@@ -350,4 +359,23 @@ model EmailSignIn {
   @@index([email, createdAt])
   @@map("email_sign_ins")
   @@ignore
+}
+
+/// Things to find one's way on a floor (kitchen, printer, exits…).
+model FloorMarker {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  floorId   String   @map("floor_id") @db.Uuid
+  kind      String
+  x         Float
+  y         Float
+  label     String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  floor  Floor  @relation(fields: [tenantId, floorId], references: [tenantId, id], onDelete: Cascade)
+
+  @@unique([tenantId, id])
+  @@index([tenantId, floorId])
+  @@map("floor_markers")
 }

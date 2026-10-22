@@ -1,6 +1,15 @@
 'use client';
 
-import { polygonArea, ROOM_TYPES, SEAT_NUMBERINGS, SEAT_TYPES } from '@seatline/shared';
+import {
+  MARKER_KINDS,
+  polygonArea,
+  ROOM_EQUIPMENT,
+  ROOM_TYPES,
+  SEAT_FEATURES,
+  SEAT_NUMBERINGS,
+  SEAT_TYPES,
+  type MarkerKind,
+} from '@seatline/shared';
 import {
   AlignCenterHorizontal,
   AlignCenterVertical,
@@ -24,6 +33,7 @@ import {
   ChevronDown,
   FileInput,
   ListOrdered,
+  type LucideIcon,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useId, useRef, useState, type ReactNode } from 'react';
@@ -70,11 +80,13 @@ import {
   useDeleteFloor,
   useFloors,
   useRemovePlan,
+  useStats,
   useUpdateBuilding,
   useUpdateFloor,
   useUploadPlan,
 } from '@/lib/queries';
-import type { Building, Floor, FloorMap, Room, Seat } from '@/lib/types';
+import type { Building, Floor, FloorMap, Marker, Room, Seat } from '@/lib/types';
+import { EQUIPMENT_ICONS, FEATURE_ICONS, MARKER_ICONS } from '@/components/map/markers';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -84,6 +96,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { CreateFloorDialog } from '@/components/workspace/place-dialogs';
 import { platformKeys } from '@/lib/platform-keys';
+import { cn } from '@/lib/utils';
 import { usePlanOpacity } from '@/lib/use-plan-opacity';
 import { CommitInput } from './commit-input';
 import { ImportPlanDialog } from './import-plan-dialog';
@@ -112,6 +125,9 @@ export function Inspector({
   const seats = doc.seats.filter((s) => selection.seats.includes(s.id));
   const rooms = doc.rooms.filter((r) => selection.rooms.includes(r.id));
 
+  const marker = editor.marker ? doc.markers?.find((m) => m.id === editor.marker) : undefined;
+  if (marker && !seats.length && !rooms.length)
+    return <MarkerForm key={marker.id} marker={marker} editor={editor} />;
   if (!seats.length && !rooms.length)
     return (
       <FloorSettings
@@ -199,6 +215,17 @@ function SeatForm({
         />
       </Field>
       <BlockSwitch editor={editor} seats={[seat]} />
+      <Field label={t('features')} hint={t('featuresHint')}>
+        <ChipToggles
+          options={SEAT_FEATURES}
+          value={seat.features ?? []}
+          icons={FEATURE_ICONS}
+          label={(f) => t(`feature.${f}`)}
+          onChange={(features) =>
+            editor.commit(changes({ seats: { update: [{ id: seat.id, features }] } }))
+          }
+        />
+      </Field>
       <Field label={t('inRoom')}>
         <p className="text-sm">{room?.name ?? t('noRoom')}</p>
       </Field>
@@ -268,7 +295,7 @@ function RoomForm({
   scale: number | null;
 }) {
   const t = useTranslations('inspector');
-  const update = (data: Partial<Pick<Room, 'name' | 'type'>>) =>
+  const update = (data: Partial<Pick<Room, 'name' | 'type' | 'capacity' | 'equipment' | 'team'>>) =>
     editor.commit(changes({ rooms: { update: [{ id: room.id, ...data }] } }));
   return (
     <div className="grid gap-4">
@@ -295,6 +322,11 @@ function RoomForm({
           </SelectContent>
         </Select>
       </Field>
+      {room.type === 'meeting' ? (
+        <MeetingRoomFields room={room} update={update} />
+      ) : (
+        <TeamZoneField room={room} update={update} />
+      )}
       <RoomSize room={room} editor={editor} scale={scale} />
       {scale && (
         <Field label={t('area')}>
@@ -887,6 +919,168 @@ function DeskSettings({ floor, editor }: { floor: Floor; editor: LayoutEditorSta
         <p className="text-sm text-muted-foreground">{t('deskSizeNoScale')}</p>
       )}
     </Section>
+  );
+}
+
+/** Toggle chips with icons (desk features, room equipment). */
+function ChipToggles<T extends string>({
+  options,
+  value,
+  icons,
+  label,
+  onChange,
+}: {
+  options: readonly T[];
+  value: T[];
+  icons: Record<T, LucideIcon>;
+  label: (option: T) => string;
+  onChange: (value: T[]) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {options.map((o) => {
+        const Icon: LucideIcon = icons[o];
+        const on = value.includes(o);
+        return (
+          <button
+            key={o}
+            type="button"
+            aria-pressed={on}
+            onClick={() => onChange(on ? value.filter((v) => v !== o) : [...value, o])}
+            className={cn(
+              'flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors',
+              on
+                ? 'border-primary bg-primary/10 text-foreground'
+                : 'text-muted-foreground hover:bg-muted',
+            )}
+          >
+            <Icon className="size-3.5" aria-hidden /> {label(o)}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Meeting rooms: how many people fit and what's in it (shown on the map). */
+function MeetingRoomFields({
+  room,
+  update,
+}: {
+  room: Room;
+  update: (data: Partial<Pick<Room, 'capacity' | 'equipment'>>) => void;
+}) {
+  const t = useTranslations('inspector');
+  return (
+    <>
+      <Field label={t('capacity')}>
+        <CommitInput
+          aria-label={t('capacity')}
+          inputMode="numeric"
+          placeholder="–"
+          value={room.capacity ? String(room.capacity) : ''}
+          onCommit={(v) => {
+            const n = Number(v);
+            if (Number.isInteger(n) && n >= 1 && n <= 500) update({ capacity: n });
+            else toast.error(t('capacityInvalid'));
+          }}
+        />
+      </Field>
+      <Field label={t('equipment')}>
+        <ChipToggles
+          options={ROOM_EQUIPMENT}
+          value={room.equipment ?? []}
+          icons={EQUIPMENT_ICONS}
+          label={(e) => t(`equip.${e}`)}
+          onChange={(equipment) => update({ equipment })}
+        />
+      </Field>
+    </>
+  );
+}
+
+const NO_ZONE = '__none__';
+
+/** An office or open space can be a team's zone: tinted in the team's colour on the map. */
+function TeamZoneField({
+  room,
+  update,
+}: {
+  room: Room;
+  update: (data: Partial<Pick<Room, 'team'>>) => void;
+}) {
+  const t = useTranslations('inspector');
+  const teams = (useStats().data?.departments ?? []).flatMap((d) => (d.name ? [d.name] : []));
+  const options = room.team && !teams.includes(room.team) ? [room.team, ...teams] : teams;
+  return (
+    <Field label={t('zone')} hint={t('zoneHint')}>
+      <Select
+        value={room.team ?? NO_ZONE}
+        onValueChange={(v) => update({ team: v === NO_ZONE ? null : v })}
+      >
+        <SelectTrigger className="w-full" aria-label={t('zone')}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={NO_ZONE}>{t('noZone')}</SelectItem>
+          {options.map((team) => (
+            <SelectItem key={team} value={team}>
+              {team}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </Field>
+  );
+}
+
+/** A map marker: what it is, an optional name, delete. */
+function MarkerForm({ marker, editor }: { marker: Marker; editor: LayoutEditorState }) {
+  const t = useTranslations('inspector');
+  const update = (data: Partial<Pick<Marker, 'kind' | 'label'>>) =>
+    editor.commit(changes({ markers: { update: [{ id: marker.id, ...data }] } }));
+  const Icon = MARKER_ICONS[marker.kind];
+  return (
+    <div className="grid gap-4" data-testid="inspector">
+      <h2 className="flex items-center gap-2 text-lg font-semibold">
+        <Icon className="size-5" aria-hidden /> {t(`marker.${marker.kind}`)}
+      </h2>
+      <Field label={t('markerKind')}>
+        <Select value={marker.kind} onValueChange={(v) => update({ kind: v as MarkerKind })}>
+          <SelectTrigger className="w-full" aria-label={t('markerKind')}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {MARKER_KINDS.map((kind) => {
+              const KindIcon = MARKER_ICONS[kind];
+              return (
+                <SelectItem key={kind} value={kind}>
+                  <KindIcon /> {t(`marker.${kind}`)}
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
+      </Field>
+      <Field label={t('markerLabel')} hint={t('markerLabelHint')}>
+        <CommitInput
+          aria-label={t('markerLabel')}
+          value={marker.label ?? ''}
+          maxLength={60}
+          onCommit={(label) => update({ label })}
+        />
+      </Field>
+      <Button
+        variant="outline"
+        className="justify-self-start"
+        onClick={() => {
+          editor.commit(changes({ markers: { delete: [marker.id] } }));
+          editor.setMarker(null);
+        }}
+      >
+        <Trash2 /> {t('deleteMarker')}
+      </Button>
+    </div>
   );
 }
 

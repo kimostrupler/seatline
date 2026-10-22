@@ -20,6 +20,7 @@ const SHORTCUTS = [
   ['⌫', 'delete'],
   ['← ↑ → ↓', 'nudge'],
   ['R', 'rotate'],
+  ['K', 'marker'],
   ['Esc', 'escape'],
   ['Space', 'pan'],
   ['Alt', 'noSnap'],

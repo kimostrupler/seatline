@@ -25,9 +25,9 @@ const load = (lang: string) =>
 const vars = (text: string) =>
   [
     ...new Set(
-      [...text.matchAll(/(?<!(?:=\d+|zero|one|two|few|many|other)\s*)\{\s*(\w+)\s*[,}]/g)].map(
-        (m) => m[1],
-      ),
+      [
+        ...text.matchAll(/(?<!(?:=\d+|\b(?:zero|one|two|few|many|other))\s*)\{\s*(\w+)\s*[,}]/g),
+      ].map((m) => m[1]),
     ),
   ].sort();
 

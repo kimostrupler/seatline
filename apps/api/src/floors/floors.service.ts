@@ -43,7 +43,7 @@ export class FloorsService {
         }),
         'Floor',
       );
-      const [rooms, seats] = await Promise.all([
+      const [rooms, seats, markers] = await Promise.all([
         tx.room.findMany({
           where: { tenantId: ctx.tenantId, floorId: id },
           orderBy: { name: 'asc' },
@@ -53,8 +53,13 @@ export class FloorsService {
           include: withCurrent,
           orderBy: { label: 'asc' },
         }),
+        tx.floorMarker.findMany({
+          where: { tenantId: ctx.tenantId, floorId: id },
+          select: { id: true, kind: true, x: true, y: true, label: true },
+          orderBy: { createdAt: 'asc' },
+        }),
       ]);
-      return { floor, rooms, seats: seats.map(present) };
+      return { floor, rooms, seats: seats.map(present), markers };
     });
   }
 
@@ -116,10 +121,22 @@ export class FloorsService {
     floor: Floor,
   ) {
     const { tenantId } = ctx;
-    const [rooms, seats] = await Promise.all([
+    const [rooms, seats, markers] = await Promise.all([
       tx.room.findMany({ where: { tenantId, floorId: source.id } }),
       tx.seat.findMany({ where: { tenantId, floorId: source.id }, orderBy: { label: 'asc' } }),
+      tx.floorMarker.findMany({ where: { tenantId, floorId: source.id } }),
     ]);
+    if (markers.length)
+      await tx.floorMarker.createMany({
+        data: markers.map((m) => ({
+          tenantId,
+          floorId: floor.id,
+          kind: m.kind,
+          x: m.x,
+          y: m.y,
+          label: m.label,
+        })),
+      });
     const roomIds = new Map<string, string>();
     for (const r of rooms) {
       const room = await tx.room.create({
@@ -129,6 +146,9 @@ export class FloorsService {
           name: r.name,
           type: r.type,
           polygon: r.polygon as Prisma.InputJsonValue,
+          capacity: r.capacity,
+          equipment: r.equipment,
+          team: r.team,
         },
       });
       roomIds.set(r.id, room.id);
@@ -155,6 +175,7 @@ export class FloorsService {
           x: s.x,
           y: s.y,
           rotation: s.rotation,
+          features: s.features,
           type: s.type,
           status: s.status,
         },

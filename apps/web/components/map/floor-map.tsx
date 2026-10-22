@@ -5,7 +5,10 @@ import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { Group, Layer, Rect, Stage } from 'react-konva';
 import { contentBounds, seatAt, seatSize, toPlan } from '@/lib/map-geometry';
-import type { FloorMap as FloorMapData, Seat } from '@/lib/types';
+import type { SeatFeature } from '@seatline/shared';
+import type { FloorMap as FloorMapData, Room, Seat } from '@/lib/types';
+import { DeskFinder } from './desk-finder';
+import { MarkerOverlay } from './markers';
 import { withAlpha } from '@/lib/team-colors';
 import type { ColorBy } from '@/lib/use-map-colors-mode';
 import { MapLegend, teamsOnFloor } from './map-legend';
@@ -111,6 +114,33 @@ export function FloorMap({
     return { fill: withAlpha(color, 0.22), stroke: color, text: c['seat-taken-text'] };
   };
   const dimmed = (seat: Seat) => byTeam && focusTeam !== null && teamOf(seat) !== focusTeam;
+  const tm = useTranslations('inspector');
+  // "find a free desk with…": free, active desks that have every wanted feature
+  const [wanted, setWanted] = useState<SeatFeature[]>([]);
+  const found = useMemo(
+    () =>
+      wanted.length
+        ? new Set(
+            map.seats
+              .filter(
+                (s) =>
+                  s.occupancy === 'free' && wanted.every((f) => (s.features ?? []).includes(f)),
+              )
+              .map((s) => s.id),
+          )
+        : null,
+    [map.seats, wanted],
+  );
+  const zoneColor = (room: Room, c: Colors) => {
+    const slot = room.team ? teamSlots.get(room.team) : undefined;
+    return room.team ? (slot ? c[`team-${slot}` as keyof Colors] : c['room-stroke']) : undefined;
+  };
+  const roomCaption = (room: Room) =>
+    room.type === 'meeting' && room.capacity
+      ? t('capacity', { count: room.capacity })
+      : room.team
+        ? t('zone', { team: room.team })
+        : undefined;
 
   // far zoomed out (e.g. a phone showing the whole floor) seat numbers would overlap
   const showLabels = view.scale >= 0.45;
@@ -217,6 +247,8 @@ export function FloorMap({
                   colors={colors}
                   textScale={vp.textScale}
                   translucent={!!plan}
+                  zoneColor={zoneColor(room, colors)}
+                  caption={roomCaption(room)}
                 />
               ))}
             </Layer>
@@ -234,7 +266,8 @@ export function FloorMap({
                   highlighted={
                     seat.id === highlightSeatId ||
                     seat.id === focusedSeatId ||
-                    !!markedSeatIds?.has(seat.id)
+                    !!markedSeatIds?.has(seat.id) ||
+                    !!found?.has(seat.id)
                   }
                   dropTarget={seat.id === dropTargetId}
                   dragging={seat.id === draggingSeatId}
@@ -249,6 +282,8 @@ export function FloorMap({
           </Stage>
         </SeatSizeContext.Provider>
       )}
+
+      <MarkerOverlay markers={map.markers ?? []} view={view} />
 
       {/* The canvas is invisible to keyboards and screen readers: this list is the accessible map. */}
       <ul className="sr-only" aria-label={t('seatsList')}>
@@ -265,7 +300,14 @@ export function FloorMap({
             </button>
           </li>
         ))}
+        {(map.markers ?? []).map((m) => (
+          <li key={m.id}>{[tm(`marker.${m.kind}`), m.label].filter(Boolean).join(': ')}</li>
+        ))}
       </ul>
+
+      <div className="absolute top-3 left-3" data-print="hide">
+        <DeskFinder seats={map.seats} wanted={wanted} onChange={setWanted} found={found} />
+      </div>
 
       <div data-print="hide">
         <ZoomControls zoomBy={vp.zoomBy} fit={vp.fit} />

@@ -46,7 +46,11 @@ export function PeopleAdmin({ consentBase }: { consentBase: ConsentBase }) {
   return (
     <PageFrame title={t('title')} wide="medium">
       <div className="-mt-3 grid gap-6">
-        <div role="tablist" aria-label={t('title')} className="flex gap-1 overflow-x-auto border-b">
+        <div
+          role="tablist"
+          aria-label={t('title')}
+          className="flex gap-1 overflow-x-auto overflow-y-hidden border-b [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
           {TABS.map(({ id, icon: Icon }) => (
             <button
               key={id}

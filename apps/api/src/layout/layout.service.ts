@@ -18,13 +18,15 @@ export class LayoutService {
     const { tenantId } = ctx;
     return this.db.run(tenantId, async (tx) => {
       orNotFound(await tx.floor.findFirst({ where: { id: floorId, tenantId } }), 'Floor');
-      const [rooms, seats] = await Promise.all([
+      const [rooms, seats, markers] = await Promise.all([
         tx.room.findMany({ where: { tenantId, floorId } }),
         tx.seat.findMany({
           where: { tenantId, floorId },
           include: { assignments: { where: { endAt: null }, select: { id: true } } },
         }),
+        tx.floorMarker.findMany({ where: { tenantId, floorId } }),
       ]);
+      const markerById = new Map(markers.map((m) => [m.id, m]));
       const roomById = new Map(rooms.map((r) => [r.id, r]));
       const seatById = new Map(seats.map((s) => [s.id, s]));
       const onFloor = (map: Map<string, unknown>, ids: string[], what: string) => {
@@ -41,6 +43,11 @@ export class LayoutService {
         seatById,
         [...changes.seats.update.map((s) => s.id), ...changes.seats.delete],
         'Seat',
+      );
+      onFloor(
+        markerById,
+        [...changes.markers.update.map((m) => m.id), ...changes.markers.delete],
+        'Marker',
       );
 
       // History must survive: seats that ever had someone can only be blocked, not deleted.
@@ -108,6 +115,19 @@ export class LayoutService {
           await tx.room.delete({ where: { id } });
           await log('room.delete', 'room', id, roomById.get(id));
         }
+      }
+
+      for (const m of changes.markers.create) {
+        const marker = await tx.floorMarker.create({ data: { ...m, tenantId, floorId } });
+        await log('marker.create', 'floor', floorId, undefined, marker);
+      }
+      for (const { id, ...data } of changes.markers.update) {
+        const marker = await tx.floorMarker.update({ where: { id }, data });
+        await log('marker.update', 'floor', floorId, markerById.get(id), marker);
+      }
+      for (const id of changes.markers.delete) {
+        await tx.floorMarker.delete({ where: { id } });
+        await log('marker.delete', 'floor', floorId, markerById.get(id));
       }
 
       await this.assignRooms(tx, ctx, floorId);

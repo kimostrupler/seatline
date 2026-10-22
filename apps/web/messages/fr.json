@@ -72,7 +72,17 @@
     "noDepartment": "Sans service",
     "focusTeam": "Mettre {team} en évidence",
     "showAllTeams": "Afficher toutes les équipes",
-    "seatButtonTeam": "Place {label}, occupée par {person} ({team})"
+    "seatButtonTeam": "Place {label}, occupée par {person} ({team})",
+    "capacity": "{count, plural, one {# place} other {# places}}",
+    "zone": "Zone {team}",
+    "finder": {
+      "button": "Trouver un poste libre",
+      "title": "Postes libres avec…",
+      "found": "{count, plural, =0 {Aucun résultat} one {# poste libre} other {# postes libres}}",
+      "result": "{count, plural, =0 {Aucun poste libre n’a tout cela.} one {# poste libre correspond — mis en évidence sur le plan.} other {# postes libres correspondent — mis en évidence sur le plan.}}",
+      "hint": "Choisissez ce que le poste doit avoir.",
+      "clear": "Effacer la recherche de poste"
+    }
   },
   "seat": {
     "title": "Place {label}",
@@ -159,7 +169,9 @@
     "hintSelectTouch": "Touchez pour sélectionner · glissez une place ou une pièce pour la déplacer · glissez l’étage pour regarder autour · pincez pour zoomer",
     "closePanel": "Fermer le panneau",
     "copied": "Copié – collez sur n’importe quel étage avec ⌘V",
-    "floorAndPlan": "Étage et plan"
+    "floorAndPlan": "Étage et plan",
+    "addMarker": "Ajouter un repère (K)",
+    "hintMarker": "Cliquez là où se trouve la cuisine, l’imprimante ou la sortie — puis choisissez à droite de quoi il s’agit"
   },
   "inspector": {
     "floor": "Étage",
@@ -265,7 +277,45 @@
     "addPlan": "Ajouter un plan",
     "changePlan": "Changer le plan",
     "importPlanHint": "DXF, PDF ou scan — les pièces et postes sont dessinés pour vous",
-    "uploadPlanHint": "PNG ou JPG sur lequel dessiner"
+    "uploadPlanHint": "PNG ou JPG sur lequel dessiner",
+    "features": "Équipement du poste",
+    "featuresHint": "Sur le plan, on peut chercher un poste libre avec ces équipements.",
+    "feature": {
+      "standing": "Bureau assis-debout",
+      "two_screens": "Deux écrans",
+      "docking": "Station d’accueil",
+      "window": "Près de la fenêtre",
+      "quiet": "Zone calme",
+      "accessible": "Accessible"
+    },
+    "capacity": "Places",
+    "capacityInvalid": "Saisissez un nombre entre 1 et 500.",
+    "equipment": "Équipement",
+    "equip": {
+      "screen": "Écran",
+      "video": "Visioconférence",
+      "whiteboard": "Tableau blanc",
+      "phone": "Téléphone de conférence"
+    },
+    "zone": "Zone d’équipe",
+    "zoneHint": "L’espace de cette équipe : affiché dans sa couleur sur le plan, un repère pour planifier les déménagements.",
+    "noZone": "Aucune zone d’équipe",
+    "marker": {
+      "kitchen": "Cuisine",
+      "coffee": "Café",
+      "printer": "Imprimante",
+      "toilet": "Toilettes",
+      "exit": "Sortie",
+      "stairs": "Escaliers",
+      "elevator": "Ascenseur",
+      "lockers": "Casiers",
+      "first_aid": "Premiers secours",
+      "reception": "Accueil"
+    },
+    "markerKind": "De quoi s’agit-il ?",
+    "markerLabel": "Nom (facultatif)",
+    "markerLabelHint": "p. ex. Cafétéria, Imprimante 2e étage",
+    "deleteMarker": "Supprimer le repère"
   },
   "auth": {
     "signInTitle": "Se connecter à Seatline",
@@ -533,7 +583,8 @@
     "addToSelection": "Cliquer pour ajouter à la sélection",
     "corners": "Double-clic sur la poignée d’un côté ajoute un coin, sur un coin le supprime",
     "help": "Afficher cette liste",
-    "box": "Tracer un cadre pour en choisir plusieurs"
+    "box": "Tracer un cadre pour en choisir plusieurs",
+    "marker": "Ajouter un repère (cuisine, imprimante, sortie…)"
   },
   "nav": {
     "label": "Pages",
@@ -789,7 +840,14 @@
     "statReservations": "{count, plural, one {réservation attend} other {réservations attendent}} quelqu’un",
     "statUnseated": "{count, plural, one {personne n’a} other {personnes n’ont}} pas de poste",
     "statMoves": "{count, plural, one {plan de déménagement ouvert} other {plans de déménagement ouverts}}",
-    "seatedOf": "{seated} sur {people} placés"
+    "seatedOf": "{seated} sur {people} placés",
+    "options": "Options pour {name}",
+    "moveEarlierShort": "Avancer",
+    "moveLaterShort": "Reculer",
+    "sizeLabel": "Taille",
+    "removeShort": "Retirer du tableau de bord",
+    "addedWidget": "{name} ajouté — tout en haut",
+    "approveMicrosoft": "L’approuver sous « Personnes et accès »"
   },
   "errors": {
     "title": "Un problème est survenu",

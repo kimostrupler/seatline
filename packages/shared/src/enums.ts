@@ -20,3 +20,33 @@ export type SeatOccupancy = (typeof SEAT_OCCUPANCY)[number];
 /** How desks on a floor are numbered: 1.01, 1.02… or by room: 1.04-A, 1.04-B… */
 export const SEAT_NUMBERINGS = ['floor', 'room'] as const;
 export type SeatNumbering = (typeof SEAT_NUMBERINGS)[number];
+
+/** What a (meeting) room has. */
+export const ROOM_EQUIPMENT = ['screen', 'video', 'whiteboard', 'phone'] as const;
+export type RoomEquipment = (typeof ROOM_EQUIPMENT)[number];
+
+/** What a desk has — searchable on the map ("find a free standing desk"). */
+export const SEAT_FEATURES = [
+  'standing',
+  'two_screens',
+  'docking',
+  'window',
+  'quiet',
+  'accessible',
+] as const;
+export type SeatFeature = (typeof SEAT_FEATURES)[number];
+
+/** Things to find one's way on a floor. */
+export const MARKER_KINDS = [
+  'kitchen',
+  'coffee',
+  'printer',
+  'toilet',
+  'exit',
+  'stairs',
+  'elevator',
+  'lockers',
+  'first_aid',
+  'reception',
+] as const;
+export type MarkerKind = (typeof MARKER_KINDS)[number];

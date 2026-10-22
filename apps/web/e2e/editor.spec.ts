@@ -180,6 +180,51 @@ test('dragging the empty floor moves around; Shift-drag selects a box', async ({
   await expect(page.getByTestId('floor-settings')).toHaveCount(0);
 });
 
+test('markers: place one, say what it is, delete it', async ({ page }) => {
+  await page.keyboard.press('k');
+  await clickPlan(page, { x: 900, y: 600 });
+  const inspector = page.getByTestId('inspector');
+  await expect(inspector.getByRole('heading')).toHaveText('Kitchen');
+  await inspector.getByRole('combobox', { name: 'What is it?' }).click();
+  await page.getByRole('option', { name: 'Printer' }).click();
+  await inspector.getByRole('textbox', { name: 'Name (optional)' }).fill('Printer 1');
+  await inspector.getByRole('textbox', { name: 'Name (optional)' }).press('Enter');
+  await saved(page);
+  expect((await floorMap(page)).markers).toMatchObject([
+    { kind: 'printer', x: 900, y: 600, label: 'Printer 1' },
+  ]);
+  await expect(page.locator('[data-marker="printer"]')).toBeVisible();
+
+  await page.keyboard.press('Delete');
+  await saved(page);
+  expect((await floorMap(page)).markers).toEqual([]);
+});
+
+test('meeting room capacity and equipment; desk features and the free-desk finder', async ({
+  page,
+}) => {
+  await clickPlan(page, { x: 975, y: 175 }); // the meeting room
+  const inspector = page.getByTestId('inspector');
+  await inspector.getByRole('textbox', { name: 'Seats' }).fill('8');
+  await inspector.getByRole('textbox', { name: 'Seats' }).press('Enter');
+  await inspector.getByRole('button', { name: 'Video calls' }).click();
+  await saved(page);
+  expect((await floorMap(page)).rooms.find((r) => r.name === 'Meeting Rigi')).toMatchObject({
+    capacity: 8,
+    equipment: ['video'],
+  });
+
+  const free = (await floorMap(page)).seats.find((s) => !s.currentAssignment)!;
+  await clickPlan(page, free);
+  await inspector.getByRole('button', { name: 'Standing desk' }).click();
+  await saved(page);
+
+  await page.getByRole('radio', { name: 'View' }).click();
+  await page.getByTestId('desk-finder').click();
+  await page.getByRole('button', { name: 'Standing desk' }).click();
+  await expect(page.getByTestId('desk-finder')).toHaveText('1 free desk');
+});
+
 test('align seats and add a row of desks', async ({ page }) => {
   const map = await floorMap(page);
   const a = map.seats.find((s) => s.label === '1.01')!;

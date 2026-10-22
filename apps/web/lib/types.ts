@@ -1,6 +1,9 @@
 import type {
   AppRole,
   AssignmentKind,
+  MarkerKind,
+  RoomEquipment,
+  SeatFeature,
   NotifyEvent,
   RoomType,
   SeatNumbering,
@@ -68,6 +71,11 @@ export interface Room {
   name: string;
   type: RoomType;
   polygon: Point[];
+  /** meeting rooms: how many people fit, and what's in it */
+  capacity?: number | null;
+  equipment?: RoomEquipment[];
+  /** team zone: this team's area */
+  team?: string | null;
 }
 
 export interface PersonRef {
@@ -98,14 +106,26 @@ export interface Seat {
   rotation: number;
   type: SeatType;
   status: SeatStatus;
+  /** standing desk, two screens… (searchable on the map) */
+  features?: SeatFeature[];
   occupancy: SeatOccupancy;
   currentAssignment: (Assignment & { person: PersonRef | null }) | null;
+}
+
+/** Kitchen, printer, exits… to find one's way. */
+export interface Marker {
+  id: string;
+  kind: MarkerKind;
+  x: number;
+  y: number;
+  label?: string | null;
 }
 
 export interface FloorMap {
   floor: Floor & { building: { id: string; name: string } };
   rooms: Room[];
   seats: Seat[];
+  markers?: Marker[];
 }
 
 export interface Person {
