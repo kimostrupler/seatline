@@ -8,7 +8,7 @@ Import architect plan**; people confirm the suggestions before anything is saved
 | ---------------------------- | -------------------------------------------------------------------------------------------------- |
 | DXF (CAD)                    | rooms (room outlines, else spaces between walls), names, desks, exact scale                        |
 | PDF exported from CAD        | rooms from thick lines/filled walls, names, desks (repeated rectangles), scale from a "1:100" note |
-| Scan / photo (PDF, PNG, JPG) | rooms from thick dark lines; no names or desks (AI reading comes later)                            |
+| Scan / photo (PDF, PNG, JPG) | rooms from thick dark lines, desks from small drawn rectangles; names via AI (below)               |
 | DWG                          | not readable (proprietary): save as DXF                                                            |
 
 Everything is in the new image's pixels (Seatline's floor coordinates); with a known scale the
@@ -40,6 +40,16 @@ requirements with pip).
   thresholded and thin lines removed.
 - `app/analyze.py` — picks the reader from the file's bytes and runs it in a separate process
   (killed after 90 s) — uploaded files are untrusted. Max 25 MB.
+
+## AI room names (scans only)
+
+`app/ai_names.py`: when `AZURE_OPENAI_ENDPOINT` + `AZURE_OPENAI_DEPLOYMENT` are set, a scan's rooms
+are outlined and numbered on a copy of the image (number in each room's top-left corner, so the
+written name stays visible) and Azure OpenAI is asked, with a strict JSON schema, what each room
+says and what kind of room it is. Outlines stay OpenCV's; the model only reads labels. Auth: the
+container's managed identity (`AZURE_CLIENT_ID`), or `AZURE_OPENAI_API_KEY` locally. Any failure
+just leaves the rooms unnamed (warning `ai_failed`). Vector plans never go to the model.
+Online: `infra/azure/ai-setup.sh` (regional deployment in Switzerland North, no keys).
 
 ## Samples
 

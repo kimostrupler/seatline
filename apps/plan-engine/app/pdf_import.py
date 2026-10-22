@@ -16,6 +16,7 @@ import pdfplumber
 import pypdfium2 as pdfium
 from PIL import Image
 
+from . import ai_names
 from .dxf_import import DrawingError
 from .geometry import (
     Draft,
@@ -24,6 +25,7 @@ from .geometry import (
     Text,
     encode_png,
     find_rooms,
+    inside,
     name_rooms,
     seats_from_rects,
     type_rooms,
@@ -163,7 +165,7 @@ def _join_lines(texts: list[Text]) -> list[Text]:
 
 
 def analyze_image(gray: np.ndarray) -> Draft:
-    """Scans and photos: thick dark strokes are walls. No names, desks or scale."""
+    """Scans and photos: thick dark strokes are walls, small drawn rectangles are desks."""
     gray = _limit(gray)
     height, width = gray.shape
     _, dark = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
@@ -172,8 +174,12 @@ def analyze_image(gray: np.ndarray) -> Draft:
     walls = cv2.morphologyEx(dark, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (stroke, stroke)))
     polygons = find_rooms(walls, None, unit_from_walls(walls))
     rooms = [Room(polygon=p) for p in polygons]
-    type_rooms(rooms, [], None)
-    warnings = ["scan", "no_scale", "no_seats"] + ([] if rooms else ["no_rooms"])
+    seats = seats_from_rects(_outlined_rects(dark, walls), None, gray.shape)
+    type_rooms(rooms, seats, None)
+    warnings = ["scan", "no_scale"] + ([] if seats else ["no_seats"]) + ([] if rooms else ["no_rooms"])
+    if rooms and ai_names.configured():
+        per_room = [sum(inside(r.polygon, s.x, s.y) for s in seats) for r in rooms]
+        warnings.append("ai_names" if ai_names.name_rooms_with_ai(gray, rooms, per_room) else "ai_failed")
     return Draft(
         source="raster",
         width=width,
@@ -181,9 +187,24 @@ def analyze_image(gray: np.ndarray) -> Draft:
         scale=None,
         image_png=encode_png(gray),
         rooms=rooms,
-        seats=[],
+        seats=seats,
         warnings=warnings,
     )
+
+
+def _outlined_rects(dark: np.ndarray, walls: np.ndarray) -> list[Rect]:
+    """Axis-aligned rectangles drawn with thin lines (desks), walls removed first."""
+    thin = cv2.subtract(dark, cv2.dilate(walls, np.ones((3, 3), np.uint8)))
+    contours, _ = cv2.findContours(thin, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    rects: list[Rect] = []
+    for c in contours:
+        x, y, w, h = cv2.boundingRect(c)
+        if w < 6 or h < 6:
+            continue
+        approx = cv2.approxPolyDP(c, 0.04 * cv2.arcLength(c, True), True)
+        if len(approx) == 4 and cv2.isContourConvex(approx) and cv2.contourArea(approx) >= 0.8 * w * h:
+            rects.append(Rect(x=x, y=y, w=w, h=h))
+    return rects
 
 
 def analyze_raster(data: bytes) -> Draft:

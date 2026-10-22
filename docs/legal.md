@@ -20,9 +20,9 @@ sections — `docs.test.ts` checks it).
 - **Data in Switzerland**: hosting, backups and logs in Azure Switzerland North.
 - **No tracking**: no analytics, ads or third-party cookies. Adding any needs a policy update
   (and possibly a consent banner).
-- **Sub-processors**: Microsoft, Stripe, Hostpoint. A new one (e.g. an e-mail service, Azure
-  OpenAI for plan import) must be added to the privacy policy and announced to customers in
-  advance.
+- **Sub-processors**: Microsoft (incl. Azure OpenAI in Switzerland North for scanned plans),
+  Stripe, Hostpoint. A new one (e.g. an e-mail service) must be added to the privacy policy and
+  announced to customers in advance.
 - **Deleting workspaces**: on request, and at the latest 6 months after the subscription or
   trial ended. This is a **manual task for now**.
 - **30 days’ notice** for price or important terms changes, by e-mail to workspace admins.

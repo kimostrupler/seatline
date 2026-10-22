@@ -179,6 +179,13 @@ def make_scan(path: Path, px_per_m: float = 40) -> None:
     for x, y, rot in desks():
         w, d = (DESK_W, DESK_D) if rot in (0, 180) else (DESK_D, DESK_W)
         cv2.rectangle(img, p(x - w / 2, y - d / 2), p(x + w / 2, y + d / 2), 90, 1)
+    for name, x0, y0, x1, y1, _ in ROOMS:  # room labels, like on a real plan (ASCII: OpenCV fonts)
+        label = name.replace("ü", "ue").replace("ä", "ae").replace("ö", "oe")
+        size = px_per_m / 60
+        (tw, _), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, size, 1)
+        cy = y1 - 1.2 if y0 >= CORRIDOR[1] else y0 + 1.0
+        cx, cy_px = p((x0 + x1) / 2, cy)
+        cv2.putText(img, label, (cx - tw // 2, cy_px), cv2.FONT_HERSHEY_SIMPLEX, size, 40, 1, cv2.LINE_AA)
     noise = np.random.default_rng(1).normal(0, 3, img.shape)
     cv2.imwrite(str(path), np.clip(img + noise, 0, 255).astype(np.uint8))
 

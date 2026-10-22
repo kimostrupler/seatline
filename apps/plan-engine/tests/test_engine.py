@@ -65,11 +65,14 @@ def test_vector_pdf_reads_the_scale_note_names_and_desks(files):
     assert sum(s.rotation == 90 for s in d.seats) == 8  # the turned desks in 1.07
 
 
-def test_scan_finds_rooms_but_no_names_or_desks(files):
+def test_scan_finds_rooms_and_desks_but_no_names(files):
     d = analyze(files["scan.png"])
     assert d.source == "raster" and d.scale is None
     assert len(d.rooms) == len(NAMES) + 1
-    assert d.seats == [] and {"scan", "no_scale", "no_seats"} <= set(d.warnings)
+    assert names(d) == set()
+    assert len(d.seats) == DESKS  # thin drawn rectangles of a desk's size
+    assert sum(s.rotation == 90 for s in d.seats) == 8
+    assert {"scan", "no_scale"} <= set(d.warnings) and "no_seats" not in d.warnings
 
 
 def test_file_kinds():
