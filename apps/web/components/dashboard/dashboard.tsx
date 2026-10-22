@@ -35,6 +35,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { addWidget, canSee, moveWidget, removeWidget, resizeWidget, SPAN } from '@/lib/dashboard';
 import { useDashboard, useDashboardActions, useMe } from '@/lib/queries';
 import { cn } from '@/lib/utils';
+import { GettingStarted } from './getting-started';
 import { WIDGET_ICONS, WIDGET_LINKS, WidgetBody } from './widgets';
 
 const errorText = (error: unknown) => (error instanceof Error ? error.message : String(error));
@@ -130,6 +131,9 @@ export function Dashboard() {
       }
     >
       {editing && <p className="-mt-4 text-sm text-muted-foreground">{t('customizeHint')}</p>}
+      {!editing && me?.role === 'admin' && !me.tenant.isDemo && (
+        <GettingStarted tenantId={me.tenant.id} />
+      )}
       {!dashboard.data ? (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <Skeleton className="h-40 md:col-span-2" />

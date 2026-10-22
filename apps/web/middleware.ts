@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { readSession, SESSION_COOKIE } from '@/lib/server/session';
+import { guideBySlug } from '@/lib/guides';
 import { PAGE_LANGUAGE_HEADER } from '@/lib/locales';
 import { isPublicPath, siteHosts } from '@/lib/site';
 
@@ -20,6 +21,14 @@ export async function middleware(req: NextRequest) {
     headers.set(PAGE_LANGUAGE_HEADER, pathname.slice(1));
     return NextResponse.rewrite(new URL('/welcome', req.url), { request: { headers } });
   }
+  // a guide's address says its language (header and footer follow it)
+  const guide = pathname.startsWith('/guides/') ? guideBySlug(pathname.slice(8)) : undefined;
+  const next = () => {
+    if (!guide) return NextResponse.next();
+    const headers = new Headers(req.headers);
+    headers.set(PAGE_LANGUAGE_HEADER, guide.language);
+    return NextResponse.next({ request: { headers } });
+  };
   if (siteHosts(appUrl).includes(host)) {
     if (pathname === '/') return NextResponse.rewrite(new URL('/welcome', req.url));
     // /.well-known: domain checks (e.g. Azure's certificate validation) must not be redirected
@@ -29,11 +38,11 @@ export async function middleware(req: NextRequest) {
       pathname === '/site-visit' ||
       pathname.startsWith('/.well-known/')
     )
-      return NextResponse.next();
+      return next();
     return NextResponse.redirect(new URL(pathname + search, appUrl));
   }
 
-  if (process.env.AUTH_MODE !== 'entra') return NextResponse.next();
+  if (process.env.AUTH_MODE !== 'entra') return next();
   if (
     pathname === '/signin' ||
     pathname.startsWith('/signin/') || // check your inbox; picking a workspace checks itself
@@ -46,7 +55,7 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith('/api/') ||
     isPublicPath(pathname)
   )
-    return NextResponse.next();
+    return next();
   const user = await readSession(
     req.cookies.get(SESSION_COOKIE)?.value,
     process.env.SESSION_SECRET ?? '',

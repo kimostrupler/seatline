@@ -171,7 +171,21 @@
     "copied": "Copié – collez sur n’importe quel étage avec ⌘V",
     "floorAndPlan": "Étage et plan",
     "addMarker": "Ajouter un repère (K)",
-    "hintMarker": "Cliquez là où se trouve la cuisine, l’imprimante ou la sortie — puis choisissez à droite de quoi il s’agit"
+    "hintMarker": "Cliquez là où se trouve la cuisine, l’imprimante ou la sortie — puis choisissez à droite de quoi il s’agit",
+    "templates": {
+      "title": "Commencer avec un bureau d’exemple",
+      "hint": "Postes de travail, salles de réunion et une cuisine, prêts à adapter. Ou dessinez le vôtre avec les outils – vous pourrez tout modifier ensuite.",
+      "small": "Petit",
+      "medium": "Moyen",
+      "large": "Grand",
+      "desks": "{count} postes",
+      "openSpace": "Open space {letter}",
+      "meeting": "Salle de réunion {n}",
+      "office": "Bureau {n}",
+      "common": "Accueil & cuisine",
+      "added": "Bureau d’exemple ajouté – déplacez, renommez ou supprimez ce que vous voulez. Annuler le retire.",
+      "dismiss": "Commencer avec un étage vide"
+    }
   },
   "inspector": {
     "floor": "Étage",
@@ -914,7 +928,36 @@
     "sizeLabel": "Taille",
     "removeShort": "Retirer du tableau de bord",
     "addedWidget": "{name} ajouté — tout en haut",
-    "approveMicrosoft": "L’approuver sous « Personnes et accès »"
+    "approveMicrosoft": "L’approuver sous « Personnes et accès »",
+    "gettingStarted": {
+      "title": "Bien démarrer avec Seatline",
+      "progress": "{done} sur {total} terminées",
+      "hide": "Masquer cette liste",
+      "done": "terminé",
+      "todo": "à faire",
+      "steps": {
+        "building": {
+          "title": "Ajouter votre bâtiment",
+          "hint": "Son nom et son adresse. Les étages s’y ajoutent.",
+          "action": "Ajouter un bâtiment"
+        },
+        "desks": {
+          "title": "Dessiner un étage avec des postes",
+          "hint": "Partez d’un bureau d’exemple, importez un plan d’architecte ou dessinez-le vous-même.",
+          "action": "Dessiner l’étage"
+        },
+        "people": {
+          "title": "Ajouter vos collègues",
+          "hint": "Importez une liste Excel ou CSV, ajoutez-les un par un – ou ils viennent de Microsoft 365.",
+          "action": "Ajouter des personnes"
+        },
+        "seated": {
+          "title": "Attribuer les postes",
+          "hint": "Glissez une personne de la liste sur un poste du plan.",
+          "action": "Ouvrir le plan"
+        }
+      }
+    }
   },
   "errors": {
     "title": "Un problème est survenu",
@@ -1179,7 +1222,10 @@
     "finalTitle": "Essayez avec vos propres étages",
     "contact": "Des questions ? Écrivez à <mail>{email}</mail>",
     "madeIn": "Made in Switzerland",
-    "copyright": "© {year} Seatline"
+    "copyright": "© {year} Seatline",
+    "guides": "Guides",
+    "moreGuides": "Autres guides",
+    "guideTopic": "Sujet"
   },
   "planImport": {
     "title": "Importer un plan d’architecte",

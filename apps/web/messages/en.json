@@ -171,7 +171,21 @@
     "copied": "Copied — paste on any floor with ⌘V",
     "floorAndPlan": "Floor & plan",
     "addMarker": "Add a marker (K)",
-    "hintMarker": "Click where the kitchen, printer or exit is — then choose what it is on the right"
+    "hintMarker": "Click where the kitchen, printer or exit is — then choose what it is on the right",
+    "templates": {
+      "title": "Start with an example office",
+      "hint": "Desks, meeting rooms and a kitchen, ready to adjust. Or draw your own with the tools — you can change everything afterwards.",
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large",
+      "desks": "{count} desks",
+      "openSpace": "Open space {letter}",
+      "meeting": "Meeting room {n}",
+      "office": "Office {n}",
+      "common": "Reception & kitchen",
+      "added": "Example office added — move, rename or delete anything. Undo removes it.",
+      "dismiss": "Start with an empty floor"
+    }
   },
   "inspector": {
     "floor": "Floor",
@@ -914,7 +928,36 @@
     "sizeLabel": "Size",
     "removeShort": "Remove from dashboard",
     "addedWidget": "{name} added — it’s at the top",
-    "approveMicrosoft": "Approve it under People & access"
+    "approveMicrosoft": "Approve it under People & access",
+    "gettingStarted": {
+      "title": "Get started with Seatline",
+      "progress": "{done} of {total} done",
+      "hide": "Hide this checklist",
+      "done": "done",
+      "todo": "to do",
+      "steps": {
+        "building": {
+          "title": "Add your building",
+          "hint": "Its name and address. Floors go inside it.",
+          "action": "Add building"
+        },
+        "desks": {
+          "title": "Draw a floor with desks",
+          "hint": "Start from an example office, import an architect plan or draw it yourself.",
+          "action": "Draw the floor"
+        },
+        "people": {
+          "title": "Add your colleagues",
+          "hint": "Import an Excel or CSV list, add them one by one — or they come from Microsoft 365.",
+          "action": "Add people"
+        },
+        "seated": {
+          "title": "Give people their desks",
+          "hint": "Drag a person from the list onto a desk on the map.",
+          "action": "Open the map"
+        }
+      }
+    }
   },
   "errors": {
     "title": "Something went wrong",
@@ -1179,7 +1222,10 @@
     "finalTitle": "Try it with your own floors",
     "contact": "Questions? Write to <mail>{email}</mail>",
     "madeIn": "Made in Switzerland",
-    "copyright": "© {year} Seatline"
+    "copyright": "© {year} Seatline",
+    "guides": "Guides",
+    "moreGuides": "More guides",
+    "guideTopic": "Topic"
   },
   "planImport": {
     "title": "Import an architect plan",

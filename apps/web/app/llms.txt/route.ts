@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { GUIDES, GUIDE_TEXT, guidePath } from '@/lib/guides';
 import { webConfig } from '@/lib/server/config';
 import { SITE_PRICE_CHF, siteUrl } from '@/lib/site';
 
@@ -30,6 +31,10 @@ ${features.join('\n')}
 ## Questions
 
 ${faq.join('\n\n')}
+
+## Guides
+
+${GUIDES.map((g) => `- [${GUIDE_TEXT.en[g].title}](${base}${guidePath(g, 'en')}): ${GUIDE_TEXT.en[g].description}`).join('\n')}
 
 ## Links
 

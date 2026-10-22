@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { LEGAL_UPDATED } from '@/lib/legal/operator';
 import { webConfig } from '@/lib/server/config';
+import { GUIDES, guideAlternates, guidePath } from '@/lib/guides';
 import { languageAlternates } from '@/lib/seo';
 import { siteUrl, SITE_LANGUAGE_PATHS } from '@/lib/site';
 
@@ -18,6 +19,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
       alternates: { languages },
     })),
+    ...GUIDES.flatMap((guide) =>
+      (['en', 'de', 'fr'] as const).map((language) => ({
+        url: `${base}${guidePath(guide, language)}`,
+        changeFrequency: 'monthly' as const,
+        priority: 0.7,
+        alternates: { languages: guideAlternates(base, guide) },
+      })),
+    ),
     ...['terms', 'privacy', 'dpa', 'imprint'].map((doc) => ({
       url: `${base}/legal/${doc}`,
       lastModified: LEGAL_UPDATED,

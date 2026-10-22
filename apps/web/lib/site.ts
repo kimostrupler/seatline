@@ -27,6 +27,7 @@ export function isPublicPath(pathname: string): boolean {
     pathname.startsWith('/icon') ||
     pathname.startsWith('/apple-icon') ||
     pathname.startsWith('/legal/') ||
+    pathname.startsWith('/guides/') ||
     pathname === '/robots.txt' ||
     pathname === '/sitemap.xml'
   );

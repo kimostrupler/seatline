@@ -14,6 +14,7 @@ describe('site domain', () => {
   it('opens only the website without signing in', () => {
     expect(isPublicPath('/welcome')).toBe(true);
     expect(isPublicPath('/legal/privacy')).toBe(true);
+    expect(isPublicPath('/guides/seatline-vs-excel')).toBe(true);
     expect(isPublicPath('/legal')).toBe(false);
     expect(isPublicPath('/map')).toBe(false);
   });
