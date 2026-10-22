@@ -2,11 +2,13 @@ name: Deploy
 
 # Deploys main to Azure after CI passed. Inactive until infra/azure/setup.sh was run and its
 # five repository variables (AZURE_*) were added in GitHub → Settings → Variables.
+# The branch "staging" deploys to the test copy instead (STAGING_RESOURCE_GROUP and
+# STAGING_REGISTRY, see setup.sh); without those variables staging isn't deployed.
 on:
   workflow_run:
     workflows: [CI]
     types: [completed]
-    branches: [main]
+    branches: [main, staging]
   workflow_dispatch:
 
 permissions:
@@ -14,18 +16,20 @@ permissions:
   contents: read
 
 concurrency:
-  group: deploy
+  group: deploy-${{ github.event.workflow_run.head_branch || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
   deploy:
     if: >-
       vars.AZURE_CLIENT_ID != '' &&
-      (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success')
+      (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success') &&
+      ((github.event.workflow_run.head_branch || github.ref_name) != 'staging' || vars.STAGING_RESOURCE_GROUP != '')
     runs-on: ubuntu-latest
     env:
-      RG: ${{ vars.AZURE_RESOURCE_GROUP }}
-      REGISTRY: ${{ vars.AZURE_REGISTRY }}
+      STAGING: ${{ (github.event.workflow_run.head_branch || github.ref_name) == 'staging' }}
+      RG: ${{ (github.event.workflow_run.head_branch || github.ref_name) == 'staging' && vars.STAGING_RESOURCE_GROUP || vars.AZURE_RESOURCE_GROUP }}
+      REGISTRY: ${{ (github.event.workflow_run.head_branch || github.ref_name) == 'staging' && vars.STAGING_REGISTRY || vars.AZURE_REGISTRY }}
       SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
     steps:
       - uses: actions/checkout@v7
@@ -87,11 +91,17 @@ jobs:
           az containerapp job update -n nightly-sync -g "$RG" --image "$API_IMAGE" -o none
 
       - name: Error alerts by e-mail
-        if: vars.ALERT_EMAIL != ''
+        if: vars.ALERT_EMAIL != '' && env.STAGING != 'true'
         env:
           ALERT_EMAIL: ${{ vars.ALERT_EMAIL }}
         # an alert problem must not block a release: warn instead
         run: bash infra/azure/alerts.sh || echo "::warning::Could not set up the error alert — see the log above"
+
+      - name: Uptime check
+        if: vars.ALERT_EMAIL != '' && env.STAGING != 'true'
+        env:
+          ALERT_EMAIL: ${{ vars.ALERT_EMAIL }}
+        run: bash infra/azure/uptime.sh || echo "::warning::Could not set up the uptime check — see the log above"
 
       - name: Check the site answers
         run: |

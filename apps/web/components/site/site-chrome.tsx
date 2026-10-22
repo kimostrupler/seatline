@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { LanguageSelect } from '@/components/common/language-select';
 import { Button } from '@/components/ui/button';
 import { OPERATOR } from '@/lib/legal/operator';
+import { SiteBeacon } from './site-beacon';
 import { webConfig } from '@/lib/server/config';
 
 /** Seatline's mark: three desks, one free. */
@@ -99,6 +100,7 @@ export function SitePage({ children, sections }: { children: ReactNode; sections
       <SiteHeader sections={sections} />
       <main className="flex-1">{children}</main>
       <SiteFooter />
+      <SiteBeacon />
     </div>
   );
 }

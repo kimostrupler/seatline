@@ -271,7 +271,7 @@ const TEXTS: Texts = {
       {
         heading: '3. What we process',
         paragraphs: [
-          'Website: we use no tracking, no analytics, no advertising and no third-party cookies. Our servers record technical logs (IP address, time, page, browser) for security and error analysis.',
+          'Website: we use no tracking, no advertising and no third-party cookies. To know how many people visit, we count page views on our own servers in Switzerland: the page, the website you came from, your language and whether it’s a phone or a computer — without cookies, without storing your IP address and without anything that links two visits. Our servers also record technical logs (IP address, time, page, browser) for security and error analysis.',
           'Sign-in: from your Microsoft work account we receive your name, e-mail address and Microsoft user and organisation IDs. Your password never reaches us.',
           'Sign-in by e-mail: if you ask for a sign-in link, we e-mail it to the address you enter (sent through Hostpoint in Switzerland). We keep only a scrambled form of the link, for at most one day; it works once and for 15 minutes. Admins can add colleagues by name and e-mail address and send them an invitation.',
           'People directory: if your company’s Microsoft 365 admin approves it, Seatline reads each employee’s name, e-mail, department, job title and whether the account is active, once a night. Nothing else.',
@@ -348,7 +348,7 @@ const TEXTS: Texts = {
       {
         heading: '3. Welche Daten wir bearbeiten',
         paragraphs: [
-          'Website: Wir verwenden kein Tracking, keine Analyse-Tools, keine Werbung und keine Cookies von Dritten. Unsere Server zeichnen technische Protokolle auf (IP-Adresse, Zeit, Seite, Browser), für Sicherheit und Fehleranalyse.',
+          'Website: Wir verwenden kein Tracking, keine Werbung und keine Cookies von Dritten. Um zu wissen, wie viele Personen die Website besuchen, zählen wir Seitenaufrufe auf unseren eigenen Servern in der Schweiz: die Seite, die Website, von der Sie kamen, Ihre Sprache und ob es ein Telefon oder ein Computer ist — ohne Cookies, ohne Speicherung Ihrer IP-Adresse und ohne etwas, das zwei Besuche verbindet. Unsere Server zeichnen zudem technische Protokolle auf (IP-Adresse, Zeit, Seite, Browser), für Sicherheit und Fehleranalyse.',
           'Anmeldung: Von Ihrem Microsoft-Geschäftskonto erhalten wir Name, E-Mail-Adresse sowie Microsoft-Benutzer- und Organisations-ID. Ihr Passwort erreicht uns nie.',
           'Anmeldung per E-Mail: Wenn Sie einen Anmeldelink anfordern, senden wir ihn an die eingegebene Adresse (über Hostpoint in der Schweiz). Wir speichern nur eine verschlüsselte Form des Links, höchstens einen Tag lang; er funktioniert einmal und 15 Minuten lang. Admins können Kolleginnen und Kollegen mit Name und E-Mail-Adresse hinzufügen und ihnen eine Einladung senden.',
           'Personenverzeichnis: Wenn der Microsoft-365-Admin Ihres Unternehmens zustimmt, liest Seatline einmal pro Nacht Name, E-Mail, Abteilung, Funktion und Kontostatus (aktiv oder nicht) der Mitarbeitenden. Sonst nichts.',
@@ -425,7 +425,7 @@ const TEXTS: Texts = {
       {
         heading: '3. Ce que nous traitons',
         paragraphs: [
-          'Site web : aucun suivi, aucun outil d’analyse, aucune publicité ni cookie tiers. Nos serveurs enregistrent des journaux techniques (adresse IP, heure, page, navigateur) pour la sécurité et l’analyse des erreurs.',
+          'Site web : aucun suivi, aucune publicité ni cookie tiers. Pour savoir combien de personnes visitent le site, nous comptons les pages vues sur nos propres serveurs en Suisse : la page, le site d’où vous venez, votre langue et s’il s’agit d’un téléphone ou d’un ordinateur — sans cookies, sans enregistrer votre adresse IP et sans rien qui relie deux visites. Nos serveurs enregistrent aussi des journaux techniques (adresse IP, heure, page, navigateur) pour la sécurité et l’analyse des erreurs.',
           'Connexion : de votre compte professionnel Microsoft, nous recevons votre nom, votre adresse e-mail et vos identifiants Microsoft d’utilisateur et d’organisation. Votre mot de passe ne nous parvient jamais.',
           'Connexion par e-mail : si vous demandez un lien de connexion, nous l’envoyons à l’adresse saisie (par Hostpoint, en Suisse). Nous ne conservons qu’une forme brouillée du lien, au plus un jour ; il fonctionne une seule fois, pendant 15 minutes. Les admins peuvent ajouter des collègues avec leur nom et leur adresse e-mail et leur envoyer une invitation.',
           'Annuaire : si l’admin Microsoft 365 de votre entreprise l’approuve, Seatline lit une fois par nuit le nom, l’e-mail, le service, la fonction et le statut (actif ou non) des collaborateurs. Rien d’autre.',

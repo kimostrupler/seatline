@@ -7,11 +7,14 @@ import {
   Languages,
   Lock,
   Map,
+  FileSpreadsheet,
   Mail,
+  MessagesSquare,
+  QrCode,
+  TrendingUp,
   MousePointerClick,
   Presentation,
   Table2,
-  RefreshCw,
   ShieldCheck,
   type LucideIcon,
 } from 'lucide-react';
@@ -28,16 +31,19 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t('metaTitle'), description: t('metaDescription') };
 }
 
-const FEATURES: [LucideIcon, `f${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}`][] = [
+const FEATURES: [LucideIcon, `f${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12}`][] = [
   [Map, 'f1'],
   [FileUp, 'f2'],
   [MousePointerClick, 'f3'],
   [CalendarClock, 'f4'],
   [History, 'f5'],
-  [RefreshCw, 'f6'],
+  [FileSpreadsheet, 'f6'],
   [Presentation, 'f7'],
   [Table2, 'f8'],
   [Mail, 'f9'],
+  [MessagesSquare, 'f10'],
+  [TrendingUp, 'f11'],
+  [QrCode, 'f12'],
 ];
 
 /** The public landing page: seatline.ch (and /welcome on any address). */
@@ -55,12 +61,14 @@ export default async function Welcome() {
           <p className="text-lg text-pretty text-muted-foreground">{t('heroBody')}</p>
           <div className="flex flex-wrap gap-3">
             <Button asChild size="lg">
-              <a href={signInUrl()}>
+              <a href={signInUrl()} data-track="cta-trial">
                 {t('ctaTrial')} <ArrowRight />
               </a>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <a href={demoUrl()}>{t('ctaDemo')}</a>
+              <a href={demoUrl()} data-track="cta-demo">
+                {t('ctaDemo')}
+              </a>
             </Button>
           </div>
           <p className="text-sm text-muted-foreground">{t('ctaNote')}</p>
@@ -154,7 +162,7 @@ export default async function Welcome() {
             ))}
           </ul>
           <Button asChild size="lg">
-            <a href={signInUrl()}>
+            <a href={signInUrl()} data-track="cta-trial">
               {t('ctaTrial')} <ArrowRight />
             </a>
           </Button>
@@ -166,7 +174,7 @@ export default async function Welcome() {
         <div className="mx-auto grid max-w-3xl scroll-mt-20 gap-8 px-4 py-20 sm:px-6">
           <h2 className="text-3xl font-semibold tracking-tight">{t('faqTitle')}</h2>
           <div className="grid gap-3">
-            {(['1', '2', '3', '4', '5'] as const).map((n) => (
+            {(['1', '2', '3', '4', '5', '6', '7', '8', '9'] as const).map((n) => (
               <details key={n} className="group rounded-xl border bg-background px-5 py-4">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">
                   {t(`q${n}`)}
@@ -189,12 +197,14 @@ export default async function Welcome() {
         <h2 className="text-3xl font-semibold tracking-tight text-balance">{t('finalTitle')}</h2>
         <div className="flex flex-wrap justify-center gap-3">
           <Button asChild size="lg">
-            <a href={signInUrl()}>
+            <a href={signInUrl()} data-track="cta-trial">
               {t('ctaTrial')} <ArrowRight />
             </a>
           </Button>
           <Button asChild size="lg" variant="outline">
-            <a href={demoUrl()}>{t('ctaDemo')}</a>
+            <a href={demoUrl()} data-track="cta-demo">
+              {t('ctaDemo')}
+            </a>
           </Button>
         </div>
         <p className="text-sm text-muted-foreground">

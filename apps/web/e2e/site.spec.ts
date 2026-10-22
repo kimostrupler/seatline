@@ -35,3 +35,16 @@ test('pages are sent with security headers', async ({ request }) => {
   expect(headers['strict-transport-security']).toContain('max-age=');
   expect(headers['x-powered-by']).toBeUndefined();
 });
+
+test('health check for the uptime monitor; website visits are counted anonymously', async ({
+  request,
+}) => {
+  const health = await request.get('/healthz');
+  expect(health.status()).toBe(200);
+  expect(await health.json()).toEqual({ ok: true });
+  const visit = await request.post('/site-visit', {
+    data: { event: 'view', path: '/', lang: 'de' },
+  });
+  expect(visit.status()).toBe(204);
+  expect(visit.headers()['set-cookie']).toBeUndefined();
+});
