@@ -25,6 +25,12 @@ test('Home shows how full each floor is and opens its map; /overview leads there
   expect(new URL(page.url()).searchParams.get('floor')).not.toBe(map.floor.id);
 });
 
+test('the logo in the top bar leads Home from every page', async ({ page }) => {
+  await page.getByTestId('app-logo').click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByTestId('dashboard')).toBeVisible();
+});
+
 test('activity lists every change in plain words, filters by person, links to the map', async ({
   page,
 }) => {

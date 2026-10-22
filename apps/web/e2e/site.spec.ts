@@ -69,4 +69,7 @@ test('search engines: a page per language, structured data, llms.txt', async ({
   const llms = await request.get('/llms.txt');
   expect(await llms.text()).toContain('# Seatline');
   expect((await request.get('/og-image')).headers()['content-type']).toBe('image/png');
+  // the logo as the browser tab icon, also for browsers that only ask for /favicon.ico
+  expect((await request.get('/favicon.ico')).ok()).toBe(true);
+  expect((await request.get('/icon.svg')).ok()).toBe(true);
 });
