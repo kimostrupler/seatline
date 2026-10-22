@@ -237,6 +237,20 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - Seat count = active seats; the nightly job syncs it (`list_billed_tenants`). Tests use
   `test/fake-stripe.ts` via `STRIPE_API_BASE`. Keys online: `infra/azure/stripe-setup.sh`.
 
+## Plan import (Phase 5, C1/C2)
+
+- `apps/plan-engine` (Python, FastAPI): DXF (ezdxf), PDF (pdfplumber + pypdfium2), scans (OpenCV).
+  Licences matter: no PyMuPDF (AGPL). Untrusted files run in a forkserver child with a 90 s limit.
+- Output = draft in the new image's pixels (`planDraftSchema` in packages/shared, validated by the
+  API). Known scale → 40 px/m so desks match `SEAT_W`. Keep detection logic in `geometry.py`.
+- API: `PlanImportService` stores the image under `<tenant>/floors/<id>/imports/<uuid>.png` until
+  apply (→ normal plan upload, audit `floor.plan.import`) or discard. Rooms/desks are created by
+  the web as ONE editor batch (`lib/editor/plan-import.ts`), so undo works like any edit.
+- Tests: pytest on `samples/make_samples.py` plans; API tests use a fake engine; e2e runs the real
+  engine (`scripts/py.sh`: `.venv` locally, `python3` in CI).
+- Deploy: `infra/azure/plan-engine.sh` (from deploy.yml) creates/updates the internal
+  `plan-engine` app and sets the API's `PLAN_ENGINE_URL`; bicep has the same app for setup.sh.
+
 ## Website and legal pages
 
 - Landing page `app/welcome` + `app/legal/[doc]` (terms, privacy, imprint) are public. The

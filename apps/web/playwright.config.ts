@@ -13,6 +13,7 @@ const BLOB_PORT = 10200;
 // Microsoft sign-in tests: a second web app in "entra" mode + a fake Microsoft login
 const ENTRA_WEB_PORT = 3102;
 const FAKE_MS_PORT = 3104;
+const PLAN_ENGINE_PORT = 3105;
 const INTERNAL_AUTH_SECRET = 'e2e-internal-secret-0123456789-abcdefghij';
 // Azurite's well-known public development account (not a secret)
 const BLOB_CONNECTION = `DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:${BLOB_PORT}/devstoreaccount1;`;
@@ -52,6 +53,13 @@ export default defineConfig({
       reuseExistingServer: false,
     },
     {
+      // the Python plan reader (apps/plan-engine; its .venv locally, python3 in CI)
+      command: `sh scripts/py.sh -m uvicorn app.main:app --host 127.0.0.1 --port ${PLAN_ENGINE_PORT}`,
+      cwd: '../plan-engine',
+      url: `http://127.0.0.1:${PLAN_ENGINE_PORT}/health`,
+      reuseExistingServer: false,
+    },
+    {
       // migrate first: the API needs the latest schema (incl. the job queue) to start
       command: 'pnpm --dir ../api exec prisma migrate deploy && node ../api/dist/main.js',
       url: `http://localhost:${API_PORT}/health`,
@@ -63,6 +71,7 @@ export default defineConfig({
         AZURE_STORAGE_CONNECTION_STRING: BLOB_CONNECTION,
         AZURE_STORAGE_CONTAINER: 'e2e-floor-plans',
         INTERNAL_AUTH_SECRET,
+        PLAN_ENGINE_URL: `http://127.0.0.1:${PLAN_ENGINE_PORT}`,
       },
       reuseExistingServer: false,
     },

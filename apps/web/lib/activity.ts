@@ -173,6 +173,12 @@ export function describe(e: ActivityEntry, refs: ActivityRefs, unknownName: stri
         values: { floor: floor(e.entityId) },
         link: floorLink(e.entityId),
       };
+    case 'floor.plan.import':
+      return {
+        key: 'planImported',
+        values: { floor: floor(e.entityId) },
+        link: floorLink(e.entityId),
+      };
     case 'floor.plan.remove':
       return {
         key: 'planRemoved',

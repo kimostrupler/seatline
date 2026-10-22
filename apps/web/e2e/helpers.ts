@@ -17,7 +17,7 @@ export interface MapSeat {
   currentAssignment?: unknown;
 }
 export interface MapData {
-  floor: { id: string; scale: number | null; planFileKey: string | null };
+  floor: { id: string; scale: number | null; planFileKey: string | null; planWidth: number | null };
   rooms: Array<{ id: string; name: string; polygon: Array<{ x: number; y: number }> }>;
   seats: MapSeat[];
 }

@@ -241,7 +241,8 @@
     "distributeX": "Space evenly left to right",
     "distributeY": "Space evenly top to bottom",
     "duplicateFloor": "Duplicate floor",
-    "duplicateFloorHint": "A new floor with the same rooms, seats and plan, without people."
+    "duplicateFloorHint": "A new floor with the same rooms, seats and plan, without people.",
+    "importPlan": "Import architect plan"
   },
   "auth": {
     "signInTitle": "Sign in to Seatline",
@@ -457,7 +458,8 @@
       "privacyPurge": "deleted history older than {months} months (data protection)",
       "billingCheckout": "opened the subscription checkout",
       "billingSubscription": "subscription is now {status}",
-      "billingSeats": "now billed for {seats} seats"
+      "billingSeats": "now billed for {seats} seats",
+      "planImported": "imported a floor plan for {floor}"
     },
     "showPlan": "Open the plan"
   },
@@ -819,5 +821,47 @@
     "copyright": "© {year} Seatline",
     "mapFloor": "Zurich · 3rd floor",
     "cardSince": "Desk 3.12 · since 3 March"
+  },
+  "planImport": {
+    "title": "Import an architect plan",
+    "intro": "Seatline reads the plan and suggests rooms and desks. You check them before anything is saved.",
+    "kindDxf": "DXF from CAD: best results — rooms, names, desks and the scale. (DWG: save as DXF first.)",
+    "kindPdf": "PDF exported from CAD: rooms, names and desks; the scale if it says “1:100”.",
+    "kindImage": "Scan or photo (PDF, PNG, JPG): the background and the rooms.",
+    "existing": "This floor already has {rooms} rooms and {seats} desks. They stay; imported ones are added.",
+    "replacesPlan": "The imported plan replaces the current background image.",
+    "choose": "Choose a file",
+    "reading": "Reading the plan…",
+    "readingHint": "This can take up to a minute.",
+    "reviewHint": "Tap a room or desk to leave it out. Nothing is saved until you import.",
+    "rooms": "Rooms: {picked} of {total}",
+    "seats": "Desks: {picked} of {total}",
+    "scaleFound": "Scale from the plan: 1 m = {px} px. Sizes on the map are in metres.",
+    "scaleMissing": "The plan has no scale. Set it afterwards with the ruler tool.",
+    "unnamed": "Room without a name",
+    "roomName": "Room {n}",
+    "cancel": "Cancel",
+    "other": "Choose another file",
+    "confirm": "Import {rooms} rooms and {seats} desks",
+    "done": "Imported {rooms} rooms and {seats} desks. Undo removes them again.",
+    "warnings": {
+      "units_guessed": "The drawing has no units; Seatline guessed them from its size. Check the scale.",
+      "no_rooms": "No rooms found. Draw them on the plan with the room tool.",
+      "no_seats": "No desks found. Add them with the desk tool or “Desk row”.",
+      "scan": "This is a scan: rooms are found from the walls, but not their names or desks.",
+      "first_page_only": "Only the first page of the PDF is used."
+    },
+    "errors": {
+      "plan_dwg": "DWG files can’t be read directly. In your CAD program, save the plan as DXF and import that.",
+      "plan_unsupported": "This file type isn’t supported. Use DXF, PDF, PNG or JPG.",
+      "plan_unreadable": "The file couldn’t be read. Is it damaged or password-protected?",
+      "plan_empty": "The drawing is empty.",
+      "plan_too_complex": "The plan is too large to read. Try exporting just this floor.",
+      "plan_too_large": "The file is larger than 25 MB.",
+      "plan_timeout": "Reading the plan took too long. Try exporting just this floor.",
+      "plan_engine_off": "Plan import isn’t available here.",
+      "plan_engine_unreachable": "The plan reader is starting. Please try again in a minute.",
+      "failed": "Reading the plan didn’t work. Please try another file."
+    }
   }
 }

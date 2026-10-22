@@ -1,0 +1,10 @@
+{
+  "name": "@seatline/plan-engine",
+  "private": true,
+  "description": "Python plan reader (DXF, PDF, images); see README.md",
+  "scripts": {
+    "dev": "sh scripts/py.sh -m uvicorn app.main:app --reload --port 8000",
+    "test": "sh scripts/py.sh -m pytest -q",
+    "samples": "sh scripts/py.sh samples/make_samples.py"
+  }
+}

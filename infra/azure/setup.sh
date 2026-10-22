@@ -78,6 +78,7 @@ say "4/6 Azure resources: database, storage, containers (first run takes ~10 min
 current_image() { az "$@" -g "$RG" --query "properties.template.containers[0].image" -o tsv 2>/dev/null || true; }
 API_IMAGE=$(current_image containerapp show -n api)
 WEB_IMAGE=$(current_image containerapp show -n web)
+ENGINE_IMAGE=$(current_image containerapp show -n plan-engine)
 PLACEHOLDER="mcr.microsoft.com/k8se/quickstart:latest"
 # keep own addresses set up with custom-domain.sh (the app) and site-domain.sh (the website)
 APP_URL_NOW=$(az containerapp show -n web -g "$RG" --query "properties.template.containers[0].env[?name=='APP_URL'].value | [0]" -o tsv 2>/dev/null || true)
@@ -95,6 +96,7 @@ STRIPE_PRICE=$(kv_get stripe-price-id)
 az deployment group create -g "$RG" -n seatline -f "$HERE/main.bicep" -o none --parameters \
   location="$LOCATION" \
   apiImage="${API_IMAGE:-$PLACEHOLDER}" webImage="${WEB_IMAGE:-$PLACEHOLDER}" \
+  planEngineImage="${ENGINE_IMAGE:-$PLACEHOLDER}" \
   pgAdminPassword="$PG_PASSWORD" appDbPassword="$APP_DB_PASSWORD" \
   sessionSecret="$SESSION_SECRET" internalAuthSecret="$INTERNAL_SECRET" \
   entraClientId="$APP_ID" entraClientSecret="$ENTRA_SECRET" \

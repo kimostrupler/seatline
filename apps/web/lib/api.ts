@@ -4,6 +4,8 @@ export class ApiError extends Error {
   constructor(
     readonly status: number,
     message: string,
+    /** machine-readable reason, when the API gives one (e.g. "plan_dwg") */
+    readonly code?: string,
   ) {
     super(message);
   }
@@ -23,14 +25,16 @@ function authHeaders(): Record<string, string> {
 
 async function errorFrom(res: Response): Promise<ApiError> {
   let message = res.statusText;
+  let code: string | undefined;
   try {
-    const body = (await res.json()) as { message?: string | string[] };
+    const body = (await res.json()) as { message?: string | string[]; code?: string };
     if (body.message)
       message = Array.isArray(body.message) ? body.message.join(', ') : body.message;
+    if (typeof body.code === 'string') code = body.code;
   } catch {
     // not JSON
   }
-  return new ApiError(res.status, message);
+  return new ApiError(res.status, message, code);
 }
 
 /** Binary download (e.g. the floor plan image). */

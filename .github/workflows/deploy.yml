@@ -45,13 +45,17 @@ jobs:
           SERVER=$(az acr show -n "$REGISTRY" --query loginServer -o tsv)
           API_IMAGE="$SERVER/seatline-api:$SHA"
           WEB_IMAGE="$SERVER/seatline-web:$SHA"
+          ENGINE_IMAGE="$SERVER/seatline-plan-engine:$SHA"
           docker build -f apps/api/Dockerfile -t "$API_IMAGE" .
           docker build -f apps/web/Dockerfile -t "$WEB_IMAGE" .
+          docker build -f apps/plan-engine/Dockerfile -t "$ENGINE_IMAGE" .
           docker push "$API_IMAGE"
           docker push "$WEB_IMAGE"
+          docker push "$ENGINE_IMAGE"
           {
             echo "API_IMAGE=$API_IMAGE"
             echo "WEB_IMAGE=$WEB_IMAGE"
+            echo "ENGINE_IMAGE=$ENGINE_IMAGE"
           } >> "$GITHUB_ENV"
 
       - name: Migrate the database
@@ -77,6 +81,7 @@ jobs:
           # page, ~CHF 10–20/month more); otherwise they sleep when nobody uses them.
           MIN_REPLICAS: ${{ vars.KEEP_WARM == 'true' && '1' || '0' }}
         run: |
+          bash infra/azure/plan-engine.sh "$ENGINE_IMAGE"
           az containerapp update -n api -g "$RG" --image "$API_IMAGE" --min-replicas "$MIN_REPLICAS" -o none
           az containerapp update -n web -g "$RG" --image "$WEB_IMAGE" --min-replicas "$MIN_REPLICAS" -o none
           az containerapp job update -n nightly-sync -g "$RG" --image "$API_IMAGE" -o none

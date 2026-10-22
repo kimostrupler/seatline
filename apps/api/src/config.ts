@@ -32,6 +32,10 @@ const envSchema = z.object({
   STRIPE_PRICE_ID: z.string().optional(),
   /** tests only: a fake Stripe server (http://localhost:port) */
   STRIPE_API_BASE: z.url().optional(),
+  /** The plan engine (apps/plan-engine) that reads DXF/PDF plans. Unset = plan import is off. */
+  PLAN_ENGINE_URL: z.url().optional(),
+  /** Sent to the plan engine as x-internal-token (same value as its PLAN_ENGINE_TOKEN). */
+  PLAN_ENGINE_TOKEN: z.string().optional(),
   /** Trust x-tenant-id / x-user-id headers. Dev only — replaced by Entra ID in Phase 4. */
   DEV_AUTH: z
     .enum(['true', 'false'])

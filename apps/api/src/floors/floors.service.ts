@@ -201,7 +201,13 @@ export class FloorsService {
    * coordinate space (planWidth × planHeight). Stored first, then linked in one
    * transaction; whichever file ends up unused is removed afterwards.
    */
-  async uploadPlan(ctx: RequestContext, id: string, data: Buffer) {
+  /** A new background image; from a plan import also its scale (null = keep the floor's). */
+  async uploadPlan(
+    ctx: RequestContext,
+    id: string,
+    data: Buffer,
+    imported?: { source: string; scale: number | null },
+  ) {
     const image = inspectPlanImage(data);
     const key = `${ctx.tenantId}/floors/${id}/${randomUUID()}.${image.ext}`;
     await this.get(ctx, id); // 404 before storing anything
@@ -214,18 +220,24 @@ export class FloorsService {
         );
         const floor = await tx.floor.update({
           where: { id },
-          data: { planFileKey: key, planWidth: image.width, planHeight: image.height },
+          data: {
+            planFileKey: key,
+            planWidth: image.width,
+            planHeight: image.height,
+            ...(imported?.scale ? { scale: imported.scale } : {}),
+          },
         });
         await audit(tx, ctx, {
-          action: 'floor.plan.upload',
+          action: imported ? 'floor.plan.import' : 'floor.plan.upload',
           entityType: 'floor',
           entityId: id,
-          before: { planFileKey: before.planFileKey },
+          before: { planFileKey: before.planFileKey, scale: before.scale },
           after: {
             planFileKey: key,
             planWidth: image.width,
             planHeight: image.height,
             bytes: data.length,
+            ...(imported ? { source: imported.source, scale: floor.scale } : {}),
           },
         });
         return { floor, oldKey: before.planFileKey };

@@ -107,6 +107,44 @@ export const layoutChangesSchema = z.strictObject({
     .default({ create: [], update: [], delete: [] }),
 });
 
+// ---- Plan import (architect plans → draft layout) ---------------------------
+
+export const PLAN_IMPORT_SOURCES = ['dxf', 'pdf', 'raster'] as const;
+
+/** What the plan engine suggests, in the pixels of the new background image. */
+export const planDraftSchema = z.object({
+  source: z.enum(PLAN_IMPORT_SOURCES),
+  width: z.number().int().positive().max(20_000),
+  height: z.number().int().positive().max(20_000),
+  /** pixels per metre, when the plan says (DXF units, a "1:100" note) */
+  scale: z.number().positive().max(10_000).nullable(),
+  rooms: z
+    .array(
+      z.object({
+        name: z.string().max(200),
+        type: z.enum(ROOM_TYPES),
+        polygon: polygonSchema,
+      }),
+    )
+    .max(500),
+  seats: z
+    .array(
+      z.object({
+        x: z.number(),
+        y: z.number(),
+        rotation: z.number().min(0).lt(360),
+        label: z.string().max(50).nullable(),
+      }),
+    )
+    .max(2000),
+  warnings: z.array(z.string().max(40)).max(20),
+});
+
+/** Use an import's image as the floor's plan (rooms and seats follow as a layout batch). */
+export const applyPlanImportSchema = z.strictObject({
+  scale: z.number().positive().max(10_000).nullable(),
+});
+
 // ---- Assignments -----------------------------------------------------------
 
 /** Give a person a seat. If they already sit somewhere, that is a move. */
@@ -274,6 +312,8 @@ export type UpdateRoomInput = z.infer<typeof updateRoomSchema>;
 export type CreateSeatInput = z.infer<typeof createSeatSchema>;
 export type UpdateSeatInput = z.infer<typeof updateSeatSchema>;
 export type LayoutChanges = z.infer<typeof layoutChangesSchema>;
+export type PlanDraft = z.infer<typeof planDraftSchema>;
+export type ApplyPlanImportInput = z.infer<typeof applyPlanImportSchema>;
 export type LayoutChangesInput = z.input<typeof layoutChangesSchema>;
 export type LayoutRoom = z.infer<typeof layoutRoom>;
 export type LayoutSeat = z.infer<typeof layoutSeat>;
