@@ -11,6 +11,8 @@ import type { RequestContext } from '../auth/request-context';
 import { audit } from '../common/audit';
 import { orNotFound } from '../common/errors';
 import { TenantDb, type Tx } from '../db/tenant-db.service';
+import type { Notice } from '../mail/notices';
+import { NotifyService } from '../mail/notify.service';
 import { checkPlan, placeTeam, type PlanCheck, type PlanItem, type Seating } from './check';
 
 /** Calendar day in Switzerland, YYYY-MM-DD. */
@@ -40,7 +42,10 @@ type Named = { code: string; personId?: string; seatId?: string; byPersonId?: st
 export class MovesService {
   private readonly logger = new Logger(MovesService.name);
 
-  constructor(private readonly db: TenantDb) {}
+  constructor(
+    private readonly db: TenantDb,
+    private readonly notify: NotifyService,
+  ) {}
 
   list(ctx: RequestContext, query: ListMovePlansQuery) {
     return this.db.run(ctx.tenantId, async (tx) => {
@@ -210,15 +215,17 @@ export class MovesService {
   }
 
   /** Apply now (any open plan). All or nothing: any problem → nothing changes. */
-  applyNow(ctx: RequestContext, id: string) {
-    return this.db.run(ctx.tenantId, async (tx) => {
+  async applyNow(ctx: RequestContext, id: string) {
+    const { detail, notice } = await this.db.run(ctx.tenantId, async (tx) => {
       const plan = await this.editable(tx, ctx.tenantId, id, ['draft', 'scheduled', 'failed']);
       const check = await this.check(tx, ctx.tenantId, id);
       if (!check.moves.length) throw new ConflictException('This plan has no moves');
       if (check.problems.length) throw new ConflictException('Fix the problems in this plan first');
-      await this.apply(tx, ctx, ctx.actorId, plan, check);
-      return this.detail(tx, ctx.tenantId, id);
+      const notice = await this.apply(tx, ctx, ctx.actorId, plan, check);
+      return { detail: await this.detail(tx, ctx.tenantId, id), notice };
     });
+    await this.notify.send(ctx.tenantId, [notice]);
+    return detail;
   }
 
   /**
@@ -257,11 +264,11 @@ export class MovesService {
           return false;
         }
         // the person who scheduled it is recorded as having made the moves
-        await this.apply(tx, system, plan.scheduledById ?? plan.createdById, plan, check);
-        return true;
+        return this.apply(tx, system, plan.scheduledById ?? plan.createdById, plan, check);
       });
+      if (ok) await this.notify.send(tenantId, [ok]);
       if (!ok) this.logger.warn(`Move plan ${plan.id} (${tenantId}) could not be applied`);
-      results.push({ id: plan.id, ok });
+      results.push({ id: plan.id, ok: !!ok });
     }
     return results;
   }
@@ -274,7 +281,7 @@ export class MovesService {
     assignedById: string,
     plan: MovePlan,
     check: PlanCheck,
-  ) {
+  ): Promise<Notice> {
     const now = new Date();
     const tenantId = actor.tenantId;
     const open = await tx.seatAssignment.findMany({ where: { tenantId, endAt: null } });
@@ -340,6 +347,41 @@ export class MovesService {
       entityId: plan.id,
       after: { name: plan.name, moves: check.moves.length },
     });
+
+    // the notice for IT / facility: who moved from where to where
+    const seatIds = check.moves.flatMap((m) => [
+      ...(m.toSeatId ? [m.toSeatId] : []),
+      ...(ofPerson.get(m.personId) ? [ofPerson.get(m.personId)!.seatId] : []),
+    ]);
+    const [seats, people] = await Promise.all([
+      tx.seat.findMany({
+        where: { tenantId, id: { in: seatIds } },
+        select: {
+          id: true,
+          label: true,
+          floor: { select: { name: true, building: { select: { name: true } } } },
+        },
+      }),
+      tx.person.findMany({
+        where: { tenantId, id: { in: check.moves.map((m) => m.personId) } },
+        select: { id: true, displayName: true },
+      }),
+    ]);
+    const seatRef = (id: string | undefined | null) => {
+      const seat = seats.find((s) => s.id === id);
+      return seat
+        ? { label: seat.label, place: `${seat.floor.building.name} › ${seat.floor.name}` }
+        : null;
+    };
+    return {
+      kind: 'moves',
+      plan: plan.name,
+      moves: check.moves.map((m) => ({
+        person: people.find((p) => p.id === m.personId)?.displayName ?? '?',
+        from: seatRef(ofPerson.get(m.personId)?.seatId),
+        to: seatRef(m.toSeatId),
+      })),
+    };
   }
 
   private async setStatus(

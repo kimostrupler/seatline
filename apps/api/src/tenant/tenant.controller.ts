@@ -15,7 +15,26 @@ const select = {
   peopleSyncedAt: true,
   peopleSyncStatus: true,
   historyRetentionMonths: true,
+  notifyEmails: true,
+  notifyEvents: true,
+  notifyLanguage: true,
 } as const;
+
+const settings = (t: {
+  name: string;
+  defaultAppRole: string | null;
+  historyRetentionMonths: number | null;
+  notifyEmails: string[];
+  notifyEvents: string[];
+  notifyLanguage: string;
+}) => ({
+  name: t.name,
+  defaultAppRole: t.defaultAppRole,
+  historyRetentionMonths: t.historyRetentionMonths,
+  notifyEmails: t.notifyEmails,
+  notifyEvents: t.notifyEvents,
+  notifyLanguage: t.notifyLanguage,
+});
 
 /** The caller's workspace and its settings. */
 @Controller('tenant')
@@ -45,16 +64,8 @@ export class TenantController {
         action: 'tenant.update',
         entityType: 'tenant',
         entityId: ctx.tenantId,
-        before: {
-          name: before.name,
-          defaultAppRole: before.defaultAppRole,
-          historyRetentionMonths: before.historyRetentionMonths,
-        },
-        after: {
-          name: after.name,
-          defaultAppRole: after.defaultAppRole,
-          historyRetentionMonths: after.historyRetentionMonths,
-        },
+        before: settings(before),
+        after: settings(after),
       });
       return after;
     });

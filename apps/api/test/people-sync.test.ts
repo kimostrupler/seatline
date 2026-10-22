@@ -3,6 +3,7 @@ import type { INestApplication } from '@nestjs/common';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { PeopleSyncService } from '../src/sync/people-sync.service';
 import { FakeMicrosoft, type FakeUser } from './fake-microsoft';
+import { clearMails, sentMails } from './mail';
 import {
   api,
   appDb,
@@ -37,6 +38,7 @@ afterAll(async () => {
 });
 beforeEach(async () => {
   await resetDb();
+  await clearMails();
   microsoft.tokenError = null;
   microsoft.graphStatus = 200;
   a = await createTenant('alpha');
@@ -168,6 +170,25 @@ describe('people sync from Microsoft 365', () => {
       .set(a.headers)
       .send({ team: 'X' })
       .expect(404);
+  });
+
+  it('an HR leaving date wins over an account that is still enabled; IT hears about it', async () => {
+    await api(app)
+      .patch('/tenant')
+      .set(a.headers)
+      .send({ notifyEmails: ['it@alpha.example'] })
+      .expect(200);
+    const p1 = await owner.person.findUniqueOrThrow({ where: { id: a.personIds[0] } });
+    await owner.person.update({
+      where: { id: p1.id },
+      data: { leavesOn: new Date('2020-01-01T00:00:00Z') },
+    });
+    microsoft.users.set(tid, [user('P One', { mail: p1.email }), user('Neu Person')]);
+    await sync.syncTenant(a.tenantId);
+    expect((await owner.person.findUniqueOrThrow({ where: { id: p1.id } })).active).toBe(false);
+    const mail = (await sentMails()).find((m) => m.to === 'it@alpha.example')!;
+    expect(mail.text).toContain('P One hat das Unternehmen verlassen');
+    expect(mail.text).toContain('Neu Person');
   });
 
   it('reports missing admin consent instead of failing silently', async () => {
