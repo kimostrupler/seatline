@@ -4,7 +4,7 @@ import { Check, ChevronsUpDown, Loader2, Search, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { PageFrame } from '@/components/common/page-frame';
 import { Button } from '@/components/ui/button';
 import {
@@ -81,11 +81,21 @@ export function ActivityPage() {
     from: search.get('from') ?? undefined,
     to: search.get('to') ?? undefined,
   };
+  // build on the last filters asked for, not the rendered URL: a router.replace can still be
+  // on its way (slow server), and the search box's delayed change would bring cleared filters back
+  const wanted = useRef(search.toString());
+  useEffect(() => {
+    wanted.current = search.toString();
+  }, [search]);
+  const replaceFilters = (next: URLSearchParams) => {
+    wanted.current = next.toString();
+    router.replace(wanted.current ? `${pathname}?${wanted.current}` : pathname);
+  };
   const setFilter = (key: keyof ActivityFilters, value: string | undefined) => {
-    const next = new URLSearchParams(search);
+    const next = new URLSearchParams(wanted.current);
     if (value) next.set(key, value);
     else next.delete(key);
-    router.replace(`${pathname}?${next.toString()}`);
+    replaceFilters(next);
   };
   const filtered = Object.values(filters).some(Boolean);
   const canSee = me.data && me.data.role !== 'viewer';
@@ -158,7 +168,7 @@ export function ActivityPage() {
             variant="ghost"
             size="sm"
             className="justify-self-start text-muted-foreground"
-            onClick={() => router.replace(pathname)}
+            onClick={() => replaceFilters(new URLSearchParams())}
           >
             <X /> {t('clear')}
           </Button>

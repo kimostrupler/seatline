@@ -60,6 +60,19 @@ test('activity lists every change in plain words, filters by person, links to th
   await expect(page.getByTestId('seat-panel')).toContainText('Reserved for New hire');
 });
 
+test('a search typed right after "Clear filters" keeps the filters cleared', async ({ page }) => {
+  await page.goto('/activity?kind=layout');
+  await expect(page.getByRole('combobox', { name: 'What changed' })).toBeVisible();
+  // a slow server: the clearing navigation is still on its way while the search starts
+  await page.route('**/activity?*', async (route) => {
+    if (route.request().headers()['rsc']) await new Promise((r) => setTimeout(r, 1500));
+    await route.continue();
+  });
+  await page.getByRole('button', { name: 'Clear filters' }).click();
+  await page.getByRole('searchbox', { name: 'Search activity' }).fill('1.04');
+  await expect(page).toHaveURL(/\/activity\?q=1\.04$/);
+});
+
 test('viewers see Home but not the change history', async ({ page }) => {
   await switchUser(page, 'Luca Rossi');
   await expect(page.getByRole('link', { name: 'Home' })).toBeVisible();
