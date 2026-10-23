@@ -21,6 +21,8 @@ beforeAll(async () => {
     STRIPE_WEBHOOK_SECRET: WEBHOOK_SECRET,
     STRIPE_PRICE_ID: 'price_seat',
     STRIPE_API_BASE: stripe.url,
+    // the operator's own workspace (created only in its test)
+    OWNER_EMAILS: 'Admin@Gamma.example',
   });
   app = await createApp();
 });
@@ -91,6 +93,16 @@ describe('billing', () => {
     await api(app).get(`/floors/${a.floorId}/map`).set(a.headers).expect(200);
     // another workspace isn't affected
     await assign(b).expect(201);
+  });
+
+  it('the operator’s own workspace never pays nor locks', async () => {
+    const mine = await createTenant('gamma');
+    await endTrial(mine);
+    expect((await me(mine)).billing.state).toBe('off');
+    await assign(mine).expect(201);
+    // everyone else's still does
+    await endTrial(a);
+    expect((await me(a)).billing.state).toBe('read_only');
   });
 
   it('subscribing: Stripe Checkout per active seat, then the webhook unlocks the workspace', async () => {

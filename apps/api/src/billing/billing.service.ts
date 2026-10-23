@@ -196,12 +196,35 @@ export class BillingService {
     }
   }
 
+  /**
+   * The operator's own workspace never pays nor locks: e-mail sign-in (an address there is
+   * proven, as for /owner) with an active admin from OWNER_EMAILS.
+   */
+  private ownersWorkspace() {
+    return {
+      entraTenantId: true,
+      people: {
+        where: {
+          email: { in: this.config.OWNER_EMAILS, mode: 'insensitive' as const },
+          appRole: 'admin' as const,
+          active: true,
+        },
+        select: { id: true },
+        take: 1,
+      },
+    };
+  }
+
   /** The state the guard and the banner use (cheap: one row). */
   async state(tenantId: string) {
     const t = await this.db.run(tenantId, (tx) =>
-      tx.tenant.findFirst({ where: { id: tenantId }, select: billingSelect }),
+      tx.tenant.findFirst({
+        where: { id: tenantId },
+        select: { ...billingSelect, ...this.ownersWorkspace() },
+      }),
     );
-    if (!t || t.isDemo) return 'off' as const; // demo workspaces never pay nor lock
+    // demo workspaces and the operator's own never pay nor lock
+    if (!t || t.isDemo || (!t.entraTenantId && t.people.length)) return 'off' as const;
     return billingState({
       configured: this.configured,
       trialEndsAt: t.trialEndsAt,
@@ -220,11 +243,7 @@ export class BillingService {
     const tenant = orNotFound(t, 'Workspace');
     return {
       configured: this.configured,
-      state: billingState({
-        configured: this.configured,
-        trialEndsAt: tenant.trialEndsAt,
-        status: tenant.billingStatus,
-      }),
+      state: await this.state(ctx.tenantId),
       trialEndsAt: tenant.trialEndsAt,
       status: tenant.billingStatus,
       periodEnd: tenant.billingPeriodEnd,

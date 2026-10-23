@@ -1,6 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { readSession, SESSION_COOKIE } from '@/lib/server/session';
-import { guideBySlug } from '@/lib/guides';
 import { PAGE_LANGUAGE_HEADER } from '@/lib/locales';
 import { isPublicPath, siteHosts } from '@/lib/site';
 
@@ -21,12 +20,12 @@ export async function middleware(req: NextRequest) {
     headers.set(PAGE_LANGUAGE_HEADER, pathname.slice(1));
     return NextResponse.rewrite(new URL('/welcome', req.url), { request: { headers } });
   }
-  // a guide's address says its language (header and footer follow it)
-  const guide = pathname.startsWith('/guides/') ? guideBySlug(pathname.slice(8)) : undefined;
+  // the help center's address says its language (/help/de/…): header and footer follow it
+  const pageLanguage = /^\/help\/(en|de|fr)(\/|$)/.exec(pathname)?.[1];
   const next = () => {
-    if (!guide) return NextResponse.next();
+    if (!pageLanguage) return NextResponse.next();
     const headers = new Headers(req.headers);
-    headers.set(PAGE_LANGUAGE_HEADER, guide.language);
+    headers.set(PAGE_LANGUAGE_HEADER, pageLanguage);
     return NextResponse.next({ request: { headers } });
   };
   if (siteHosts(appUrl).includes(host)) {

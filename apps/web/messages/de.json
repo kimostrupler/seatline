@@ -679,7 +679,8 @@
     "language": "Sprache",
     "moves": "Umzüge",
     "billing": "Abrechnung",
-    "planning": "Planung"
+    "planning": "Planung",
+    "help": "Hilfe"
   },
   "overview": {
     "title": "Übersicht",
@@ -963,6 +964,12 @@
           "action": "Plan öffnen"
         }
       }
+    },
+    "helpBanner": {
+      "title": "Neu bei Seatline?",
+      "body": "Das Hilfe-Center erklärt jeden Schritt mit Bildern: Stockwerke, Plätze, Personen, Umzüge und mehr.",
+      "open": "Hilfe-Center öffnen",
+      "hide": "Ausblenden"
     }
   },
   "errors": {
@@ -1228,10 +1235,7 @@
     "finalTitle": "Testen Sie es mit Ihren eigenen Etagen",
     "contact": "Fragen? Schreiben Sie an <mail>{email}</mail>",
     "madeIn": "Made in Switzerland",
-    "copyright": "© {year} Seatline",
-    "guides": "Ratgeber",
-    "moreGuides": "Weitere Ratgeber",
-    "guideTopic": "Thema"
+    "copyright": "© {year} Seatline"
   },
   "planImport": {
     "title": "Architektenplan importieren",
@@ -1408,5 +1412,20 @@
     "showOnMap": "Auf dem Plan zeigen",
     "notFound": "Arbeitsplatz nicht gefunden",
     "notFoundHint": "Dieser Platz wurde entfernt oder gehört zu einem anderen Arbeitsbereich."
+  },
+  "help": {
+    "title": "Hilfe-Center",
+    "metaTitle": "Seatline Hilfe-Center: Anleitungen Schritt für Schritt",
+    "intro": "Anleitungen Schritt für Schritt mit Bildern zu allem in Seatline – vom ersten Stockwerk bis zu Umzügen, Exporten und Datenschutz.",
+    "topics": "Themen",
+    "faq": "Fragen und Antworten",
+    "step": "Schritt {n}",
+    "tips": "Tipps",
+    "all": "Alle Hilfethemen",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "stuck": "Noch Fragen?",
+    "contact": "Schreiben Sie an <mail>{email}</mail> – auf Deutsch, Französisch oder Englisch.",
+    "openApp": "Seatline öffnen"
   }
 }

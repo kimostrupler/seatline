@@ -31,21 +31,21 @@ test('the website and legal pages need no sign-in', async ({ page }) => {
   await page.getByRole('link', { name: 'terms of service' }).click();
   await expect(page.getByRole('heading', { name: 'Terms of service' })).toBeVisible();
 
-  // guides: each address in its own language, linked from the footer and the sitemap
-  await page.goto('/welcome');
-  await page.getByRole('link', { name: 'Seatline vs. an Excel seating plan' }).click();
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-    'Seatline vs. an Excel seating plan',
-  );
-  await page.goto('/guides/seatline-vs-excel-sitzplan');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-    'Seatline oder ein Sitzplan in Excel',
-  );
-  await expect(page.getByRole('link', { name: '30 Tage gratis testen' }).first()).toBeVisible();
-  expect(await (await page.request.get('/indexnow.txt')).text()).toMatch(/^[0-9a-f]{32}$/);
-  expect(await (await page.request.get('/sitemap.xml')).text()).toContain(
-    '/guides/plan-de-places-ou-reservation-de-postes',
-  );
+  // the help center: public, each language with its own address, steps with screenshots
+  await page.goto('/help');
+  await expect(page).toHaveURL(/\/help\/en$/);
+  await page
+    .getByTestId('help-topics')
+    .getByRole('link', { name: /Planning moves/ })
+    .click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Planning moves');
+  const shot = page.getByTestId('help-steps').getByRole('img').first();
+  await expect(shot).toBeVisible();
+  expect(await shot.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
+  await page.getByRole('link', { name: 'DE', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Umzüge planen');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'de-CH');
+  expect(await (await page.request.get('/sitemap.xml')).text()).toContain('/help/fr/moves');
 });
 
 test('visitors try a demo workspace from the website, then start a real trial', async ({
