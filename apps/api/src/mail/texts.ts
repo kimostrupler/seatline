@@ -105,6 +105,61 @@ export function trialMail(
   return { to, ...t };
 }
 
+/** Onboarding, to a new workspace's admins: day 1 = draw a floor, 3 = add people, 7 = help. */
+export function onboardingMail(
+  to: string,
+  workspace: string,
+  day: 1 | 3 | 7,
+  link: string,
+  language: MailLanguage,
+): Mail {
+  const t = {
+    en: {
+      1: {
+        subject: 'Draw your first floor in Seatline',
+        text: `Hello,\n\nWelcome to Seatline. The quickest start for ${workspace}: open the map, choose an example office (small, medium or large) and change it to fit. Or upload a picture of your floor plan.\n\n${link}\n\nQuestions? Just reply to this e-mail.\n\nSeatline`,
+      },
+      3: {
+        subject: 'Add your people to Seatline',
+        text: `Hello,\n\nOnce your people are in ${workspace}, you can give them desks. Add them one by one, or import an Excel or CSV list (name and e-mail are enough):\n\n${link}\n\nQuestions? Just reply to this e-mail.\n\nSeatline`,
+      },
+      7: {
+        subject: 'Can we help with Seatline?',
+        text: `Hello,\n\nYou have tried Seatline for a week. If something is unclear or missing, just reply to this e-mail: we read every message and answer personally.\n\nThe help center shows each step with pictures:\n${link}\n\nSeatline`,
+      },
+    },
+    de: {
+      1: {
+        subject: 'Zeichnen Sie Ihr erstes Stockwerk in Seatline',
+        text: `Guten Tag\n\nWillkommen bei Seatline. Der schnellste Start für ${workspace}: Öffnen Sie den Plan, wählen Sie ein Beispielbüro (klein, mittel oder gross) und passen Sie es an. Oder laden Sie ein Bild Ihres Grundrisses hoch.\n\n${link}\n\nFragen? Antworten Sie einfach auf diese E-Mail.\n\nSeatline`,
+      },
+      3: {
+        subject: 'Erfassen Sie Ihre Personen in Seatline',
+        text: `Guten Tag\n\nSobald Ihre Personen in ${workspace} erfasst sind, können Sie ihnen Plätze geben. Fügen Sie sie einzeln hinzu oder importieren Sie eine Excel- oder CSV-Liste (Name und E-Mail genügen):\n\n${link}\n\nFragen? Antworten Sie einfach auf diese E-Mail.\n\nSeatline`,
+      },
+      7: {
+        subject: 'Können wir Ihnen bei Seatline helfen?',
+        text: `Guten Tag\n\nSie testen Seatline seit einer Woche. Wenn etwas unklar ist oder fehlt, antworten Sie einfach auf diese E-Mail: Wir lesen jede Nachricht und antworten persönlich.\n\nDas Hilfe-Center zeigt jeden Schritt mit Bildern:\n${link}\n\nSeatline`,
+      },
+    },
+    fr: {
+      1: {
+        subject: 'Dessinez votre premier étage dans Seatline',
+        text: `Bonjour,\n\nBienvenue sur Seatline. Le départ le plus rapide pour ${workspace} : ouvrez le plan, choisissez un bureau d’exemple (petit, moyen ou grand) et adaptez-le. Ou téléversez une image de votre plan d’étage.\n\n${link}\n\nDes questions ? Répondez simplement à cet e-mail.\n\nSeatline`,
+      },
+      3: {
+        subject: 'Ajoutez vos collaborateurs dans Seatline',
+        text: `Bonjour,\n\nUne fois vos collaborateurs dans ${workspace}, vous pouvez leur attribuer des places. Ajoutez-les un par un, ou importez une liste Excel ou CSV (nom et e-mail suffisent) :\n\n${link}\n\nDes questions ? Répondez simplement à cet e-mail.\n\nSeatline`,
+      },
+      7: {
+        subject: 'Pouvons-nous vous aider avec Seatline ?',
+        text: `Bonjour,\n\nVous essayez Seatline depuis une semaine. Si quelque chose n’est pas clair ou manque, répondez simplement à cet e-mail : nous lisons chaque message et répondons personnellement.\n\nLe centre d’aide montre chaque étape en images :\n${link}\n\nSeatline`,
+      },
+    },
+  }[language][day];
+  return { to, ...t };
+}
+
 /** To an admin who asked for it: the DPA as a PDF attachment. */
 export function dpaMail(to: string, workspace: string, pdf: Buffer, language: MailLanguage): Mail {
   const t = {

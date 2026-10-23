@@ -2,7 +2,7 @@
  * Nightly: people sync for every workspace connected to Microsoft 365, then HR leaving dates
  * that have come, then the scheduled move plans that are due (after the sync, so people who left are already inactive), then the
  * privacy clean-up (history older than each workspace's retention period), billing (seat
- * counts, trial reminders).
+ * counts, trial reminders), onboarding e-mails.
  * Runs as its own scheduled container (Azure Container Apps Job), so it works even
  * while the API is scaled to zero:  node dist/jobs/nightly-sync.js
  */
@@ -82,6 +82,17 @@ async function main() {
           logger.error(`${tenantId}: could not send the trial reminder: ${String(error)}`);
         }
       }
+
+    // onboarding: tips to new workspaces' admins on day 1, 3 and 7
+    const { OnboardingService } = await import('../mail/onboarding.service');
+    for (const tenantId of await app.get(TenantDb).listOnboardingTenants()) {
+      try {
+        const day = await app.get(OnboardingService).send(tenantId);
+        if (day) logger.log(`${tenantId}: onboarding e-mail sent (day ${day})`);
+      } catch (error) {
+        logger.error(`${tenantId}: could not send the onboarding e-mail: ${String(error)}`);
+      }
+    }
   } finally {
     await app.close();
   }

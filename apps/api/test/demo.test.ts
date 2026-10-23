@@ -1,7 +1,8 @@
 import type { INestApplication } from '@nestjs/common';
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DemoService } from '../src/demo/demo.service';
 import { MailService } from '../src/mail/mail.service';
+import { StorageService } from '../src/storage/storage.service';
 import { api, appDb, createApp, createTenant, owner, resetDb, type Fixture } from './helpers';
 import { clearMails, sentMails } from './mail';
 
@@ -79,7 +80,10 @@ describe('demo workspaces', () => {
       .send({ seatId: a.seatIds[0], personId: a.personIds[0] })
       .expect(201);
     await owner.$executeRaw`UPDATE tenants SET created_at = now() - interval '2 days' WHERE id = ${old.tenantId}::uuid`;
+    const deleted = vi.spyOn(app.get(StorageService), 'deletePrefix');
     expect(await app.get(DemoService).purge()).toBe(1);
+    expect(deleted.mock.calls).toEqual([[`${old.tenantId}/`]]); // its plan images go too
+    deleted.mockRestore();
     expect(await owner.tenant.findUnique({ where: { id: old.tenantId } })).toBeNull();
     expect(await owner.seatAssignment.count({ where: { tenantId: old.tenantId } })).toBe(0);
     expect(await owner.person.count({ where: { tenantId: old.tenantId } })).toBe(0);

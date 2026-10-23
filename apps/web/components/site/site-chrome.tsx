@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { OPERATOR } from '@/lib/legal/operator';
 import { LANGUAGES, LANGUAGE_NAMES, type Language } from '@/lib/locales';
 import { helpPath } from '@/lib/help';
+import { TEMPLATE, templatePath } from '@/lib/help/template';
 import { SITE_LANGUAGE_PATHS } from '@/lib/site';
 import { SiteBeacon } from './site-beacon';
 import { looksSignedIn } from '@/lib/server/auth';
@@ -86,6 +87,7 @@ export async function SiteHeader({
 
 export async function SiteFooter() {
   const t = await getTranslations();
+  const language = (await getLocale()).slice(0, 2) as Language;
   return (
     <footer className="border-t bg-canvas">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-3 px-4 py-8 text-sm text-muted-foreground sm:px-6">
@@ -95,6 +97,9 @@ export async function SiteFooter() {
         <span>{t('site.madeIn')}</span>
         <a className="hover:text-foreground" href={`mailto:${OPERATOR.email}`}>
           {OPERATOR.email}
+        </a>
+        <a className="hover:text-foreground" href={templatePath(language)}>
+          {TEMPLATE[language].title}
         </a>
         <nav
           aria-label={t('legal.legalLinks')}

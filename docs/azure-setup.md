@@ -158,6 +158,10 @@ To go live: activate your Stripe account, then run the script again with the **l
 (`sk_live_…`). In Stripe, also turn on the **Customer portal** (Settings → Billing → Customer
 portal) so admins can change their card or cancel.
 
+**Discount codes** (e.g. founding customers, partners): Stripe → Product catalogue → Coupons →
+**+ Create coupon** (e.g. 100 % off, duration "repeating", 6 months), then **Add promotion code**
+(e.g. `GRUENDER6`). Customers type it in the "Add promotion code" field on the payment page.
+
 **Own payment domain (done):** in Stripe → Settings → Business → Custom domains, Checkout and the
 customer portal run on **pay.seatline.ch** (a DNS record at the domain registrar points it to
 Stripe; Stripe checks it for a few hours, then switches over by itself). Seatline needs no change

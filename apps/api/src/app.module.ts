@@ -23,6 +23,7 @@ import { EmailSignInService } from './auth/email-sign-in.service';
 import { MailService } from './mail/mail.service';
 import { NotifyService } from './mail/notify.service';
 import { DeskMailService } from './mail/desk-mail.service';
+import { OnboardingService } from './mail/onboarding.service';
 import { DemoService } from './demo/demo.service';
 import { PlanningController } from './planning/planning.controller';
 import { OwnerController } from './owner/owner.controller';
@@ -99,6 +100,7 @@ import { PeopleSyncService } from './sync/people-sync.service';
     MailService,
     NotifyService,
     DeskMailService,
+    OnboardingService,
     DemoService,
     PlanningService,
     OwnerService,

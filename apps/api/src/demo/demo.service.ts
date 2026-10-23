@@ -3,6 +3,7 @@ import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common'
 import type { MailLanguage, MarkerKind, RoomEquipment, SeatFeature } from '@seatline/shared';
 import { audit } from '../common/audit';
 import { TenantDb, type Tx } from '../db/tenant-db.service';
+import { StorageService } from '../storage/storage.service';
 
 /** At most this many demo workspaces at once (they're deleted after a day). */
 export const MAX_DEMO_WORKSPACES = 300;
@@ -177,7 +178,10 @@ function features(row: number, col: number): SeatFeature[] {
 export class DemoService {
   private readonly logger = new Logger(DemoService.name);
 
-  constructor(private readonly db: TenantDb) {}
+  constructor(
+    private readonly db: TenantDb,
+    private readonly storage: StorageService,
+  ) {}
 
   async create(language: MailLanguage) {
     if ((await this.db.countDemoTenants()) >= MAX_DEMO_WORKSPACES)
@@ -193,8 +197,10 @@ export class DemoService {
     return { tenantId, email };
   }
 
-  /** Nightly: delete demo workspaces older than a day. */
-  purge() {
+  /** Nightly: delete demo workspaces older than a day, with their files (plan images). */
+  async purge() {
+    for (const id of await this.db.listOldDemoTenants(DEMO_LIFETIME))
+      await this.storage.deletePrefix(`${id}/`);
     return this.db.purgeDemoTenants(DEMO_LIFETIME);
   }
 
