@@ -332,6 +332,8 @@ export function describe(e: ActivityEntry, refs: ActivityRefs, unknownName: stri
       };
     case 'privacy.dpa':
       return { key: 'privacyDpa', values: {} };
+    case 'owner.workspace.delete':
+      return { key: 'workspaceDeleted', values: { name: pick('name') ?? '' } };
     case 'privacy.forget':
       return { key: 'privacyForget', values: {} };
     case 'privacy.purge':

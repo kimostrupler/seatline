@@ -30,7 +30,8 @@ describe('owner dashboard', () => {
       .expect(201);
     await api(app).get('/owner/check').set(a.headers).expect(204);
     const res = await api(app).get('/owner/overview').set(a.headers).expect(200);
-    expect(res.body.totals).toMatchObject({ workspaces: 2, last7Days: 2, inTrial: 2, paying: 0 });
+    // alpha is the operator's own workspace: free, so not counted as a trial
+    expect(res.body.totals).toMatchObject({ workspaces: 2, last7Days: 2, inTrial: 1, paying: 0 });
     const beta = res.body.workspaces.find((w: { name: string }) => w.name === 'beta');
     expect(beta).toMatchObject({
       people: 4,
@@ -70,5 +71,42 @@ describe('owner dashboard', () => {
       error: 'Not Found',
       statusCode: 404,
     });
+  });
+
+  it('the operator deletes a workspace for support, with every row of it', async () => {
+    await api(app)
+      .post('/assignments')
+      .set(b.headers)
+      .send({ seatId: b.seatIds[0], personId: b.personIds[0] })
+      .expect(201);
+    const del = (id: string, name: string, headers = a.headers) =>
+      api(app).delete(`/owner/workspaces/${id}`).set(headers).send({ name });
+
+    await del(b.tenantId, 'beta', b.headers).expect(404); // only the operator
+    await del(b.tenantId, 'gamma').expect(400); // the typed name must match
+    await del(a.tenantId, 'alpha').expect(409); // never the own workspace
+    await owner.tenant.update({
+      where: { id: b.tenantId },
+      data: { stripeSubscriptionId: 'sub_1', billingStatus: 'active' },
+    });
+    const paying = await del(b.tenantId, 'beta').expect(409);
+    expect(paying.body.code).toBe('subscribed');
+    await owner.tenant.update({ where: { id: b.tenantId }, data: { billingStatus: 'canceled' } });
+
+    await del(b.tenantId, 'beta').expect(204);
+    expect(await owner.tenant.count({ where: { id: b.tenantId } })).toBe(0);
+    expect(await owner.person.count({ where: { tenantId: b.tenantId } })).toBe(0);
+    expect(await owner.seatAssignment.count({ where: { tenantId: b.tenantId } })).toBe(0);
+    expect(await owner.auditLog.count({ where: { tenantId: b.tenantId } })).toBe(0);
+    const logged = await owner.auditLog.findFirst({
+      where: { tenantId: a.tenantId, action: 'owner.workspace.delete' },
+    });
+    expect(logged).toMatchObject({ actorId: a.adminId, entityId: b.tenantId });
+
+    // the operator's own workspace is free, not a trial
+    const res = await api(app).get('/owner/overview').set(a.headers).expect(200);
+    expect(res.body.workspaces).toHaveLength(1);
+    expect(res.body.workspaces[0]).toMatchObject({ name: 'alpha', owner: true });
+    expect(res.body.totals.inTrial).toBe(0);
   });
 });

@@ -46,6 +46,25 @@ export function summarizeCosts(result: CostResult) {
   };
 }
 
+/** Azure's error code and message from a failed answer (short, for the owner dashboard). */
+async function reason(res: Response): Promise<string> {
+  const text = await res.text().catch(() => '');
+  try {
+    const body = JSON.parse(text) as {
+      error?: { code?: string; message?: string } | string;
+      error_description?: string;
+    };
+    const e = body.error;
+    const out =
+      typeof e === 'object'
+        ? `${e.code ?? ''} ${e.message ?? ''}`
+        : `${e ?? ''} ${body.error_description ?? ''}`;
+    return out.trim().slice(0, 300) || text.slice(0, 300);
+  } catch {
+    return text.slice(0, 300);
+  }
+}
+
 /**
  * Azure costs of Seatline's resource group for the owner dashboard, read with the apps'
  * managed identity (role "Cost Management Reader", see infra/azure/owner-setup.sh). Azure
@@ -74,8 +93,10 @@ export class AzureCostService {
       this.cache = { at: Date.now(), value };
       return value;
     } catch (error) {
-      this.logger.warn(`Azure costs could not be read: ${(error as Error).message}`);
-      return { error: 'unavailable' as const };
+      const detail = (error as Error).message;
+      this.logger.warn(`Azure costs could not be read: ${detail}`);
+      // the owner sees Azure's own reason (e.g. a missing role), so setup problems are visible
+      return { error: 'unavailable' as const, detail };
     }
   }
 
@@ -99,7 +120,8 @@ export class AzureCostService {
           signal: AbortSignal.timeout(20_000),
         },
       ).then(async (res) => {
-        if (!res.ok) throw new Error(`Cost Management answered ${res.status}`);
+        if (!res.ok)
+          throw new Error(`Cost Management answered ${res.status}: ${await reason(res)}`);
         return summarizeCosts((await res.json()) as CostResult);
       });
     const [month, lastMonth] = await Promise.all([
@@ -118,7 +140,7 @@ export class AzureCostService {
       headers: { 'X-IDENTITY-HEADER': process.env.IDENTITY_HEADER! },
       signal: AbortSignal.timeout(10_000),
     });
-    if (!res.ok) throw new Error(`Managed identity answered ${res.status}`);
+    if (!res.ok) throw new Error(`Managed identity answered ${res.status}: ${await reason(res)}`);
     return ((await res.json()) as { access_token: string }).access_token;
   }
 }

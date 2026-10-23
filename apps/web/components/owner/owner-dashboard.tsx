@@ -1,13 +1,30 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { RefreshCw } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Ellipsis, RefreshCw, Trash2 } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { PageFrame } from '@/components/common/page-frame';
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { api, ApiError } from '@/lib/api';
@@ -30,7 +47,7 @@ type StripeStatus = (typeof STRIPE_STATUSES)[number];
 const isStripeStatus = (s: string): s is StripeStatus =>
   (STRIPE_STATUSES as readonly string[]).includes(s);
 type Stripe = Exclude<OwnerOverview['stripe'], null | { error: 'unavailable' }>;
-type Azure = Exclude<OwnerOverview['azure'], null | { error: 'unavailable' }>;
+type Azure = Exclude<OwnerOverview['azure'], null | { error: 'unavailable'; detail?: string }>;
 
 /** The operator's dashboard: sign-ups, workspaces, Stripe and Azure, refreshed every 30 s. */
 export function OwnerDashboard({ initial }: { initial: OwnerOverview | null }) {
@@ -251,6 +268,14 @@ function AzurePanel({ azure }: { azure: OwnerOverview['azure'] }) {
         <p className={cn('text-sm', azure ? 'text-destructive' : 'text-muted-foreground')}>
           {azure ? t('azure.error') : t('azure.off')}
         </p>
+        {azure?.detail && (
+          <>
+            <p className="mt-2 font-mono text-xs break-words text-muted-foreground">
+              {azure.detail}
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">{t('azure.fix')}</p>
+          </>
+        )}
       </Panel>
     );
   const a: Azure = azure;
@@ -299,9 +324,11 @@ function Workspaces({ list }: { list: Workspace[] }) {
   const format = useFormatter();
   const now = useNow({ updateInterval: 60_000 });
   const [demos, setDemos] = useState(false);
+  const [deleting, setDeleting] = useState<Workspace | null>(null);
   const shown = list.filter((w) => demos || !w.demo);
   const status = (w: Workspace) => {
     if (w.demo) return { label: t('status.demo'), variant: 'outline' as const };
+    if (w.owner) return { label: t('status.owner'), variant: 'default' as const };
     if (w.subscribed && w.billingStatus)
       return {
         label: isStripeStatus(w.billingStatus)
@@ -338,6 +365,7 @@ function Workspaces({ list }: { list: Workspace[] }) {
               <th className="px-2 py-2 font-medium">{t('workspaces.status')}</th>
               <th className="px-2 py-2 font-medium">{t('workspaces.lastActivity')}</th>
               <th className="px-4 py-2 font-medium">{t('workspaces.admins')}</th>
+              <th className="w-10 px-2 py-2" />
             </tr>
           </thead>
           <tbody>
@@ -369,12 +397,100 @@ function Workspaces({ list }: { list: Workspace[] }) {
                       </a>
                     ))}
                   </td>
+                  <td className="px-2 py-1">
+                    {!w.owner && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8"
+                            aria-label={t('delete.options', { name: w.name })}
+                          >
+                            <Ellipsis />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem variant="destructive" onSelect={() => setDeleting(w)}>
+                            <Trash2 /> {t('delete.action')}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                  </td>
                 </tr>
               );
             })}
           </tbody>
         </table>
       </div>
+      <DeleteWorkspace workspace={deleting} onClose={() => setDeleting(null)} />
     </section>
+  );
+}
+
+/** Support: delete a whole workspace after typing its name (the API checks it again). */
+function DeleteWorkspace({
+  workspace,
+  onClose,
+}: {
+  workspace: Workspace | null;
+  onClose: () => void;
+}) {
+  const t = useTranslations('owner.delete');
+  const queryClient = useQueryClient();
+  const [typed, setTyped] = useState('');
+  const remove = useMutation({
+    mutationFn: (w: Workspace) =>
+      api<void>(`/owner/workspaces/${w.id}`, { method: 'DELETE', body: { name: typed } }),
+    onSuccess: (_, w) => {
+      toast.success(t('done', { name: w.name }));
+      void queryClient.invalidateQueries({ queryKey: ['owner'] });
+      close();
+    },
+    onError: (error) => {
+      const code = error instanceof ApiError ? error.code : undefined;
+      toast.error(
+        code === 'subscribed'
+          ? t('subscribed')
+          : code === 'own_workspace'
+            ? t('own')
+            : code === 'name_mismatch'
+              ? t('mismatch')
+              : t('failed'),
+      );
+    },
+  });
+  const close = () => {
+    setTyped('');
+    onClose();
+  };
+  return (
+    <AlertDialog open={!!workspace} onOpenChange={(o) => !o && close()}>
+      <AlertDialogContent>
+        <AlertDialogTitle>{t('title', { name: workspace?.name ?? '' })}</AlertDialogTitle>
+        <AlertDialogDescription>{t('body')}</AlertDialogDescription>
+        <div className="grid gap-2">
+          <Label htmlFor="delete-workspace-name">{t('label')}</Label>
+          <Input
+            id="delete-workspace-name"
+            value={typed}
+            onChange={(e) => setTyped(e.target.value)}
+            placeholder={workspace?.name}
+            autoComplete="off"
+          />
+        </div>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+          <Button
+            variant="destructive"
+            disabled={!workspace || typed.trim() !== workspace.name.trim() || remove.isPending}
+            onClick={() => workspace && remove.mutate(workspace)}
+          >
+            {t('confirm')}
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

@@ -16,9 +16,16 @@ IDENTITY=$(az identity list -g "$RG" --query "[?ends_with(name, '-pull')] | [0]"
 PRINCIPAL=$(echo "$IDENTITY" | python3 -c "import json,sys; print(json.load(sys.stdin)['principalId'])")
 CLIENT=$(echo "$IDENTITY" | python3 -c "import json,sys; print(json.load(sys.stdin)['clientId'])")
 SCOPE=$(az group show -n "$RG" --query id -o tsv)
-az role assignment create --assignee-object-id "$PRINCIPAL" --assignee-principal-type ServicePrincipal \
-  --role "Cost Management Reader" --scope "$SCOPE" -o none 2>/dev/null || true
-echo "  done"
+HAS=$(az role assignment list --assignee "$PRINCIPAL" --role "Cost Management Reader" --scope "$SCOPE" --query "length(@)" -o tsv 2>/dev/null || echo 0)
+if [ "${HAS:-0}" -gt 0 ]; then
+  echo "  already allowed"
+elif az role assignment create --assignee-object-id "$PRINCIPAL" --assignee-principal-type ServicePrincipal \
+  --role "Cost Management Reader" --scope "$SCOPE" -o none; then
+  echo "  done (Azure can take up to 30 minutes to apply it)"
+else
+  echo "  ⚠ Azure refused (see the message above). Your account needs the role 'Owner' or"
+  echo "    'User Access Administrator' on the subscription; then run this script again."
+fi
 
 say "2/2 The dashboard is for $EMAIL"
 az containerapp update -n api -g "$RG" -o none --set-env-vars \

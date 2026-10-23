@@ -76,6 +76,13 @@ export class TenantDb {
     >`SELECT * FROM owner_workspaces()`;
   }
 
+  /** Owner only: delete one whole workspace, history included (see delete_tenant). */
+  async deleteTenant(tenantId: string): Promise<boolean> {
+    const [row] = await this.prisma.$queryRaw<{ ok: boolean }[]>`
+      SELECT delete_tenant(${tenantId}::uuid) AS ok`;
+    return row?.ok === true;
+  }
+
   /** The database answers (health check). */
   async ping(): Promise<void> {
     await this.prisma.$queryRaw`SELECT 1`;

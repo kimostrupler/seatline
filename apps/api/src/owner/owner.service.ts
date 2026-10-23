@@ -1,8 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import type { RequestContext } from '../auth/request-context';
 import { BillingService } from '../billing/billing.service';
 import { loadConfig } from '../config';
+import { audit } from '../common/audit';
 import { TenantDb } from '../db/tenant-db.service';
+import { StorageService } from '../storage/storage.service';
 import { AzureCostService } from './azure-cost';
 
 const DAY = 86_400_000;
@@ -19,7 +27,9 @@ export class OwnerService {
     private readonly db: TenantDb,
     private readonly billing: BillingService,
     private readonly costs: AzureCostService,
+    private readonly storage: StorageService,
   ) {}
+  private readonly logger = new Logger(OwnerService.name);
 
   /** The caller is the operator — else a plain "not found" (nobody learns the page exists). */
   async assertOwner(ctx: RequestContext, path: string) {
@@ -38,6 +48,48 @@ export class OwnerService {
         error: 'Not Found',
         statusCode: 404,
       });
+  }
+
+  /**
+   * Support: delete a whole workspace (people, floors, seat history, files). Not the caller's
+   * own, not one with a running subscription (cancel it in Stripe first), and only when the
+   * typed name matches. Recorded in the operator's own activity log.
+   */
+  async deleteWorkspace(ctx: RequestContext, tenantId: string, typedName: string) {
+    if (tenantId === ctx.tenantId)
+      throw new ConflictException({
+        message: 'You can’t delete the workspace you’re signed in to',
+        code: 'own_workspace',
+      });
+    const tenant = await this.db.run(tenantId, (tx) =>
+      tx.tenant.findUnique({
+        where: { id: tenantId },
+        select: { name: true, stripeSubscriptionId: true, billingStatus: true },
+      }),
+    );
+    if (!tenant) throw new NotFoundException('Workspace not found');
+    if (typedName.trim() !== tenant.name.trim())
+      throw new BadRequestException({
+        message: 'The name doesn’t match',
+        code: 'name_mismatch',
+      });
+    const ended = ['canceled', 'incomplete_expired'];
+    if (tenant.stripeSubscriptionId && !ended.includes(tenant.billingStatus ?? ''))
+      throw new ConflictException({
+        message: 'This workspace has a subscription — cancel it in Stripe first',
+        code: 'subscribed',
+      });
+    await this.db.deleteTenant(tenantId);
+    await this.storage.deletePrefix(`${tenantId}/`);
+    await this.db.run(ctx.tenantId, (tx) =>
+      audit(tx, ctx, {
+        action: 'owner.workspace.delete',
+        entityType: 'tenant',
+        entityId: tenantId,
+        before: { name: tenant.name },
+      }),
+    );
+    this.logger.log(`Workspace deleted by the operator: ${tenantId}`);
   }
 
   async overview() {
@@ -62,8 +114,13 @@ export class OwnerService {
       subscribed: r.subscribed,
       lastActivity: r.last_activity?.toISOString() ?? null,
       admins: r.admin_emails,
+      // the operator's own workspace: free, never a trial (same rule as BillingService)
+      owner:
+        !r.microsoft &&
+        r.admin_emails.some((e) => this.config.OWNER_EMAILS.includes(e.toLowerCase())),
     }));
     const real = workspaces.filter((w) => !w.demo);
+    const billable = real.filter((w) => !w.owner);
     const since = (days: number) => real.filter((w) => now - Date.parse(w.createdAt) < days * DAY);
     const days = Array.from({ length: 30 }, (_, i) =>
       new Date(now - (29 - i) * DAY).toISOString().slice(0, 10),
@@ -75,8 +132,9 @@ export class OwnerService {
         last7Days: since(7).length,
         last30Days: since(30).length,
         paying: real.filter((w) => w.subscribed && w.billingStatus === 'active').length,
-        inTrial: real.filter((w) => !w.subscribed && Date.parse(w.trialEndsAt) > now).length,
-        trialEnded: real.filter((w) => !w.subscribed && Date.parse(w.trialEndsAt) <= now).length,
+        inTrial: billable.filter((w) => !w.subscribed && Date.parse(w.trialEndsAt) > now).length,
+        trialEnded: billable.filter((w) => !w.subscribed && Date.parse(w.trialEndsAt) <= now)
+          .length,
         activeLast7Days: real.filter(
           (w) => w.lastActivity && now - Date.parse(w.lastActivity) < 7 * DAY,
         ).length,
