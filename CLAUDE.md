@@ -183,6 +183,8 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   (`INTERNAL_AUTH_SECRET`). The API (`auth.guard.ts`) verifies it and maps Entra `tid`/`oid` to a
   workspace/person (`identity.service.ts`). Never forward identity headers from the browser in
   entra mode.
+- A sign-in lasts **30 days** (`SESSION_HOURS`; sign out ends it, leavers lose access on the next
+  request anyway). Keep the privacy policy's cookie section in step if it changes.
 - Signing in also sets `sl_in=1` on the site's parent domain (`signedInMarker`, same lifetime, no
   personal data; cleared on sign-out) because seatline.ch can't read the app's session cookie:
   `looksSignedIn()` makes the website/help headers show **Open Seatline** instead of Sign in.
@@ -442,6 +444,8 @@ chromium` (re-run after UI changes). In the app: **Help** in the top bar, a dism
 - `/owner` (not linked, `noindex`): sign-ups per day, every workspace (counts, billing state,
   last change, admins' e-mails), Stripe (MRR, subscriptions by status, balance, payments) and
   Azure costs (month to date by service and day, last month). Refreshes every 30 s.
+- Reached from the account menu: **Overview** appears only when `GET /owner/check` answers 204
+  (asked when the menu opens; everyone else gets the same 404).
 - Access: `GET /owner/overview` checks `OWNER_EMAILS` against the caller's person **and** that
   their workspace has no Microsoft (an e-mail link proves the address; an Entra directory could
   claim any address). Anyone else gets Nest's exact "Cannot GET …" 404, and the page calls

@@ -1,8 +1,10 @@
 'use client';
 
-import { FileText, LogOut } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { ChartColumn, FileText, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -12,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { api } from '@/lib/api';
 import { useAuthMode } from '@/lib/auth-mode';
 import { useMe } from '@/lib/queries';
 import { DevLogin } from './dev-login';
@@ -22,13 +25,22 @@ export function AccountMenu() {
   const mode = useAuthMode();
   const t = useTranslations();
   const me = useMe();
+  const [open, setOpen] = useState(false);
+  // the operator's dashboard: asked only when the menu opens; everyone else gets a 404
+  const owner = useQuery({
+    queryKey: ['owner-check'],
+    queryFn: () => api<void>('/owner/check').then(() => true),
+    enabled: open && mode !== 'dev',
+    retry: false,
+    staleTime: Infinity,
+  });
 
   return (
     <div className="grid gap-1">
       {mode === 'dev' ? (
         <DevLogin />
       ) : (
-        <DropdownMenu>
+        <DropdownMenu open={open} onOpenChange={setOpen}>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
@@ -51,6 +63,13 @@ export function AccountMenu() {
               {me.data?.person.email}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            {owner.data && (
+              <DropdownMenuItem asChild>
+                <Link href="/owner">
+                  <ChartColumn /> {t('nav.overview')}
+                </Link>
+              </DropdownMenuItem>
+            )}
             {(['terms', 'privacy', 'imprint'] as const).map((doc) => (
               <DropdownMenuItem key={doc} asChild>
                 <Link href={`/legal/${doc}`}>
