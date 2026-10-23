@@ -17,6 +17,7 @@ describe('site domain', () => {
     expect(isPublicPath('/help/de/moves')).toBe(true);
     expect(isPublicPath('/help-img/de/home.jpg')).toBe(true);
     expect(isPublicPath('/indexnow.txt')).toBe(true);
+    expect(isPublicPath('/site-video/seatline-promo.mp4')).toBe(true);
     expect(isPublicPath('/help/de/excel-template')).toBe(true);
     expect(isPublicPath('/templates/seatline-sitzplan.xlsx')).toBe(true);
     expect(isPublicPath('/legal')).toBe(false);

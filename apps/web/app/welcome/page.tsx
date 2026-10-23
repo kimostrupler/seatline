@@ -260,6 +260,22 @@ export default async function Welcome() {
           </ul>
         </section>
 
+        {/* the promo video: nothing loads until play (poster 14 KB, video 1.4 MB, 720p) */}
+        <Section title={t('videoTitle')} lead={t('videoLead')} className="pb-0 sm:pb-0">
+          <video
+            controls
+            playsInline
+            preload="none"
+            poster="/site-video/seatline-promo.webp"
+            width={1280}
+            height={720}
+            className="aspect-video h-auto w-full rounded-2xl border bg-card shadow-xl shadow-black/5"
+            data-reveal
+          >
+            <source src="/site-video/seatline-promo.mp4" type="video/mp4" />
+          </video>
+        </Section>
+
         {/* the three parts of the app, with pictures */}
         <section id="features" className="scroll-mt-20 py-20 sm:py-28">
           <div className="mx-auto grid max-w-6xl gap-20 px-4 sm:gap-28 sm:px-6">
