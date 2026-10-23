@@ -80,6 +80,7 @@ model Tenant {
   isDemo                 Boolean   @default(false) @map("is_demo")
   /// last trial reminder sent (days left: 7, then 1)
   trialReminded          Int?      @map("trial_reminded") @db.SmallInt
+  onboardingSent         Int       @default(0) @map("onboarding_sent") @db.SmallInt
   /// free trial until (new workspaces: 30 days); afterwards a subscription is needed
   trialEndsAt            DateTime  @default(dbgenerated("(now() + '30 days'::interval)")) @map("trial_ends_at") @db.Timestamptz(3)
   stripeCustomerId       String?   @unique @map("stripe_customer_id")

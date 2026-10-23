@@ -94,6 +94,13 @@ export class TenantDb {
     return Number(row?.n ?? 0);
   }
 
+  /** Demo workspaces older than `olderThan`: the ones the next purge deletes. */
+  async listOldDemoTenants(olderThan: string): Promise<string[]> {
+    const rows = await this.prisma.$queryRaw<{ id: string }[]>`
+      SELECT id FROM list_old_demo_tenants(${olderThan}::interval)`;
+    return rows.map((r) => r.id);
+  }
+
   /** Delete demo workspaces older than `olderThan` (a Postgres interval, e.g. '1 day'). */
   async purgeDemoTenants(olderThan: string): Promise<number> {
     const [row] = await this.prisma.$queryRaw<{ n: number }[]>`
@@ -105,6 +112,13 @@ export class TenantDb {
   async listTrialTenants(): Promise<string[]> {
     const rows = await this.prisma.$queryRaw<{ id: string }[]>`
       SELECT id FROM list_trial_tenants()`;
+    return rows.map((r) => r.id);
+  }
+
+  /** New workspaces (last 10 days) still waiting for an onboarding e-mail. */
+  async listOnboardingTenants(): Promise<string[]> {
+    const rows = await this.prisma.$queryRaw<{ id: string }[]>`
+      SELECT id FROM list_onboarding_tenants()`;
     return rows.map((r) => r.id);
   }
 

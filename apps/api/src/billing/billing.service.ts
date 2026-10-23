@@ -298,6 +298,8 @@ export class BillingService {
       billing_address_collection: 'required',
       tax_id_collection: { enabled: true },
       customer_update: { name: 'auto', address: 'auto' },
+      // a "code" field for founding-customer / partner offers (codes are made in Stripe)
+      allow_promotion_codes: true,
       success_url: `${back}?checkout=done`,
       cancel_url: back,
     });

@@ -255,6 +255,10 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - **Trial reminders**: nightly, `list_trial_tenants()` → `BillingService.remindTrial` e-mails the
   admins 7 days and 1 day before (`trialReminderDue`, `tenants.trial_reminded`). Only when
   billing and e-mail are set up; subscribed workspaces get nothing.
+- **Onboarding e-mails** (`mail/onboarding.service.ts`, text `onboardingMail`): nightly,
+  `list_onboarding_tenants()` (last 10 days, no demos) → admins get day 1 "draw your first floor"
+  (skipped if desks exist), day 3 "add your people" (skipped if more than one person), day 7
+  "can we help?" (`onboardingDue`, `tenants.onboarding_sent`; workspaces older than the feature = done).
 - **People import** (`people/import-file.ts`, pure + unit-tested): Excel (exceljs) or CSV
   (; , tab, quotes, UTF-8 or Windows-1252). Column titles en/de/fr ("Nom" next to "Prénom" = last
   name). `POST /people/import/read` (multipart, saves nothing) returns each row's status (new /
@@ -274,7 +278,7 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   and the web (`app/auth/demo` page → POST `start` route, 5 per IP per hour) signs the visitor
   in with an ordinary e-mail session for it. Max 300 at once (`count_demo_tenants`); the nightly
   job deletes them after a day (`purge_demo_tenants`, SECURITY DEFINER, sets
-  `seatline.privacy=purge`). Demo: billing state `off`, checkout refused, banner with "Start your
+  `seatline.privacy=purge`), their uploaded files first (`list_old_demo_tenants` → `deletePrefix`). Demo: billing state `off`, checkout refused, banner with "Start your
   free trial" (= sign out → sign-in page). `MailService` never sends to `.invalid` addresses.
 - **QR stickers**: Export menu → `/map/qr?floor=` (`components/map/desk-labels.tsx`, `qrcode`
   lib, SVG made in the browser), printed 12 per A4 sheet (fixed 3 × 4 grid, `@page` margin 0,
@@ -379,6 +383,8 @@ folded`) so the person and the actions stand out.
   webhook only applies if its customer matches the tenant's `stripe_customer_id`.
 - The operator's own workspace (an active admin from `OWNER_EMAILS`, e-mail sign-in) is billing
   state `off` like demos: never a trial, never read-only.
+- Checkout allows promotion codes (`allow_promotion_codes`); the codes are made in the Stripe
+  dashboard (docs/azure-setup.md).
 - Checkout and the customer portal run on Stripe's own pages under **pay.seatline.ch** (Stripe
   custom domain, set in the Stripe dashboard + a DNS record). The web app just opens the URL the
   API gets from Stripe (`window.location.assign`), so nothing in code or the CSP depends on the
@@ -436,6 +442,11 @@ folded`) so the person and the actions stand out.
   the real app: `HELP_SCREENSHOTS=1 pnpm exec playwright test help-screenshots --project
 chromium` (re-run after UI changes). In the app: **Help** in the top bar, a dismissible banner
   on Home. Help texts must use the app's real labels (from messages) and only true facts.
+- **Free Excel template** (`/help/<lang>/excel-template`, `lib/help/template.ts`; in the help
+  sidebar, footers, sitemap, llms.txt): a seating-plan .xlsx per language in
+  `apps/web/public/templates/`, made by `node apps/api/scripts/seating-template.mjs` (re-run after
+  changes). Its first sheet uses the people import's column titles; `seating-template.test.ts`
+  checks that a filled-in template imports.
 - A new sub-processor, tracking or retention change must be reflected in the privacy policy
   (`docs/legal.md`). Infra: `infra/azure/site-domain.sh`, bicep `siteDomains`.
 

@@ -14,6 +14,7 @@ import { appHomeUrl, demoUrl, LegalLinks, signInUrl } from '@/components/site/si
 import { looksSignedIn } from '@/lib/server/auth';
 import { Button } from '@/components/ui/button';
 import { helpPath, type HelpTopicId } from '@/lib/help';
+import { TEMPLATE, templatePath } from '@/lib/help/template';
 import { OPERATOR } from '@/lib/legal/operator';
 import { LANGUAGES, LANGUAGE_NAMES, LOCALES, type Language } from '@/lib/locales';
 import { webConfig } from '@/lib/server/config';
@@ -452,6 +453,7 @@ export default async function Welcome() {
                 ['#pricing', t('navPricing')],
                 ['#faq', t('navFaq')],
                 [helpPath(language), t('navHelp')],
+                [templatePath(language), TEMPLATE[language].title],
                 [signInUrl(), t('signIn')],
               ] as const
             ).map(([href, label]) => (

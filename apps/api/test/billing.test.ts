@@ -121,6 +121,7 @@ describe('billing', () => {
       'line_items[0][quantity]': '3',
       'subscription_data[metadata][tenantId]': a.tenantId,
       success_url: 'https://app.seatline.ch/billing?checkout=done',
+      allow_promotion_codes: 'true',
     });
     expect(session['subscription_data[trial_end]']).toBeUndefined(); // the trial is over
 

@@ -4,6 +4,7 @@ import {
   Building2,
   CreditCard,
   FileDown,
+  FileSpreadsheet,
   MousePointerClick,
   PencilRuler,
   Rocket,
@@ -15,6 +16,7 @@ import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { SitePage } from '@/components/site/site-chrome';
 import { HELP, HELP_TOPICS, helpPath, type HelpTopicId } from '@/lib/help';
+import { TEMPLATE, templatePath } from '@/lib/help/template';
 import type { Language } from '@/lib/locales';
 import { OPERATOR } from '@/lib/legal/operator';
 import { cn } from '@/lib/utils';
@@ -36,20 +38,25 @@ export const TOPIC_ICONS: Record<HelpTopicId, LucideIcon> = {
 export async function HelpShell({
   language,
   topic,
+  paths,
   children,
 }: {
   language: Language;
   topic?: HelpTopicId;
+  /** language links for pages outside the topics (e.g. the Excel template) */
+  paths?: Record<Language, string>;
   children: ReactNode;
 }) {
   const t = await getTranslations('help');
   return (
     <SitePage
-      languagePaths={{
-        en: helpPath('en', topic),
-        de: helpPath('de', topic),
-        fr: helpPath('fr', topic),
-      }}
+      languagePaths={
+        paths ?? {
+          en: helpPath('en', topic),
+          de: helpPath('de', topic),
+          fr: helpPath('fr', topic),
+        }
+      }
     >
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[14rem_minmax(0,1fr)]">
         <nav aria-label={t('topics')} className="max-lg:hidden">
@@ -80,6 +87,17 @@ export async function HelpShell({
                 </a>
               );
             })}
+            <a
+              href={templatePath(language)}
+              aria-current={paths ? 'page' : undefined}
+              className={cn(
+                'mt-3 flex items-center gap-2 rounded-md border-t px-2 pt-3 pb-1.5 text-muted-foreground hover:bg-muted hover:text-foreground',
+                paths && 'bg-muted font-medium text-foreground',
+              )}
+            >
+              <FileSpreadsheet className="size-4 shrink-0" aria-hidden />
+              {TEMPLATE[language].title}
+            </a>
           </div>
         </nav>
         <div className="grid min-w-0 content-start gap-10">

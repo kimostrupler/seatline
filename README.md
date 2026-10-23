@@ -127,7 +127,7 @@ Changing the schema: edit `apps/api/prisma/schema.prisma`, then
   free desks — "6 desks short" before it happens.
 - **"Your new desk" e-mails** to the person who got a desk (2 minutes later, so an undone move
   sends nothing), switchable in Settings. Admins get a reminder 7 days and 1 day before the
-  free trial ends.
+  free trial ends, and short tips on day 1, 3 and 7 after sign-up (skipped when that step is done).
 - **E-mail notices:** IT or facility addresses (Settings) get a short professional e-mail when
   someone leaves or joins, changes team, or a move plan is carried out — which desks are free.
   A leaving date in the future is carried out by the nightly job on that day.

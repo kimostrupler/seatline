@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { HELP, HELP_TOPICS, helpPath } from '@/lib/help';
+import { TEMPLATE, templatePath } from '@/lib/help/template';
 import { webConfig } from '@/lib/server/config';
 import { SITE_PRICE_CHF, siteUrl } from '@/lib/site';
 
@@ -35,6 +36,10 @@ ${faq.join('\n\n')}
 ## Help center (step by step, with screenshots)
 
 ${HELP_TOPICS.map((t) => `- [${HELP.en.topics[t].title}](${base}${helpPath('en', t)}): ${HELP.en.topics[t].summary}`).join('\n')}
+
+## Free download
+
+- [${TEMPLATE.en.title}](${base}${templatePath('en')}): ${TEMPLATE.en.intro} (also in [German](${base}${templatePath('de')}) and [French](${base}${templatePath('fr')}))
 
 ## Links
 
