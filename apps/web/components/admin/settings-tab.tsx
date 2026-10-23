@@ -2,7 +2,7 @@
 
 import { NOTIFY_EVENTS, type NotifyEvent } from '@seatline/shared';
 import { Download, Loader2, Mail, RefreshCw, X } from 'lucide-react';
-import { useFormatter, useNow, useTranslations } from 'next-intl';
+import { useFormatter, useLocale, useNow, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { PageSection as Section } from '@/components/common/page-frame';
@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
-import { useSyncNow, useTenant, useUpdateTenant } from '@/lib/queries';
+import { useMe, useSendDpa, useSyncNow, useTenant, useUpdateTenant } from '@/lib/queries';
 import type { TenantInfo } from '@/lib/types';
 
 const NONE = 'none';
@@ -273,7 +273,46 @@ function PrivacySection() {
       </div>
       <p className="text-xs text-muted-foreground">{t('retentionHint')}</p>
       <p className="text-xs text-muted-foreground">{t('requestsHint')}</p>
+      <DpaCopy />
     </Section>
+  );
+}
+
+/** The DPA as a PDF, e-mailed to the admin who asks (not in demos: their address can't receive). */
+function DpaCopy() {
+  const t = useTranslations('admin.privacy');
+  const language = useLocale().slice(0, 2);
+  const me = useMe().data;
+  const send = useSendDpa();
+  return (
+    <div className="grid gap-2 rounded-lg border p-4" data-testid="dpa">
+      <p className="text-sm font-medium">{t('dpaTitle')}</p>
+      <p className="text-xs text-muted-foreground">{t('dpaHint')}</p>
+      <div className="flex flex-wrap items-center gap-3">
+        {!me?.tenant.isDemo && (
+          <Button
+            variant="outline"
+            disabled={send.isPending}
+            onClick={() =>
+              send.mutateAsync(language).then(
+                (r) => toast.success(t('dpaSent', { email: r.sentTo })),
+                (error: unknown) => toast.error(errorText(error)),
+              )
+            }
+          >
+            {send.isPending ? <Loader2 className="animate-spin" /> : <Mail />} {t('dpaSend')}
+          </Button>
+        )}
+        <a
+          href="/legal/dpa"
+          target="_blank"
+          rel="noreferrer"
+          className="text-sm text-primary underline-offset-4 hover:underline"
+        >
+          {t('dpaRead')}
+        </a>
+      </div>
+    </div>
   );
 }
 

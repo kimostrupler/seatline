@@ -129,6 +129,10 @@ test('data protection: how long history is kept, a person’s data, forgetting a
   await page.getByRole('combobox', { name: 'Keep seat history and the activity log for' }).click();
   await page.getByRole('option', { name: '5 years' }).click();
   await expect(page.getByText('Saved')).toBeVisible();
+
+  // the DPA as a PDF, by e-mail to the admin
+  await page.getByTestId('dpa').getByRole('button', { name: 'E-mail me the DPA (PDF)' }).click();
+  await expect(page.getByText(/^Sent to /)).toBeVisible();
   await page.getByRole('tab', { name: 'People' }).click();
 
   await page.getByRole('button', { name: 'More for Anna Meier' }).click();

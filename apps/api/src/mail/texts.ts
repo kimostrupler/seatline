@@ -104,3 +104,30 @@ export function trialMail(
   }[language];
   return { to, ...t };
 }
+
+/** To an admin who asked for it: the DPA as a PDF attachment. */
+export function dpaMail(to: string, workspace: string, pdf: Buffer, language: MailLanguage): Mail {
+  const t = {
+    en: {
+      subject: `Data processing agreement for ${workspace}`,
+      text: `Hello,\n\nAttached is the data processing agreement (DPA) between ${workspace} and Seatline, as you asked. It is part of our terms and already applies to your workspace; this copy is for your records.\n\nQuestions? Just reply to this e-mail.\n\nSeatline`,
+      file: 'Seatline-DPA.pdf',
+    },
+    de: {
+      subject: `Auftragsverarbeitungsvertrag für ${workspace}`,
+      text: `Guten Tag\n\nIm Anhang finden Sie wie gewünscht den Auftragsverarbeitungsvertrag (AVV) zwischen ${workspace} und Seatline. Er ist Teil unserer Nutzungsbedingungen und gilt bereits für Ihren Arbeitsbereich; diese Kopie ist für Ihre Unterlagen.\n\nFragen? Antworten Sie einfach auf diese E-Mail.\n\nSeatline`,
+      file: 'Seatline-AVV.pdf',
+    },
+    fr: {
+      subject: `Accord de sous-traitance pour ${workspace}`,
+      text: `Bonjour,\n\nVous trouverez en pièce jointe l’accord de sous-traitance (DPA) entre ${workspace} et Seatline, comme demandé. Il fait partie de nos conditions et s’applique déjà à votre espace ; cette copie est pour vos dossiers.\n\nDes questions ? Répondez simplement à cet e-mail.\n\nSeatline`,
+      file: 'Seatline-DPA.pdf',
+    },
+  }[language];
+  return {
+    to,
+    subject: t.subject,
+    text: t.text,
+    attachments: [{ filename: t.file, content: pdf, contentType: 'application/pdf' }],
+  };
+}

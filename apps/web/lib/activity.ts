@@ -330,6 +330,8 @@ export function describe(e: ActivityEntry, refs: ActivityRefs, unknownName: stri
         values: { person: person(e.entityId) },
         link: { person: e.entityId },
       };
+    case 'privacy.dpa':
+      return { key: 'privacyDpa', values: {} };
     case 'privacy.forget':
       return { key: 'privacyForget', values: {} };
     case 'privacy.purge':

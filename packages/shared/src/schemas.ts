@@ -217,6 +217,8 @@ const email = z.string().trim().toLowerCase().max(320).pipe(z.email());
 
 /** Send a one-time sign-in link to this address. */
 /** Open a demo workspace (sample data, in the visitor's language). */
+/** An admin e-mails themselves the DPA as a PDF, in their language. */
+export const sendDpaSchema = z.strictObject({ language: z.enum(MAIL_LANGUAGES) });
 export const demoStartSchema = z.strictObject({ language: z.enum(MAIL_LANGUAGES).default('en') });
 export type DemoStartInput = z.infer<typeof demoStartSchema>;
 
@@ -457,6 +459,7 @@ export type CreateSeatInput = z.infer<typeof createSeatSchema>;
 export type UpdateSeatInput = z.infer<typeof updateSeatSchema>;
 export type LayoutChanges = z.infer<typeof layoutChangesSchema>;
 export type PlanDraft = z.infer<typeof planDraftSchema>;
+export type SendDpaInput = z.infer<typeof sendDpaSchema>;
 export type ApplyPlanImportInput = z.infer<typeof applyPlanImportSchema>;
 export type LayoutChangesInput = z.input<typeof layoutChangesSchema>;
 export type LayoutRoom = z.infer<typeof layoutRoom>;

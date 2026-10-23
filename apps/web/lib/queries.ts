@@ -568,6 +568,13 @@ export const useRenameTeam = () =>
     api<{ people: number }>('/people/teams/rename', { method: 'POST', body }),
   );
 
+/** Admins: e-mail themselves the DPA as a PDF. */
+export const useSendDpa = () =>
+  useMutation({
+    mutationFn: (language: string) =>
+      api<{ sentTo: string }>('/privacy/dpa', { method: 'POST', body: { language } }),
+  });
+
 export function useForgetPerson() {
   const qc = useQueryClient();
   return useMutation({

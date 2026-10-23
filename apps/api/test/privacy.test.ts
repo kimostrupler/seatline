@@ -2,6 +2,7 @@ import type { INestApplication } from '@nestjs/common';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { PrivacyService, retentionCutoff } from '../src/privacy/privacy.service';
 import { api, appDb, createApp, createTenant, owner, resetDb, type Fixture } from './helpers';
+import { clearMails, sentMails } from './mail';
 
 let app: INestApplication;
 let a: Fixture;
@@ -164,5 +165,38 @@ describe('people who left', () => {
     expect(retentionCutoff(new Date('2026-10-21T12:00:00Z'), 24).toISOString()).toBe(
       '2024-10-21T12:00:00.000Z',
     );
+  });
+});
+
+describe('data processing agreement', () => {
+  it('an admin e-mails themselves the DPA as a PDF; viewers cannot', async () => {
+    await clearMails();
+    const admin = await owner.person.findUniqueOrThrow({ where: { id: a.adminId } });
+    const res = await api(app)
+      .post('/privacy/dpa')
+      .set(a.headers)
+      .send({ language: 'de' })
+      .expect(201);
+    expect(res.body).toEqual({ sentTo: admin.email });
+    const mail = (await sentMails()).at(-1) as unknown as {
+      to: string;
+      subject: string;
+      attachments: Array<{ filename: string; contentType: string; content: string }>;
+    };
+    expect(mail.to).toBe(admin.email);
+    expect(mail.subject).toContain('Auftragsverarbeitungsvertrag');
+    expect(mail.attachments[0]).toMatchObject({
+      filename: 'Seatline-AVV.pdf',
+      contentType: 'application/pdf',
+    });
+    expect(Buffer.from(mail.attachments[0]!.content, 'base64').subarray(0, 5).toString()).toBe(
+      '%PDF-',
+    );
+    expect(
+      await owner.auditLog.count({ where: { tenantId: a.tenantId, action: 'privacy.dpa' } }),
+    ).toBe(1);
+
+    await api(app).post('/privacy/dpa').set(a.viewerHeaders).send({ language: 'en' }).expect(403);
+    await api(app).post('/privacy/dpa').set(a.headers).send({ language: 'xx' }).expect(400);
   });
 });

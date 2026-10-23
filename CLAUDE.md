@@ -273,8 +273,12 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   never split). A code opens `/desk/<seatId>` (`components/map/desk-page.tsx`, signed-in members
   only): place, who sits there (name, job, team, e-mail, since), features, history, "Show on the
   map". Old stickers (`/map?…&seat=`) still work.
-- **Legal**: `/legal/dpa` (data processing agreement, `lib/legal/dpa.ts`, same sections in all
-  languages). Sub-processors listed there and in the privacy policy must stay in step.
+- **Legal**: `/legal/dpa` (data processing agreement; text + operator in
+  `packages/shared/src/legal.ts`, imported as `@seatline/shared/dist/legal` to keep page bundles
+  small; same sections in all languages). Sub-processors listed there and in the privacy policy
+  must stay in step. Admins e-mail themselves a PDF copy with their company's name: Settings ›
+  Data protection → `POST /privacy/dpa` (`dpa-pdf.ts`, pdf-lib, audited `privacy.dpa`); it
+  applies without a signature, a hand-signed copy stays possible on request.
 
 ## Space planning, Teams & Outlook app
 
