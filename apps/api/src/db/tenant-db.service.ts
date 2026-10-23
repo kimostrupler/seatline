@@ -55,6 +55,28 @@ export class TenantDb {
   }
 
   /** Owner dashboard only: every workspace with counts (see the owner_workspaces function). */
+  /** Owner dashboard: database size and its biggest tables (Postgres' own figures). */
+  async databaseUsage() {
+    const [[db], tables] = await Promise.all([
+      this.prisma.$queryRaw<{ bytes: bigint }[]>`
+        SELECT pg_database_size(current_database()) AS bytes`,
+      this.prisma.$queryRaw<{ name: string; bytes: bigint; rows: number }[]>`
+        SELECT c.relname AS name, pg_total_relation_size(c.oid) AS bytes,
+               c.reltuples::float8 AS rows
+        FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE c.relkind = 'r' AND n.nspname IN ('public', 'pgboss')
+        ORDER BY 2 DESC LIMIT 6`,
+    ]);
+    return {
+      bytes: Number(db?.bytes ?? 0),
+      tables: tables.map((t) => ({
+        name: t.name,
+        bytes: Number(t.bytes),
+        rows: t.rows >= 0 ? Math.round(t.rows) : null, // -1 = not counted by Postgres yet
+      })),
+    };
+  }
+
   ownerWorkspaces() {
     return this.prisma.$queryRaw<
       Array<{

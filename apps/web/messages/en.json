@@ -1460,9 +1460,20 @@
       "off": "Azure costs aren’t connected (owner-setup.sh).",
       "error": "Azure costs couldn’t be read just now.",
       "month": "This month so far",
+      "forecast": "Forecast for the month",
       "lastMonth": "Last month",
       "note": "Azure updates costs a few times a day (read at {time}).",
       "fix": "Run owner-setup.sh again in Cloud Shell. A new permission can take up to 30 minutes."
+    },
+    "usage": {
+      "title": "Storage",
+      "database": "Database",
+      "of": "{used} of {total}",
+      "files": "Files",
+      "imports": "Plan imports waiting",
+      "filesValue": "{size} · {count, plural, one {# file} other {# files}}",
+      "tables": "Biggest tables",
+      "tableValue": "{size} · {rows, plural, one {# row} other {# rows}}"
     },
     "status": {
       "demo": "Demo",

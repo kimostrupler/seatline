@@ -46,6 +46,23 @@ export function summarizeCosts(result: CostResult) {
   };
 }
 
+/**
+ * Last calendar month (UTC) as an explicit period: not every subscription type accepts the
+ * "TheLastMonth" shortcut (Azure answered "timeframe TheLastMonth is currently not supported").
+ */
+export function lastMonthPeriod(now: Date) {
+  const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1));
+  const to = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0, 23, 59, 59));
+  return { from: from.toISOString(), to: to.toISOString() };
+}
+
+/** This month's total at today's pace: cost so far ÷ days gone × days in the month. */
+export function monthForecast(soFar: number, now: Date) {
+  const days = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0)).getUTCDate();
+  const gone = now.getUTCDate() - 1 + now.getUTCHours() / 24 + now.getUTCMinutes() / 1440;
+  return Math.round((soFar / Math.max(gone, 1)) * days * 100) / 100;
+}
+
 /** Azure's error code and message from a failed answer (short, for the owner dashboard). */
 async function reason(res: Response): Promise<string> {
   const text = await res.text().catch(() => '');
@@ -102,7 +119,11 @@ export class AzureCostService {
 
   private async load() {
     const token = await this.token();
-    const query = (timeframe: string, grouping: boolean) =>
+    const query = (
+      timeframe: 'MonthToDate' | 'Custom',
+      grouping: boolean,
+      timePeriod?: { from: string; to: string },
+    ) =>
       fetch(
         `https://management.azure.com${this.config.COST_SCOPE}/providers/Microsoft.CostManagement/query?api-version=2023-11-01`,
         {
@@ -111,6 +132,7 @@ export class AzureCostService {
           body: JSON.stringify({
             type: 'ActualCost',
             timeframe,
+            ...(timePeriod && { timePeriod }),
             dataset: {
               granularity: grouping ? 'Daily' : 'None',
               aggregation: { totalCost: { name: 'Cost', function: 'Sum' } },
@@ -124,11 +146,21 @@ export class AzureCostService {
           throw new Error(`Cost Management answered ${res.status}: ${await reason(res)}`);
         return summarizeCosts((await res.json()) as CostResult);
       });
+    const now = new Date();
     const [month, lastMonth] = await Promise.all([
       query('MonthToDate', true),
-      query('TheLastMonth', false),
+      // a nice-to-have: if only last month fails, this month still shows
+      query('Custom', false, lastMonthPeriod(now)).catch((error: Error) => {
+        this.logger.warn(`Azure costs of last month could not be read: ${error.message}`);
+        return null;
+      }),
     ]);
-    return { ...month, lastMonth: lastMonth.total, at: new Date().toISOString() };
+    return {
+      ...month,
+      forecast: monthForecast(month.total, now),
+      lastMonth: lastMonth?.total ?? null,
+      at: now.toISOString(),
+    };
   }
 
   private async token(): Promise<string> {

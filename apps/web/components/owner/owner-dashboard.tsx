@@ -139,7 +139,10 @@ function Overview({ data }: { data: OwnerOverview }) {
         <StripePanel stripe={data.stripe} />
       </div>
 
-      <AzurePanel azure={data.azure} />
+      <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+        <AzurePanel azure={data.azure} />
+        <UsagePanel usage={data.usage} />
+      </div>
       <Workspaces list={data.workspaces} />
     </div>
   );
@@ -285,7 +288,10 @@ function AzurePanel({ azure }: { azure: OwnerOverview['azure'] }) {
         <div className="grid content-start gap-3">
           <dl className="grid grid-cols-2 gap-3 text-sm">
             <Stat label={t('azure.month')}>{money(a.total, a.currency, format)}</Stat>
-            <Stat label={t('azure.lastMonth')}>{money(a.lastMonth, a.currency, format)}</Stat>
+            <Stat label={t('azure.forecast')}>{money(a.forecast, a.currency, format)}</Stat>
+            <Stat label={t('azure.lastMonth')}>
+              {a.lastMonth == null ? '—' : money(a.lastMonth, a.currency, format)}
+            </Stat>
           </dl>
           <ul className="grid gap-1 text-sm">
             {a.byService.map((s) => (
@@ -305,6 +311,69 @@ function AzurePanel({ azure }: { azure: OwnerOverview['azure'] }) {
             {t('azure.note', { time: format.dateTime(new Date(a.at), { timeStyle: 'short' }) })}
           </p>
         </div>
+      </div>
+    </Panel>
+  );
+}
+
+/** Storage right now: the database (against its disk) and the stored files. */
+function UsagePanel({ usage }: { usage: OwnerOverview['usage'] }) {
+  const t = useTranslations('owner');
+  const format = useFormatter();
+  const size = (bytes: number) => {
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.min(units.length - 1, Math.floor(Math.log(Math.max(bytes, 1)) / Math.log(1024)));
+    return `${format.number(bytes / 1024 ** i, { maximumFractionDigits: i ? 1 : 0 })} ${units[i]}`;
+  };
+  const { database: db, files } = usage;
+  const share = db.bytes / db.diskBytes;
+  return (
+    <Panel title={t('usage.title')}>
+      <div className="grid gap-1.5">
+        <div className="flex items-baseline justify-between gap-2 text-sm">
+          <span className="text-muted-foreground">{t('usage.database')}</span>
+          <span className="font-medium tabular-nums">
+            {t('usage.of', { used: size(db.bytes), total: size(db.diskBytes) })}
+          </span>
+        </div>
+        <div
+          className="h-2 overflow-hidden rounded-full bg-muted"
+          role="meter"
+          aria-label={t('usage.database')}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(share * 100)}
+        >
+          <div
+            className={cn('h-full rounded-full', share > 0.8 ? 'bg-destructive' : 'bg-primary')}
+            style={{ width: `${Math.max(share * 100, 1)}%` }}
+          />
+        </div>
+      </div>
+      <dl className="grid grid-cols-2 gap-3 text-sm">
+        <Stat label={t('usage.files')}>
+          {files ? t('usage.filesValue', { size: size(files.bytes), count: files.files }) : '—'}
+        </Stat>
+        <Stat label={t('usage.imports')}>
+          {files
+            ? t('usage.filesValue', { size: size(files.imports.bytes), count: files.imports.files })
+            : '—'}
+        </Stat>
+      </dl>
+      <div className="grid gap-1 text-sm">
+        <p className="text-xs text-muted-foreground">{t('usage.tables')}</p>
+        <ul className="grid gap-1">
+          {db.tables.map((table) => (
+            <li key={table.name} className="flex justify-between gap-2">
+              <span className="truncate font-mono text-xs">{table.name}</span>
+              <span className="shrink-0 text-muted-foreground tabular-nums">
+                {table.rows == null
+                  ? size(table.bytes)
+                  : t('usage.tableValue', { size: size(table.bytes), rows: table.rows })}
+              </span>
+            </li>
+          ))}
+        </ul>
       </div>
     </Panel>
   );

@@ -460,7 +460,10 @@ chromium` (re-run after UI changes). In the app: **Help** in the top bar, a dism
 
 - `/owner` (`noindex`, linked only for the operator): sign-ups per day, every workspace (counts, billing state,
   last change, admins' e-mails), Stripe (MRR, subscriptions by status, balance, payments) and
-  Azure costs (month to date by service and day, last month). Refreshes every 30 s.
+  Azure costs (month to date by service and day, forecast at today's pace, last month) and
+  **Storage** (database size against its 32 GB disk + biggest tables, files in Blob Storage incl.
+  plan imports waiting; files listed at most every 15 min). Refreshes every 30 s. Last month is
+  asked with explicit dates (`Custom` + `timePeriod`): some subscriptions refuse `TheLastMonth`.
 - Reached from the main menu: **Overview** appears (admins only ask) when `GET /owner/check`
   answers 204; everyone else gets the same 404. The operator's own workspace shows as
   "Owner · free" (`owner` flag, same rule as billing) and isn't counted as a trial.

@@ -1460,9 +1460,20 @@
       "off": "Les coûts Azure ne sont pas connectés (owner-setup.sh).",
       "error": "Les coûts Azure n’ont pas pu être lus à l’instant.",
       "month": "Ce mois jusqu’ici",
+      "forecast": "Prévision pour le mois",
       "lastMonth": "Mois dernier",
       "note": "Azure met à jour les coûts quelques fois par jour (lu à {time}).",
       "fix": "Relancez owner-setup.sh dans Cloud Shell. Une nouvelle autorisation peut prendre jusqu’à 30 minutes."
+    },
+    "usage": {
+      "title": "Stockage",
+      "database": "Base de données",
+      "of": "{used} sur {total}",
+      "files": "Fichiers",
+      "imports": "Imports de plans en attente",
+      "filesValue": "{size} · {count, plural, one {# fichier} other {# fichiers}}",
+      "tables": "Plus grandes tables",
+      "tableValue": "{size} · {rows, plural, one {# ligne} other {# lignes}}"
     },
     "status": {
       "demo": "Démo",
