@@ -6,8 +6,10 @@ import {
   Check,
   ChevronDown,
   Map as MapIcon,
+  Pencil,
   Printer,
   TriangleAlert,
+  Undo2,
   Users,
   X,
 } from 'lucide-react';
@@ -63,6 +65,7 @@ export function PlanPage({ id }: { id: string }) {
   const plan = useMovePlan(id);
   const actions = useMovePlanActions(id);
   const [dialog, setDialog] = useState<'team' | 'schedule' | 'apply' | null>(null);
+  const [renaming, setRenaming] = useState(false);
   const run = (p: Promise<unknown>, success?: string) =>
     p.then(
       () => success && toast.success(success),
@@ -85,6 +88,7 @@ export function PlanPage({ id }: { id: string }) {
   const draft = p.status === 'draft';
   const open = draft || p.status === 'scheduled' || p.status === 'failed';
   const blocked = p.problems.length > 0;
+  const canRun = !blocked && p.items.length > 0;
 
   return (
     <PageFrame
@@ -99,62 +103,44 @@ export function PlanPage({ id }: { id: string }) {
         </span>
       }
       actions={
-        <>
-          <Button asChild variant="ghost">
-            <Link href={`/moves/${p.id}/print`}>
-              <Printer /> {t('list.button')}
-            </Link>
-          </Button>
-          {open && (
-            <>
-              <Button asChild variant="outline">
-                <Link href={`/map?plan=${p.id}`}>
-                  <MapIcon /> {draft ? t('editOnMap') : t('viewOnMap')}
-                </Link>
-              </Button>
-              {draft && (
-                <Button variant="outline" onClick={() => setDialog('team')}>
-                  <Users /> {t('moveTeam')}
-                </Button>
-              )}
-              <Button
-                variant="outline"
-                disabled={blocked || !p.items.length}
-                onClick={() => setDialog('schedule')}
+        // everything rarely needed sits in one menu; the page itself is two steps
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" aria-label={t('more')}>
+              {t('more')} <ChevronDown />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {draft && (
+              <DropdownMenuItem onSelect={() => setRenaming(true)}>
+                <Pencil /> {t('rename')}
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem asChild>
+              <Link href={`/moves/${p.id}/print`}>
+                <Printer /> {t('list.button')}
+              </Link>
+            </DropdownMenuItem>
+            {open && !draft && (
+              <DropdownMenuItem
+                onSelect={() => run(actions.unschedule.mutateAsync(), t('backToDraftDone'))}
               >
-                <CalendarClock /> {p.status === 'scheduled' ? t('reschedule') : t('schedule')}
-              </Button>
-              <Button disabled={blocked || !p.items.length} onClick={() => setDialog('apply')}>
-                <Check /> {t('applyNow')}
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" aria-label={t('more')}>
-                    {t('more')} <ChevronDown />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {!draft && (
-                    <DropdownMenuItem
-                      onSelect={() => run(actions.unschedule.mutateAsync(), t('backToDraftDone'))}
-                    >
-                      {t('backToDraft')}
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem
-                    variant="destructive"
-                    onSelect={() => run(actions.cancel.mutateAsync(), t('cancelled'))}
-                  >
-                    {t('cancelPlan')}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </>
-          )}
-        </>
+                <Undo2 /> {t('backToDraft')}
+              </DropdownMenuItem>
+            )}
+            {open && (
+              <DropdownMenuItem
+                variant="destructive"
+                onSelect={() => run(actions.cancel.mutateAsync(), t('cancelled'))}
+              >
+                <X /> {t('cancelPlan')}
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       }
     >
-      {draft && (
+      {draft && renaming && (
         <div className="-mt-4 grid max-w-md gap-1.5">
           <Label htmlFor="plan-name-edit" className="text-xs text-muted-foreground">
             {t('planName')}
@@ -163,7 +149,9 @@ export function PlanPage({ id }: { id: string }) {
             id="plan-name-edit"
             value={p.name}
             maxLength={200}
-            onCommit={(name) => run(actions.update.mutateAsync({ name }))}
+            onCommit={(name) =>
+              run(actions.update.mutateAsync({ name })).then(() => setRenaming(false))
+            }
           />
         </div>
       )}
@@ -172,26 +160,31 @@ export function PlanPage({ id }: { id: string }) {
       )}
       {p.status === 'failed' && <p className="-mt-4 text-sm text-destructive">{t('failedHint')}</p>}
 
-      <Problems plan={p} />
-
-      <section className="grid gap-3">
-        <h2 className="text-base font-semibold">{t('movesTitle', { count: p.items.length })}</h2>
-        {p.items.length === 0 ? (
-          <div className="grid justify-items-start gap-3 rounded-lg border border-dashed p-6">
-            <p className="text-sm text-muted-foreground">{t('noMoves')}</p>
-            {draft && (
-              <div className="flex flex-wrap gap-2">
-                <Button asChild variant="outline">
-                  <Link href={`/map?plan=${p.id}`}>
-                    <MapIcon /> {t('editOnMap')}
-                  </Link>
-                </Button>
-                <Button variant="outline" onClick={() => setDialog('team')}>
+      {/* step 1: who moves where */}
+      <section className="grid gap-3 rounded-xl border bg-card p-4 sm:p-5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="font-semibold">
+            {open ? t('stepWho') : t('movesTitle', { count: p.items.length })}
+          </h2>
+          {open && (
+            <div className="flex flex-wrap gap-2">
+              <Button asChild variant="outline" size="sm">
+                <Link href={`/map?plan=${p.id}`}>
+                  <MapIcon /> {draft ? t('editOnMap') : t('viewOnMap')}
+                </Link>
+              </Button>
+              {draft && (
+                <Button variant="outline" size="sm" onClick={() => setDialog('team')}>
                   <Users /> {t('moveTeam')}
                 </Button>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
+        </div>
+        {p.items.length === 0 ? (
+          <p className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+            {t('noMoves')}
+          </p>
         ) : (
           <ul className="divide-y rounded-lg border" data-testid="plan-moves">
             {p.items.map((item) => (
@@ -205,6 +198,26 @@ export function PlanPage({ id }: { id: string }) {
           </ul>
         )}
       </section>
+
+      <Problems plan={p} />
+
+      {/* step 2: when */}
+      {open && (
+        <section className="grid gap-3 rounded-xl border bg-card p-4 sm:p-5">
+          <div className="grid gap-1">
+            <h2 className="font-semibold">{t('stepWhen')}</h2>
+            <p className="text-sm text-muted-foreground">{t('stepWhenHint')}</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button disabled={!canRun} onClick={() => setDialog('apply')}>
+              <Check /> {t('applyNow')}
+            </Button>
+            <Button variant="outline" disabled={!canRun} onClick={() => setDialog('schedule')}>
+              <CalendarClock /> {p.status === 'scheduled' ? t('reschedule') : t('schedule')}
+            </Button>
+          </div>
+        </section>
+      )}
 
       <TeamDialog
         open={dialog === 'team'}

@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { resetE2eDb } from './db';
 import { clearMails, lastLink, mailsTo } from './mail';
+import { openFold } from './helpers';
 
 // The web app in "entra" mode against a fake Microsoft login (e2e/fake-microsoft.mjs).
 
@@ -70,7 +71,7 @@ test('visitors try a demo workspace from the website, then start a real trial', 
   await page.getByRole('link', { name: 'Try the demo' }).first().click();
   await page.getByRole('button', { name: 'Open the demo' }).click();
   await page.getByTestId('demo-banner').getByRole('button', { name: 'Leave the demo' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Seatline' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Know who sits where.' })).toBeVisible();
 });
 
 test('a new organisation creates its workspace; a colleague joins as viewer', async ({
@@ -103,6 +104,7 @@ test('a new organisation creates its workspace; a colleague joins as viewer', as
   await page.getByRole('link', { name: 'People & access' }).click();
   await expect(page.getByTestId('directory')).toContainText('second@newco.example');
   await page.getByRole('tab', { name: 'Settings' }).click();
+  await openFold(page, 'Microsoft 365');
   await expect(page.getByTestId('sync-status')).toContainText('People haven’t been synced yet');
 });
 

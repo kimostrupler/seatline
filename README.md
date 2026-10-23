@@ -90,12 +90,17 @@ Changing the schema: edit `apps/api/prisma/schema.prisma`, then
   be meeting rooms (seats, equipment) or a team's zone; desks carry features. Uploading or
   importing a plan is in the floor's **Add plan / Change plan** menu.
 - **Home** (`/`): a dashboard of widgets (it replaced the old Overview page; `/overview`
-  redirects here, the Excel/CSV export sits in its header) — seats at a glance, floors, recent changes, seat
-  changes per week, people without a seat, open reservations, departments, free and blocked
-  seats, Microsoft 365 sync, my seat, quick actions. **Customize** to add, remove, reorder
+  redirects here, the Excel/CSV export sits in its header). It starts short — quick actions,
+  upcoming moves, my seat, seats at a glance, floors — and **Add widget** offers the rest: recent
+  changes, seat changes per week, people without a seat, open reservations, departments, free and
+  blocked seats, Microsoft 365 sync. **Customize** to add, remove, reorder
   (drag or arrows) and resize; everyone has their own layout, admins can save the company
   default. Each widget's **⋯** menu moves, resizes or removes it; a newly added widget is
   scrolled into view and highlighted. The map is at `/map` (old `/?floor=…` links redirect there).
+- **A move plan** reads as two steps: who moves where, then when (apply now or on a day); the
+  rest is in its More menu. Seat and person panels show history folded.
+- **On phones** the pages are in a floating glass bar at the bottom (Home, Map, Moves, People,
+  More); settings sections fold open one at a time.
 - **Moves** (editors and admins): prepare seat changes as a plan, see the floor "after" on the
   map (`/map?plan=…`, drag people as usual — it only changes the plan), move a whole team to a
   floor in one go, then apply now or schedule a day (applied early that morning by the nightly

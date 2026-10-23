@@ -1,5 +1,6 @@
 'use client';
 
+import { ChevronDown } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { usePersonName } from '@/lib/use-person-name';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -11,22 +12,27 @@ export function HistoryList({
   loading,
   show,
   emptyText,
+  folded,
 }: {
   entries: HistoryEntry[] | undefined;
   loading: boolean;
   show: 'person' | 'seat';
   emptyText: string;
+  /** side panels: closed until tapped, so the person and the actions stand out */
+  folded?: boolean;
 }) {
   const t = useTranslations('history');
   const format = useFormatter();
   const personName = usePersonName();
   const date = (iso: string) => format.dateTime(new Date(iso), { dateStyle: 'medium' });
 
-  return (
+  const list = (
     <section aria-labelledby="history-title" className="grid gap-2">
-      <h3 id="history-title" className="text-xs font-medium text-muted-foreground">
-        {t('title')}
-      </h3>
+      {!folded && (
+        <h3 id="history-title" className="text-xs font-medium text-muted-foreground">
+          {t('title')}
+        </h3>
+      )}
       {loading && <Skeleton className="h-12 w-full" />}
       {entries?.length === 0 && <p className="text-sm text-muted-foreground">{emptyText}</p>}
       <ol className="grid gap-0" data-testid="history">
@@ -55,5 +61,23 @@ export function HistoryList({
         })}
       </ol>
     </section>
+  );
+  if (!folded) return list;
+  return (
+    <details className="group">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 py-1 text-sm font-medium [&::-webkit-details-marker]:hidden">
+        <span id="history-title">
+          {t('title')}
+          {!!entries?.length && (
+            <span className="ml-1.5 text-muted-foreground tabular-nums">{entries.length}</span>
+          )}
+        </span>
+        <ChevronDown
+          aria-hidden
+          className="size-4 text-muted-foreground transition group-open:rotate-180"
+        />
+      </summary>
+      <div className="pt-3">{list}</div>
+    </details>
   );
 }

@@ -5,7 +5,6 @@ import { useFormatter, useNow, useTranslations } from 'next-intl';
 import { FEATURE_ICONS } from '@/components/map/markers';
 import { StatusDot } from '@/components/map/status-dot';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { useSeatHistory } from '@/lib/queries';
 import type { Room, Seat } from '@/lib/types';
 import { AssignPicker } from './assign-picker';
@@ -81,17 +80,29 @@ export function SeatPanel({
           {ts(seat.occupancy)}
         </p>
         {current?.person && (
-          <div>
-            <button
-              type="button"
-              className="text-base font-medium hover:underline focus-visible:underline focus-visible:outline-none"
-              onClick={() => onSelectPerson(current.person!.id)}
+          <div className="flex items-center gap-3">
+            <span
+              aria-hidden
+              className="grid size-10 shrink-0 place-items-center rounded-full bg-muted text-sm font-medium"
             >
-              {current.person.displayName}
-            </button>
-            {current.person.department && (
-              <p className="text-sm text-muted-foreground">{current.person.department}</p>
-            )}
+              {current.person.displayName
+                .split(/\s+/)
+                .map((w) => w[0])
+                .slice(0, 2)
+                .join('')}
+            </span>
+            <div className="min-w-0">
+              <button
+                type="button"
+                className="text-base font-medium hover:underline focus-visible:underline focus-visible:outline-none"
+                onClick={() => onSelectPerson(current.person!.id)}
+              >
+                {current.person.displayName}
+              </button>
+              {current.person.department && (
+                <p className="text-sm text-muted-foreground">{current.person.department}</p>
+              )}
+            </div>
           </div>
         )}
         {current?.kind === 'reserved' && (
@@ -158,12 +169,12 @@ export function SeatPanel({
         {!canEdit && <p className="text-xs text-muted-foreground">{t('viewOnly')}</p>}
       </div>
 
-      <Separator />
       <HistoryList
         entries={history.data}
         loading={history.isPending}
         show="seat"
         emptyText={th('empty')}
+        folded
       />
     </div>
   );

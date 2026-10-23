@@ -1,7 +1,7 @@
 import { DEMO_TENANTS } from '@seatline/shared';
 import { expect, test } from '@playwright/test';
 import { resetE2eDb, sqlE2e } from './db';
-import { switchUser } from './helpers';
+import { openFold, switchUser } from './helpers';
 
 test.beforeEach(async ({ page }) => {
   resetE2eDb();
@@ -20,9 +20,11 @@ test('admins manage roles and who can open Seatline', async ({ page }) => {
   await page.getByRole('tab', { name: 'Settings' }).click();
   await expect(page).toHaveURL(/tab=settings/);
   await expect(page.getByTestId('sync-status')).toHaveCount(0); // demo workspace: not connected
+  await openFold(page, 'Who can open Seatline');
   await page.getByRole('combobox', { name: 'Who can open Seatline' }).click();
   await page.getByRole('option', { name: 'Only people you give a role' }).click();
   await page.reload();
+  await openFold(page, 'Who can open Seatline');
   await expect(page.getByRole('combobox', { name: 'Who can open Seatline' })).toHaveText(
     'Only people you give a role',
   );
@@ -84,6 +86,7 @@ test('teams: create one with people, rename it; it shows in the people list', as
 
 test('HR changes: several people at once, a leaving date, notices to IT', async ({ page }) => {
   await page.goto('/people?tab=settings');
+  await openFold(page, 'Notices');
   const notices = page.getByTestId('notices');
   await notices.getByLabel('E-mail address for notices').fill('it@alpenblick.example');
   await notices.getByRole('button', { name: 'Add' }).click();
@@ -126,6 +129,7 @@ test('data protection: how long history is kept, a person’s data, forgetting a
 }) => {
   sqlE2e(`UPDATE people SET active = false, left_at = now() WHERE display_name = 'Marc Dubois'`);
   await page.goto('/people?tab=settings');
+  await openFold(page, 'Data protection');
   await page.getByRole('combobox', { name: 'Keep seat history and the activity log for' }).click();
   await page.getByRole('option', { name: '5 years' }).click();
   await expect(page.getByText('Saved')).toBeVisible();

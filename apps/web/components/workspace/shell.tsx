@@ -30,7 +30,7 @@ export function Shell({
 }) {
   const t = useTranslations('map');
   return (
-    <div className="flex h-dvh flex-col">
+    <div className="pb-tab-bar flex h-dvh flex-col">
       <BillingBanner />
       <TopBar />
       <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)_340px]">
