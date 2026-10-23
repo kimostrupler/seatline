@@ -35,10 +35,12 @@ test('the website and legal pages need no sign-in', async ({ page }) => {
   // the help center: public, each language with its own address, steps with screenshots
   await page.goto('/help');
   await expect(page).toHaveURL(/\/help\/en$/);
+  await page.waitForLoadState('networkidle'); // a click while the page still loads can get lost
   await page
     .getByTestId('help-topics')
     .getByRole('link', { name: /Planning moves/ })
     .click();
+  await expect(page).toHaveURL(/\/help\/en\/moves$/);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Planning moves');
   const shot = page.getByTestId('help-steps').getByRole('img').first();
   await expect(shot).toBeVisible();
