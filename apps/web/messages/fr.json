@@ -1266,26 +1266,9 @@
     },
     "notice": {
       "title": "Tout le monde est informé",
-      "output": "E-mail à l’IT, tel que Seatline l’envoie",
-      "day": {
-        "title": "Choisissez le jour du déménagement.",
-        "body": "Un plan de déménagement s’exécute tôt ce matin-là, tous les déménagements ou aucun.",
-        "label": "Jour du déménagement"
-      },
-      "to": {
-        "title": "L’IT est informée toute seule.",
-        "body": "Chaque adresse ajoutée reçoit un e-mail simple par changement : qui part, qui arrive, qui va où.",
-        "label": "Envoyer les avis à"
-      },
+      "lead": "L’IT reçoit un court e-mail par changement, et chaque personne qui déménage apprend son nouveau poste.",
       "lang": {
-        "title": "Dans sa langue.",
-        "body": "Français, allemand ou anglais, choisi par espace.",
         "label": "Langue des e-mails"
-      },
-      "people": {
-        "title": "Chacun apprend son nouveau poste.",
-        "body": "Chaque personne qui déménage reçoit un court e-mail avec son poste et un lien vers le plan.",
-        "label": "Envoyer le nouveau poste par e-mail"
       }
     },
     "priceFigure": "CHF 2",

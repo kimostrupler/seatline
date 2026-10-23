@@ -354,13 +354,13 @@ export default async function Welcome() {
         </Section>
 
         {/* notices to IT */}
-        <Section title={t('notice.title')} className="border-t bg-canvas">
-          <div data-reveal>
+        <section className="border-t bg-canvas px-4 py-20 sm:px-6 sm:py-28">
+          <div className="mx-auto max-w-6xl">
             <NextIntlClientProvider messages={liveMessages}>
               <NoticeDemo />
             </NextIntlClientProvider>
           </div>
-        </Section>
+        </section>
 
         {/* pricing */}
         <section id="pricing" className="scroll-mt-20 px-4 py-20 sm:px-6 sm:py-28">

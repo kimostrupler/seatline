@@ -401,7 +401,7 @@ folded`) so the person and the actions stand out.
   (Features, Pricing, Questions, Help, languages, Sign in) → hero + `LiveFloor` (tap a green desk,
   seat colours = the map's) → trust row → three parts with phone pictures (`public/site-img/<lang>/`,
   made by help-screenshots.spec.ts) → help topics grid (pictures hidden on phones) → 4 steps →
-  `NoticeDemo` (the IT e-mail, worded like `notices.ts` via `lib/site/notice-sample.ts` — keep in
+  `NoticeDemo` (short: one line, DE/FR/EN switch, the IT e-mail's subject + moves, worded like `notices.ts` via `lib/site/notice-sample.ts` — keep in
   step) → price card → FAQ as fold-outs → blue closing band → footer ("Zürich, Switzerland" + local
   time). The live parts get only `site.live`/`site.notice` via a nested `NextIntlClientProvider`.
 - Landing page `app/welcome` + `app/legal/[doc]` (terms, privacy, imprint) are public. The

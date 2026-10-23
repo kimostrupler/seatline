@@ -1266,26 +1266,9 @@
     },
     "notice": {
       "title": "Everyone in the loop",
-      "output": "E-mail to IT, as Seatline sends it",
-      "day": {
-        "title": "Pick the moving day.",
-        "body": "A move plan happens early that morning, all moves at once or none.",
-        "label": "Moving day"
-      },
-      "to": {
-        "title": "Tell IT without lifting a finger.",
-        "body": "Any address you add gets one plain e-mail per change: who left, who joined, who moved where.",
-        "label": "Send notices to"
-      },
+      "lead": "IT gets one short e-mail per change, and everyone who moves gets their new desk.",
       "lang": {
-        "title": "Written in their language.",
-        "body": "German, French or English, chosen per workspace.",
         "label": "Language of the e-mails"
-      },
-      "people": {
-        "title": "People hear about their new desk.",
-        "body": "Everyone who moves gets a short e-mail with their desk and a link to the map.",
-        "label": "E-mail people their new desk"
       }
     },
     "priceFigure": "CHF 2",

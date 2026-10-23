@@ -25,9 +25,8 @@ test('the landing page links to sign-in, help and the legal pages', async ({ pag
   ).toBeEnabled();
 
   // the notice e-mail follows the chosen language
-  await page.getByRole('combobox', { name: 'Language of the e-mails' }).click();
-  await page.getByRole('option', { name: 'Deutsch' }).click();
-  await expect(page.getByText('Seatline öffnen:', { exact: false })).toBeVisible();
+  await page.getByRole('radio', { name: 'DE' }).click();
+  await expect(page.getByText(/Umzugsplan «Verkauf in den 2\. Stock» ausgeführt/)).toBeVisible();
 
   await page.getByRole('link', { name: 'Privacy policy' }).click();
   await expect(page.getByRole('heading', { name: 'Privacy policy' })).toBeVisible();
