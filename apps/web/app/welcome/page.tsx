@@ -10,7 +10,8 @@ import { Reveal } from '@/components/site/landing/reveal';
 import { ZurichTime } from '@/components/site/landing/zurich-time';
 import '@/components/site/landing/landing.css';
 import { SiteBeacon } from '@/components/site/site-beacon';
-import { demoUrl, LegalLinks, signInUrl } from '@/components/site/site-chrome';
+import { appHomeUrl, demoUrl, LegalLinks, signInUrl } from '@/components/site/site-chrome';
+import { looksSignedIn } from '@/lib/server/auth';
 import { Button } from '@/components/ui/button';
 import { helpPath, type HelpTopicId } from '@/lib/help';
 import { OPERATOR } from '@/lib/legal/operator';
@@ -107,6 +108,7 @@ export default async function Welcome() {
   const t = await getTranslations('site');
   const tl = await getTranslations('legal');
   const language = (await getLocale()).slice(0, 2) as Language;
+  const signedIn = await looksSignedIn();
   // site.* texts stay on the server (app/layout.tsx); the two live parts get just theirs
   const { live, notice } = (await getMessages()).site;
   const liveMessages = { site: { live, notice } };
@@ -205,7 +207,11 @@ export default async function Welcome() {
             <a href={helpPath(language)}>{t('navHelp')}</a>
           </Button>
           <Button asChild size="sm">
-            <a href={signInUrl()}>{t('signIn')}</a>
+            {signedIn ? (
+              <a href={appHomeUrl()}>{t('openApp')}</a>
+            ) : (
+              <a href={signInUrl()}>{t('signIn')}</a>
+            )}
           </Button>
         </div>
       </header>

@@ -1317,7 +1317,8 @@
         "title": "Data in Zurich",
         "body": "Seat history is kept as long as you choose, then deleted."
       }
-    }
+    },
+    "openApp": "Open Seatline"
   },
   "planImport": {
     "title": "Import an architect plan",

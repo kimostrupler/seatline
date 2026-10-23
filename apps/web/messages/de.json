@@ -1317,7 +1317,8 @@
         "title": "Daten in Zürich",
         "body": "Der Verlauf bleibt so lange, wie Sie wählen, dann wird er gelöscht."
       }
-    }
+    },
+    "openApp": "Seatline öffnen"
   },
   "planImport": {
     "title": "Architektenplan importieren",

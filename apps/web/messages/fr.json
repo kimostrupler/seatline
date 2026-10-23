@@ -1317,7 +1317,8 @@
         "title": "Données à Zurich",
         "body": "L’historique est gardé aussi longtemps que vous le choisissez, puis supprimé."
       }
-    }
+    },
+    "openApp": "Ouvrir Seatline"
   },
   "planImport": {
     "title": "Importer un plan d’architecte",

@@ -1,5 +1,7 @@
 import 'server-only';
 import { cookies } from 'next/headers';
+import type { NextResponse } from 'next/server';
+import { siteHosts } from '../site';
 import { webConfig } from './config';
 import { internalToken, readSession, SESSION_COOKIE, type SessionUser } from './session';
 
@@ -78,4 +80,25 @@ export function cookieOptions(maxAgeSeconds: number, path = '/') {
     path,
     maxAge: maxAgeSeconds,
   };
+}
+
+/**
+ * The website (seatline.ch) can't read the app's session cookie, so signing in also sets this
+ * marker on the parent domain: it only says "signed in" (no personal data), lives as long as
+ * the session and lets the website show "Open Seatline" instead of "Sign in".
+ */
+export const SIGNED_IN_COOKIE = 'sl_in';
+export function signedInMarker(res: NextResponse, maxAgeSeconds: number) {
+  const apex = siteHosts(webConfig().APP_URL)[0];
+  res.cookies.set(SIGNED_IN_COOKIE, maxAgeSeconds ? '1' : '', {
+    ...cookieOptions(maxAgeSeconds),
+    ...(apex && { domain: apex }),
+  });
+}
+
+/** Website pages: is this visitor signed in to the app (session here, or the marker)? */
+export async function looksSignedIn(): Promise<boolean> {
+  if (webConfig().AUTH_MODE !== 'entra') return false;
+  if ((await cookies()).get(SIGNED_IN_COOKIE)?.value === '1') return true;
+  return !!(await currentUser());
 }

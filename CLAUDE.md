@@ -183,6 +183,10 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   (`INTERNAL_AUTH_SECRET`). The API (`auth.guard.ts`) verifies it and maps Entra `tid`/`oid` to a
   workspace/person (`identity.service.ts`). Never forward identity headers from the browser in
   entra mode.
+- Signing in also sets `sl_in=1` on the site's parent domain (`signedInMarker`, same lifetime, no
+  personal data; cleared on sign-out) because seatline.ch can't read the app's session cookie:
+  `looksSignedIn()` makes the website/help headers show **Open Seatline** instead of Sign in.
+  It's listed in the privacy policy's cookie section.
 - ID tokens: issuer must equal `<login>/<tid>/v2.0` of the token's own `tid` (multi-tenant), plus
   audience, nonce, signature. Covered by `lib/server/oidc.test.ts`.
 - Workspace lookup before the tenant is known uses SECURITY DEFINER SQL functions

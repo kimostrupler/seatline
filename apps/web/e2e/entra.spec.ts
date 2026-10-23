@@ -128,9 +128,17 @@ test('sign out, and the API refuses requests without a session (dev headers are 
   await signInAs(page, 'first@newco.example');
   await page.getByLabel('Organisation name').fill('NewCo AG');
   await page.getByRole('button', { name: 'Create workspace' }).click();
+  // the website and help center know you're signed in
+  await page.goto('/welcome');
+  await expect(page.getByRole('link', { name: 'Open Seatline' })).toBeVisible();
+  await page.goto('/help/en');
+  await expect(page.getByRole('link', { name: 'Open Seatline' })).toBeVisible();
+  await page.goto('/');
   await page.getByTestId('account-menu').click();
   await page.getByRole('menuitem', { name: 'Sign out' }).click();
   await expect(page).toHaveURL(/\/signin\?signedOut=1$/);
+  await page.goto('/welcome');
+  await expect(page.getByRole('link', { name: 'Sign in', exact: true }).first()).toBeVisible();
   await page.goto('/');
   await expect(page).toHaveURL(/\/signin$/);
 

@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { siteHosts, siteUrl } from '@/lib/site';
-import { cookieOptions } from '@/lib/server/auth';
+import { cookieOptions, signedInMarker } from '@/lib/server/auth';
 import { webConfig } from '@/lib/server/config';
 import { SESSION_COOKIE } from '@/lib/server/session';
 
@@ -15,5 +15,6 @@ export async function POST(req: NextRequest) {
   const target = to === 'site' ? website : new URL('/signin?signedOut=1', appUrl);
   const res = NextResponse.redirect(target, 303);
   res.cookies.set(SESSION_COOKIE, '', cookieOptions(0));
+  signedInMarker(res, 0);
   return res;
 }

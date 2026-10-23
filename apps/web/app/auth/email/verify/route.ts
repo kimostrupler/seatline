@@ -1,5 +1,5 @@
 import type { NextRequest } from 'next/server';
-import { cookieOptions, landing, membership, publicApi } from '@/lib/server/auth';
+import { cookieOptions, landing, membership, publicApi, signedInMarker } from '@/lib/server/auth';
 import { webConfig } from '@/lib/server/config';
 import { fromThisApp, seeOther } from '@/lib/server/forms';
 import { SESSION_COOKIE, SESSION_HOURS, sealSession, type SessionUser } from '@/lib/server/session';
@@ -18,5 +18,6 @@ export async function POST(req: NextRequest) {
     await sealSession(user, config.SESSION_SECRET),
     cookieOptions(SESSION_HOURS * 3600),
   );
+  signedInMarker(out, SESSION_HOURS * 3600);
   return out;
 }
