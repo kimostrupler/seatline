@@ -1,9 +1,15 @@
 name: CI
 
+# Runs on pull requests only (GitHub's free minutes are limited): main is deployed straight
+# from the merged PR, whose last push was tested here. Docs-only changes skip it, and a new
+# push to the same PR cancels the run still going for the older one.
 on:
-  push:
-    branches: [main, staging]
   pull_request:
+    paths-ignore: ['**/*.md', 'docs/**']
+
+concurrency:
+  group: ci-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   check:

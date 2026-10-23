@@ -1,14 +1,14 @@
 name: Deploy
 
-# Deploys main to Azure after CI passed. Inactive until infra/azure/setup.sh was run and its
-# five repository variables (AZURE_*) were added in GitHub → Settings → Variables.
-# The branch "staging" deploys to the test copy instead (STAGING_RESOURCE_GROUP and
-# STAGING_REGISTRY, see setup.sh); without those variables staging isn't deployed.
+# Deploys main to Azure when a PR is merged (CI already passed on the PR, see ci.yml).
+# Inactive until infra/azure/setup.sh was run and its five repository variables (AZURE_*) were
+# added in GitHub → Settings → Variables. The branch "staging" deploys to the test copy instead
+# (STAGING_RESOURCE_GROUP and STAGING_REGISTRY, see setup.sh); without those variables staging
+# isn't deployed. Docs-only changes don't deploy.
 on:
-  workflow_run:
-    workflows: [CI]
-    types: [completed]
+  push:
     branches: [main, staging]
+    paths-ignore: ['**/*.md', 'docs/**']
   workflow_dispatch:
 
 permissions:
@@ -16,21 +16,20 @@ permissions:
   contents: read
 
 concurrency:
-  group: deploy-${{ github.event.workflow_run.head_branch || github.ref_name }}
+  group: deploy-${{ github.ref_name }}
   cancel-in-progress: false
 
 jobs:
   deploy:
     if: >-
       vars.AZURE_CLIENT_ID != '' &&
-      (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success') &&
-      ((github.event.workflow_run.head_branch || github.ref_name) != 'staging' || vars.STAGING_RESOURCE_GROUP != '')
+      (github.ref_name != 'staging' || vars.STAGING_RESOURCE_GROUP != '')
     runs-on: ubuntu-latest
     env:
-      STAGING: ${{ (github.event.workflow_run.head_branch || github.ref_name) == 'staging' }}
-      RG: ${{ (github.event.workflow_run.head_branch || github.ref_name) == 'staging' && vars.STAGING_RESOURCE_GROUP || vars.AZURE_RESOURCE_GROUP }}
-      REGISTRY: ${{ (github.event.workflow_run.head_branch || github.ref_name) == 'staging' && vars.STAGING_REGISTRY || vars.AZURE_REGISTRY }}
-      SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      STAGING: ${{ github.ref_name == 'staging' }}
+      RG: ${{ github.ref_name == 'staging' && vars.STAGING_RESOURCE_GROUP || vars.AZURE_RESOURCE_GROUP }}
+      REGISTRY: ${{ github.ref_name == 'staging' && vars.STAGING_REGISTRY || vars.AZURE_REGISTRY }}
+      SHA: ${{ github.sha }}
     steps:
       - uses: actions/checkout@v7
         with:

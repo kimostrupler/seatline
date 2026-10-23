@@ -206,7 +206,10 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - Browser tests: project `entra` runs `e2e/entra.spec.ts` against a second web app in entra mode
   and `e2e/fake-microsoft.mjs`; everything else runs in dev mode.
 - Azure: `infra/azure/main.bicep` + `setup.sh` (Cloud Shell, idempotent, secrets in Key Vault);
-  `.github/workflows/deploy.yml` deploys after CI on main (OIDC, no stored Azure secrets).
+  `.github/workflows/deploy.yml` deploys on every push to main (OIDC, no stored Azure secrets).
+  GitHub's free minutes are limited: CI runs on pull requests only (main = the merged PR, already
+  tested), a newer push cancels the older run, docs-only changes (`*.md`, `docs/`) skip CI and
+  deploy. Push each PR once when possible.
   Docker Hub may rate-limit; Dockerfiles take `--build-arg NODE_IMAGE=…` for a mirror.
 - Fast pipeline: deploy builds the three images in parallel with buildx and a registry layer cache
   (`<image>:buildcache` in ACR); the API/web Dockerfiles `pnpm fetch` from the lockfile first so
@@ -271,7 +274,7 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - **Security headers** in `apps/web/next.config.ts`: CSP (self only, `blob:` images,
   `frame-ancestors 'none'` + X-Frame-Options DENY), HSTS, nosniff, Referrer/Permissions-Policy, COOP. A new outside
   host (script, font, image, API) must be added to the CSP or it's blocked.
-- **Dependabot** (`.github/dependabot.yml`): weekly grouped minor/patch PRs for npm, pip, Docker,
+- **Dependabot** (`.github/dependabot.yml`): monthly grouped minor/patch PRs for npm, pip, Docker,
   Actions; majors are skipped (read the changelog; react-konva must match Next's React).
 
 ## Demo workspaces, desk QR codes, DPA
@@ -502,7 +505,7 @@ chromium` (re-run after UI changes). In the app: **Help** in the top bar, a dism
   delete); `.github/workflows/restore-test.yml` runs it monthly.
 - Staging: `setup.sh` takes `RG`, `APP_NAME`, `BRANCH`; branch `staging` deploys to
   `STAGING_RESOURCE_GROUP`/`STAGING_REGISTRY` (deploy.yml picks by branch; alerts/uptime only on
-  main). CI also runs on pushes to `staging`.
+  main). Staging deploys on push without its own CI run (test it through a PR).
 - Website statistics: `SiteBeacon` on site pages → `POST /site-visit` → one log line
   `[site-visit] {event, path, ref, source, lang, device}` (`lib/site-stats.ts`; no cookies, no
   IP). Links with `data-track="cta-…"` count clicks. Report: `infra/azure/site-stats.sh` (also

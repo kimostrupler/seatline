@@ -1,11 +1,12 @@
-# Weekly update proposals (security fixes arrive as soon as they're published).
+# Monthly update proposals (security fixes still arrive as soon as they're published);
+# monthly, not weekly, because every proposal runs CI on GitHub's limited free minutes.
 # Each proposal is a PR that CI checks; merge it when green. Major versions are skipped —
 # they need a person to read the changelog (e.g. react-konva must match Next's React).
 version: 2
 updates:
   - package-ecosystem: npm # pnpm workspace (pnpm-lock.yaml)
     directory: /
-    schedule: { interval: weekly, day: monday }
+    schedule: { interval: monthly }
     open-pull-requests-limit: 5
     groups:
       minor-and-patch:
@@ -15,7 +16,7 @@ updates:
         update-types: [version-update:semver-major]
   - package-ecosystem: pip
     directory: /apps/plan-engine
-    schedule: { interval: weekly, day: monday }
+    schedule: { interval: monthly }
     groups:
       minor-and-patch:
         update-types: [minor, patch]
