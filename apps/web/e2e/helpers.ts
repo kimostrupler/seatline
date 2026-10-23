@@ -87,3 +87,7 @@ export function makePng(width: number, height: number): Buffer {
     chunk('IEND', Buffer.alloc(0)),
   ]);
 }
+
+/** Settings sections fold away; open one by its title. */
+export const openFold = (page: Page, title: string) =>
+  page.locator('summary', { hasText: title }).click();

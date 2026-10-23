@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-/** The time in Eglisau right now (Europe/Zurich), ticking each minute. Empty until mounted. */
+/** The time in Zürich right now (Europe/Zurich), ticking each minute. Empty until mounted. */
 export function ZurichTime() {
   const [now, setNow] = useState<string | null>(null);
   useEffect(() => {

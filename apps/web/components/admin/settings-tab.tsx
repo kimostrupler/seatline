@@ -5,7 +5,7 @@ import { Loader2, Mail, RefreshCw, X } from 'lucide-react';
 import { useFormatter, useLocale, useNow, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { PageSection as Section } from '@/components/common/page-frame';
+import { Fold } from '@/components/common/fold';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -28,12 +28,12 @@ export type ConsentBase = { loginUrl: string; clientId: string; redirectUri: str
 /** Workspace settings: who can open Seatline, notices to IT, Microsoft 365, data protection. */
 export function SettingsTab({ consentBase }: { consentBase: ConsentBase }) {
   return (
-    <>
+    <div className="grid gap-3">
       <AccessSection />
       <NoticesSection />
       <MicrosoftSection consentBase={consentBase} />
       <PrivacySection />
-    </>
+    </div>
   );
 }
 
@@ -69,8 +69,11 @@ function NoticesSection() {
         : tenant.notifyEvents.filter((e) => e !== event),
     });
   return (
-    <Section title={t('title')}>
-      <p className="-mt-1 text-sm text-muted-foreground">{t('intro')}</p>
+    <Fold
+      title={t('title')}
+      summary={tenant.notifyEmails.length ? tenant.notifyEmails.join(', ') : t('none')}
+    >
+      <p className="text-sm text-muted-foreground">{t('intro')}</p>
       <div className="grid gap-4 rounded-lg border p-4" data-testid="notices">
         <div className="grid gap-2">
           <p className="text-sm font-medium">{t('recipients')}</p>
@@ -172,7 +175,7 @@ function NoticesSection() {
         </div>
         <p className="text-xs text-muted-foreground">{t('hint')}</p>
       </div>
-    </Section>
+    </Fold>
   );
 }
 
@@ -182,7 +185,10 @@ function AccessSection() {
   const update = useUpdateTenant();
   if (!tenant.data) return <Skeleton className="h-20" />;
   return (
-    <Section title={t('accessTitle')}>
+    <Fold
+      title={t('accessTitle')}
+      summary={tenant.data.defaultAppRole === 'viewer' ? t('accessViewer') : t('accessInvited')}
+    >
       <Select
         value={tenant.data.defaultAppRole === 'viewer' ? 'viewer' : NONE}
         onValueChange={(v) =>
@@ -200,7 +206,7 @@ function AccessSection() {
         </SelectContent>
       </Select>
       <p className="text-xs text-muted-foreground">{t('accessHint')}</p>
-    </Section>
+    </Fold>
   );
 }
 
@@ -216,7 +222,10 @@ function PrivacySection() {
     ? String(tenant.data.historyRetentionMonths)
     : 'forever';
   return (
-    <Section title={t('title')}>
+    <Fold
+      title={t('title')}
+      summary={`${t('retention')}: ${t(`keep.${value as (typeof RETENTION)[number]}`)}`}
+    >
       <div className="grid gap-1.5">
         <label htmlFor="retention" className="text-sm font-medium">
           {t('retention')}
@@ -249,7 +258,7 @@ function PrivacySection() {
       <p className="text-xs text-muted-foreground">{t('retentionHint')}</p>
       <p className="text-xs text-muted-foreground">{t('requestsHint')}</p>
       <DpaCopy />
-    </Section>
+    </Fold>
   );
 }
 
@@ -327,12 +336,19 @@ function MicrosoftSection({
   if (!tenant.data) return <Skeleton className="h-24" />;
   if (!tenant.data.entraTenantId)
     return (
-      <Section title={t('microsoftTitle')}>
+      <Fold title={t('microsoftTitle')} summary={t('notConnected')}>
         <p className="text-sm text-muted-foreground">{t('notConnected')}</p>
-      </Section>
+      </Fold>
     );
   return (
-    <Section title={t('microsoftTitle')}>
+    <Fold
+      title={t('microsoftTitle')}
+      summary={
+        status?.ok
+          ? t('lastSync', { when: format.relativeTime(new Date(status.at), now) })
+          : t('neverSynced')
+      }
+    >
       <div className="grid gap-3 rounded-lg border p-4" data-testid="sync-status">
         {status?.ok ? (
           <div className="grid gap-0.5">
@@ -384,6 +400,6 @@ function MicrosoftSection({
         </div>
         <p className="text-xs text-muted-foreground">{t('syncHint')}</p>
       </div>
-    </Section>
+    </Fold>
   );
 }

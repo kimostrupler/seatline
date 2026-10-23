@@ -228,7 +228,9 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - `/people` has tabs in the URL (`?tab=`): **People** (list: team colour, desk, role, filters all /
   without desk / leaving / left, Add person), **Teams** (cards: seated meter, floors, rename /
   remove via `POST /people/teams/rename`, add people), **Changes** (HR table: team, role, leaving
-  date for many people, one `POST /people/changes`, all or nothing), **Settings** (access,
+  date for many people, one `POST /people/changes`, all or nothing), **Settings** (each section a
+  fold-out `Fold` (`components/common/fold.tsx`) showing its current value; tests open it with
+  `openFold`) (access,
   notices, Microsoft 365, data protection). Files: `components/admin/*-tab.tsx`.
 - `people.leaves_on`: today or earlier → leave now (`PeopleService.leave`: inactive, open seats
   end, history kept); later → the nightly job (`leaveDue`, `list_leaving_tenants`) before moves.
@@ -303,6 +305,10 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 ## Home dashboard
 
 - `/` is the dashboard, the map lives at `/map` (`app/page.tsx` redirects old `/?floor=…` links).
+  **Phones**: the pages sit in a floating "liquid glass" bottom bar (`mobile-tab-bar.tsx`: Home, Map,
+  Moves, People + **More** menu with the rest and Help; utilities `glass` and `pb-tab-bar` in
+  `globals.css`). It must be rendered OUTSIDE the sticky header (a backdrop-filter parent pins
+  fixed children to itself). The top bar then only shows logo, language and account.
   Every page, the map (view + edit) included, has the same `TopBar` (`components/common/top-bar.tsx`:
   `NavLinks`, language, `AccountMenu`); the map's sidebar only has the place picker + people.
 - Layouts: `dashboard_layouts` (person_id null = company default; RLS like everything else).
@@ -314,6 +320,9 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - **Getting started** (`components/dashboard/getting-started.tsx`, admins, not in demos): 4 steps
   ticked from `/overview` + `/people/directory` (`setupProgress`, `lib/getting-started.ts`);
   hidden per browser + workspace (`useDismissed`), and by itself once all are done.
+- The default Home is short on purpose (quick actions, upcoming moves, my seat, seats at a glance,
+  floors); the other widgets are one **Add widget** away. Keep it calm: prefer fold-outs and menus
+  over showing everything.
 - Customize mode: each widget has one **⋯** menu (move earlier/later, size, remove) — no rows
   of small buttons. A newly added widget is scrolled into view and highlighted, plus a toast.
 - The `/api` proxy must export every HTTP method the API uses (PUT was missing once).
@@ -382,16 +391,15 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 
 ## Website and legal pages
 
-- **Landing page design** ("colour chapters", dealt by the taste-skill, record in `.taste-skill/`):
-  each section is one flat seat colour (green free, grey taken, yellow reserved, brand blue, deep
-  ink). Own stylesheet `components/site/landing/landing.css` scoped under `.ld`; font Chivo is
-  self-hosted in `public/fonts` (CSP blocks Google Fonts). Live parts (client): `LiveFloor` (tap a
-  green desk), `NoticeDemo` (the IT e-mail, worded like `notices.ts` via `lib/site/notice-sample.ts`
-  — keep in step), `FeatureIndex` (help topics with previews), `Reveal` (entrances). They get only
-  `site.live`/`site.notice` via a nested `NextIntlClientProvider`. Phone pictures in
-  `public/site-img/<lang>/` come from the screenshot run (help-screenshots.spec.ts). Help is
-  linked from the top row, the chapters, the index and the footer. Gate: the taste-skill's
-  `lint.mjs` + `inspect.mjs` (Chrome needs `--no-sandbox` as root).
+- **Landing page design**: the app's own look (tokens + system font from `app/globals.css`,
+  light/dark follows the system), built with Tailwind like the app; `components/site/landing/landing.css`
+  only holds the scroll entrances (`Reveal` adds `is-live`/`is-in`). Sections: glass sticky header
+  (Features, Pricing, Questions, Help, languages, Sign in) → hero + `LiveFloor` (tap a green desk,
+  seat colours = the map's) → trust row → three parts with phone pictures (`public/site-img/<lang>/`,
+  made by help-screenshots.spec.ts) → help topics grid (pictures hidden on phones) → 4 steps →
+  `NoticeDemo` (the IT e-mail, worded like `notices.ts` via `lib/site/notice-sample.ts` — keep in
+  step) → price card → FAQ as fold-outs → blue closing band → footer ("Zürich, Switzerland" + local
+  time). The live parts get only `site.live`/`site.notice` via a nested `NextIntlClientProvider`.
 - Landing page `app/welcome` + `app/legal/[doc]` (terms, privacy, imprint) are public. The
   site domain = parent of the app's `APP_URL` host (`siteHosts` in `lib/site.ts`): there `/`
   rewrites to `/welcome`, other paths redirect to the app. robots: index the site, never the app.

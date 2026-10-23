@@ -16,20 +16,28 @@ export function HelpBanner() {
   if (hidden) return null;
   return (
     <section
-      className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-xl border border-primary/30 bg-primary/5 p-4"
+      className="relative grid gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4 sm:flex sm:items-center sm:gap-4"
       data-testid="help-banner"
     >
-      <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
-        <BookOpen className="size-5" aria-hidden />
-      </span>
-      <div className="grid min-w-0 flex-1 gap-0.5">
-        <p className="font-semibold">{t('title')}</p>
-        <p className="text-sm text-muted-foreground">{t('body')}</p>
+      <div className="flex min-w-0 flex-1 items-start gap-3 pr-8 sm:items-center sm:pr-0">
+        <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
+          <BookOpen className="size-5" aria-hidden />
+        </span>
+        <div className="grid min-w-0 gap-0.5">
+          <p className="font-semibold">{t('title')}</p>
+          <p className="text-sm text-muted-foreground">{t('body')}</p>
+        </div>
       </div>
-      <Button asChild>
+      <Button asChild className="max-sm:w-full">
         <Link href={helpPath(language)}>{t('open')}</Link>
       </Button>
-      <Button variant="ghost" size="icon" aria-label={t('hide')} onClick={hide}>
+      <Button
+        variant="ghost"
+        size="icon"
+        aria-label={t('hide')}
+        onClick={hide}
+        className="max-sm:absolute max-sm:top-2 max-sm:right-2"
+      >
         <X />
       </Button>
     </section>

@@ -672,7 +672,9 @@
     "moves": "Déménagements",
     "billing": "Facturation",
     "planning": "Planification",
-    "help": "Aide"
+    "help": "Aide",
+    "more": "Plus",
+    "people": "Personnes"
   },
   "overview": {
     "title": "Vue d’ensemble",
@@ -1197,15 +1199,7 @@
     "f11Title": "QR codes sur les places",
     "f11Body": "Imprimez une étiquette pour chaque place. En la scannant, on voit qui y est assis.",
     "heroLead": "Le plan de places des bureaux suisses : qui est assis où, déménagements pendant la nuit, chaque changement conservé. CHF 2 par poste et par mois.",
-    "tabs": {
-      "free": "Postes libres",
-      "taken": "Qui est où",
-      "moving": "Déménagements",
-      "price": "Prix",
-      "faq": "Questions"
-    },
     "navHelp": "Aide",
-    "demoLink": "ou essayez d’abord la démo",
     "live": {
       "title": "Essayez : touchez un poste vert",
       "waiting": "En attente d’un poste",
@@ -1290,20 +1284,28 @@
         "label": "Envoyer le nouveau poste par e-mail"
       }
     },
-    "priceLine1": "Chaque poste :",
     "priceFigure": "CHF 2",
-    "priceLine2": "par mois",
     "priceBody": "Tout est inclus : toutes les fonctions, personnes, bâtiments et étages illimités. Les postes bloqués sont gratuits, les 30 premiers jours aussi. Résiliable chaque mois.",
     "priceDemo": "Ou essayez d’abord la démo",
     "ctaTitle": "Essayez sur votre étage",
     "ctaBody": "30 jours gratuits, sans carte de crédit. Connexion avec Microsoft 365 ou par e-mail.",
-    "footerStatement": "Des plans de places pour les bureaux suisses, faits en Suisse.",
-    "footerPlace": "Eglisau, Suisse",
+    "footerPlace": "Zurich, Suisse",
     "footerTime": "Heure locale",
     "footerHosted": "Données hébergées à Zurich",
-    "footerInvite": "Essayer la démo",
     "footerNav": "Pages",
-    "footerMail": "Des questions ?"
+    "footerMail": "Des questions ?",
+    "heroTitle": "Savoir qui est assis où.",
+    "navFeatures": "Fonctions",
+    "navPricing": "Tarif",
+    "navFaq": "Questions",
+    "trust": {
+      "swiss": "Données hébergées à Zurich",
+      "privacy": "Conçu pour la loi suisse sur la protection des données",
+      "microsoft": "Connexion avec Microsoft 365 ou par e-mail",
+      "trial": "30 jours gratuits, sans carte de crédit"
+    },
+    "perDesk": "par poste actif et par mois",
+    "priceTitle": "Un seul prix, simple"
   },
   "planImport": {
     "title": "Importer un plan d’architecte",

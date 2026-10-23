@@ -25,7 +25,7 @@ export function PageFrame({
       <TopBar />
       <main
         className={cn(
-          'mx-auto grid gap-8 px-4 py-6 sm:px-6',
+          'pb-tab-bar mx-auto grid gap-8 px-4 py-6 sm:px-6',
           wide === 'medium' ? 'max-w-5xl' : wide ? 'max-w-7xl' : 'max-w-3xl',
         )}
       >

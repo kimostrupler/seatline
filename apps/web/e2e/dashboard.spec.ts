@@ -17,8 +17,8 @@ test('home shows the company at a glance', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Alpenblick AG');
   await expect(widget(page, 'Seats at a glance')).toContainText('desks are taken or reserved');
   await expect(widget(page, 'Floors')).toContainText('1. OG');
-  await expect(widget(page, 'People without a seat')).toContainText('Mia Schmid');
-  await expect(widget(page, 'Seat changes per week')).toContainText('in the last 12 weeks');
+  // a calm start: the rest is one "Add widget" away
+  await expect(widget(page, 'People without a seat')).toHaveCount(0);
   await widget(page, 'Floors').getByRole('link', { name: '2. OG' }).click();
   await expect(page.getByTestId('floor-select')).toHaveText('2. OG');
 });
@@ -26,7 +26,7 @@ test('home shows the company at a glance', async ({ page }) => {
 test('customize: remove, move and add widgets; the layout is kept; reset', async ({ page }) => {
   const before = await titles(page);
   await page.getByRole('button', { name: 'Customize' }).click();
-  await page.getByRole('button', { name: 'Options for Departments' }).click();
+  await page.getByRole('button', { name: 'Options for Floors' }).click();
   await page.getByRole('menuitem', { name: 'Remove from dashboard' }).click();
   await page.getByRole('button', { name: 'Options for My seat' }).click();
   await page.getByRole('menuitem', { name: 'Move earlier' }).click();
@@ -43,7 +43,7 @@ test('customize: remove, move and add widgets; the layout is kept; reset', async
   const after = await titles(page);
   expect(after[0]).toBe('Blocked seats');
   expect(after.slice(1, 4)).toEqual(['Quick actions', 'My seat', 'Upcoming moves']);
-  expect(after).not.toContain('Departments');
+  expect(after).not.toContain('Floors');
   expect(after).toHaveLength(before.length);
 
   await page.getByRole('button', { name: 'Customize' }).click();

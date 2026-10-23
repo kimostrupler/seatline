@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test('the landing page links to sign-in, help and the legal pages', async ({ page }) => {
   await page.goto('/welcome');
-  await expect(page.getByRole('heading', { level: 1, name: 'Seatline' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Know who sits where.' })).toBeVisible();
   await expect(page.getByText('CHF 2', { exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Ready in an afternoon' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Everyone in the loop' })).toBeVisible();
@@ -25,7 +25,8 @@ test('the landing page links to sign-in, help and the legal pages', async ({ pag
   ).toBeEnabled();
 
   // the notice e-mail follows the chosen language
-  await page.getByRole('button', { name: 'Deutsch' }).click();
+  await page.getByRole('combobox', { name: 'Language of the e-mails' }).click();
+  await page.getByRole('option', { name: 'Deutsch' }).click();
   await expect(page.getByText('Seatline öffnen:', { exact: false })).toBeVisible();
 
   await page.getByRole('link', { name: 'Privacy policy' }).click();

@@ -672,7 +672,9 @@
     "moves": "Umzüge",
     "billing": "Abrechnung",
     "planning": "Planung",
-    "help": "Hilfe"
+    "help": "Hilfe",
+    "more": "Mehr",
+    "people": "Personen"
   },
   "overview": {
     "title": "Übersicht",
@@ -1197,15 +1199,7 @@
     "f11Title": "QR-Codes auf den Plätzen",
     "f11Body": "Für jeden Platz ein Etikett drucken. Scannen zeigt, wer dort sitzt.",
     "heroLead": "Der Sitzplan für Schweizer Büros: wer an welchem Platz sitzt, Umzüge über Nacht, jede Änderung festgehalten. CHF 2 pro Platz und Monat.",
-    "tabs": {
-      "free": "Freie Plätze",
-      "taken": "Wer sitzt wo",
-      "moving": "Umzüge",
-      "price": "Preis",
-      "faq": "Fragen"
-    },
     "navHelp": "Hilfe",
-    "demoLink": "oder zuerst die Demo ausprobieren",
     "live": {
       "title": "Ausprobieren: tippen Sie auf einen grünen Platz",
       "waiting": "Warten auf einen Platz",
@@ -1290,20 +1284,28 @@
         "label": "Neuen Platz per E-Mail mitteilen"
       }
     },
-    "priceLine1": "Jeder Platz:",
     "priceFigure": "CHF 2",
-    "priceLine2": "im Monat",
     "priceBody": "Alles inbegriffen: alle Funktionen, beliebig viele Personen, Gebäude und Stockwerke. Gesperrte Plätze sind gratis, die ersten 30 Tage auch. Jeden Monat kündbar.",
     "priceDemo": "Oder zuerst die Demo ausprobieren",
     "ctaTitle": "Mit Ihrem Stockwerk testen",
     "ctaBody": "30 Tage gratis, ohne Kreditkarte. Anmeldung mit Microsoft 365 oder per E-Mail.",
-    "footerStatement": "Sitzpläne für Schweizer Büros, gemacht in der Schweiz.",
-    "footerPlace": "Eglisau, Schweiz",
+    "footerPlace": "Zürich, Schweiz",
     "footerTime": "Ortszeit",
     "footerHosted": "Daten in Zürich gehostet",
-    "footerInvite": "Demo ausprobieren",
     "footerNav": "Seiten",
-    "footerMail": "Fragen?"
+    "footerMail": "Fragen?",
+    "heroTitle": "Wissen, wer wo sitzt.",
+    "navFeatures": "Funktionen",
+    "navPricing": "Preis",
+    "navFaq": "Fragen",
+    "trust": {
+      "swiss": "Daten in Zürich gespeichert",
+      "privacy": "Für das Schweizer Datenschutzgesetz gebaut",
+      "microsoft": "Anmeldung mit Microsoft 365 oder E-Mail",
+      "trial": "30 Tage gratis, ohne Kreditkarte"
+    },
+    "perDesk": "pro aktivem Platz und Monat",
+    "priceTitle": "Ein einfacher Preis"
   },
   "planImport": {
     "title": "Architektenplan importieren",

@@ -6,7 +6,7 @@ import en from '../messages/en.json';
 import fr from '../messages/fr.json';
 import type { FloorMap } from '../lib/types';
 import { resetE2eDb } from './db';
-import { adminHeaders, floorMap, toScreen } from './helpers';
+import { adminHeaders, floorMap, openFold, toScreen } from './helpers';
 
 // The help center's screenshots (public/help-img/<language>/<name>.jpg) and the landing page's
 // phone pictures (public/site-img/<language>/), taken from the real app with the sample office. Not part of the normal run:
@@ -101,9 +101,11 @@ for (const language of ['en', 'de', 'fr'] as const) {
       ['settings', 'notices'],
     ] as const) {
       await page.goto(`/people?tab=${tab}`);
+      if (tab === 'settings') await openFold(page, m.admin.notices.title);
       await expect(page.getByTestId(ready)).toBeVisible();
       await shot(tab);
     }
+    await openFold(page, m.admin.privacy.title);
     await page.getByTestId('dpa').scrollIntoViewIfNeeded();
     await shot('privacy');
 

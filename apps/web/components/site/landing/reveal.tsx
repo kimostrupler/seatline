@@ -21,7 +21,7 @@ export function Reveal() {
       },
       { rootMargin: '0px 0px -12% 0px' },
     );
-    root.querySelectorAll('[data-reveal], .ld-chapter').forEach((el) => io.observe(el));
+    root.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
     return () => io.disconnect();
   }, []);
   return null;

@@ -395,17 +395,13 @@ export type Widget = z.infer<typeof widgetSchema>;
 export type DashboardInput = z.infer<typeof dashboardSchema>;
 
 /** What a new workspace starts with (before an admin saves a company default). */
+/** A calm start: the few things people look at daily; the rest can be added in Customize. */
 export const DEFAULT_DASHBOARD: Widget[] = [
   { id: 'quick', type: 'quickActions', size: 'small' },
   { id: 'moves', type: 'moves', size: 'small' },
   { id: 'me', type: 'mySeat', size: 'small' },
   { id: 'summary', type: 'summary', size: 'wide' },
   { id: 'occupancy', type: 'occupancy', size: 'wide' },
-  { id: 'activity', type: 'activity', size: 'wide' },
-  { id: 'trend', type: 'trend', size: 'wide' },
-  { id: 'unseated', type: 'unseated', size: 'small' },
-  { id: 'reservations', type: 'reservations', size: 'small' },
-  { id: 'departments', type: 'departments', size: 'full' },
 ];
 
 // ---- Move plans -------------------------------------------------------------

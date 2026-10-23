@@ -1,6 +1,15 @@
 'use client';
 
-import { ArrowRightLeft, ChartPie, CreditCard, History, House, Map, Users } from 'lucide-react';
+import {
+  ArrowRightLeft,
+  ChartPie,
+  CreditCard,
+  History,
+  House,
+  type LucideIcon,
+  Map,
+  Users,
+} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -8,18 +17,19 @@ import { Button } from '@/components/ui/button';
 import { useMe } from '@/lib/queries';
 import { cn } from '@/lib/utils';
 
-/** The app's pages, by role: Home, Map, Overview, Activity (editors), People & access (admins). */
-export function NavLinks({
-  orientation = 'vertical',
-}: {
-  orientation?: 'vertical' | 'horizontal';
-}) {
+export interface NavLink {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+}
+
+/** The app's pages, by role: Home, Map, Moves/Planning/Activity (editors), People, Billing (admins). */
+export function useNavLinks(): NavLink[] {
   const t = useTranslations();
-  const pathname = usePathname();
   const me = useMe();
   const role = me.data?.role;
-  if (!role) return null;
-  const links = [
+  if (!role) return [];
+  return [
     { href: '/', label: t('nav.home'), icon: House },
     { href: '/map', label: t('nav.map'), icon: Map },
     ...(role !== 'viewer'
@@ -34,6 +44,20 @@ export function NavLinks({
       ? [{ href: '/billing', label: t('nav.billing'), icon: CreditCard }]
       : []),
   ];
+}
+
+export const isCurrent = (href: string, pathname: string) =>
+  href === '/' ? pathname === '/' : pathname.startsWith(href);
+
+export function NavLinks({
+  orientation = 'vertical',
+}: {
+  orientation?: 'vertical' | 'horizontal';
+}) {
+  const t = useTranslations();
+  const pathname = usePathname();
+  const links = useNavLinks();
+  if (!links.length) return null;
   return (
     <nav
       aria-label={t('nav.label')}
@@ -42,7 +66,7 @@ export function NavLinks({
       )}
     >
       {links.map(({ href, label, icon: Icon }) => {
-        const current = href === '/' ? pathname === '/' : pathname.startsWith(href);
+        const current = isCurrent(href, pathname);
         return (
           <Button
             key={href}

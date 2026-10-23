@@ -672,7 +672,9 @@
     "moves": "Moves",
     "billing": "Billing",
     "planning": "Planning",
-    "help": "Help"
+    "help": "Help",
+    "more": "More",
+    "people": "People"
   },
   "overview": {
     "title": "Overview",
@@ -1197,15 +1199,7 @@
     "f11Title": "QR codes on desks",
     "f11Body": "Print a sticker for every desk. Scan it to see who sits there.",
     "heroLead": "The seating plan for Swiss offices: who sits at which desk, moves planned overnight, every change kept. CHF 2 per desk a month.",
-    "tabs": {
-      "free": "Free desks",
-      "taken": "Who sits where",
-      "moving": "Moves",
-      "price": "Price",
-      "faq": "Questions"
-    },
     "navHelp": "Help",
-    "demoLink": "or try the demo first",
     "live": {
       "title": "Try it: tap a green desk",
       "waiting": "Waiting for a desk",
@@ -1290,20 +1284,28 @@
         "label": "E-mail people their new desk"
       }
     },
-    "priceLine1": "Every desk:",
     "priceFigure": "CHF 2",
-    "priceLine2": "a month",
     "priceBody": "Everything included: all features, unlimited people, buildings and floors. Blocked desks are free, the first 30 days too. Cancel any month.",
     "priceDemo": "Or try the demo first",
     "ctaTitle": "Try it on your floor",
     "ctaBody": "30 days free, no credit card. Sign in with Microsoft 365 or by e-mail.",
-    "footerStatement": "Seating plans for Swiss offices, made in Switzerland.",
-    "footerPlace": "Eglisau, Switzerland",
+    "footerPlace": "Zürich, Switzerland",
     "footerTime": "Local time",
     "footerHosted": "Data hosted in Zurich",
-    "footerInvite": "Try the demo",
     "footerNav": "Pages",
-    "footerMail": "Questions?"
+    "footerMail": "Questions?",
+    "heroTitle": "Know who sits where.",
+    "navFeatures": "Features",
+    "navPricing": "Pricing",
+    "navFaq": "Questions",
+    "trust": {
+      "swiss": "Data hosted in Zurich",
+      "privacy": "Made for the Swiss data protection act",
+      "microsoft": "Sign in with Microsoft 365 or e-mail",
+      "trial": "30 days free, no credit card"
+    },
+    "perDesk": "per active desk and month",
+    "priceTitle": "One simple price"
   },
   "planImport": {
     "title": "Import an architect plan",

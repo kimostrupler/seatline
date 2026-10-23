@@ -1,10 +1,9 @@
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowRight, Check, ChevronDown, Gift, LogIn, MapPin, ShieldCheck } from 'lucide-react';
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages, getTranslations } from 'next-intl/server';
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { Logo } from '@/components/common/logo';
-import { FeatureIndex } from '@/components/site/landing/feature-index';
 import { LiveFloor } from '@/components/site/landing/live-floor';
 import { NoticeDemo } from '@/components/site/landing/notice-demo';
 import { Reveal } from '@/components/site/landing/reveal';
@@ -12,12 +11,14 @@ import { ZurichTime } from '@/components/site/landing/zurich-time';
 import '@/components/site/landing/landing.css';
 import { SiteBeacon } from '@/components/site/site-beacon';
 import { demoUrl, LegalLinks, signInUrl } from '@/components/site/site-chrome';
+import { Button } from '@/components/ui/button';
 import { HELP, HELP_TOPICS, helpImage, helpPath, type HelpTopicId } from '@/lib/help';
 import { OPERATOR } from '@/lib/legal/operator';
 import { LANGUAGES, LANGUAGE_NAMES, LOCALES, type Language } from '@/lib/locales';
 import { webConfig } from '@/lib/server/config';
 import { landingJsonLd, languageAlternates, pageUrl } from '@/lib/seo';
 import { SITE_LANGUAGE_PATHS, siteUrl } from '@/lib/site';
+import { cn } from '@/lib/utils';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('site');
@@ -35,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: t('metaTitle'),
       description: t('metaDescription'),
       locale: LOCALES[language].replace('-', '_'),
-      images: [{ url: `${base}/og-image`, width: 1200, height: 630, alt: t('metaTitle') }],
+      images: [{ url: `${base}/og-image`, width: 1200, height: 630, alt: t('heroTitle') }],
     },
     twitter: {
       card: 'summary_large_image',
@@ -49,35 +50,49 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const FAQ = ['1', '2', '3', '4', '5', '6', '7', '8'] as const;
 
-/** The three chapters: one seat state each, with a phone picture of the app and its help topic. */
-const CHAPTERS: Array<{
-  key: 'free' | 'taken' | 'moving';
-  bg: string;
-  ink: string;
-  topic: HelpTopicId;
-}> = [
-  { key: 'free', bg: 'var(--free)', ink: 'var(--on-free)', topic: 'seating' },
-  { key: 'taken', bg: 'var(--taken)', ink: 'var(--on-taken)', topic: 'exports-and-qr' },
-  { key: 'moving', bg: 'var(--reserved)', ink: 'var(--on-reserved)', topic: 'moves' },
+/** One part of the app per seat state, with a phone picture and its help topic. */
+const CHAPTERS: Array<{ key: 'free' | 'taken' | 'moving'; dot: string; topic: HelpTopicId }> = [
+  { key: 'free', dot: 'var(--seat-free-stroke)', topic: 'seating' },
+  { key: 'taken', dot: 'var(--seat-taken-stroke)', topic: 'exports-and-qr' },
+  { key: 'moving', dot: 'var(--seat-reserved-stroke)', topic: 'moves' },
 ];
-
-/** The hero's folders, back to front: each tab opens its chapter. The front one is "free". */
-const FOLDERS = [
-  { tab: 'faq', href: '#faq', bg: 'var(--paper)', ink: 'var(--on-paper)', left: '80%' },
-  { tab: 'price', href: '#price', bg: 'var(--brand)', ink: 'var(--on-brand)', left: '60%' },
-  { tab: 'moving', href: '#moving', bg: 'var(--reserved)', ink: 'var(--on-reserved)', left: '40%' },
-  { tab: 'taken', href: '#taken', bg: 'var(--taken)', ink: 'var(--on-taken)', left: '20%' },
+const STEPS = ['signup', 'floor', 'people', 'seat'] as const;
+const TRUST = [
+  ['swiss', MapPin],
+  ['privacy', ShieldCheck],
+  ['microsoft', LogIn],
+  ['trial', Gift],
 ] as const;
 
-/** Getting started, as one bar: each part as wide as the time it takes. */
-const STAGES = [
-  { key: 'signup', grow: 1, bg: 'var(--brand)', ink: 'var(--on-brand)' },
-  { key: 'floor', grow: 10, bg: 'var(--free)', ink: 'var(--on-free)' },
-  { key: 'people', grow: 2, bg: 'var(--reserved)', ink: 'var(--on-reserved)' },
-  { key: 'seat', grow: 60, bg: 'var(--taken)', ink: 'var(--on-taken)' },
-] as const;
+const delay = (i: number) => ({ '--i': i }) as CSSProperties;
 
-const vars = (v: Record<string, string | number>) => v as CSSProperties;
+function Section({
+  id,
+  title,
+  lead,
+  children,
+  className,
+}: {
+  id?: string;
+  title: string;
+  lead?: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <section id={id} className={cn('scroll-mt-20 py-20 sm:py-28', className)}>
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6">
+        <div className="grid max-w-2xl gap-3" data-reveal>
+          <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+            {title}
+          </h2>
+          {lead && <p className="text-lg text-pretty text-muted-foreground">{lead}</p>}
+        </div>
+        {children}
+      </div>
+    </section>
+  );
+}
 
 /** The public landing page: seatline.ch (and /welcome on any address). */
 export default async function Welcome() {
@@ -95,23 +110,71 @@ export default async function Welcome() {
     description: t('metaDescription'),
     faq: FAQ.map((n) => ({ q: t(`q${n}`), a: t(`a${n}`) })),
   });
-  const trial = () => (
-    <a className="ld-button" href={signInUrl()} data-track="cta-trial">
-      {t('ctaTrial')}
-    </a>
+  const ctas = (light = false) => (
+    <div className="flex flex-wrap justify-center gap-3">
+      <Button
+        asChild
+        size="lg"
+        className={cn('h-12 px-6 text-base', light && 'bg-white text-primary hover:bg-white/90')}
+      >
+        <a href={signInUrl()} data-track="cta-trial">
+          {t('ctaTrial')} <ArrowRight />
+        </a>
+      </Button>
+      <Button
+        asChild
+        size="lg"
+        variant="outline"
+        className={cn(
+          'h-12 px-6 text-base',
+          light && 'border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white',
+        )}
+      >
+        <a href={demoUrl()} data-track="cta-demo">
+          {t('ctaDemo')}
+        </a>
+      </Button>
+    </div>
   );
 
   return (
-    <div className="ld">
+    <div className="ld min-h-dvh bg-background text-foreground">
       <script
         type="application/ld+json"
         // our own data; "<" escaped so text can never end the script tag
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
 
-      <header className="ld-hero">
-        <div className="ld-top">
-          <nav className="ld-top__langs" aria-label="Language">
+      <header className="sticky top-0 z-30 border-b border-border/60 bg-background/70 backdrop-blur-xl backdrop-saturate-150">
+        <div className="mx-auto flex h-16 max-w-6xl items-center gap-2 px-4 sm:px-6">
+          <a
+            href={SITE_LANGUAGE_PATHS[language]}
+            className="mr-auto flex items-center gap-2 font-semibold"
+          >
+            <Logo className="size-7" />
+            Seatline
+          </a>
+          <nav className="flex items-center max-md:hidden" aria-label={t('footerNav')}>
+            {(
+              [
+                ['#features', t('navFeatures')],
+                ['#pricing', t('navPricing')],
+                ['#faq', t('navFaq')],
+                [helpPath(language), t('navHelp')],
+              ] as const
+            ).map(([href, label]) => (
+              <Button
+                key={href}
+                asChild
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground"
+              >
+                <a href={href}>{label}</a>
+              </Button>
+            ))}
+          </nav>
+          <nav aria-label="Language" className="flex items-center text-xs font-medium">
             {LANGUAGES.map((l) => (
               <a
                 key={l}
@@ -120,242 +183,305 @@ export default async function Welcome() {
                 lang={l}
                 title={LANGUAGE_NAMES[l]}
                 aria-current={l === language ? 'page' : undefined}
+                className={cn(
+                  'rounded px-1.5 py-1',
+                  l === language
+                    ? 'text-foreground'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
               >
                 {l.toUpperCase()}
               </a>
             ))}
           </nav>
-          <a className="ld-top__brand" href={SITE_LANGUAGE_PATHS[language]} aria-label="Seatline">
-            <Logo className="size-8" />
-          </a>
-          <nav className="ld-top__links" aria-label={t('footerNav')}>
+          <Button asChild variant="ghost" size="sm" className="md:hidden">
             <a href={helpPath(language)}>{t('navHelp')}</a>
+          </Button>
+          <Button asChild size="sm">
             <a href={signInUrl()}>{t('signIn')}</a>
-          </nav>
-        </div>
-        <div className="ld-hero__title">
-          <h1 className="ld-display">Seatline</h1>
-          <p className="ld-hero__lead">{t('heroLead')}</p>
-        </div>
-        <div className="ld-folders">
-          {FOLDERS.map((f, i) => (
-            <div
-              key={f.tab}
-              className="ld-folder"
-              style={vars({
-                '--f-bg': f.bg,
-                '--f-ink': f.ink,
-                '--tab-left': f.left,
-                top: `${(FOLDERS.length - i) * -14}px`,
-              })}
-            >
-              <a className="ld-folder__tab" href={f.href}>
-                {t(`tabs.${f.tab}`)}
-              </a>
-            </div>
-          ))}
-          <div
-            className="ld-folder ld-folder--front"
-            style={vars({
-              '--f-bg': 'var(--free)',
-              '--f-ink': 'var(--on-free)',
-              '--tab-left': '0%',
-            })}
-          >
-            <a className="ld-folder__tab" href="#free">
-              {t('tabs.free')}
-            </a>
-            <div className="ld-folder__body">
-              <div className="ld-folder__cta">
-                {trial()}
-                <a className="ld-link" href={demoUrl()} data-track="cta-demo">
-                  {t('demoLink')}
-                </a>
-              </div>
-              <NextIntlClientProvider messages={liveMessages}>
-                <LiveFloor />
-              </NextIntlClientProvider>
-            </div>
-          </div>
+          </Button>
         </div>
       </header>
 
       <main>
-        {CHAPTERS.map((c) => (
-          <section
-            key={c.key}
-            id={c.key}
-            className="ld-chapter ld-field"
-            style={vars({ '--c-bg': c.bg, '--c-ink': c.ink })}
-            aria-labelledby={`${c.key}-title`}
-          >
-            <h2 id={`${c.key}-title`} className="ld-chapter__title" data-reveal>
-              {t(`chapters.${c.key}.title`)}
-            </h2>
-            <figure className="ld-chapter__picture">
-              <img
-                src={`/site-img/${language}/${c.key}.jpg`}
-                alt={t(`chapters.alt.${c.key}`)}
-                width={780}
-                height={1040}
-                loading="lazy"
-              />
-            </figure>
-            <p className="ld-chapter__text" data-reveal style={vars({ '--i': 1 })}>
-              {t(`chapters.${c.key}.body`)}
-            </p>
-            <a
-              className="ld-chapter__link ld-link"
-              href={helpPath(language, c.topic)}
+        {/* hero */}
+        <section className="overflow-hidden px-4 pt-16 pb-20 sm:px-6 sm:pt-24 sm:pb-28">
+          <div className="mx-auto grid max-w-3xl justify-items-center gap-6 text-center">
+            <h1
+              className="text-5xl font-semibold tracking-tight text-balance sm:text-7xl"
               data-reveal
-              style={vars({ '--i': 2 })}
             >
-              {t(`chapters.${c.key}.link`)}
-            </a>
-          </section>
-        ))}
-
-        <section className="ld-index ld-field" id="features" aria-labelledby="features-title">
-          <div className="ld-index__head" data-reveal>
-            <h2 id="features-title" className="ld-head">
-              {t('indexTitle')}
-            </h2>
-            <p>{t('indexBody')}</p>
+              {t('heroTitle')}
+            </h1>
+            <p
+              className="max-w-2xl text-lg text-pretty text-muted-foreground sm:text-xl"
+              data-reveal
+              style={delay(1)}
+            >
+              {t('heroLead')}
+            </p>
+            <div data-reveal style={delay(2)}>
+              {ctas()}
+            </div>
+            <p className="text-sm text-muted-foreground" data-reveal style={delay(3)}>
+              {t('ctaNote')}
+            </p>
           </div>
-          <FeatureIndex
-            rows={HELP_TOPICS.map((id) => {
-              const topic = help.topics[id];
-              const image = topic.steps.find((s) => s.image)?.image;
-              return {
-                href: helpPath(language, id),
-                name: topic.title,
-                summary: topic.summary,
-                image: image && helpImage(language, image),
-              };
-            })}
-          />
-          <a className="ld-index__all ld-link" href={helpPath(language)}>
-            {t('indexAll')}
-          </a>
+          <div className="mx-auto mt-14 max-w-5xl" data-reveal style={delay(4)}>
+            <NextIntlClientProvider messages={liveMessages}>
+              <LiveFloor />
+            </NextIntlClientProvider>
+          </div>
         </section>
 
-        <section className="ld-stages ld-field" aria-labelledby="steps-title">
-          <h2 id="steps-title" className="ld-head" data-reveal>
-            {t('stepsTitle')}
-          </h2>
-          <ol className="ld-bar" role="list">
-            {STAGES.map((s, i) => (
-              <li
-                key={s.key}
-                className="ld-bar__seg"
-                data-reveal
-                style={vars({ flexGrow: s.grow, '--s-bg': s.bg, '--s-ink': s.ink, '--i': i })}
-              >
-                <span className="ld-bar__time">{t(`steps.${s.key}.time`)}</span>
-                <p className="ld-bar__text">{t(`steps.${s.key}.text`)}</p>
+        {/* trust */}
+        <section className="border-y bg-canvas">
+          <ul className="mx-auto grid max-w-6xl gap-4 px-4 py-6 text-sm sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
+            {TRUST.map(([key, Icon]) => (
+              <li key={key} className="flex items-center gap-2.5">
+                <Icon className="size-4 shrink-0 text-primary" aria-hidden />
+                {t(`trust.${key}`)}
               </li>
             ))}
-          </ol>
+          </ul>
         </section>
 
-        <NextIntlClientProvider messages={liveMessages}>
-          <NoticeDemo />
-        </NextIntlClientProvider>
-
-        <section className="ld-price ld-field" id="price" aria-labelledby="price-title">
-          <h2 id="price-title" className="ld-display" data-reveal>
-            {t('priceLine1')} <span className="ld-price__fig">{t('priceFigure')}</span>{' '}
-            {t('priceLine2')}
-          </h2>
-          <div className="ld-price__foot" data-reveal style={vars({ '--i': 1 })}>
-            <p>{t('priceBody')}</p>
-            <div className="ld-price__act">
-              {trial()}
-              <a className="ld-link" href={demoUrl()} data-track="cta-demo">
-                {t('priceDemo')}
-              </a>
-            </div>
-          </div>
-        </section>
-
-        <section id="faq" className="ld-field" aria-labelledby="faq-title">
-          <div className="ld-faq__head">
-            <h2 id="faq-title" className="ld-display" data-reveal>
-              {t('faqTitle')}
-            </h2>
-          </div>
-          <div>
-            {FAQ.map((n) => (
-              <div key={n} className="ld-band">
-                <h3>{t(`q${n}`)}</h3>
-                <p>{t(`a${n}`)}</p>
+        {/* the three parts of the app, with pictures */}
+        <section id="features" className="scroll-mt-20 py-20 sm:py-28">
+          <div className="mx-auto grid max-w-6xl gap-20 px-4 sm:gap-28 sm:px-6">
+            {CHAPTERS.map((c, i) => (
+              <div
+                key={c.key}
+                className="grid items-center gap-10 md:grid-cols-2 md:gap-16"
+                aria-labelledby={`${c.key}-title`}
+              >
+                <div className={cn('grid gap-4', i % 2 === 1 && 'md:order-2')} data-reveal>
+                  <span
+                    aria-hidden
+                    className="h-1.5 w-12 rounded-full"
+                    style={{ background: c.dot }}
+                  />
+                  <h2
+                    id={`${c.key}-title`}
+                    className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl"
+                  >
+                    {t(`chapters.${c.key}.title`)}
+                  </h2>
+                  <p className="text-lg text-pretty text-muted-foreground">
+                    {t(`chapters.${c.key}.body`)}
+                  </p>
+                  <a
+                    href={helpPath(language, c.topic)}
+                    className="inline-flex items-center gap-1.5 font-medium text-primary hover:underline"
+                  >
+                    {t(`chapters.${c.key}.link`)} <ArrowRight className="size-4" aria-hidden />
+                  </a>
+                </div>
+                <figure
+                  className="m-0 grid place-items-center rounded-3xl bg-canvas px-6 py-10 sm:py-14"
+                  data-reveal
+                  style={delay(1)}
+                >
+                  <img
+                    src={`/site-img/${language}/${c.key}.jpg`}
+                    alt={t(`chapters.alt.${c.key}`)}
+                    width={780}
+                    height={1040}
+                    loading="lazy"
+                    className="h-auto w-full max-w-72 rounded-[1.75rem] border-[6px] border-foreground/90 shadow-2xl shadow-black/15"
+                  />
+                </figure>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="ld-cta ld-field" aria-labelledby="cta-title">
-          <h2 id="cta-title" className="ld-display" data-reveal>
-            {t('ctaTitle')}
-          </h2>
-          <div className="ld-cta__foot" data-reveal style={vars({ '--i': 1 })}>
-            <p>{t('ctaBody')}</p>
-            {trial()}
+        {/* everything, as the help center's topics */}
+        <Section title={t('indexTitle')} lead={t('indexBody')} className="border-t bg-canvas">
+          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
+            {HELP_TOPICS.map((id, i) => {
+              const topic = help.topics[id];
+              const image = topic.steps.find((s) => s.image)?.image;
+              return (
+                <li key={id} data-reveal style={delay(i % 3)}>
+                  <a
+                    href={helpPath(language, id)}
+                    className="group grid h-full overflow-hidden rounded-xl border bg-card transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5"
+                  >
+                    {image && (
+                      <span className="block aspect-[16/9] overflow-hidden border-b bg-muted max-sm:hidden">
+                        <img
+                          src={helpImage(language, image)}
+                          alt=""
+                          loading="lazy"
+                          width={1280}
+                          height={800}
+                          className="h-full w-full object-cover object-top-left transition duration-500 group-hover:scale-[1.03]"
+                        />
+                      </span>
+                    )}
+                    <span className="grid gap-1 p-4">
+                      <span className="flex items-center justify-between gap-2 font-medium">
+                        {topic.title}
+                        <ArrowRight
+                          className="size-4 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary"
+                          aria-hidden
+                        />
+                      </span>
+                      <span className="text-sm text-muted-foreground">{topic.summary}</span>
+                    </span>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </Section>
+
+        {/* getting started */}
+        <Section title={t('stepsTitle')}>
+          <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {STEPS.map((key, i) => (
+              <li
+                key={key}
+                className="grid content-start gap-3 rounded-xl border bg-card p-5"
+                data-reveal
+                style={delay(i)}
+              >
+                <span className="text-sm font-medium text-primary">{t(`steps.${key}.time`)}</span>
+                <p>{t(`steps.${key}.text`)}</p>
+              </li>
+            ))}
+          </ol>
+        </Section>
+
+        {/* notices to IT */}
+        <Section
+          title={t('notice.title')}
+          lead={t('notice.to.body')}
+          className="border-t bg-canvas"
+        >
+          <div data-reveal>
+            <NextIntlClientProvider messages={liveMessages}>
+              <NoticeDemo />
+            </NextIntlClientProvider>
+          </div>
+        </Section>
+
+        {/* pricing */}
+        <section id="pricing" className="scroll-mt-20 px-4 py-20 sm:px-6 sm:py-28">
+          <div
+            className="mx-auto grid max-w-xl justify-items-center gap-6 rounded-3xl border bg-card p-8 text-center shadow-xl shadow-black/5 sm:p-12"
+            data-reveal
+          >
+            <h2 className="text-2xl font-semibold tracking-tight">{t('priceTitle')}</h2>
+            <p className="grid gap-1">
+              <span className="text-6xl font-semibold tracking-tight sm:text-7xl">
+                {t('priceFigure')}
+              </span>
+              <span className="text-muted-foreground">{t('perDesk')}</span>
+            </p>
+            <p className="flex gap-2.5 text-left text-muted-foreground">
+              <Check className="mt-1 size-4 shrink-0 text-[var(--seat-free-stroke)]" aria-hidden />
+              {t('priceBody')}
+            </p>
+            <Button asChild size="lg" className="h-12 w-full text-base">
+              <a href={signInUrl()} data-track="cta-trial">
+                {t('ctaTrial')} <ArrowRight />
+              </a>
+            </Button>
+            <a
+              href={demoUrl()}
+              data-track="cta-demo"
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              {t('priceDemo')}
+            </a>
+          </div>
+        </section>
+
+        {/* questions, one open at a time if you like */}
+        <section id="faq" className="scroll-mt-20 border-t bg-canvas px-4 py-20 sm:px-6 sm:py-28">
+          <div className="mx-auto grid max-w-3xl gap-8">
+            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl" data-reveal>
+              {t('faqTitle')}
+            </h2>
+            <div className="grid gap-3">
+              {FAQ.map((n) => (
+                <details key={n} className="group rounded-xl border bg-card px-5 py-4">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium [&::-webkit-details-marker]:hidden">
+                    {t(`q${n}`)}
+                    <ChevronDown
+                      aria-hidden
+                      className="size-4 shrink-0 text-muted-foreground transition group-open:rotate-180"
+                    />
+                  </summary>
+                  <p className="mt-3 text-muted-foreground">{t(`a${n}`)}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* closing call */}
+        <section className="bg-primary px-4 py-20 text-primary-foreground sm:px-6 sm:py-24">
+          <div
+            className="mx-auto grid max-w-3xl justify-items-center gap-6 text-center"
+            data-reveal
+          >
+            <h2 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
+              {t('ctaTitle')}
+            </h2>
+            <p className="text-lg text-pretty text-primary-foreground/80">{t('ctaBody')}</p>
+            {ctas(true)}
           </div>
         </section>
       </main>
 
-      <footer className="ld-foot">
-        <div className="ld-tile ld-tile--statement">
-          <p>{t('footerStatement')}</p>
-          <div>
-            <nav className="ld-tile--legal" aria-label={tl('legalLinks')}>
-              <LegalLinks className="hover:underline" />
-            </nav>
-            <p className="mt-2" style={{ fontSize: 'var(--step-small)' }}>
-              {t('copyright', { year: new Date().getFullYear() })}
+      <footer className="border-t">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[2fr_1fr_1fr]">
+          <div className="grid content-start gap-3 text-sm text-muted-foreground">
+            <span className="flex items-center gap-2 text-base font-semibold text-foreground">
+              <Logo className="size-6" /> Seatline
+            </span>
+            <p>{t('madeIn')}</p>
+            <p>
+              {t('footerPlace')} · {t('footerTime')} <ZurichTime />
+              <br />
+              {t('footerHosted')}
             </p>
           </div>
+          <nav className="grid content-start gap-2 text-sm" aria-label={t('footerNav')}>
+            <p className="font-medium">{t('footerNav')}</p>
+            {(
+              [
+                ['#features', t('navFeatures')],
+                ['#pricing', t('navPricing')],
+                ['#faq', t('navFaq')],
+                [helpPath(language), t('navHelp')],
+                [signInUrl(), t('signIn')],
+              ] as const
+            ).map(([href, label]) => (
+              <a key={href} href={href} className="text-muted-foreground hover:text-foreground">
+                {label}
+              </a>
+            ))}
+          </nav>
+          <div className="grid content-start gap-2 text-sm">
+            <p className="font-medium">{t('footerMail')}</p>
+            <a
+              href={`mailto:${OPERATOR.email}`}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              {OPERATOR.email}
+            </a>
+            <nav aria-label={tl('legalLinks')} className="mt-3 grid gap-2 text-muted-foreground">
+              <LegalLinks className="hover:text-foreground" />
+            </nav>
+          </div>
         </div>
-        <div className="ld-tile ld-tile--nav">
-          <p className="ld-label">{t('footerNav')}</p>
-          <ul>
-            <li>
-              <a href={helpPath(language)}>{t('navHelp')}</a>
-            </li>
-            <li>
-              <a href="#features">{t('indexTitle')}</a>
-            </li>
-            <li>
-              <a href="#price">{t('tabs.price')}</a>
-            </li>
-            <li>
-              <a href="#faq">{t('tabs.faq')}</a>
-            </li>
-            <li>
-              <a href={signInUrl()}>{t('signIn')}</a>
-            </li>
-          </ul>
-        </div>
-        <div className="ld-tile ld-tile--place">
-          <p>{t('footerPlace')}</p>
-          <p>
-            {t('footerTime')} <ZurichTime />
-            <br />
-            {t('footerHosted')}
-          </p>
-        </div>
-        <div className="ld-tile ld-tile--mail">
-          <p className="ld-label">{t('footerMail')}</p>
-          <a href={`mailto:${OPERATOR.email}`}>{OPERATOR.email}</a>
-        </div>
-        <div className="ld-tile ld-tile--word" aria-hidden>
-          <span>Seatline</span>
-        </div>
-        <a className="ld-tile ld-tile--invite" href={demoUrl()} data-track="cta-demo">
-          <span>{t('footerInvite')}</span>
-          <ArrowUpRight className="size-12" aria-hidden />
-        </a>
+        <p className="mx-auto max-w-6xl px-4 pb-10 text-xs text-muted-foreground sm:px-6">
+          {t('copyright', { year: new Date().getFullYear() })}
+        </p>
       </footer>
       <Reveal />
       <SiteBeacon />
