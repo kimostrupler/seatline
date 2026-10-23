@@ -46,6 +46,18 @@ describe('owner dashboard', () => {
     // billing and Azure aren't set up in tests
     expect(res.body.stripe).toBeNull();
     expect(res.body.azure).toBeNull();
+    // live usage: database size (and its biggest tables) and stored files
+    expect(res.body.usage.database.bytes).toBeGreaterThan(0);
+    expect(res.body.usage.database.diskBytes).toBe(32 * 1024 ** 3);
+    expect(res.body.usage.database.tables.length).toBeGreaterThan(0);
+    expect(res.body.usage.database.tables[0]).toMatchObject({
+      name: expect.any(String),
+      bytes: expect.any(Number),
+    });
+    expect(res.body.usage.files).toMatchObject({
+      bytes: expect.any(Number),
+      files: expect.any(Number),
+    });
   });
 
   it('is a plain 404 for everyone else, admins of other workspaces included', async () => {

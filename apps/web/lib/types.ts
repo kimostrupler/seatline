@@ -436,9 +436,21 @@ export interface OwnerOverview {
     | {
         currency: string;
         total: number;
-        lastMonth: number;
+        /** this month at today's pace */
+        forecast: number;
+        /** null when Azure couldn't give last month */
+        lastMonth: number | null;
         byService: Array<{ name: string; amount: number }>;
         daily: Array<{ day: string; amount: number }>;
         at: string;
       };
+  usage: {
+    database: {
+      bytes: number;
+      diskBytes: number;
+      tables: Array<{ name: string; bytes: number; rows: number | null }>;
+    };
+    /** null when the file storage couldn't be listed */
+    files: null | { bytes: number; files: number; imports: { bytes: number; files: number } };
+  };
 }

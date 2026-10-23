@@ -260,7 +260,7 @@ export default async function Welcome() {
           </ul>
         </section>
 
-        {/* the promo video: nothing loads until play (poster 14 KB, video 1.4 MB, 720p) */}
+        {/* the promo video: nothing loads until play (poster 23 KB, video 4.5 MB, 1080p) */}
         <Section title={t('videoTitle')} lead={t('videoLead')} className="pb-0 sm:pb-0">
           <video
             controls

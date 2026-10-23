@@ -1,9 +1,15 @@
 name: CI
 
+# Runs on pull requests only (GitHub's free minutes are limited): main is deployed straight
+# from the merged PR, whose last push was tested here. Docs-only changes skip it, and a new
+# push to the same PR cancels the run still going for the older one.
 on:
-  push:
-    branches: [main, staging]
   pull_request:
+    paths-ignore: ['**/*.md', 'docs/**']
+
+concurrency:
+  group: ci-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   check:
@@ -40,14 +46,26 @@ jobs:
           cache-dependency-path: apps/plan-engine/requirements*.txt
       - name: Install the plan engine (Python + OCR)
         run: |
-          sudo apt-get update -q && sudo apt-get install -y -q tesseract-ocr tesseract-ocr-deu tesseract-ocr-fra
+          # skip rebuilding the manual-page index after apt installs (minutes on GitHub's runners)
+          sudo rm -f /var/lib/man-db/auto-update
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends tesseract-ocr tesseract-ocr-deu tesseract-ocr-fra
           pip install -r apps/plan-engine/requirements-dev.txt
       - name: Create the API role and e2e database (same as infra/postgres/init.sql)
         run: |
           psql postgresql://seatline:seatline@localhost:5432/seatline_test -c "CREATE ROLE seatline_app LOGIN PASSWORD 'seatline_app'"
           psql postgresql://seatline:seatline@localhost:5432/seatline_test -c "CREATE DATABASE seatline_e2e"
+      # the browser is cached per Playwright version; its system libraries are already on the
+      # runner (it ships with Chrome), so no apt install is needed
+      - name: Playwright version
+        id: playwright
+        run: echo "version=$(pnpm --filter @seatline/web exec playwright --version)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
       - name: Install Chromium for the browser tests
-        run: pnpm --filter @seatline/web exec playwright install --with-deps chromium
+        run: pnpm --filter @seatline/web exec playwright install chromium
       - run: pnpm check
       - uses: actions/upload-artifact@v4
         if: failure()

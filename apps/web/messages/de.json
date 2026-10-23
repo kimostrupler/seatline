@@ -1460,9 +1460,20 @@
       "off": "Die Azure-Kosten sind nicht verbunden (owner-setup.sh).",
       "error": "Die Azure-Kosten konnten gerade nicht gelesen werden.",
       "month": "Diesen Monat bisher",
+      "forecast": "Prognose für den Monat",
       "lastMonth": "Letzter Monat",
       "note": "Azure aktualisiert die Kosten ein paar Mal pro Tag (gelesen um {time}).",
       "fix": "Führen Sie owner-setup.sh in der Cloud Shell nochmals aus. Eine neue Berechtigung kann bis zu 30 Minuten dauern."
+    },
+    "usage": {
+      "title": "Speicher",
+      "database": "Datenbank",
+      "of": "{used} von {total}",
+      "files": "Dateien",
+      "imports": "Offene Plan-Importe",
+      "filesValue": "{size} · {count, plural, one {# Datei} other {# Dateien}}",
+      "tables": "Grösste Tabellen",
+      "tableValue": "{size} · {rows, plural, one {# Zeile} other {# Zeilen}}"
     },
     "status": {
       "demo": "Demo",

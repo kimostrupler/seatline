@@ -14,6 +14,8 @@ import { StorageService } from '../storage/storage.service';
 import { AzureCostService } from './azure-cost';
 
 const DAY = 86_400_000;
+/** The database server's disk (infra/azure/main.bicep `storageSizeGB`). */
+const DB_DISK_GB = 32;
 
 /**
  * The operator's dashboard: every workspace (sign-ups, use, billing state), Stripe and Azure.
@@ -30,6 +32,23 @@ export class OwnerService {
     private readonly storage: StorageService,
   ) {}
   private readonly logger = new Logger(OwnerService.name);
+  private files: { at: number; value: Awaited<ReturnType<StorageService['usage']>> } | null = null;
+
+  /** Database and file storage right now (files are listed at most every 15 minutes). */
+  private async usage() {
+    const database = await this.db.databaseUsage();
+    if (!this.files || Date.now() - this.files.at > 15 * 60_000) {
+      try {
+        this.files = { at: Date.now(), value: await this.storage.usage() };
+      } catch (error) {
+        this.logger.warn(`File storage could not be listed: ${(error as Error).message}`);
+      }
+    }
+    return {
+      database: { ...database, diskBytes: DB_DISK_GB * 1024 ** 3 },
+      files: this.files?.value ?? null,
+    };
+  }
 
   /** The caller is the operator — else a plain "not found" (nobody learns the page exists). */
   async assertOwner(ctx: RequestContext, path: string) {
@@ -94,10 +113,11 @@ export class OwnerService {
 
   async overview() {
     const now = Date.now();
-    const [rows, stripe, azure] = await Promise.all([
+    const [rows, stripe, azure, usage] = await Promise.all([
       this.db.ownerWorkspaces(),
       this.billing.ownerSummary().catch(() => ({ error: 'unavailable' as const })),
       this.costs.summary(),
+      this.usage(),
     ]);
     const workspaces = rows.map((r) => ({
       id: r.id,
@@ -149,6 +169,7 @@ export class OwnerService {
       workspaces,
       stripe,
       azure,
+      usage,
     };
   }
 }

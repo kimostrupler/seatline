@@ -82,6 +82,22 @@ export class StorageService {
     }
   }
 
+  /** Owner dashboard: how much is stored (floor plans, and imports waiting to be applied). */
+  async usage() {
+    const container = await this.client();
+    const out = { bytes: 0, files: 0, imports: { bytes: 0, files: 0 } };
+    for await (const blob of container.listBlobsFlat()) {
+      const size = blob.properties.contentLength ?? 0;
+      out.bytes += size;
+      out.files++;
+      if (blob.name.includes('/imports/')) {
+        out.imports.bytes += size;
+        out.imports.files++;
+      }
+    }
+    return out;
+  }
+
   async delete(key: string): Promise<void> {
     try {
       const container = await this.client();
