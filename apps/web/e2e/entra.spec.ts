@@ -70,7 +70,7 @@ test('visitors try a demo workspace from the website, then start a real trial', 
   await page.getByRole('link', { name: 'Try the demo' }).first().click();
   await page.getByRole('button', { name: 'Open the demo' }).click();
   await page.getByTestId('demo-banner').getByRole('button', { name: 'Leave the demo' }).click();
-  await expect(page.getByRole('heading', { name: 'Know who sits where.' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Seatline' })).toBeVisible();
 });
 
 test('a new organisation creates its workspace; a colleague joins as viewer', async ({

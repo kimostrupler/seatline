@@ -8,8 +8,8 @@ import type { FloorMap } from '../lib/types';
 import { resetE2eDb } from './db';
 import { adminHeaders, floorMap, toScreen } from './helpers';
 
-// The help center's screenshots (public/help-img/<language>/<name>.jpg), taken from the real app
-// with the sample office. Not part of the normal run:
+// The help center's screenshots (public/help-img/<language>/<name>.jpg) and the landing page's
+// phone pictures (public/site-img/<language>/), taken from the real app with the sample office. Not part of the normal run:
 //   HELP_SCREENSHOTS=1 pnpm exec playwright test help-screenshots --project chromium
 const MESSAGES = { en, de, fr };
 const NAMES = {
@@ -158,5 +158,34 @@ for (const language of ['en', 'de', 'fr'] as const) {
     await expect(phone.getByTestId('desk-page')).toBeVisible();
     await shot('desk-phone', phone);
     await phone.close();
+
+    // The landing page's chapters (public/site-img/<language>/): portraits on a phone
+    const portrait = await browser.newPage({
+      viewport: { width: 390, height: 520 },
+      deviceScaleFactor: 2,
+      extraHTTPHeaders: adminHeaders,
+    });
+    await portrait
+      .context()
+      .addCookies([{ name: 'seatline-language', value: language, url: baseURL! }]);
+    const siteDir = join(__dirname, '..', 'public', 'site-img', language);
+    mkdirSync(siteDir, { recursive: true });
+    const portraitShot = async (name: string) => {
+      await portrait.waitForLoadState('networkidle');
+      await portrait.waitForTimeout(400);
+      await portrait.screenshot({ path: join(siteDir, `${name}.jpg`), type: 'jpeg', quality: 75 });
+    };
+    await portrait.goto(`/map?building=${map.floor.buildingId}&floor=${map.floor.id}`);
+    await expect(portrait.getByTestId('floor-map').locator('canvas').first()).toBeVisible();
+    await portrait.getByRole('button', { name: m.map.fit }).click();
+    await portrait.getByRole('button', { name: m.map.zoomIn }).click();
+    await portraitShot('free');
+    await portrait.goto(`/desk/${taken.id}`);
+    await expect(portrait.getByTestId('desk-page')).toBeVisible();
+    await portraitShot('taken');
+    await portrait.goto(`/moves/${planId}`);
+    await expect(portrait.getByTestId('plan-moves')).toBeVisible();
+    await portraitShot('moving');
+    await portrait.close();
   });
 }

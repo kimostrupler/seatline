@@ -1150,23 +1150,10 @@
   "site": {
     "metaTitle": "Seatline : plans de places pour les entreprises suisses",
     "metaDescription": "Voyez qui est assis où, planifiez les déménagements, informez l’IT et gardez l’historique. Connexion avec Microsoft 365 ou par e-mail. Hébergé en Suisse. 30 jours gratuits.",
-    "navFeatures": "Fonctions",
-    "navPricing": "Prix",
-    "navFaq": "Questions",
     "signIn": "Se connecter",
-    "heroTitle": "Savoir qui est assis où.",
-    "heroBody": "Le plan de places de votre bureau. Dessinez vos étages, attribuez les places, planifiez les déménagements et informez l’IT automatiquement. Hébergé en Suisse.",
     "ctaTrial": "Essayer 30 jours gratuitement",
     "ctaDemo": "Essayer la démo",
     "ctaNote": "Sans carte de crédit. Connexion avec Microsoft 365 ou par e-mail.",
-    "mapAlt": "Un plan Seatline : places libres en vert, occupées en gris, réservées en jaune.",
-    "mapFloor": "Zurich · 3e étage",
-    "cardSince": "Place 3.12 · depuis le 3 mars",
-    "trustSwiss": "Les données restent en Suisse",
-    "trustMicrosoft": "Connexion Microsoft 365 ou e-mail",
-    "trustPrivacy": "LPD et RGPD",
-    "trustLanguages": "Allemand, français, anglais",
-    "featuresTitle": "Ce que vous obtenez",
     "f1Title": "Plan",
     "f1Body": "Places libres, occupées et réservées d’un coup d’œil. Retrouvez chacun en quelques secondes.",
     "f2Title": "Import de plans",
@@ -1187,20 +1174,6 @@
     "f9Body": "L’IT reçoit un e-mail clair quand quelqu’un part, arrive ou déménage. Les personnes apprennent leur nouvelle place.",
     "f10Title": "Planification des espaces",
     "f10Body": "Indiquez combien de personnes chaque équipe prévoit. Voyez des mois à l’avance quand les places manqueront.",
-    "stepsTitle": "Prêt en un après-midi",
-    "s1Title": "Ajoutez vos étages",
-    "s1Body": "Importez le plan de l’architecte ou dessinez salles et places sur une image.",
-    "s2Title": "Ajoutez vos collaborateurs",
-    "s2Body": "Depuis Microsoft 365, ou saisissez-les et invitez-les par e-mail.",
-    "s3Title": "Placez tout le monde",
-    "s3Body": "Glissez les personnes sur les places. Ensuite, chaque déménagement est conservé.",
-    "pricingTitle": "Un seul prix",
-    "pricingBody": "Vous ne payez que les places utilisées.",
-    "perSeat": "par place et par mois",
-    "trialBadge": "30 jours gratuits",
-    "p1": "Toutes les fonctions",
-    "p2": "Personnes, bâtiments et étages illimités",
-    "p3": "Résiliable chaque mois",
     "faqTitle": "Questions",
     "q1": "Où sont stockées nos données ?",
     "a1": "En Suisse, chez Microsoft Azure (Zurich). Les paiements passent par Stripe.",
@@ -1218,12 +1191,119 @@
     "a7": "Avec Microsoft 365, automatiquement, chaque nuit. Sans Microsoft 365, importez une liste Excel ou CSV, ou ajoutez les personnes une à une.",
     "q8": "Signez-vous un accord de sous-traitance ?",
     "a8": "Oui. Notre accord de sous-traitance (DPA) fait partie des conditions, s’applique à chaque espace et est en ligne. Les administrateurs peuvent s’en envoyer un PDF au nom de leur entreprise depuis les paramètres.",
-    "finalTitle": "Essayez avec vos propres étages",
     "contact": "Des questions ? Écrivez à <mail>{email}</mail>",
     "madeIn": "Made in Switzerland",
     "copyright": "© {year} Seatline",
     "f11Title": "QR codes sur les places",
-    "f11Body": "Imprimez une étiquette pour chaque place. En la scannant, on voit qui y est assis."
+    "f11Body": "Imprimez une étiquette pour chaque place. En la scannant, on voit qui y est assis.",
+    "heroLead": "Le plan de places des bureaux suisses : qui est assis où, déménagements pendant la nuit, chaque changement conservé. CHF 2 par poste et par mois.",
+    "tabs": {
+      "free": "Postes libres",
+      "taken": "Qui est où",
+      "moving": "Déménagements",
+      "price": "Prix",
+      "faq": "Questions"
+    },
+    "navHelp": "Aide",
+    "demoLink": "ou essayez d’abord la démo",
+    "live": {
+      "title": "Essayez : touchez un poste vert",
+      "waiting": "En attente d’un poste",
+      "everyone": "Tout le monde a un poste.",
+      "assigned": "{person} → poste {desk}, depuis aujourd’hui",
+      "undo": "Annuler",
+      "free": "Libres {count}",
+      "taken": "Occupés {count}",
+      "reserved": "Réservés {count}",
+      "seatFree": "Poste {label}, libre — l’attribuer à {person}",
+      "seatTaken": "Poste {label}, {person}",
+      "seatReserved": "Poste {label}, réservé pour {person}",
+      "room": "Open space",
+      "meeting": "Salle de réunion",
+      "newHire": "Nouvelle personne"
+    },
+    "chapters": {
+      "free": {
+        "title": "Trouver un poste libre",
+        "body": "Les postes libres sont verts. Filtrez par bureau debout, deux écrans ou fenêtre, puis glissez-y un nom.",
+        "link": "Comment attribuer les postes"
+      },
+      "taken": {
+        "title": "Qui est assis là, depuis quand",
+        "body": "Touchez un poste ou scannez son étiquette : nom, équipe, e-mail et tous ceux qui l’ont occupé avant.",
+        "link": "Étiquettes et exports"
+      },
+      "moving": {
+        "title": "Déménager pendant la nuit",
+        "body": "Planifiez le déménagement d’une équipe sur le plan et choisissez le jour. Il a lieu tôt le matin, et les déménageurs reçoivent une liste imprimée.",
+        "link": "Comment fonctionnent les déménagements"
+      },
+      "alt": {
+        "free": "Seatline sur téléphone : le plan avec les postes libres",
+        "taken": "Seatline sur téléphone : la page qu’ouvre une étiquette de poste",
+        "moving": "Seatline sur téléphone : un plan de déménagement"
+      }
+    },
+    "indexTitle": "Tout ce que fait Seatline",
+    "indexBody": "Chaque thème ouvre un guide pas à pas avec des images de l’app.",
+    "indexAll": "Ouvrir le centre d’aide",
+    "stepsTitle": "Prêt en un après-midi",
+    "steps": {
+      "signup": {
+        "time": "Une minute",
+        "text": "D’abord, connectez-vous avec Microsoft 365 ou votre e-mail."
+      },
+      "floor": {
+        "time": "Dix minutes",
+        "text": "Puis choisissez un bureau d’exemple et adaptez-le à votre étage."
+      },
+      "people": {
+        "time": "Deux minutes",
+        "text": "Ensuite, importez vos collaborateurs depuis Excel ou Microsoft 365."
+      },
+      "seat": {
+        "time": "Environ une heure",
+        "text": "Enfin, glissez chacun sur son poste."
+      }
+    },
+    "notice": {
+      "title": "Tout le monde est informé",
+      "output": "E-mail à l’IT, tel que Seatline l’envoie",
+      "day": {
+        "title": "Choisissez le jour du déménagement.",
+        "body": "Un plan de déménagement s’exécute tôt ce matin-là, tous les déménagements ou aucun.",
+        "label": "Jour du déménagement"
+      },
+      "to": {
+        "title": "L’IT est informée toute seule.",
+        "body": "Chaque adresse ajoutée reçoit un e-mail simple par changement : qui part, qui arrive, qui va où.",
+        "label": "Envoyer les avis à"
+      },
+      "lang": {
+        "title": "Dans sa langue.",
+        "body": "Français, allemand ou anglais, choisi par espace.",
+        "label": "Langue des e-mails"
+      },
+      "people": {
+        "title": "Chacun apprend son nouveau poste.",
+        "body": "Chaque personne qui déménage reçoit un court e-mail avec son poste et un lien vers le plan.",
+        "label": "Envoyer le nouveau poste par e-mail"
+      }
+    },
+    "priceLine1": "Chaque poste :",
+    "priceFigure": "CHF 2",
+    "priceLine2": "par mois",
+    "priceBody": "Tout est inclus : toutes les fonctions, personnes, bâtiments et étages illimités. Les postes bloqués sont gratuits, les 30 premiers jours aussi. Résiliable chaque mois.",
+    "priceDemo": "Ou essayez d’abord la démo",
+    "ctaTitle": "Essayez sur votre étage",
+    "ctaBody": "30 jours gratuits, sans carte de crédit. Connexion avec Microsoft 365 ou par e-mail.",
+    "footerStatement": "Des plans de places pour les bureaux suisses, faits en Suisse.",
+    "footerPlace": "Eglisau, Suisse",
+    "footerTime": "Heure locale",
+    "footerHosted": "Données hébergées à Zurich",
+    "footerInvite": "Essayer la démo",
+    "footerNav": "Pages",
+    "footerMail": "Des questions ?"
   },
   "planImport": {
     "title": "Importer un plan d’architecte",

@@ -30,6 +30,8 @@ export function isPublicPath(pathname: string): boolean {
     pathname === '/help' ||
     pathname.startsWith('/help/') ||
     pathname.startsWith('/help-img/') ||
+    pathname.startsWith('/site-img/') ||
+    pathname.startsWith('/fonts/') ||
     pathname === '/robots.txt' ||
     pathname === '/indexnow.txt' ||
     pathname === '/sitemap.xml'

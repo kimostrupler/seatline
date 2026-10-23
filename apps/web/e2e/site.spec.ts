@@ -1,15 +1,33 @@
 import { expect, test } from '@playwright/test';
 
-test('the landing page links to sign-in and the legal pages', async ({ page }) => {
+test('the landing page links to sign-in, help and the legal pages', async ({ page }) => {
   await page.goto('/welcome');
-  await expect(page.getByRole('heading', { name: 'Know who sits where.' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Seatline' })).toBeVisible();
   await expect(page.getByText('CHF 2', { exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Ready in an afternoon' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'E-mails to IT' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Everyone in the loop' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Try it free for 30 days' }).first()).toHaveAttribute(
     'href',
     /\/signin$/,
   );
+  await expect(page.getByRole('link', { name: 'Help', exact: true }).first()).toHaveAttribute(
+    'href',
+    '/help/en',
+  );
+
+  // the live floor: a free desk goes to the first person waiting, and back with Undo
+  await page.getByRole('button', { name: 'Desk 1.02, free — give it to Chloé Martin' }).click();
+  await expect(page.getByText('Chloé Martin → desk 1.02, since today')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Desk 1.02, Chloé Martin' })).toBeDisabled();
+  await page.getByRole('button', { name: 'Undo' }).click();
+  await expect(
+    page.getByRole('button', { name: 'Desk 1.02, free — give it to Chloé Martin' }),
+  ).toBeEnabled();
+
+  // the notice e-mail follows the chosen language
+  await page.getByRole('button', { name: 'Deutsch' }).click();
+  await expect(page.getByText('Seatline öffnen:', { exact: false })).toBeVisible();
+
   await page.getByRole('link', { name: 'Privacy policy' }).click();
   await expect(page.getByRole('heading', { name: 'Privacy policy' })).toBeVisible();
   await expect(page.getByRole('heading', { name: '5. Where your data is stored' })).toBeVisible();
@@ -52,7 +70,11 @@ test('search engines: a page per language, structured data, llms.txt', async ({
   request,
 }) => {
   await page.goto('/de');
-  await expect(page.getByRole('heading', { name: 'Wissen, wer wo sitzt.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Freie Plätze finden' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Hilfe', exact: true }).first()).toHaveAttribute(
+    'href',
+    '/help/de',
+  );
   await expect(page.locator('html')).toHaveAttribute('lang', 'de-CH');
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/de$/);
   await expect(page.locator('link[rel="alternate"][hreflang="fr"]')).toHaveAttribute(
@@ -62,7 +84,7 @@ test('search engines: a page per language, structured data, llms.txt', async ({
   const ld = JSON.parse((await page.locator('script[type="application/ld+json"]').textContent())!);
   expect(ld['@graph'].map((x: { '@type': string }) => x['@type'])).toContain('FAQPage');
   await page.getByRole('link', { name: 'FR', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Savoir qui est assis où.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Trouver un poste libre' })).toBeVisible();
 
   const llms = await request.get('/llms.txt');
   expect(await llms.text()).toContain('# Seatline');

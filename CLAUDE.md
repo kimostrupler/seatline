@@ -382,6 +382,16 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 
 ## Website and legal pages
 
+- **Landing page design** ("colour chapters", dealt by the taste-skill, record in `.taste-skill/`):
+  each section is one flat seat colour (green free, grey taken, yellow reserved, brand blue, deep
+  ink). Own stylesheet `components/site/landing/landing.css` scoped under `.ld`; font Chivo is
+  self-hosted in `public/fonts` (CSP blocks Google Fonts). Live parts (client): `LiveFloor` (tap a
+  green desk), `NoticeDemo` (the IT e-mail, worded like `notices.ts` via `lib/site/notice-sample.ts`
+  — keep in step), `FeatureIndex` (help topics with previews), `Reveal` (entrances). They get only
+  `site.live`/`site.notice` via a nested `NextIntlClientProvider`. Phone pictures in
+  `public/site-img/<lang>/` come from the screenshot run (help-screenshots.spec.ts). Help is
+  linked from the top row, the chapters, the index and the footer. Gate: the taste-skill's
+  `lint.mjs` + `inspect.mjs` (Chrome needs `--no-sandbox` as root).
 - Landing page `app/welcome` + `app/legal/[doc]` (terms, privacy, imprint) are public. The
   site domain = parent of the app's `APP_URL` host (`siteHosts` in `lib/site.ts`): there `/`
   rewrites to `/welcome`, other paths redirect to the app. robots: index the site, never the app.

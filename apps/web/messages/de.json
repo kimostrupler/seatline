@@ -1150,23 +1150,10 @@
   "site": {
     "metaTitle": "Seatline: Sitzpläne für Schweizer Unternehmen",
     "metaDescription": "Sehen Sie, wer wo sitzt, planen Sie Umzüge, informieren Sie die IT und behalten Sie den Verlauf. Anmeldung mit Microsoft 365 oder per E-Mail. Gehostet in der Schweiz. 30 Tage gratis.",
-    "navFeatures": "Funktionen",
-    "navPricing": "Preise",
-    "navFaq": "Fragen",
     "signIn": "Anmelden",
-    "heroTitle": "Wissen, wer wo sitzt.",
-    "heroBody": "Der Sitzplan für Ihr Büro. Etagen zeichnen, allen einen Platz geben, Umzüge planen und die IT automatisch informieren. Gehostet in der Schweiz.",
     "ctaTrial": "30 Tage gratis testen",
     "ctaDemo": "Demo ausprobieren",
     "ctaNote": "Ohne Kreditkarte. Anmeldung mit Microsoft 365 oder per E-Mail.",
-    "mapAlt": "Ein Seatline-Grundriss: freie Plätze grün, besetzte grau, reservierte gelb.",
-    "mapFloor": "Zürich · 3. OG",
-    "cardSince": "Platz 3.12 · seit 3. März",
-    "trustSwiss": "Daten bleiben in der Schweiz",
-    "trustMicrosoft": "Anmeldung mit Microsoft 365 oder E-Mail",
-    "trustPrivacy": "DSG und DSGVO",
-    "trustLanguages": "Deutsch, Französisch, Englisch",
-    "featuresTitle": "Was Sie bekommen",
     "f1Title": "Grundriss",
     "f1Body": "Freie, besetzte und reservierte Plätze auf einen Blick. Alle in Sekunden finden.",
     "f2Title": "Planimport",
@@ -1187,20 +1174,6 @@
     "f9Body": "Die IT erhält eine klare E-Mail, wenn jemand geht, kommt oder umzieht. Die Personen erfahren ihren neuen Platz.",
     "f10Title": "Flächenplanung",
     "f10Body": "Geben Sie ein, wie viele Personen jedes Team erwartet. Sie sehen Monate im Voraus, wann die Plätze knapp werden.",
-    "stepsTitle": "An einem Nachmittag startklar",
-    "s1Title": "Etagen erfassen",
-    "s1Body": "Den Plan des Architekturbüros importieren oder Räume und Plätze über ein Bild zeichnen.",
-    "s2Title": "Personen erfassen",
-    "s2Body": "Aus Microsoft 365 oder von Hand eingeben und per E-Mail einladen.",
-    "s3Title": "Allen einen Platz geben",
-    "s3Body": "Personen auf Plätze ziehen. Ab dann wird jeder Umzug festgehalten.",
-    "pricingTitle": "Ein Preis",
-    "pricingBody": "Sie zahlen nur für Plätze, die genutzt werden.",
-    "perSeat": "pro Platz und Monat",
-    "trialBadge": "30 Tage gratis",
-    "p1": "Alle Funktionen",
-    "p2": "Beliebig viele Personen, Gebäude und Etagen",
-    "p3": "Monatlich kündbar",
     "faqTitle": "Fragen",
     "q1": "Wo sind unsere Daten gespeichert?",
     "a1": "In der Schweiz, bei Microsoft Azure (Zürich). Zahlungen laufen über Stripe.",
@@ -1218,12 +1191,119 @@
     "a7": "Mit Microsoft 365 automatisch, jede Nacht. Ohne Microsoft 365 importieren Sie eine Excel- oder CSV-Liste oder erfassen Personen einzeln.",
     "q8": "Unterzeichnen Sie einen Auftragsverarbeitungsvertrag?",
     "a8": "Ja. Unser Auftragsverarbeitungsvertrag (AVV) ist Teil der Nutzungsbedingungen, gilt für jeden Arbeitsbereich und ist online. Admins können sich in den Einstellungen ein PDF mit dem Namen ihrer Firma per E-Mail senden.",
-    "finalTitle": "Testen Sie es mit Ihren eigenen Etagen",
     "contact": "Fragen? Schreiben Sie an <mail>{email}</mail>",
     "madeIn": "Made in Switzerland",
     "copyright": "© {year} Seatline",
     "f11Title": "QR-Codes auf den Plätzen",
-    "f11Body": "Für jeden Platz ein Etikett drucken. Scannen zeigt, wer dort sitzt."
+    "f11Body": "Für jeden Platz ein Etikett drucken. Scannen zeigt, wer dort sitzt.",
+    "heroLead": "Der Sitzplan für Schweizer Büros: wer an welchem Platz sitzt, Umzüge über Nacht, jede Änderung festgehalten. CHF 2 pro Platz und Monat.",
+    "tabs": {
+      "free": "Freie Plätze",
+      "taken": "Wer sitzt wo",
+      "moving": "Umzüge",
+      "price": "Preis",
+      "faq": "Fragen"
+    },
+    "navHelp": "Hilfe",
+    "demoLink": "oder zuerst die Demo ausprobieren",
+    "live": {
+      "title": "Ausprobieren: tippen Sie auf einen grünen Platz",
+      "waiting": "Warten auf einen Platz",
+      "everyone": "Jetzt haben alle einen Platz.",
+      "assigned": "{person} → Platz {desk}, seit heute",
+      "undo": "Rückgängig",
+      "free": "Frei {count}",
+      "taken": "Belegt {count}",
+      "reserved": "Reserviert {count}",
+      "seatFree": "Platz {label}, frei – an {person} vergeben",
+      "seatTaken": "Platz {label}, {person}",
+      "seatReserved": "Platz {label}, reserviert für {person}",
+      "room": "Grossraum",
+      "meeting": "Sitzungszimmer",
+      "newHire": "Neue Person"
+    },
+    "chapters": {
+      "free": {
+        "title": "Freie Plätze finden",
+        "body": "Freie Plätze sind grün. Filtern Sie nach Stehpult, zwei Bildschirmen oder Fenster und ziehen Sie einen Namen darauf.",
+        "link": "So funktioniert das Zuteilen"
+      },
+      "taken": {
+        "title": "Wer dort sitzt, seit wann",
+        "body": "Tippen Sie auf einen Platz oder scannen Sie das Etikett: Name, Team, E-Mail und alle, die vorher dort sassen.",
+        "link": "Etiketten und Exporte"
+      },
+      "moving": {
+        "title": "Umzüge über Nacht",
+        "body": "Planen Sie den Teamumzug auf dem Plan und wählen Sie den Tag. Er passiert früh morgens, und die Zügelfirma erhält eine gedruckte Liste.",
+        "link": "So funktionieren Umzüge"
+      },
+      "alt": {
+        "free": "Seatline auf dem Handy: der Plan mit freien Plätzen",
+        "taken": "Seatline auf dem Handy: die Seite, die ein Platz-Etikett öffnet",
+        "moving": "Seatline auf dem Handy: ein Umzugsplan mit seinen Umzügen"
+      }
+    },
+    "indexTitle": "Alles, was Seatline kann",
+    "indexBody": "Jedes Thema öffnet eine Anleitung Schritt für Schritt mit Bildern aus der App.",
+    "indexAll": "Hilfe-Center öffnen",
+    "stepsTitle": "An einem Nachmittag bereit",
+    "steps": {
+      "signup": {
+        "time": "Eine Minute",
+        "text": "Zuerst mit Microsoft 365 oder per E-Mail anmelden."
+      },
+      "floor": {
+        "time": "Zehn Minuten",
+        "text": "Dann ein Beispielbüro wählen und an Ihr Stockwerk anpassen."
+      },
+      "people": {
+        "time": "Zwei Minuten",
+        "text": "Danach Ihre Leute aus Excel oder Microsoft 365 importieren."
+      },
+      "seat": {
+        "time": "Etwa eine Stunde",
+        "text": "Zum Schluss alle auf ihren Platz ziehen."
+      }
+    },
+    "notice": {
+      "title": "Alle sind informiert",
+      "output": "E-Mail an die IT, wie Seatline sie sendet",
+      "day": {
+        "title": "Den Umzugstag wählen.",
+        "body": "Ein Umzugsplan wird früh morgens ausgeführt, alle Umzüge auf einmal oder keiner.",
+        "label": "Umzugstag"
+      },
+      "to": {
+        "title": "Die IT wird von selbst informiert.",
+        "body": "Jede eingetragene Adresse erhält pro Änderung eine schlichte E-Mail: wer ging, wer kam, wer wohin zog.",
+        "label": "Mitteilungen an"
+      },
+      "lang": {
+        "title": "In ihrer Sprache.",
+        "body": "Deutsch, Französisch oder Englisch, pro Arbeitsbereich gewählt.",
+        "label": "Sprache der E-Mails"
+      },
+      "people": {
+        "title": "Alle erfahren ihren neuen Platz.",
+        "body": "Wer umzieht, erhält eine kurze E-Mail mit dem Platz und einem Link zum Plan.",
+        "label": "Neuen Platz per E-Mail mitteilen"
+      }
+    },
+    "priceLine1": "Jeder Platz:",
+    "priceFigure": "CHF 2",
+    "priceLine2": "im Monat",
+    "priceBody": "Alles inbegriffen: alle Funktionen, beliebig viele Personen, Gebäude und Stockwerke. Gesperrte Plätze sind gratis, die ersten 30 Tage auch. Jeden Monat kündbar.",
+    "priceDemo": "Oder zuerst die Demo ausprobieren",
+    "ctaTitle": "Mit Ihrem Stockwerk testen",
+    "ctaBody": "30 Tage gratis, ohne Kreditkarte. Anmeldung mit Microsoft 365 oder per E-Mail.",
+    "footerStatement": "Sitzpläne für Schweizer Büros, gemacht in der Schweiz.",
+    "footerPlace": "Eglisau, Schweiz",
+    "footerTime": "Ortszeit",
+    "footerHosted": "Daten in Zürich gehostet",
+    "footerInvite": "Demo ausprobieren",
+    "footerNav": "Seiten",
+    "footerMail": "Fragen?"
   },
   "planImport": {
     "title": "Architektenplan importieren",
