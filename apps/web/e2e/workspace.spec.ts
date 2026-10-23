@@ -126,6 +126,7 @@ test('a person’s panel shows their seat and history', async ({ page }) => {
   const panel = page.getByTestId('person-panel');
   await expect(panel.getByRole('heading', { name: 'Anna Meier' })).toBeVisible();
   await expect(panel).toContainText('Seat 1.01');
+  await panel.locator('summary', { hasText: 'History' }).click(); // folded until tapped
   await expect(panel.getByTestId('history').getByRole('listitem')).toHaveCount(2);
 });
 

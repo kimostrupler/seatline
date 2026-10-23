@@ -339,6 +339,10 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   applied by the nightly job (`list_due_move_tenants`, after the people sync); a broken plan is
   marked `failed` with its problems and logs an ERROR (→ alert). Nightly moves are recorded as
   made by whoever scheduled the plan; the audit actor is the system.
+- The plan page is two steps: **1. Who moves where?** (moves list + Plan on the map / Move a
+  team) and **2. When?** (Apply now / Schedule); rename, moving list, back to draft and cancel
+  sit in one **More** menu. The seat and person panels fold their history away (`HistoryList
+folded`) so the person and the actions stand out.
 - Web: `/moves`, `/moves/[id]`, and plan mode on the map (`/map?plan=…`): `projectFloor`
   (`lib/moves.ts`) shows the floor after the plan; the usual gestures add plan items instead.
 - **Moving list** `/moves/[id]/print` (`components/moves/moving-list.tsx`): a print page for the

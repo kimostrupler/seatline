@@ -4,7 +4,6 @@ import { X } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMe, usePerson, usePersonHistory } from '@/lib/queries';
 import { HistoryList } from './history-list';
@@ -73,12 +72,12 @@ export function PersonPanel({
           <p className="text-sm text-muted-foreground">{t('noSeat')}</p>
         )}
       </div>
-      <Separator />
       <HistoryList
         entries={history.data}
         loading={history.isPending}
         show="person"
         emptyText={th('emptyPerson')}
+        folded
       />
       {canEdit && (
         <Button

@@ -62,7 +62,8 @@ test('move a whole team to another floor and schedule it', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Scheduled for');
 
   // the printable moving list: one row per move, a tick box each
-  await page.getByRole('link', { name: 'Moving list' }).click();
+  await page.getByRole('button', { name: 'More' }).click();
+  await page.getByRole('menuitem', { name: 'Moving list' }).click();
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Sales to 2. OG');
   await expect(page.getByTestId('moving-list').locator('tbody tr')).toHaveCount(2);
   await expect(page.getByTestId('moving-list')).toContainText('2. OG');

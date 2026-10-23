@@ -1078,7 +1078,11 @@
       "givesUp": "Gibt den Platz ab",
       "signedMovers": "Gezügelt von (Name, Datum)",
       "signedFacility": "Geprüft durch Facility (Name, Datum)"
-    }
+    },
+    "stepWho": "1. Wer zieht wohin?",
+    "stepWhen": "2. Wann?",
+    "stepWhenHint": "Führen Sie die Umzüge sofort aus oder wählen Sie einen Tag: Dann passieren sie früh am Morgen.",
+    "rename": "Umbenennen"
   },
   "exports": {
     "menu": "Exportieren",

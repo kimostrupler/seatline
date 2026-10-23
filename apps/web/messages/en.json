@@ -1078,7 +1078,11 @@
       "givesUp": "Gives up the desk",
       "signedMovers": "Moved by (name, date)",
       "signedFacility": "Checked by facility (name, date)"
-    }
+    },
+    "stepWho": "1. Who moves where?",
+    "stepWhen": "2. When?",
+    "stepWhenHint": "Apply the moves right away, or pick a day: they then happen early that morning.",
+    "rename": "Rename"
   },
   "exports": {
     "menu": "Export",

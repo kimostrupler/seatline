@@ -1078,7 +1078,11 @@
       "givesUp": "Libère son poste",
       "signedMovers": "Déménagé par (nom, date)",
       "signedFacility": "Contrôlé par le facility (nom, date)"
-    }
+    },
+    "stepWho": "1. Qui déménage où ?",
+    "stepWhen": "2. Quand ?",
+    "stepWhenHint": "Appliquez les déménagements tout de suite, ou choisissez un jour : ils auront lieu tôt ce matin-là.",
+    "rename": "Renommer"
   },
   "exports": {
     "menu": "Exporter",

@@ -97,6 +97,8 @@ Changing the schema: edit `apps/api/prisma/schema.prisma`, then
   (drag or arrows) and resize; everyone has their own layout, admins can save the company
   default. Each widget's **⋯** menu moves, resizes or removes it; a newly added widget is
   scrolled into view and highlighted. The map is at `/map` (old `/?floor=…` links redirect there).
+- **A move plan** reads as two steps: who moves where, then when (apply now or on a day); the
+  rest is in its More menu. Seat and person panels show history folded.
 - **On phones** the pages are in a floating glass bar at the bottom (Home, Map, Moves, People,
   More); settings sections fold open one at a time.
 - **Moves** (editors and admins): prepare seat changes as a plan, see the floor "after" on the
