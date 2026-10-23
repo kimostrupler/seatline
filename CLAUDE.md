@@ -208,6 +208,10 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - Azure: `infra/azure/main.bicep` + `setup.sh` (Cloud Shell, idempotent, secrets in Key Vault);
   `.github/workflows/deploy.yml` deploys after CI on main (OIDC, no stored Azure secrets).
   Docker Hub may rate-limit; Dockerfiles take `--build-arg NODE_IMAGE=…` for a mirror.
+- Fast pipeline: deploy builds the three images in parallel with buildx and a registry layer cache
+  (`<image>:buildcache` in ACR); the API/web Dockerfiles `pnpm fetch` from the lockfile first so
+  that layer survives code-only changes. CI caches the Playwright browser per version (no
+  `--with-deps`: the runner already has Chrome's libraries) and skips man-db after apt installs.
 
 ## Sign-in by e-mail link + people added by hand
 

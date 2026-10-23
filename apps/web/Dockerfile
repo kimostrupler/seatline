@@ -5,9 +5,12 @@ ARG NODE_IMAGE=node:22-bookworm-slim
 FROM ${NODE_IMAGE} AS build
 RUN corepack enable
 WORKDIR /app
+# packages first (only the lockfile): this layer is reused until dependencies change
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm fetch --frozen-lockfile
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN pnpm install --frozen-lockfile --filter @seatline/web... \
+RUN pnpm install --offline --frozen-lockfile --filter @seatline/web... \
  && pnpm --filter @seatline/shared build \
  && pnpm --filter @seatline/web exec next build
 

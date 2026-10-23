@@ -50,12 +50,27 @@ jobs:
           API_IMAGE="$SERVER/seatline-api:$SHA"
           WEB_IMAGE="$SERVER/seatline-web:$SHA"
           ENGINE_IMAGE="$SERVER/seatline-plan-engine:$SHA"
-          docker build -f apps/api/Dockerfile -t "$API_IMAGE" .
-          docker build -f apps/web/Dockerfile -t "$WEB_IMAGE" .
-          docker build -f apps/plan-engine/Dockerfile -t "$ENGINE_IMAGE" .
-          docker push "$API_IMAGE"
-          docker push "$WEB_IMAGE"
-          docker push "$ENGINE_IMAGE"
+          # all three at once; each reuses the unchanged layers of the last build (kept in the
+          # registry as <image>:buildcache), so only what changed is rebuilt
+          docker buildx create --use --driver docker-container >/dev/null
+          build() {
+            local cache="$SERVER/$1:buildcache"
+            docker buildx build -f "$2" -t "$3" --push --provenance=false --progress=plain \
+              --cache-from "type=registry,ref=$cache" \
+              --cache-to "type=registry,ref=$cache,mode=max,image-manifest=true,oci-mediatypes=true" \
+              . > "/tmp/$1.log" 2>&1
+          }
+          build seatline-api apps/api/Dockerfile "$API_IMAGE" & api=$!
+          build seatline-web apps/web/Dockerfile "$WEB_IMAGE" & web=$!
+          build seatline-plan-engine apps/plan-engine/Dockerfile "$ENGINE_IMAGE" & engine=$!
+          failed=0
+          for job in "api $api" "web $web" "plan-engine $engine"; do
+            set -- $job
+            if wait "$2"; then echo "::group::$1 (built)"; else failed=1; echo "::group::$1 (FAILED)"; fi
+            cat "/tmp/seatline-$1.log"
+            echo "::endgroup::"
+          done
+          [ "$failed" = 0 ]
           {
             echo "API_IMAGE=$API_IMAGE"
             echo "WEB_IMAGE=$WEB_IMAGE"

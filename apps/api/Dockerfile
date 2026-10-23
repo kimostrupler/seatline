@@ -6,8 +6,11 @@ FROM ${NODE_IMAGE} AS build
 RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 RUN corepack enable
 WORKDIR /app
+# packages first (only the lockfile): this layer is reused until dependencies change
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm fetch --frozen-lockfile
 COPY . .
-RUN pnpm install --frozen-lockfile --filter @seatline/api... \
+RUN pnpm install --offline --frozen-lockfile --filter @seatline/api... \
  && pnpm --filter @seatline/shared build \
  && pnpm --filter @seatline/api build
 
