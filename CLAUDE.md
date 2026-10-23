@@ -50,7 +50,7 @@ Target customers: Swiss/EU companies using Microsoft 365. Data must stay in Swit
 /packages
   /shared         shared TypeScript types + zod schemas
 /infra            docker-compose for local dev (Postgres, Azurite)
-/.claude/skills   apple-design (HIG references — use for UI work/reviews)
+/.claude/skills   apple-design (HIG references — UI work/reviews), ponytail (coding style)
 ```
 
 ## Data model (first version)
@@ -447,6 +447,10 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 
 ## Working style
 
+- **Ponytail** (`.claude/skills/ponytail/`, from github.com/DietrichGebert/ponytail, MIT, copied —
+  no hooks): follow its rules on every coding task (smallest complete change, no unrequested
+  features, but never cut tests, validation, security, accessibility). The rules here win when
+  they differ. Reviews: `ponytail-review`; whole-repo audit: `ponytail-audit`.
 - Plan before coding larger steps; show the plan first.
 - Small, focused commits with clear messages.
 - Keep `README.md` current with how to run everything locally.
