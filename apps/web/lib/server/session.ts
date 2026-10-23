@@ -18,7 +18,8 @@ export const userLabel = (user: SessionUser) =>
 
 export const SESSION_COOKIE = 'sl_session';
 export const OIDC_COOKIE = 'sl_oidc';
-export const SESSION_HOURS = 10;
+/** how long a sign-in lasts: 30 days (sign out ends it at once; leavers lose access anyway) */
+export const SESSION_HOURS = 30 * 24;
 
 async function keyFrom(secret: string, purpose: string): Promise<Uint8Array> {
   const digest = await crypto.subtle.digest(

@@ -28,6 +28,7 @@ describe('owner dashboard', () => {
       .set(b.headers)
       .send({ seatId: b.seatIds[0], personId: b.personIds[0] })
       .expect(201);
+    await api(app).get('/owner/check').set(a.headers).expect(204);
     const res = await api(app).get('/owner/overview').set(a.headers).expect(200);
     expect(res.body.totals).toMatchObject({ workspaces: 2, last7Days: 2, inTrial: 2, paying: 0 });
     const beta = res.body.workspaces.find((w: { name: string }) => w.name === 'beta');
@@ -48,6 +49,7 @@ describe('owner dashboard', () => {
 
   it('is a plain 404 for everyone else, admins of other workspaces included', async () => {
     for (const headers of [b.headers, a.viewerHeaders]) {
+      await api(app).get('/owner/check').set(headers).expect(404);
       const res = await api(app).get('/owner/overview').set(headers).expect(404);
       expect(res.body).toEqual({
         message: 'Cannot GET /owner/overview',

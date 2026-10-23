@@ -301,7 +301,7 @@ const TEXTS: Texts = {
       {
         heading: '7. Cookies',
         paragraphs: [
-          'Only cookies that are needed for Seatline to work: an encrypted sign-in cookie (ends when you sign out, at the latest after 10 hours) with a second one that only says “signed in”, so our website can show “Open Seatline” (same lifetime, no personal data), a short-lived cookie during Microsoft sign-in (a few minutes) and, if you choose a language, a language cookie (1 year). No consent banner is needed because nothing tracks you.',
+          'Only cookies that are needed for Seatline to work: an encrypted sign-in cookie (ends when you sign out, at the latest after 30 days) with a second one that only says “signed in”, so our website can show “Open Seatline” (same lifetime, no personal data), a short-lived cookie during Microsoft sign-in (a few minutes) and, if you choose a language, a language cookie (1 year). No consent banner is needed because nothing tracks you.',
         ],
       },
       {
@@ -378,7 +378,7 @@ const TEXTS: Texts = {
       {
         heading: '7. Cookies',
         paragraphs: [
-          'Nur Cookies, die Seatline zum Funktionieren braucht: ein verschlüsseltes Anmelde-Cookie (endet beim Abmelden, spätestens nach 10 Stunden) mit einem zweiten, das nur «angemeldet» sagt, damit unsere Website «Seatline öffnen» zeigen kann (gleiche Dauer, keine Personendaten), ein kurzlebiges Cookie während der Microsoft-Anmeldung (einige Minuten) und, wenn Sie eine Sprache wählen, ein Sprach-Cookie (1 Jahr). Ein Cookie-Banner braucht es nicht, weil Sie nicht verfolgt werden.',
+          'Nur Cookies, die Seatline zum Funktionieren braucht: ein verschlüsseltes Anmelde-Cookie (endet beim Abmelden, spätestens nach 30 Tagen) mit einem zweiten, das nur «angemeldet» sagt, damit unsere Website «Seatline öffnen» zeigen kann (gleiche Dauer, keine Personendaten), ein kurzlebiges Cookie während der Microsoft-Anmeldung (einige Minuten) und, wenn Sie eine Sprache wählen, ein Sprach-Cookie (1 Jahr). Ein Cookie-Banner braucht es nicht, weil Sie nicht verfolgt werden.',
         ],
       },
       {
@@ -455,7 +455,7 @@ const TEXTS: Texts = {
       {
         heading: '7. Cookies',
         paragraphs: [
-          'Uniquement les cookies nécessaires au fonctionnement de Seatline : un cookie de connexion chiffré (supprimé à la déconnexion, au plus tard après 10 heures) avec un second qui indique seulement « connecté », pour que notre site puisse afficher « Ouvrir Seatline » (même durée, aucune donnée personnelle), un cookie de courte durée pendant la connexion Microsoft (quelques minutes) et, si vous choisissez une langue, un cookie de langue (1 an). Aucune bannière n’est nécessaire, car rien ne vous suit.',
+          'Uniquement les cookies nécessaires au fonctionnement de Seatline : un cookie de connexion chiffré (supprimé à la déconnexion, au plus tard après 30 jours) avec un second qui indique seulement « connecté », pour que notre site puisse afficher « Ouvrir Seatline » (même durée, aucune donnée personnelle), un cookie de courte durée pendant la connexion Microsoft (quelques minutes) et, si vous choisissez une langue, un cookie de langue (1 an). Aucune bannière n’est nécessaire, car rien ne vous suit.',
         ],
       },
       {
