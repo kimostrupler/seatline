@@ -1,7 +1,11 @@
-import { Controller, Get, HttpCode } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param } from '@nestjs/common';
+import { z } from 'zod';
 import { Ctx } from '../auth/decorators';
+import { IdPipe, ZodPipe } from '../common/zod.pipe';
 import type { RequestContext } from '../auth/request-context';
 import { OwnerService } from './owner.service';
+
+const deleteWorkspaceSchema = z.strictObject({ name: z.string().min(1).max(200) });
 
 /** The operator's dashboard (OWNER_EMAILS only; a 404 for everyone else). */
 @Controller('owner')
@@ -13,6 +17,18 @@ export class OwnerController {
   @HttpCode(204)
   async check(@Ctx() ctx: RequestContext) {
     await this.owner.assertOwner(ctx, '/owner/check');
+  }
+
+  /** Support: delete a whole workspace; the body repeats its name as a confirmation. */
+  @Delete('workspaces/:id')
+  @HttpCode(204)
+  async deleteWorkspace(
+    @Ctx() ctx: RequestContext,
+    @Param('id', IdPipe) id: string,
+    @Body(new ZodPipe(deleteWorkspaceSchema)) body: { name: string },
+  ) {
+    await this.owner.assertOwner(ctx, `/owner/workspaces/${id}`);
+    await this.owner.deleteWorkspace(ctx, id, body.name);
   }
 
   @Get('overview')

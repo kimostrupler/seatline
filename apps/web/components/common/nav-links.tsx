@@ -1,7 +1,9 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import {
   ArrowRightLeft,
+  ChartColumn,
   ChartPie,
   CreditCard,
   History,
@@ -14,6 +16,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
+import { api } from '@/lib/api';
+import { useAuthMode } from '@/lib/auth-mode';
 import { useMe } from '@/lib/queries';
 import { cn } from '@/lib/utils';
 
@@ -27,7 +31,16 @@ export interface NavLink {
 export function useNavLinks(): NavLink[] {
   const t = useTranslations();
   const me = useMe();
+  const mode = useAuthMode();
   const role = me.data?.role;
+  // the operator's dashboard: only shown when the API says this is the operator (404 otherwise)
+  const owner = useQuery({
+    queryKey: ['owner-check'],
+    queryFn: () => api<void>('/owner/check').then(() => true),
+    enabled: role === 'admin' && mode !== 'dev',
+    retry: false,
+    staleTime: Infinity,
+  });
   if (!role) return [];
   return [
     { href: '/', label: t('nav.home'), icon: House },
@@ -43,6 +56,7 @@ export function useNavLinks(): NavLink[] {
     ...(role === 'admin' && me.data?.billing.state !== 'off'
       ? [{ href: '/billing', label: t('nav.billing'), icon: CreditCard }]
       : []),
+    ...(owner.data ? [{ href: '/owner', label: t('nav.overview'), icon: ChartColumn }] : []),
   ];
 }
 

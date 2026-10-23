@@ -71,6 +71,17 @@ export class StorageService {
   }
 
   /** Best effort: a leftover file is harmless, a failed request is not. */
+  /** Every file under a prefix (a deleted workspace's `<tenantId>/`); best effort. */
+  async deletePrefix(prefix: string): Promise<void> {
+    try {
+      const container = await this.client();
+      for await (const blob of container.listBlobsFlat({ prefix }))
+        await container.getBlockBlobClient(blob.name).deleteIfExists();
+    } catch (error) {
+      this.logger.warn(`Could not delete ${prefix}*: ${String(error)}`);
+    }
+  }
+
   async delete(key: string): Promise<void> {
     try {
       const container = await this.client();

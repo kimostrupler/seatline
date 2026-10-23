@@ -798,7 +798,8 @@
     "showPlan": "Open the plan",
     "search": "Search activity",
     "searchPlaceholder": "Search people, desks, rooms, floors, notes…",
-    "privacyDpa": "e-mailed themselves the data processing agreement"
+    "privacyDpa": "e-mailed themselves the data processing agreement",
+    "workspaceDeleted": "deleted the workspace “{name}” (support)"
   },
   "dashboard": {
     "title": "Home",
@@ -1458,12 +1459,14 @@
       "error": "Azure costs couldn’t be read just now.",
       "month": "This month so far",
       "lastMonth": "Last month",
-      "note": "Azure updates costs a few times a day (read at {time})."
+      "note": "Azure updates costs a few times a day (read at {time}).",
+      "fix": "Run owner-setup.sh again in Cloud Shell. A new permission can take up to 30 minutes."
     },
     "status": {
       "demo": "Demo",
       "trialUntil": "Trial until {date}",
-      "trialEnded": "Trial ended"
+      "trialEnded": "Trial ended",
+      "owner": "Owner · free"
     },
     "workspaces": {
       "title": "Workspaces ({count})",
@@ -1477,6 +1480,20 @@
       "lastActivity": "Last change",
       "admins": "Admins",
       "email": "E-mail link"
+    },
+    "delete": {
+      "options": "Options for {name}",
+      "action": "Delete workspace…",
+      "title": "Delete {name}?",
+      "body": "This deletes the workspace with all its people, floors, seat history and files. It can’t be undone. Type the workspace’s name to confirm.",
+      "label": "Workspace name",
+      "confirm": "Delete forever",
+      "cancel": "Cancel",
+      "done": "{name} was deleted",
+      "subscribed": "This workspace has a subscription. Cancel it in Stripe first.",
+      "own": "You can’t delete the workspace you’re signed in to.",
+      "mismatch": "The name doesn’t match.",
+      "failed": "The workspace couldn’t be deleted."
     }
   },
   "loading": {

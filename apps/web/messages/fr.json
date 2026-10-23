@@ -798,7 +798,8 @@
     "showPlan": "Ouvrir le plan",
     "search": "Rechercher dans l’activité",
     "searchPlaceholder": "Rechercher des personnes, postes, pièces, étages, notes…",
-    "privacyDpa": "s’est envoyé l’accord de sous-traitance par e-mail"
+    "privacyDpa": "s’est envoyé l’accord de sous-traitance par e-mail",
+    "workspaceDeleted": "a supprimé l’espace « {name} » (support)"
   },
   "dashboard": {
     "title": "Accueil",
@@ -1458,12 +1459,14 @@
       "error": "Les coûts Azure n’ont pas pu être lus à l’instant.",
       "month": "Ce mois jusqu’ici",
       "lastMonth": "Mois dernier",
-      "note": "Azure met à jour les coûts quelques fois par jour (lu à {time})."
+      "note": "Azure met à jour les coûts quelques fois par jour (lu à {time}).",
+      "fix": "Relancez owner-setup.sh dans Cloud Shell. Une nouvelle autorisation peut prendre jusqu’à 30 minutes."
     },
     "status": {
       "demo": "Démo",
       "trialUntil": "Essai jusqu’au {date}",
-      "trialEnded": "Essai terminé"
+      "trialEnded": "Essai terminé",
+      "owner": "Exploitant · gratuit"
     },
     "workspaces": {
       "title": "Espaces ({count})",
@@ -1477,6 +1480,20 @@
       "lastActivity": "Dernier changement",
       "admins": "Admins",
       "email": "Lien e-mail"
+    },
+    "delete": {
+      "options": "Options pour {name}",
+      "action": "Supprimer l’espace…",
+      "title": "Supprimer {name} ?",
+      "body": "Cela supprime l’espace avec toutes ses personnes, ses étages, l’historique des postes et les fichiers. C’est irréversible. Tapez le nom de l’espace pour confirmer.",
+      "label": "Nom de l’espace",
+      "confirm": "Supprimer définitivement",
+      "cancel": "Annuler",
+      "done": "{name} a été supprimé",
+      "subscribed": "Cet espace a un abonnement. Résiliez-le d’abord dans Stripe.",
+      "own": "Vous ne pouvez pas supprimer l’espace dans lequel vous êtes connecté.",
+      "mismatch": "Le nom ne correspond pas.",
+      "failed": "L’espace n’a pas pu être supprimé."
     }
   },
   "loading": {

@@ -441,11 +441,20 @@ chromium` (re-run after UI changes). In the app: **Help** in the top bar, a dism
 
 ## Owner dashboard (operator only)
 
-- `/owner` (not linked, `noindex`): sign-ups per day, every workspace (counts, billing state,
+- `/owner` (`noindex`, linked only for the operator): sign-ups per day, every workspace (counts, billing state,
   last change, admins' e-mails), Stripe (MRR, subscriptions by status, balance, payments) and
   Azure costs (month to date by service and day, last month). Refreshes every 30 s.
-- Reached from the account menu: **Overview** appears only when `GET /owner/check` answers 204
-  (asked when the menu opens; everyone else gets the same 404).
+- Reached from the main menu: **Overview** appears (admins only ask) when `GET /owner/check`
+  answers 204; everyone else gets the same 404. The operator's own workspace shows as
+  "Owner · free" (`owner` flag, same rule as billing) and isn't counted as a trial.
+- **Delete a workspace (support)**: row ⋯ → type its name → `DELETE /owner/workspaces/:id`
+  (`{ name }` must match). Refused for the operator's own workspace and while a Stripe
+  subscription runs (cancel it in Stripe first). SECURITY DEFINER `delete_tenant(uuid)` removes
+  every row (history included, like `purge_demo_tenants`), then `StorageService.deletePrefix`
+  removes the files; logged as `owner.workspace.delete` in the operator's own activity.
+- Azure costs that fail show Azure's own reason on the dashboard (`detail`); `owner-setup.sh` now
+  reports whether the "Cost Management Reader" role could be given (needs Owner / User Access
+  Administrator on the subscription).
 - Access: `GET /owner/overview` checks `OWNER_EMAILS` against the caller's person **and** that
   their workspace has no Microsoft (an e-mail link proves the address; an Entra directory could
   claim any address). Anyone else gets Nest's exact "Cannot GET …" 404, and the page calls

@@ -798,7 +798,8 @@
     "showPlan": "Plan öffnen",
     "search": "Aktivität durchsuchen",
     "searchPlaceholder": "Personen, Arbeitsplätze, Räume, Stockwerke, Notizen suchen …",
-    "privacyDpa": "hat sich den Auftragsverarbeitungsvertrag per E-Mail gesendet"
+    "privacyDpa": "hat sich den Auftragsverarbeitungsvertrag per E-Mail gesendet",
+    "workspaceDeleted": "hat den Arbeitsbereich «{name}» gelöscht (Support)"
   },
   "dashboard": {
     "title": "Start",
@@ -1458,12 +1459,14 @@
       "error": "Die Azure-Kosten konnten gerade nicht gelesen werden.",
       "month": "Diesen Monat bisher",
       "lastMonth": "Letzter Monat",
-      "note": "Azure aktualisiert die Kosten ein paar Mal pro Tag (gelesen um {time})."
+      "note": "Azure aktualisiert die Kosten ein paar Mal pro Tag (gelesen um {time}).",
+      "fix": "Führen Sie owner-setup.sh in der Cloud Shell nochmals aus. Eine neue Berechtigung kann bis zu 30 Minuten dauern."
     },
     "status": {
       "demo": "Demo",
       "trialUntil": "Testphase bis {date}",
-      "trialEnded": "Testphase abgelaufen"
+      "trialEnded": "Testphase abgelaufen",
+      "owner": "Betreiber · gratis"
     },
     "workspaces": {
       "title": "Arbeitsbereiche ({count})",
@@ -1477,6 +1480,20 @@
       "lastActivity": "Letzte Änderung",
       "admins": "Admins",
       "email": "E-Mail-Link"
+    },
+    "delete": {
+      "options": "Optionen für {name}",
+      "action": "Arbeitsbereich löschen…",
+      "title": "{name} löschen?",
+      "body": "Damit werden der Arbeitsbereich und alle Personen, Stockwerke, der Platzverlauf und die Dateien gelöscht. Das lässt sich nicht rückgängig machen. Geben Sie zur Bestätigung den Namen des Arbeitsbereichs ein.",
+      "label": "Name des Arbeitsbereichs",
+      "confirm": "Endgültig löschen",
+      "cancel": "Abbrechen",
+      "done": "{name} wurde gelöscht",
+      "subscribed": "Dieser Arbeitsbereich hat ein Abo. Kündigen Sie es zuerst in Stripe.",
+      "own": "Den Arbeitsbereich, in dem Sie angemeldet sind, können Sie nicht löschen.",
+      "mismatch": "Der Name stimmt nicht.",
+      "failed": "Der Arbeitsbereich konnte nicht gelöscht werden."
     }
   },
   "loading": {

@@ -408,6 +408,8 @@ export interface OwnerOverview {
     subscribed: boolean;
     lastActivity: string | null;
     admins: string[];
+    /** the operator's own workspace: free, never a trial */
+    owner: boolean;
   }>;
   stripe:
     | null
@@ -430,7 +432,7 @@ export interface OwnerOverview {
       };
   azure:
     | null
-    | { error: 'unavailable' }
+    | { error: 'unavailable'; detail?: string }
     | {
         currency: string;
         total: number;
