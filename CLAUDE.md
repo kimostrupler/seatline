@@ -415,7 +415,9 @@ folded`) so the person and the actions stand out.
   light/dark follows the system), built with Tailwind like the app; `components/site/landing/landing.css`
   only holds the scroll entrances (`Reveal` adds `is-live`/`is-in`). Sections: glass sticky header
   (Features, Pricing, Questions, Help, languages, Sign in) → hero + `LiveFloor` (tap a green desk,
-  seat colours = the map's) → trust row → three parts with phone pictures (`public/site-img/<lang>/`,
+  seat colours = the map's) → trust row → promo video (`public/site-video/`, 720p H.264 ~1.4 MB +
+  14 KB WebP poster, `preload="none"`: nothing loads before play; captions are burned in, English) →
+  three parts with phone pictures (`public/site-img/<lang>/`,
   made by help-screenshots.spec.ts) → six short feature items (`site.features`, each opens its help topic) → 4 steps →
   `NoticeDemo` (short: one line, DE/FR/EN switch, the IT e-mail's subject + moves, worded like `notices.ts` via `lib/site/notice-sample.ts` — keep in
   step) → price card → FAQ as fold-outs → blue closing band → footer ("Zürich, Switzerland" + local
