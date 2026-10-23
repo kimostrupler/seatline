@@ -679,7 +679,8 @@
     "language": "Language",
     "moves": "Moves",
     "billing": "Billing",
-    "planning": "Planning"
+    "planning": "Planning",
+    "help": "Help"
   },
   "overview": {
     "title": "Overview",
@@ -963,6 +964,12 @@
           "action": "Open the map"
         }
       }
+    },
+    "helpBanner": {
+      "title": "New to Seatline?",
+      "body": "The help center explains every step with pictures: floors, desks, people, moves and more.",
+      "open": "Open the help center",
+      "hide": "Hide"
     }
   },
   "errors": {
@@ -1228,10 +1235,7 @@
     "finalTitle": "Try it with your own floors",
     "contact": "Questions? Write to <mail>{email}</mail>",
     "madeIn": "Made in Switzerland",
-    "copyright": "© {year} Seatline",
-    "guides": "Guides",
-    "moreGuides": "More guides",
-    "guideTopic": "Topic"
+    "copyright": "© {year} Seatline"
   },
   "planImport": {
     "title": "Import an architect plan",
@@ -1408,5 +1412,20 @@
     "showOnMap": "Show on the map",
     "notFound": "Desk not found",
     "notFoundHint": "This desk was removed, or it belongs to another workspace."
+  },
+  "help": {
+    "title": "Help center",
+    "metaTitle": "Seatline help center: step-by-step guides",
+    "intro": "Step-by-step instructions with pictures for everything in Seatline — from your first floor to moves, exports and data protection.",
+    "topics": "Topics",
+    "faq": "Questions and answers",
+    "step": "Step {n}",
+    "tips": "Tips",
+    "all": "All help topics",
+    "previous": "Previous",
+    "next": "Next",
+    "stuck": "Still stuck?",
+    "contact": "Write to <mail>{email}</mail> — in English, German or French.",
+    "openApp": "Open Seatline"
   }
 }

@@ -321,7 +321,7 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   Numbers come from `GET /stats` (one snapshot; weeks are Swiss weeks starting Monday).
 - **Getting started** (`components/dashboard/getting-started.tsx`, admins, not in demos): 4 steps
   ticked from `/overview` + `/people/directory` (`setupProgress`, `lib/getting-started.ts`);
-  hidden per browser + workspace, and by itself once all are done.
+  hidden per browser + workspace (`useDismissed`), and by itself once all are done.
 - Customize mode: each widget has one **⋯** menu (move earlier/later, size, remove) — no rows
   of small buttons. A newly added widget is scrolled into view and highlighted, plus a toast.
 - The `/api` proxy must export every HTTP method the API uses (PUT was missing once).
@@ -366,6 +366,8 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - Stripe state arrives only via the signed webhook (`@Public`, raw body; the web proxy passes
   `billing/webhook` through without a session). Subscriptions carry `metadata.tenantId`, but a
   webhook only applies if its customer matches the tenant's `stripe_customer_id`.
+- The operator's own workspace (an active admin from `OWNER_EMAILS`, e-mail sign-in) is billing
+  state `off` like demos: never a trial, never read-only.
 - Seat count = active seats; the nightly job syncs it (`list_billed_tenants`). Tests use
   `test/fake-stripe.ts` via `STRIPE_API_BASE`. Keys online: `infra/azure/stripe-setup.sh`.
 
@@ -403,10 +405,13 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   sitemap with hreflang. The landing header uses language links, not the cookie switch.
   IndexNow (Bing & co.): key `INDEXNOW_KEY` (public) served at `/indexnow.txt`; the deploy
   (`infra/azure/indexnow.sh`) posts the live sitemap's pages after each release.
-- **Guides** (`/guides/<slug>`, `lib/guides.ts`, tested): comparison pages (vs Excel, Swiss
-  software, seating plan vs desk booking), one slug per language; the middleware sets the
-  page language from the slug. Linked from the footer, sitemap (hreflang) and llms.txt. Only
-  true facts about Seatline, never named competitors.
+- **Help center** (`/help/<en|de|fr>[/<topic>]`, public, `lib/help/` en/de/fr content, tested
+  for same steps/pictures in every language): topics with numbered steps + screenshots, tips,
+  FAQ (FAQPage / HowTo JSON-LD), in the sitemap (hreflang) and llms.txt; the middleware sets the
+  page language from the address. Screenshots in `apps/web/public/help-img/<lang>/` come from
+  the real app: `HELP_SCREENSHOTS=1 pnpm exec playwright test help-screenshots --project
+chromium` (re-run after UI changes). In the app: **Help** in the top bar, a dismissible banner
+  on Home. Help texts must use the app's real labels (from messages) and only true facts.
 - A new sub-processor, tracking or retention change must be reflected in the privacy policy
   (`docs/legal.md`). Infra: `infra/azure/site-domain.sh`, bicep `siteDomains`.
 

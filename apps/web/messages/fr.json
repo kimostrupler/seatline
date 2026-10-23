@@ -679,7 +679,8 @@
     "language": "Langue",
     "moves": "Déménagements",
     "billing": "Facturation",
-    "planning": "Planification"
+    "planning": "Planification",
+    "help": "Aide"
   },
   "overview": {
     "title": "Vue d’ensemble",
@@ -963,6 +964,12 @@
           "action": "Ouvrir le plan"
         }
       }
+    },
+    "helpBanner": {
+      "title": "Nouveau sur Seatline ?",
+      "body": "Le centre d’aide explique chaque étape avec des images : étages, postes, personnes, déménagements et plus.",
+      "open": "Ouvrir le centre d’aide",
+      "hide": "Masquer"
     }
   },
   "errors": {
@@ -1228,10 +1235,7 @@
     "finalTitle": "Essayez avec vos propres étages",
     "contact": "Des questions ? Écrivez à <mail>{email}</mail>",
     "madeIn": "Made in Switzerland",
-    "copyright": "© {year} Seatline",
-    "guides": "Guides",
-    "moreGuides": "Autres guides",
-    "guideTopic": "Sujet"
+    "copyright": "© {year} Seatline"
   },
   "planImport": {
     "title": "Importer un plan d’architecte",
@@ -1408,5 +1412,20 @@
     "showOnMap": "Voir sur le plan",
     "notFound": "Poste introuvable",
     "notFoundHint": "Ce poste a été supprimé ou appartient à un autre espace de travail."
+  },
+  "help": {
+    "title": "Centre d’aide",
+    "metaTitle": "Centre d’aide Seatline : guides pas à pas",
+    "intro": "Des instructions pas à pas avec images pour tout Seatline — du premier étage aux déménagements, exports et protection des données.",
+    "topics": "Thèmes",
+    "faq": "Questions et réponses",
+    "step": "Étape {n}",
+    "tips": "Conseils",
+    "all": "Tous les thèmes d’aide",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "stuck": "Encore une question ?",
+    "contact": "Écrivez à <mail>{email}</mail> — en français, en allemand ou en anglais.",
+    "openApp": "Ouvrir Seatline"
   }
 }

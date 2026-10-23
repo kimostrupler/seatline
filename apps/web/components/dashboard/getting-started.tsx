@@ -3,48 +3,19 @@
 import { ArrowRight, Check, X } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useCallback, useSyncExternalStore } from 'react';
 import { Button } from '@/components/ui/button';
 import { SETUP_LINKS, SETUP_STEPS, setupProgress } from '@/lib/getting-started';
 import { useDirectory, useOverview } from '@/lib/queries';
+import { useDismissed } from '@/lib/use-dismissed';
 import { cn } from '@/lib/utils';
-
-// hidden per browser and workspace (a convenience; it also hides itself once all is done)
-const key = (tenantId: string) => `seatline.gettingStarted.hidden.${tenantId}`;
-const listeners = new Set<() => void>();
-
-function useHidden(tenantId: string) {
-  const hidden = useSyncExternalStore(
-    (l) => {
-      listeners.add(l);
-      return () => listeners.delete(l);
-    },
-    () => {
-      try {
-        return localStorage.getItem(key(tenantId)) === '1';
-      } catch {
-        return false;
-      }
-    },
-    () => true, // server: don't flash it
-  );
-  const hide = useCallback(() => {
-    try {
-      localStorage.setItem(key(tenantId), '1');
-    } catch {
-      // storage blocked — hidden until reload
-    }
-    listeners.forEach((l) => l());
-  }, [tenantId]);
-  return [hidden, hide] as const;
-}
 
 /** Home, for admins of a new workspace: the four steps to a working seating plan. */
 export function GettingStarted({ tenantId }: { tenantId: string }) {
   const t = useTranslations('dashboard.gettingStarted');
   const overview = useOverview();
   const directory = useDirectory();
-  const [hidden, hide] = useHidden(tenantId);
+  // per browser and workspace; it also hides itself once all is done
+  const [hidden, hide] = useDismissed(`seatline.gettingStarted.hidden.${tenantId}`);
   const progress = setupProgress(overview.data, directory.data?.filter((p) => p.active).length);
   if (hidden || !progress || SETUP_STEPS.every((s) => progress[s])) return null;
   const done = SETUP_STEPS.filter((s) => progress[s]).length;
