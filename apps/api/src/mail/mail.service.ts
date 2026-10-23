@@ -9,6 +9,7 @@ export interface Mail {
   to: string;
   subject: string;
   text: string;
+  attachments?: Array<{ filename: string; content: Buffer; contentType: string }>;
 }
 
 /**
@@ -43,7 +44,14 @@ export class MailService {
     if (this.config.MAIL_OUTBOX) {
       await mkdir(this.config.MAIL_OUTBOX, { recursive: true });
       const file = `${Date.now()}-${randomUUID()}.json`;
-      await writeFile(join(this.config.MAIL_OUTBOX, file), JSON.stringify(mail));
+      const attachments = mail.attachments?.map((a) => ({
+        ...a,
+        content: a.content.toString('base64'),
+      }));
+      await writeFile(
+        join(this.config.MAIL_OUTBOX, file),
+        JSON.stringify({ ...mail, attachments }),
+      );
       return;
     }
     this.transport ??= createTransport({

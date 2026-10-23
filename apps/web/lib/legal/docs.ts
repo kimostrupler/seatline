@@ -1,6 +1,6 @@
 import type { Language } from '@/lib/locales';
 import { DPA } from './dpa';
-import { OPERATOR } from './operator';
+import { fillLegal } from '@seatline/shared/dist/legal';
 
 /**
  * Terms of service, privacy policy and data processing agreement in German, French and English.
@@ -10,10 +10,8 @@ import { OPERATOR } from './operator';
 export const LEGAL_DOCS = ['terms', 'privacy', 'dpa'] as const;
 export type LegalDoc = (typeof LEGAL_DOCS)[number];
 
-export interface LegalSection {
-  heading: string;
-  paragraphs: string[];
-}
+export type { LegalSection } from '@seatline/shared/dist/legal';
+import type { LegalSection } from '@seatline/shared/dist/legal';
 
 type Texts = Record<LegalDoc, Record<Language, LegalSection[]>>;
 
@@ -490,11 +488,7 @@ const TEXTS: Texts = {
   dpa: DPA,
 };
 
-const fill = (text: string) =>
-  text
-    .replaceAll('{name}', OPERATOR.name)
-    .replaceAll('{address}', `${OPERATOR.street}, ${OPERATOR.place}`)
-    .replaceAll('{email}', OPERATOR.email);
+const fill = fillLegal;
 
 export function legalText(doc: LegalDoc, language: Language): LegalSection[] {
   return TEXTS[doc][language].map((s) => ({

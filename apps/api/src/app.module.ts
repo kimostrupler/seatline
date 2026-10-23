@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { BillingController } from './billing/billing.controller';
 import { BillingService } from './billing/billing.service';
-import { PrivacyController } from './privacy/privacy.controller';
+import { DpaController, PrivacyController } from './privacy/privacy.controller';
 import { PrivacyService } from './privacy/privacy.service';
 import { ExportsController } from './exports/exports.controller';
 import { ExportsService } from './exports/exports.service';
@@ -71,6 +71,7 @@ import { PeopleSyncService } from './sync/people-sync.service';
     MovesController,
     ExportsController,
     PrivacyController,
+    DpaController,
     BillingController,
     PlanningController,
     OwnerController,

@@ -425,7 +425,12 @@
       "forgetTitle": "{name} vergessen?",
       "forgetBody": "Name, E-Mail, Abteilung und Funktion werden endgültig aus Seatline entfernt – auch aus dem Aktivitätsprotokoll. Der Platzverlauf bleibt, als «Ehemalige Person». Das kann nicht rückgängig gemacht werden.",
       "forgotten": "Personendaten entfernt",
-      "cancel": "Abbrechen"
+      "cancel": "Abbrechen",
+      "dpaTitle": "Auftragsverarbeitungsvertrag (AVV)",
+      "dpaHint": "Der Vertrag darüber, wie Seatline die Daten Ihrer Mitarbeitenden für Sie bearbeitet. Er gilt bereits für Ihren Arbeitsbereich (ohne Unterschrift); senden Sie sich ein PDF mit dem Namen Ihrer Firma für Ihre Unterlagen oder Ihre IT.",
+      "dpaSend": "AVV per E-Mail senden (PDF)",
+      "dpaSent": "An {email} gesendet",
+      "dpaRead": "Online lesen"
     },
     "teams": {
       "hint": "Teams gruppieren Personen auf dem Plan und in den Statistiken. Sie kommen aus der Abteilung in Microsoft 365; setzen oder ändern Sie ein Team über ⋯ → Team festlegen.",
@@ -797,7 +802,8 @@
     },
     "showPlan": "Plan öffnen",
     "search": "Aktivität durchsuchen",
-    "searchPlaceholder": "Personen, Arbeitsplätze, Räume, Stockwerke, Notizen suchen …"
+    "searchPlaceholder": "Personen, Arbeitsplätze, Räume, Stockwerke, Notizen suchen …",
+    "privacyDpa": "hat sich den Auftragsverarbeitungsvertrag per E-Mail gesendet"
   },
   "dashboard": {
     "title": "Start",
@@ -1218,7 +1224,7 @@
     "q8": "Funktioniert es in Microsoft Teams?",
     "a8": "Ja. Ihre IT fügt die Seatline-App einmal hinzu; danach finden alle den Plan in Teams und Outlook.",
     "q9": "Unterzeichnen Sie einen Auftragsverarbeitungsvertrag?",
-    "a9": "Ja. Unser Auftragsverarbeitungsvertrag (AVV) ist Teil der Nutzungsbedingungen und online. Auf Wunsch senden wir ein unterzeichnetes Exemplar.",
+    "a9": "Ja. Unser Auftragsverarbeitungsvertrag (AVV) ist Teil der Nutzungsbedingungen, gilt für jeden Arbeitsbereich und ist online. Admins können sich in den Einstellungen ein PDF mit dem Namen ihrer Firma per E-Mail senden.",
     "finalTitle": "Testen Sie es mit Ihren eigenen Etagen",
     "contact": "Fragen? Schreiben Sie an <mail>{email}</mail>",
     "madeIn": "Made in Switzerland",

@@ -425,7 +425,12 @@
       "forgetTitle": "Forget {name}?",
       "forgetBody": "Their name, e-mail, department and job title are removed from Seatline for good — also from the activity log. Their seat history stays, as “Former employee”. This can’t be undone.",
       "forgotten": "Personal data removed",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "dpaTitle": "Data processing agreement (DPA)",
+      "dpaHint": "The contract on how Seatline handles your people’s data for you. It already applies to your workspace (no signature needed); e-mail yourself a PDF with your company’s name for your records or your IT.",
+      "dpaSend": "E-mail me the DPA (PDF)",
+      "dpaSent": "Sent to {email}",
+      "dpaRead": "Read it online"
     },
     "teams": {
       "hint": "Teams group people on the map and in the statistics. They come from the department in Microsoft 365; to set or change one, use ⋯ → Set team.",
@@ -797,7 +802,8 @@
     },
     "showPlan": "Open the plan",
     "search": "Search activity",
-    "searchPlaceholder": "Search people, desks, rooms, floors, notes…"
+    "searchPlaceholder": "Search people, desks, rooms, floors, notes…",
+    "privacyDpa": "e-mailed themselves the data processing agreement"
   },
   "dashboard": {
     "title": "Home",
@@ -1218,7 +1224,7 @@
     "q8": "Does it work in Microsoft Teams?",
     "a8": "Yes. Your IT adds the Seatline app once; everyone then finds the floor map in Teams and Outlook.",
     "q9": "Do you sign a data processing agreement?",
-    "a9": "Yes. Our data processing agreement (DPA / AVV) is part of the terms and online. We send a signed copy on request.",
+    "a9": "Yes. Our data processing agreement (DPA / AVV) is part of the terms, applies to every workspace and is online. Admins can e-mail themselves a PDF copy with their company’s name in Settings.",
     "finalTitle": "Try it with your own floors",
     "contact": "Questions? Write to <mail>{email}</mail>",
     "madeIn": "Made in Switzerland",

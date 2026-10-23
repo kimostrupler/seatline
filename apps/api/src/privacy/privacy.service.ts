@@ -1,8 +1,12 @@
 import { ConflictException, Injectable } from '@nestjs/common';
+import type { MailLanguage } from '@seatline/shared';
 import type { RequestContext } from '../auth/request-context';
 import { audit } from '../common/audit';
 import { orNotFound } from '../common/errors';
 import { TenantDb, type Tx } from '../db/tenant-db.service';
+import { MailService } from '../mail/mail.service';
+import { dpaMail } from '../mail/texts';
+import { dpaPdf } from './dpa-pdf';
 
 /** The day `months` months before `now` (history ended before it is deleted). */
 export function retentionCutoff(now: Date, months: number): Date {
@@ -19,7 +23,33 @@ export function retentionCutoff(now: Date, months: number): Date {
  */
 @Injectable()
 export class PrivacyService {
-  constructor(private readonly db: TenantDb) {}
+  constructor(
+    private readonly db: TenantDb,
+    private readonly mail: MailService,
+  ) {}
+
+  /** E-mails the admin who asks a PDF of the DPA, with their company's name. */
+  async sendDpa(ctx: RequestContext, language: MailLanguage) {
+    const { tenant, me } = await this.db.run(ctx.tenantId, async (tx) => {
+      const found = {
+        tenant: await tx.tenant.findUniqueOrThrow({ where: { id: ctx.tenantId } }),
+        me: await tx.person.findFirstOrThrow({
+          where: { id: ctx.actorId, tenantId: ctx.tenantId },
+        }),
+      };
+      await audit(tx, ctx, { action: 'privacy.dpa', entityType: 'tenant', entityId: ctx.tenantId });
+      return found;
+    });
+    const date = new Intl.DateTimeFormat('de-CH', { timeZone: 'Europe/Zurich' }).format(new Date());
+    const pdf = await dpaPdf({
+      language,
+      company: tenant.name,
+      requestedBy: `${me.displayName} (${me.email})`,
+      date,
+    });
+    await this.mail.send(dpaMail(me.email, tenant.name, Buffer.from(pdf), language));
+    return { sentTo: me.email };
+  }
 
   /** Everything stored about one person, as one JSON document. */
   exportPerson(ctx: RequestContext, personId: string) {
