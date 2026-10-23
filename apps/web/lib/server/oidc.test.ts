@@ -2,7 +2,7 @@ import { exportJWK, generateKeyPair, SignJWT, type JWK } from 'jose';
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { finishLogin, SignInError, startLogin, verifyIdToken, verifyTeamsToken } from './oidc';
+import { finishLogin, SignInError, startLogin, verifyIdToken } from './oidc';
 import { internalToken, readSession, seal, sealSession } from './session';
 
 const TID = '72f988bf-86f1-41af-91ab-2d7cd011db47';
@@ -153,41 +153,5 @@ describe('session cookie', () => {
   it('mints the API token', async () => {
     const token = await internalToken(user, secret);
     expect(token.split('.')).toHaveLength(3);
-  });
-});
-
-describe('Teams single sign-on', () => {
-  const opts = () => ({ loginUrl, clientId: 'client-1', appUrl: 'https://app.seatline.ch' });
-  const aud = 'api://app.seatline.ch/client-1';
-
-  it('accepts a Teams token for our API, from the user’s own tenant', async () => {
-    const user = await verifyTeamsToken(await idToken({ aud }), opts());
-    expect(user).toEqual({
-      kind: 'microsoft',
-      tid: TID,
-      oid: OID,
-      name: 'Anna Meier',
-      email: 'anna@contoso.com',
-    });
-    // v1 tokens come from sts.windows.net
-    await expect(
-      verifyTeamsToken(await idToken({ aud, iss: `https://sts.windows.net/${TID}/` }), opts()),
-    ).resolves.toMatchObject({ oid: OID });
-  });
-
-  it('refuses tokens for another app, another tenant’s issuer, or a wrong key', async () => {
-    await expect(
-      verifyTeamsToken(await idToken({ aud: 'api://evil.example/client-1' }), opts()),
-    ).rejects.toBeInstanceOf(SignInError);
-    await expect(
-      verifyTeamsToken(
-        await idToken({ aud, iss: `${loginUrl}/11111111-1111-4111-8111-111111111111/v2.0` }),
-        opts(),
-      ),
-    ).rejects.toBeInstanceOf(SignInError);
-    const other = await generateKeyPair('RS256');
-    await expect(
-      verifyTeamsToken(await idToken({ aud }, other.privateKey), opts()),
-    ).rejects.toBeInstanceOf(SignInError);
   });
 });

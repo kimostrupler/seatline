@@ -11,11 +11,11 @@ export async function GET() {
   const t = await getTranslations({ locale: 'en-GB', namespace: 'site' });
   const base = siteUrl(webConfig().APP_URL);
   const features = Array.from(
-    { length: 12 },
+    { length: 11 },
     (_, i) => `- ${t(`f${i + 1}Title` as 'f1Title')}: ${t(`f${i + 1}Body` as 'f1Body')}`,
   );
   const faq = Array.from(
-    { length: 9 },
+    { length: 8 },
     (_, i) => `### ${t(`q${i + 1}` as 'q1')}\n\n${t(`a${i + 1}` as 'a1')}`,
   );
   const text = `# Seatline

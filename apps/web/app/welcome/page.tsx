@@ -9,7 +9,6 @@ import {
   Map,
   FileSpreadsheet,
   Mail,
-  MessagesSquare,
   QrCode,
   TrendingUp,
   MousePointerClick,
@@ -57,7 +56,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-const FEATURES: [LucideIcon, `f${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12}`][] = [
+const FEATURES: [LucideIcon, `f${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11}`][] = [
   [Map, 'f1'],
   [FileUp, 'f2'],
   [MousePointerClick, 'f3'],
@@ -67,13 +66,12 @@ const FEATURES: [LucideIcon, `f${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 1
   [Presentation, 'f7'],
   [Table2, 'f8'],
   [Mail, 'f9'],
-  [MessagesSquare, 'f10'],
-  [TrendingUp, 'f11'],
-  [QrCode, 'f12'],
+  [TrendingUp, 'f10'],
+  [QrCode, 'f11'],
 ];
 
 /** The public landing page: seatline.ch (and /welcome on any address). */
-const FAQ = ['1', '2', '3', '4', '5', '6', '7', '8', '9'] as const;
+const FAQ = ['1', '2', '3', '4', '5', '6', '7', '8'] as const;
 
 export default async function Welcome() {
   const t = await getTranslations('site');

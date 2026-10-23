@@ -29,7 +29,7 @@ async function proxy(req: NextRequest, { params }: { params: Promise<{ path: str
     const signature = req.headers.get('stripe-signature');
     if (signature) headers.set('stripe-signature', signature);
   } else if (config.AUTH_MODE === 'entra') {
-    // changes only from our own pages (the Teams cookie is SameSite=None)
+    // changes only from our own pages (login CSRF / cross-site requests)
     const origin = req.headers.get('origin');
     if (hasBody && origin && origin !== new URL(config.APP_URL).origin)
       return Response.json({ message: 'Not allowed from another site' }, { status: 403 });

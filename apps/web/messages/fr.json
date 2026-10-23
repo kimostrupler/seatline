@@ -632,14 +632,6 @@
         "empty": "Le fichier est vide.",
         "too_many": "2000 personnes au maximum par fichier — divisez la liste."
       }
-    },
-    "teamsApp": {
-      "title": "Teams et Outlook",
-      "body": "Ajoutez Seatline comme app dans Microsoft Teams et Outlook : chacun y voit le plan et trouve ses collègues, connecté automatiquement.",
-      "step1": "Téléchargez l’app ci-dessous.",
-      "step2": "Dans le centre d’administration Teams : Applications Teams → Gérer les applications → Charger une nouvelle application (pour tous), ou dans Teams : Applications → Gérer vos applications → Charger une application (pour vous).",
-      "step3": "Ouvrez Seatline depuis la barre d’applications de Teams ou d’Outlook.",
-      "download": "Télécharger l’app Teams"
     }
   },
   "shortcuts": {
@@ -1193,12 +1185,8 @@
     "f8Body": "Changez l’équipe, le rôle et la date de départ de plusieurs personnes à la fois. Les départs libèrent leur place le dernier jour.",
     "f9Title": "E-mails à l’IT et aux personnes",
     "f9Body": "L’IT reçoit un e-mail clair quand quelqu’un part, arrive ou déménage. Les personnes apprennent leur nouvelle place.",
-    "f10Title": "Dans Teams et Outlook",
-    "f10Body": "Trouvez la place d’un collègue sans quitter Teams ou Outlook. Connecté automatiquement.",
-    "f11Title": "Planification des espaces",
-    "f11Body": "Indiquez combien de personnes chaque équipe prévoit. Voyez des mois à l’avance quand les places manqueront.",
-    "f12Title": "QR codes sur les places",
-    "f12Body": "Imprimez une étiquette pour chaque place. En la scannant, on voit qui y est assis.",
+    "f10Title": "Planification des espaces",
+    "f10Body": "Indiquez combien de personnes chaque équipe prévoit. Voyez des mois à l’avance quand les places manqueront.",
     "stepsTitle": "Prêt en un après-midi",
     "s1Title": "Ajoutez vos étages",
     "s1Body": "Importez le plan de l’architecte ou dessinez salles et places sur une image.",
@@ -1228,14 +1216,14 @@
     "a6": "Oui. « Essayer la démo » ouvre un bureau d’exemple que vous pouvez modifier librement, sans compte. Ou commencez l’essai gratuit avec vos propres étages.",
     "q7": "Comment nos collaborateurs arrivent-ils dans Seatline ?",
     "a7": "Avec Microsoft 365, automatiquement, chaque nuit. Sans Microsoft 365, importez une liste Excel ou CSV, ou ajoutez les personnes une à une.",
-    "q8": "Est-ce que ça fonctionne dans Microsoft Teams ?",
-    "a8": "Oui. Votre IT ajoute l’app Seatline une fois ; ensuite chacun trouve le plan dans Teams et Outlook.",
-    "q9": "Signez-vous un accord de sous-traitance ?",
-    "a9": "Oui. Notre accord de sous-traitance (DPA) fait partie des conditions, s’applique à chaque espace et est en ligne. Les administrateurs peuvent s’en envoyer un PDF au nom de leur entreprise depuis les paramètres.",
+    "q8": "Signez-vous un accord de sous-traitance ?",
+    "a8": "Oui. Notre accord de sous-traitance (DPA) fait partie des conditions, s’applique à chaque espace et est en ligne. Les administrateurs peuvent s’en envoyer un PDF au nom de leur entreprise depuis les paramètres.",
     "finalTitle": "Essayez avec vos propres étages",
     "contact": "Des questions ? Écrivez à <mail>{email}</mail>",
     "madeIn": "Made in Switzerland",
-    "copyright": "© {year} Seatline"
+    "copyright": "© {year} Seatline",
+    "f11Title": "QR codes sur les places",
+    "f11Body": "Imprimez une étiquette pour chaque place. En la scannant, on voit qui y est assis."
   },
   "planImport": {
     "title": "Importer un plan d’architecte",
@@ -1332,11 +1320,6 @@
     "cancel": "Annuler",
     "floors": "Places libres par étage"
   },
-  "teamsTab": {
-    "signingIn": "Connexion avec votre compte Microsoft…",
-    "failed": "La connexion dans Teams n’a pas fonctionné. Votre IT doit peut-être encore autoriser Seatline pour Teams.",
-    "openInBrowser": "Ouvrir Seatline dans le navigateur"
-  },
   "owner": {
     "title": "Vue d’ensemble de l’activité",
     "updated": "Mis à jour {time}",
@@ -1425,7 +1408,7 @@
     "previous": "Précédent",
     "next": "Suivant",
     "stuck": "Encore une question ?",
-    "contact": "Écrivez à <mail>{email}</mail> — en français, en allemand ou en anglais.",
+    "contact": "Écrivez à <mail>{email}</mail>.",
     "openApp": "Ouvrir Seatline"
   }
 }

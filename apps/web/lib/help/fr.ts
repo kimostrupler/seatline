@@ -334,30 +334,6 @@ export const FR: HelpContent = {
         },
       ],
     },
-    'teams-app': {
-      title: 'Microsoft Teams et Outlook',
-      summary: 'Utiliser Seatline dans Teams et Outlook, connecté automatiquement.',
-      steps: [
-        {
-          title: 'Télécharger l’app',
-          text: [
-            'Sous Personnes et accès → Réglages → Teams et Outlook, cliquez sur « Télécharger l’app Teams ».',
-          ],
-        },
-        {
-          title: 'L’ajouter à Teams',
-          text: [
-            'Pour tout le monde : dans le centre d’administration Teams, Applications Teams → Gérer les applications → Charger une nouvelle application. Pour vous seul : dans Teams, Applications → Gérer vos applications → Charger une application.',
-          ],
-        },
-        {
-          title: 'L’ouvrir',
-          text: [
-            'Seatline apparaît dans la barre d’applications de Teams et d’Outlook. Chacun y voit le plan et trouve ses collègues sans se reconnecter.',
-          ],
-        },
-      ],
-    },
   },
   faq: [
     {
@@ -430,7 +406,7 @@ export const FR: HelpContent = {
     },
     {
       q: 'J’ai besoin d’une aide qui ne figure pas ici.',
-      a: 'Écrivez à hello@seatline.ch, en français, en allemand ou en anglais.',
+      a: 'Écrivez à hello@seatline.ch.',
     },
   ],
 };

@@ -632,14 +632,6 @@
         "empty": "Die Datei ist leer.",
         "too_many": "Höchstens 2000 Personen pro Datei — teilen Sie die Liste auf."
       }
-    },
-    "teamsApp": {
-      "title": "Teams & Outlook",
-      "body": "Fügen Sie Seatline als App in Microsoft Teams und Outlook hinzu: Alle sehen dort den Plan und finden Kolleginnen und Kollegen, automatisch angemeldet.",
-      "step1": "Laden Sie die App unten herunter.",
-      "step2": "Im Teams Admin Center: Teams-Apps → Apps verwalten → Neue App hochladen (für alle), oder in Teams: Apps → Ihre Apps verwalten → App hochladen (nur für Sie).",
-      "step3": "Öffnen Sie Seatline über die App-Leiste in Teams oder Outlook.",
-      "download": "Teams-App herunterladen"
     }
   },
   "shortcuts": {
@@ -1193,12 +1185,8 @@
     "f8Body": "Team, Rolle und Austrittsdatum für viele Personen auf einmal ändern. Wer geht, gibt den Platz am letzten Tag frei.",
     "f9Title": "E-Mails an die IT und an die Personen",
     "f9Body": "Die IT erhält eine klare E-Mail, wenn jemand geht, kommt oder umzieht. Die Personen erfahren ihren neuen Platz.",
-    "f10Title": "In Teams und Outlook",
-    "f10Body": "Den Platz von Kolleginnen und Kollegen finden, ohne Teams oder Outlook zu verlassen. Automatisch angemeldet.",
-    "f11Title": "Flächenplanung",
-    "f11Body": "Geben Sie ein, wie viele Personen jedes Team erwartet. Sie sehen Monate im Voraus, wann die Plätze knapp werden.",
-    "f12Title": "QR-Codes auf den Plätzen",
-    "f12Body": "Für jeden Platz ein Etikett drucken. Scannen zeigt, wer dort sitzt.",
+    "f10Title": "Flächenplanung",
+    "f10Body": "Geben Sie ein, wie viele Personen jedes Team erwartet. Sie sehen Monate im Voraus, wann die Plätze knapp werden.",
     "stepsTitle": "An einem Nachmittag startklar",
     "s1Title": "Etagen erfassen",
     "s1Body": "Den Plan des Architekturbüros importieren oder Räume und Plätze über ein Bild zeichnen.",
@@ -1228,14 +1216,14 @@
     "a6": "Ja. «Demo ausprobieren» öffnet ein Musterbüro, das Sie frei verändern können, ohne Konto. Oder starten Sie die Gratis-Testphase mit Ihren eigenen Etagen.",
     "q7": "Wie kommen unsere Mitarbeitenden in Seatline?",
     "a7": "Mit Microsoft 365 automatisch, jede Nacht. Ohne Microsoft 365 importieren Sie eine Excel- oder CSV-Liste oder erfassen Personen einzeln.",
-    "q8": "Funktioniert es in Microsoft Teams?",
-    "a8": "Ja. Ihre IT fügt die Seatline-App einmal hinzu; danach finden alle den Plan in Teams und Outlook.",
-    "q9": "Unterzeichnen Sie einen Auftragsverarbeitungsvertrag?",
-    "a9": "Ja. Unser Auftragsverarbeitungsvertrag (AVV) ist Teil der Nutzungsbedingungen, gilt für jeden Arbeitsbereich und ist online. Admins können sich in den Einstellungen ein PDF mit dem Namen ihrer Firma per E-Mail senden.",
+    "q8": "Unterzeichnen Sie einen Auftragsverarbeitungsvertrag?",
+    "a8": "Ja. Unser Auftragsverarbeitungsvertrag (AVV) ist Teil der Nutzungsbedingungen, gilt für jeden Arbeitsbereich und ist online. Admins können sich in den Einstellungen ein PDF mit dem Namen ihrer Firma per E-Mail senden.",
     "finalTitle": "Testen Sie es mit Ihren eigenen Etagen",
     "contact": "Fragen? Schreiben Sie an <mail>{email}</mail>",
     "madeIn": "Made in Switzerland",
-    "copyright": "© {year} Seatline"
+    "copyright": "© {year} Seatline",
+    "f11Title": "QR-Codes auf den Plätzen",
+    "f11Body": "Für jeden Platz ein Etikett drucken. Scannen zeigt, wer dort sitzt."
   },
   "planImport": {
     "title": "Architektenplan importieren",
@@ -1332,11 +1320,6 @@
     "cancel": "Abbrechen",
     "floors": "Freie Plätze pro Etage"
   },
-  "teamsTab": {
-    "signingIn": "Sie werden mit Ihrem Microsoft-Konto angemeldet…",
-    "failed": "Die Anmeldung in Teams hat nicht geklappt. Möglicherweise muss Ihre IT Seatline für Teams noch freigeben.",
-    "openInBrowser": "Seatline im Browser öffnen"
-  },
   "owner": {
     "title": "Geschäftsübersicht",
     "updated": "Aktualisiert {time}",
@@ -1425,7 +1408,7 @@
     "previous": "Zurück",
     "next": "Weiter",
     "stuck": "Noch Fragen?",
-    "contact": "Schreiben Sie an <mail>{email}</mail> – auf Deutsch, Französisch oder Englisch.",
+    "contact": "Schreiben Sie an <mail>{email}</mail>.",
     "openApp": "Seatline öffnen"
   }
 }

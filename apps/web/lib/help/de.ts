@@ -335,30 +335,6 @@ export const DE: HelpContent = {
         },
       ],
     },
-    'teams-app': {
-      title: 'Microsoft Teams und Outlook',
-      summary: 'Seatline in Teams und Outlook nutzen, automatisch angemeldet.',
-      steps: [
-        {
-          title: 'App herunterladen',
-          text: [
-            'Klicken Sie unter Personen & Zugang → Einstellungen → Teams & Outlook auf «Teams-App herunterladen».',
-          ],
-        },
-        {
-          title: 'Zu Teams hinzufügen',
-          text: [
-            'Für alle: im Teams Admin Center Teams-Apps → Apps verwalten → Neue App hochladen. Nur für Sie: in Teams Apps → Ihre Apps verwalten → App hochladen.',
-          ],
-        },
-        {
-          title: 'Öffnen',
-          text: [
-            'Seatline erscheint in der App-Leiste von Teams und Outlook. Dort sehen alle den Plan und finden Kolleginnen und Kollegen, ohne sich erneut anzumelden.',
-          ],
-        },
-      ],
-    },
   },
   faq: [
     {
@@ -431,7 +407,7 @@ export const DE: HelpContent = {
     },
     {
       q: 'Ich brauche Hilfe, die hier fehlt.',
-      a: 'Schreiben Sie an hello@seatline.ch – auf Deutsch, Französisch oder Englisch.',
+      a: 'Schreiben Sie an hello@seatline.ch.',
     },
   ],
 };

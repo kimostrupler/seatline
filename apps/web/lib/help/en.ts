@@ -329,28 +329,6 @@ export const EN: HelpContent = {
         },
       ],
     },
-    'teams-app': {
-      title: 'Microsoft Teams and Outlook',
-      summary: 'Use Seatline inside Teams and Outlook, signed in automatically.',
-      steps: [
-        {
-          title: 'Download the app',
-          text: ['In People & access → Settings → Teams & Outlook, click Download the Teams app.'],
-        },
-        {
-          title: 'Add it to Teams',
-          text: [
-            'For everyone: in the Teams admin center, Teams apps → Manage apps → Upload new app. Just for you: in Teams, Apps → Manage your apps → Upload an app.',
-          ],
-        },
-        {
-          title: 'Open it',
-          text: [
-            'Seatline appears in the Teams and Outlook app bar. People see the map and find colleagues there without signing in again.',
-          ],
-        },
-      ],
-    },
   },
   faq: [
     {
@@ -423,7 +401,7 @@ export const EN: HelpContent = {
     },
     {
       q: 'I need help that isn’t here.',
-      a: 'Write to hello@seatline.ch, in English, German or French.',
+      a: 'Write to hello@seatline.ch.',
     },
   ],
 };

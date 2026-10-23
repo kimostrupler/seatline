@@ -4,7 +4,6 @@ import {
   Building2,
   CreditCard,
   FileDown,
-  MessagesSquare,
   MousePointerClick,
   PencilRuler,
   Rocket,
@@ -32,7 +31,6 @@ export const TOPIC_ICONS: Record<HelpTopicId, LucideIcon> = {
   'home-planning-activity': BarChart3,
   'exports-and-qr': FileDown,
   'privacy-and-billing': CreditCard,
-  'teams-app': MessagesSquare,
 };
 
 /** Website chrome with language links to the same help page, a topic list on the side. */

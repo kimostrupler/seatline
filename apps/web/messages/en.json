@@ -632,14 +632,6 @@
         "empty": "The file is empty.",
         "too_many": "At most 2000 people per file — split the list."
       }
-    },
-    "teamsApp": {
-      "title": "Teams & Outlook",
-      "body": "Add Seatline as an app in Microsoft Teams and Outlook: people see the map and find colleagues there, signed in automatically.",
-      "step1": "Download the app below.",
-      "step2": "In the Teams admin center: Teams apps → Manage apps → Upload new app (for everyone), or in Teams: Apps → Manage your apps → Upload an app (just you).",
-      "step3": "Open Seatline from the Teams or Outlook app bar.",
-      "download": "Download the Teams app"
     }
   },
   "shortcuts": {
@@ -1193,12 +1185,8 @@
     "f8Body": "Change teams, roles and leaving dates for many people at once. Leavers free their desk on their last day.",
     "f9Title": "E-mails to IT and to people",
     "f9Body": "IT gets a clear e-mail when someone leaves, joins or moves. People are told about their new desk.",
-    "f10Title": "In Teams and Outlook",
-    "f10Body": "Find a colleague’s desk without leaving Teams or Outlook. Signed in automatically.",
-    "f11Title": "Space planning",
-    "f11Body": "Enter how many people each team expects. See months ahead when you’ll run out of desks.",
-    "f12Title": "QR codes on desks",
-    "f12Body": "Print a sticker for every desk. Scan it to see who sits there.",
+    "f10Title": "Space planning",
+    "f10Body": "Enter how many people each team expects. See months ahead when you’ll run out of desks.",
     "stepsTitle": "Ready in an afternoon",
     "s1Title": "Add your floors",
     "s1Body": "Import the architect’s plan or draw rooms and desks over a picture.",
@@ -1228,14 +1216,14 @@
     "a6": "Yes. “Try the demo” opens a sample office you can change freely, no account needed. Or start the free trial with your own floors.",
     "q7": "How do our people get into Seatline?",
     "a7": "With Microsoft 365 they come in automatically, every night. Without it, import an Excel or CSV list, or add people one by one.",
-    "q8": "Does it work in Microsoft Teams?",
-    "a8": "Yes. Your IT adds the Seatline app once; everyone then finds the floor map in Teams and Outlook.",
-    "q9": "Do you sign a data processing agreement?",
-    "a9": "Yes. Our data processing agreement (DPA / AVV) is part of the terms, applies to every workspace and is online. Admins can e-mail themselves a PDF copy with their company’s name in Settings.",
+    "q8": "Do you sign a data processing agreement?",
+    "a8": "Yes. Our data processing agreement (DPA / AVV) is part of the terms, applies to every workspace and is online. Admins can e-mail themselves a PDF copy with their company’s name in Settings.",
     "finalTitle": "Try it with your own floors",
     "contact": "Questions? Write to <mail>{email}</mail>",
     "madeIn": "Made in Switzerland",
-    "copyright": "© {year} Seatline"
+    "copyright": "© {year} Seatline",
+    "f11Title": "QR codes on desks",
+    "f11Body": "Print a sticker for every desk. Scan it to see who sits there."
   },
   "planImport": {
     "title": "Import an architect plan",
@@ -1332,11 +1320,6 @@
     "cancel": "Cancel",
     "floors": "Free desks per floor"
   },
-  "teamsTab": {
-    "signingIn": "Signing you in with your Microsoft account…",
-    "failed": "Sign-in inside Teams didn’t work. Your IT may still need to approve Seatline for Teams.",
-    "openInBrowser": "Open Seatline in the browser"
-  },
   "owner": {
     "title": "Business overview",
     "updated": "Updated {time}",
@@ -1425,7 +1408,7 @@
     "previous": "Previous",
     "next": "Next",
     "stuck": "Still stuck?",
-    "contact": "Write to <mail>{email}</mail> — in English, German or French.",
+    "contact": "Write to <mail>{email}</mail>.",
     "openApp": "Open Seatline"
   }
 }
