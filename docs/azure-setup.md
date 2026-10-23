@@ -99,11 +99,6 @@ deploys there after CI, while `main` still goes live. Try risky changes there fi
 views per day, pages, where visitors came from, phone or computer, clicks on "Try it free" /
 "Try the demo", demos opened and workspaces created. Counted without cookies or IP addresses.
 
-### Microsoft Teams & Outlook app
-
-`bash seatline/infra/azure/teams-setup.sh` once; then People & access → Settings → Teams &
-Outlook → download the app and upload it in Teams.
-
 ### Faster first page (~CHF 10–20/month more)
 
 To save money the apps sleep when nobody uses them, so the first visit after a quiet time takes

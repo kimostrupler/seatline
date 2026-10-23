@@ -48,7 +48,7 @@ export function landingJsonLd(opts: {
         description: opts.description,
         applicationCategory: 'BusinessApplication',
         applicationSubCategory: 'Desk and seating management',
-        operatingSystem: 'Web, Microsoft Teams, Outlook',
+        operatingSystem: 'Web',
         inLanguage: ['de-CH', 'fr-CH', 'en'],
         offers: {
           '@type': 'Offer',

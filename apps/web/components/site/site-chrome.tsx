@@ -6,6 +6,7 @@ import { Logo } from '@/components/common/logo';
 import { Button } from '@/components/ui/button';
 import { OPERATOR } from '@/lib/legal/operator';
 import { LANGUAGES, LANGUAGE_NAMES, type Language } from '@/lib/locales';
+import { helpPath } from '@/lib/help';
 import { SITE_LANGUAGE_PATHS } from '@/lib/site';
 import { SiteBeacon } from './site-beacon';
 import { webConfig } from '@/lib/server/config';
@@ -49,10 +50,8 @@ async function LanguageLinks({
 
 /** Top bar of the public website (landing page and legal pages). */
 export async function SiteHeader({
-  sections = false,
   languagePaths,
 }: {
-  sections?: boolean;
   /** pages whose address says their language (landing page, help center) link to the others */
   languagePaths?: Record<Language, string>;
 }) {
@@ -64,26 +63,10 @@ export async function SiteHeader({
           <Logo className="size-7" />
           Seatline
         </Link>
-        {sections && (
-          <nav className="flex items-center gap-1 max-md:hidden" aria-label={t('navFeatures')}>
-            {(
-              [
-                ['#features', 'navFeatures'],
-                ['#pricing', 'navPricing'],
-                ['#faq', 'navFaq'],
-              ] as const
-            ).map(([href, key]) => (
-              <Button key={href} asChild variant="ghost" size="sm">
-                <a href={href}>{t(key)}</a>
-              </Button>
-            ))}
-          </nav>
-        )}
-        {sections || languagePaths ? (
-          <LanguageLinks paths={languagePaths} />
-        ) : (
-          <LanguageSelect compact />
-        )}
+        <Button asChild variant="ghost" size="sm">
+          <Link href={helpPath((await getLocale()).slice(0, 2) as Language)}>{t('navHelp')}</Link>
+        </Button>
+        {languagePaths ? <LanguageLinks paths={languagePaths} /> : <LanguageSelect compact />}
         <Button asChild variant="outline" size="sm">
           <a href={signInUrl()}>{t('signIn')}</a>
         </Button>
@@ -130,16 +113,14 @@ export async function LegalLinks({ className }: { className?: string }) {
 
 export function SitePage({
   children,
-  sections,
   languagePaths,
 }: {
   children: ReactNode;
-  sections?: boolean;
   languagePaths?: Record<Language, string>;
 }) {
   return (
     <div className="flex min-h-dvh flex-col bg-background">
-      <SiteHeader sections={sections} languagePaths={languagePaths} />
+      <SiteHeader languagePaths={languagePaths} />
       <main className="flex-1">{children}</main>
       <SiteFooter />
       <SiteBeacon />

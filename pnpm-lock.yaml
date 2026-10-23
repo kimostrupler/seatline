@@ -119,9 +119,6 @@ importers:
 
   apps/web:
     dependencies:
-      '@microsoft/teams-js':
-        specifier: 2.38.0
-        version: 2.38.0
       '@seatline/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -942,9 +939,6 @@ packages:
 
   '@microsoft/applicationinsights-web-snippet@1.2.3':
     resolution: {integrity: sha512-59ex4x1/PabGQIg+o0GKG5olqAJYBvMOiXec/9HCD3hK2y36YMWT0ivq5mequvtS5+21kco3SOnMB6QyScLPIA==}
-
-  '@microsoft/teams-js@2.38.0':
-    resolution: {integrity: sha512-qK8jPR0B30oAh8yo48YqG8enxABFEsNO28+xM5KImeZg4KWspax2xmm70uPyR0sjxfj7qtiTnReA0Mo6GUboyQ==}
 
   '@napi-rs/lzma-linux-x64-gnu@1.5.1':
     resolution: {integrity: sha512-oTXEIha4SsuXdTA4Iyskj0kpdx2yVXdhd75c2v3xGrHFfVMsbhTPZU/nMPL4sWKo4pBHm3aucLaqGlF696dTyQ==}
@@ -6565,13 +6559,6 @@ snapshots:
   '@lukeed/csprng@1.1.0': {}
 
   '@microsoft/applicationinsights-web-snippet@1.2.3': {}
-
-  '@microsoft/teams-js@2.38.0':
-    dependencies:
-      base64-js: 1.5.1
-      debug: 4.4.3
-    transitivePeerDependencies:
-      - supports-color
 
   '@napi-rs/lzma-linux-x64-gnu@1.5.1':
     optional: true

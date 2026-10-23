@@ -253,7 +253,7 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   exists / duplicate / invalid); `POST /people/import` adds the new ones in one transaction,
   sends one "joined" notice and optional invitations. Manual add also sends "joined" now.
 - **Security headers** in `apps/web/next.config.ts`: CSP (self only, `blob:` images,
-  `frame-ancestors 'none'`), HSTS, nosniff, Referrer/Permissions-Policy, COOP. A new outside
+  `frame-ancestors 'none'` + X-Frame-Options DENY), HSTS, nosniff, Referrer/Permissions-Policy, COOP. A new outside
   host (script, font, image, API) must be added to the CSP or it's blocked.
 - **Dependabot** (`.github/dependabot.yml`): weekly grouped minor/patch PRs for npm, pip, Docker,
   Actions; majors are skipped (read the changelog; react-konva must match Next's React).
@@ -280,22 +280,14 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   Data protection → `POST /privacy/dpa` (`dpa-pdf.ts`, pdf-lib, audited `privacy.dpa`); it
   applies without a signature, a hand-signed copy stays possible on request.
 
-## Space planning, Teams & Outlook app
+## Space planning
 
 - **Planning** (`/planning`, editors/admins, `@EditorsOnly`): `team_plans` (team, headcount,
   by_date; RLS like everything). `GET /planning` = `spacePlan()` (`apps/api/src/planning/plan.ts`,
   pure, unit-tested): per team people / seated / expected / desks needed / team-zone desks, desks
   free, growth and how many desks are short. `PUT /planning/teams` (headcount null = remove),
   audited as `team_plan.set`.
-- **Teams/Outlook tab**: the app package is built at `/teams-app` (`lib/teams/manifest.ts`,
-  manifest 1.17, personal static tab → `/teams`, icons in `icons.ts`, id derived from the host).
-  `/teams` (public) uses `@microsoft/teams-js` `getAuthToken()` → POST `/auth/teams` →
-  `verifyTeamsToken` (audience `api://<host>/<clientId>`, issuer = the token's tenant, v2 or v1
-  sts) → ordinary Microsoft session, cookie `SameSite=None; Partitioned` (https only) so it only
-  lives inside the Teams frame. Outside Teams `/teams` goes to `/map`. CSP `frame-ancestors`
-  allows Teams/Outlook/M365 hosts only (no X-Frame-Options). The `/api` proxy refuses changes
-  whose Origin isn't the app. One-time Entra setup: `infra/azure/teams-setup.sh` (Application ID
-  URI, `access_as_user` scope, Teams/Outlook/M365 clients pre-authorized, v2 tokens).
+- There is no Microsoft Teams / Outlook app (removed on purpose); the app may not be framed.
 
 ## Activity
 
@@ -390,6 +382,16 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 
 ## Website and legal pages
 
+- **Landing page design** ("colour chapters", dealt by the taste-skill, record in `.taste-skill/`):
+  each section is one flat seat colour (green free, grey taken, yellow reserved, brand blue, deep
+  ink). Own stylesheet `components/site/landing/landing.css` scoped under `.ld`; font Chivo is
+  self-hosted in `public/fonts` (CSP blocks Google Fonts). Live parts (client): `LiveFloor` (tap a
+  green desk), `NoticeDemo` (the IT e-mail, worded like `notices.ts` via `lib/site/notice-sample.ts`
+  — keep in step), `FeatureIndex` (help topics with previews), `Reveal` (entrances). They get only
+  `site.live`/`site.notice` via a nested `NextIntlClientProvider`. Phone pictures in
+  `public/site-img/<lang>/` come from the screenshot run (help-screenshots.spec.ts). Help is
+  linked from the top row, the chapters, the index and the footer. Gate: the taste-skill's
+  `lint.mjs` + `inspect.mjs` (Chrome needs `--no-sandbox` as root).
 - Landing page `app/welcome` + `app/legal/[doc]` (terms, privacy, imprint) are public. The
   site domain = parent of the app's `APP_URL` host (`siteHosts` in `lib/site.ts`): there `/`
   rewrites to `/welcome`, other paths redirect to the app. robots: index the site, never the app.

@@ -1,7 +1,7 @@
 'use client';
 
 import { NOTIFY_EVENTS, type NotifyEvent } from '@seatline/shared';
-import { Download, Loader2, Mail, RefreshCw, X } from 'lucide-react';
+import { Loader2, Mail, RefreshCw, X } from 'lucide-react';
 import { useFormatter, useLocale, useNow, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -32,7 +32,6 @@ export function SettingsTab({ consentBase }: { consentBase: ConsentBase }) {
       <AccessSection />
       <NoticesSection />
       <MicrosoftSection consentBase={consentBase} />
-      {consentBase && <TeamsSection />}
       <PrivacySection />
     </>
   );
@@ -208,30 +207,6 @@ function AccessSection() {
 const RETENTION = ['12', '24', '60', '120', 'forever'] as const;
 
 /** How long seat history and the activity log are kept (Swiss data protection). */
-/** Seatline as a tab in Microsoft Teams and Outlook (single sign-on). */
-function TeamsSection() {
-  const t = useTranslations('admin.teamsApp');
-  const tenant = useTenant().data;
-  if (!tenant?.entraTenantId) return null;
-  return (
-    <Section title={t('title')}>
-      <div className="grid gap-3 rounded-lg border p-4 text-sm" data-testid="teams-app">
-        <p className="text-muted-foreground">{t('body')}</p>
-        <ol className="grid list-decimal gap-1 pl-5">
-          <li>{t('step1')}</li>
-          <li>{t('step2')}</li>
-          <li>{t('step3')}</li>
-        </ol>
-        <Button asChild variant="outline" className="justify-self-start">
-          <a href="/teams-app" download>
-            <Download /> {t('download')}
-          </a>
-        </Button>
-      </div>
-    </Section>
-  );
-}
-
 function PrivacySection() {
   const t = useTranslations('admin.privacy');
   const tenant = useTenant();

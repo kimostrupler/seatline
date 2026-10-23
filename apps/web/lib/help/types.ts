@@ -10,7 +10,6 @@ export const HELP_TOPICS = [
   'home-planning-activity',
   'exports-and-qr',
   'privacy-and-billing',
-  'teams-app',
 ] as const;
 export type HelpTopicId = (typeof HELP_TOPICS)[number];
 

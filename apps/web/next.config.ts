@@ -6,24 +6,10 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 const dev = process.env.NODE_ENV !== 'production';
 
-/** Where Microsoft hosts Teams / Outlook / Microsoft 365 tabs (see Microsoft's Teams tab docs). */
-const TEAMS_HOSTS = [
-  'https://teams.microsoft.com',
-  'https://*.teams.microsoft.com',
-  'https://*.cloud.microsoft',
-  'https://*.office.com',
-  'https://*.office365.com',
-  'https://*.microsoft365.com',
-  'https://outlook.office.com',
-  'https://outlook.office365.com',
-  'https://*.outlook.com',
-];
-
 /**
  * Content Security Policy: everything comes from our own origin (no third-party scripts, fonts
  * or trackers). Inline scripts/styles are needed by Next.js and the map; plan images are
- * blob: URLs. Only Microsoft Teams, Outlook and the Microsoft 365 app may show it in a frame
- * (our Teams tab); nobody else (clickjacking).
+ * blob: URLs. No site may show it in a frame (clickjacking).
  */
 const csp = [
   "default-src 'self'",
@@ -34,12 +20,13 @@ const csp = [
   `connect-src 'self'${dev ? ' ws:' : ''}`,
   "object-src 'none'",
   "base-uri 'self'",
-  `frame-ancestors 'self' ${TEAMS_HOSTS.join(' ')}`,
+  "frame-ancestors 'none'",
 ].join('; ');
 
 const securityHeaders = [
   { key: 'Content-Security-Policy', value: csp },
   { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains' },
+  { key: 'X-Frame-Options', value: 'DENY' },
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
   {

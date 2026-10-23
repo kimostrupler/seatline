@@ -67,7 +67,7 @@ const T = {
     nowhere: 'kein Platz',
     open: 'Seatline öffnen:',
     why: (ws: string) =>
-      `Sie erhalten diese E-Mail, weil ein Admin von ${ws} Ihre Adresse für Mitteilungen in Seatline eingetragen hat (Personen & Zugriff → Einstellungen).`,
+      `Sie erhalten diese E-Mail, weil ein Admin von ${ws} Ihre Adresse für Mitteilungen in Seatline eingetragen hat (Personen & Zugang → Einstellungen).`,
     subjectOne: (ws: string, what: string) => `Seatline · ${ws}: ${what}`,
     subjectMany: (ws: string, n: number) => `Seatline · ${ws}: ${n} Änderungen`,
     short: {

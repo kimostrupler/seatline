@@ -120,8 +120,6 @@ Changing the schema: edit `apps/api/prisma/schema.prisma`, then
   map (who sits there).
 - **Planning** (`/planning`, editors): expected headcount per team (and by when) against the
   free desks — "6 desks short" before it happens.
-- **Teams & Outlook app** (People & access → Settings, after `infra/azure/teams-setup.sh`): the
-  map as a tab in Teams and Outlook, signed in automatically (Teams single sign-on).
 - **"Your new desk" e-mails** to the person who got a desk (2 minutes later, so an undone move
   sends nothing), switchable in Settings. Admins get a reminder 7 days and 1 day before the
   free trial ends.
@@ -242,7 +240,7 @@ merge to `main` deploys automatically (`.github/workflows/deploy.yml`).
 
 See [docs/azure-setup.md](docs/azure-setup.md) → Optional extras: error alerts + uptime check
 (`ALERT_EMAIL`), the monthly backup restore test, a staging copy (branch `staging`), website
-statistics (`infra/azure/site-stats.sh`) and the Teams & Outlook app.
+statistics (`infra/azure/site-stats.sh`).
 
 ## File storage
 

@@ -632,14 +632,6 @@
         "empty": "The file is empty.",
         "too_many": "At most 2000 people per file — split the list."
       }
-    },
-    "teamsApp": {
-      "title": "Teams & Outlook",
-      "body": "Add Seatline as an app in Microsoft Teams and Outlook: people see the map and find colleagues there, signed in automatically.",
-      "step1": "Download the app below.",
-      "step2": "In the Teams admin center: Teams apps → Manage apps → Upload new app (for everyone), or in Teams: Apps → Manage your apps → Upload an app (just you).",
-      "step3": "Open Seatline from the Teams or Outlook app bar.",
-      "download": "Download the Teams app"
     }
   },
   "shortcuts": {
@@ -1158,23 +1150,10 @@
   "site": {
     "metaTitle": "Seatline: seating plans for Swiss companies",
     "metaDescription": "See who sits where, plan moves, keep IT in the loop and keep the history. Sign in with Microsoft 365 or by e-mail. Hosted in Switzerland. Free for 30 days.",
-    "navFeatures": "Features",
-    "navPricing": "Pricing",
-    "navFaq": "Questions",
     "signIn": "Sign in",
-    "heroTitle": "Know who sits where.",
-    "heroBody": "A seating plan for your office. Draw your floors, give people a desk, plan moves and let IT know automatically. Hosted in Switzerland.",
     "ctaTrial": "Try it free for 30 days",
     "ctaDemo": "Try the demo",
     "ctaNote": "No credit card. Sign in with Microsoft 365 or by e-mail.",
-    "mapAlt": "A Seatline floor map: free desks in green, taken in grey, reserved in yellow.",
-    "mapFloor": "Zurich · 3rd floor",
-    "cardSince": "Desk 3.12 · since 3 March",
-    "trustSwiss": "Data stays in Switzerland",
-    "trustMicrosoft": "Microsoft 365 or e-mail sign-in",
-    "trustPrivacy": "Swiss nDSG and GDPR",
-    "trustLanguages": "German, French, English",
-    "featuresTitle": "What you get",
     "f1Title": "Floor map",
     "f1Body": "Free, taken and reserved desks at a glance. Find anyone in seconds.",
     "f2Title": "Plan import",
@@ -1193,26 +1172,8 @@
     "f8Body": "Change teams, roles and leaving dates for many people at once. Leavers free their desk on their last day.",
     "f9Title": "E-mails to IT and to people",
     "f9Body": "IT gets a clear e-mail when someone leaves, joins or moves. People are told about their new desk.",
-    "f10Title": "In Teams and Outlook",
-    "f10Body": "Find a colleague’s desk without leaving Teams or Outlook. Signed in automatically.",
-    "f11Title": "Space planning",
-    "f11Body": "Enter how many people each team expects. See months ahead when you’ll run out of desks.",
-    "f12Title": "QR codes on desks",
-    "f12Body": "Print a sticker for every desk. Scan it to see who sits there.",
-    "stepsTitle": "Ready in an afternoon",
-    "s1Title": "Add your floors",
-    "s1Body": "Import the architect’s plan or draw rooms and desks over a picture.",
-    "s2Title": "Add your people",
-    "s2Body": "From Microsoft 365, or type them in and invite them by e-mail.",
-    "s3Title": "Seat everyone",
-    "s3Body": "Drag people onto desks. From then on, every move is kept.",
-    "pricingTitle": "One price",
-    "pricingBody": "You only pay for desks in use.",
-    "perSeat": "per desk per month",
-    "trialBadge": "30 days free",
-    "p1": "All features",
-    "p2": "Unlimited people, buildings and floors",
-    "p3": "Cancel any month",
+    "f10Title": "Space planning",
+    "f10Body": "Enter how many people each team expects. See months ahead when you’ll run out of desks.",
     "faqTitle": "Questions",
     "q1": "Where is our data stored?",
     "a1": "In Switzerland, in Microsoft Azure (Zurich). Payments go through Stripe.",
@@ -1228,14 +1189,121 @@
     "a6": "Yes. “Try the demo” opens a sample office you can change freely, no account needed. Or start the free trial with your own floors.",
     "q7": "How do our people get into Seatline?",
     "a7": "With Microsoft 365 they come in automatically, every night. Without it, import an Excel or CSV list, or add people one by one.",
-    "q8": "Does it work in Microsoft Teams?",
-    "a8": "Yes. Your IT adds the Seatline app once; everyone then finds the floor map in Teams and Outlook.",
-    "q9": "Do you sign a data processing agreement?",
-    "a9": "Yes. Our data processing agreement (DPA / AVV) is part of the terms, applies to every workspace and is online. Admins can e-mail themselves a PDF copy with their company’s name in Settings.",
-    "finalTitle": "Try it with your own floors",
+    "q8": "Do you sign a data processing agreement?",
+    "a8": "Yes. Our data processing agreement (DPA / AVV) is part of the terms, applies to every workspace and is online. Admins can e-mail themselves a PDF copy with their company’s name in Settings.",
     "contact": "Questions? Write to <mail>{email}</mail>",
     "madeIn": "Made in Switzerland",
-    "copyright": "© {year} Seatline"
+    "copyright": "© {year} Seatline",
+    "f11Title": "QR codes on desks",
+    "f11Body": "Print a sticker for every desk. Scan it to see who sits there.",
+    "heroLead": "The seating plan for Swiss offices: who sits at which desk, moves planned overnight, every change kept. CHF 2 per desk a month.",
+    "tabs": {
+      "free": "Free desks",
+      "taken": "Who sits where",
+      "moving": "Moves",
+      "price": "Price",
+      "faq": "Questions"
+    },
+    "navHelp": "Help",
+    "demoLink": "or try the demo first",
+    "live": {
+      "title": "Try it: tap a green desk",
+      "waiting": "Waiting for a desk",
+      "everyone": "Everyone has a desk now.",
+      "assigned": "{person} → desk {desk}, since today",
+      "undo": "Undo",
+      "free": "Free {count}",
+      "taken": "Taken {count}",
+      "reserved": "Reserved {count}",
+      "seatFree": "Desk {label}, free — give it to {person}",
+      "seatTaken": "Desk {label}, {person}",
+      "seatReserved": "Desk {label}, reserved for {person}",
+      "room": "Open space",
+      "meeting": "Meeting room",
+      "newHire": "New hire"
+    },
+    "chapters": {
+      "free": {
+        "title": "Find a free desk",
+        "body": "Free desks are green. Filter for a standing desk, two screens or the window, then drag a name onto one.",
+        "link": "How seating works"
+      },
+      "taken": {
+        "title": "Who sits there, since when",
+        "body": "Tap a desk or scan its sticker: name, team, e-mail and everyone who sat there before.",
+        "link": "Desk stickers and exports"
+      },
+      "moving": {
+        "title": "Moves happen overnight",
+        "body": "Plan a team move on the map and pick the day. It happens early that morning, and the movers get a printed list.",
+        "link": "How moves work"
+      },
+      "alt": {
+        "free": "Seatline on a phone: the floor map with free desks",
+        "taken": "Seatline on a phone: the page a desk sticker opens",
+        "moving": "Seatline on a phone: a move plan with its moves"
+      }
+    },
+    "indexTitle": "Everything Seatline does",
+    "indexBody": "Each topic opens a step-by-step guide with pictures from the app.",
+    "indexAll": "Open the help center",
+    "stepsTitle": "Ready in an afternoon",
+    "steps": {
+      "signup": {
+        "time": "One minute",
+        "text": "First, sign in with Microsoft 365 or your e-mail."
+      },
+      "floor": {
+        "time": "Ten minutes",
+        "text": "Then pick an example office and shape it to your floor."
+      },
+      "people": {
+        "time": "Two minutes",
+        "text": "Next, import your people from Excel or Microsoft 365."
+      },
+      "seat": {
+        "time": "About an hour",
+        "text": "Last, drag everyone onto their desk."
+      }
+    },
+    "notice": {
+      "title": "Everyone in the loop",
+      "output": "E-mail to IT, as Seatline sends it",
+      "day": {
+        "title": "Pick the moving day.",
+        "body": "A move plan happens early that morning, all moves at once or none.",
+        "label": "Moving day"
+      },
+      "to": {
+        "title": "Tell IT without lifting a finger.",
+        "body": "Any address you add gets one plain e-mail per change: who left, who joined, who moved where.",
+        "label": "Send notices to"
+      },
+      "lang": {
+        "title": "Written in their language.",
+        "body": "German, French or English, chosen per workspace.",
+        "label": "Language of the e-mails"
+      },
+      "people": {
+        "title": "People hear about their new desk.",
+        "body": "Everyone who moves gets a short e-mail with their desk and a link to the map.",
+        "label": "E-mail people their new desk"
+      }
+    },
+    "priceLine1": "Every desk:",
+    "priceFigure": "CHF 2",
+    "priceLine2": "a month",
+    "priceBody": "Everything included: all features, unlimited people, buildings and floors. Blocked desks are free, the first 30 days too. Cancel any month.",
+    "priceDemo": "Or try the demo first",
+    "ctaTitle": "Try it on your floor",
+    "ctaBody": "30 days free, no credit card. Sign in with Microsoft 365 or by e-mail.",
+    "footerStatement": "Seating plans for Swiss offices, made in Switzerland.",
+    "footerPlace": "Eglisau, Switzerland",
+    "footerTime": "Local time",
+    "footerHosted": "Data hosted in Zurich",
+    "footerInvite": "Try the demo",
+    "footerNav": "Pages",
+    "footerMail": "Questions?"
   },
   "planImport": {
     "title": "Import an architect plan",
@@ -1332,11 +1400,6 @@
     "cancel": "Cancel",
     "floors": "Free desks per floor"
   },
-  "teamsTab": {
-    "signingIn": "Signing you in with your Microsoft account…",
-    "failed": "Sign-in inside Teams didn’t work. Your IT may still need to approve Seatline for Teams.",
-    "openInBrowser": "Open Seatline in the browser"
-  },
   "owner": {
     "title": "Business overview",
     "updated": "Updated {time}",
@@ -1425,7 +1488,7 @@
     "previous": "Previous",
     "next": "Next",
     "stuck": "Still stuck?",
-    "contact": "Write to <mail>{email}</mail> — in English, German or French.",
+    "contact": "Write to <mail>{email}</mail>.",
     "openApp": "Open Seatline"
   }
 }
