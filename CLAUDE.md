@@ -377,6 +377,10 @@ folded`) so the person and the actions stand out.
   webhook only applies if its customer matches the tenant's `stripe_customer_id`.
 - The operator's own workspace (an active admin from `OWNER_EMAILS`, e-mail sign-in) is billing
   state `off` like demos: never a trial, never read-only.
+- Checkout and the customer portal run on Stripe's own pages under **pay.seatline.ch** (Stripe
+  custom domain, set in the Stripe dashboard + a DNS record). The web app just opens the URL the
+  API gets from Stripe (`window.location.assign`), so nothing in code or the CSP depends on the
+  domain. Don't hard-code Stripe hosts.
 - Seat count = active seats; the nightly job syncs it (`list_billed_tenants`). Tests use
   `test/fake-stripe.ts` via `STRIPE_API_BASE`. Keys online: `infra/azure/stripe-setup.sh`.
 

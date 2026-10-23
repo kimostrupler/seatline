@@ -158,6 +158,12 @@ To go live: activate your Stripe account, then run the script again with the **l
 (`sk_live_…`). In Stripe, also turn on the **Customer portal** (Settings → Billing → Customer
 portal) so admins can change their card or cancel.
 
+**Own payment domain (done):** in Stripe → Settings → Business → Custom domains, Checkout and the
+customer portal run on **pay.seatline.ch** (a DNS record at the domain registrar points it to
+Stripe; Stripe checks it for a few hours, then switches over by itself). Seatline needs no change
+for this: it always opens the address Stripe returns. If the domain is ever removed, Stripe falls
+back to checkout.stripe.com / billing.stripe.com, which also works.
+
 ## Good to know
 
 - **Other companies** can sign in the same way: their first person creates their workspace.
