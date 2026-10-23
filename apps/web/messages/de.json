@@ -1202,7 +1202,7 @@
     "copyright": "© {year} Seatline",
     "f11Title": "QR-Codes auf den Plätzen",
     "f11Body": "Für jeden Platz ein Etikett drucken. Scannen zeigt, wer dort sitzt.",
-    "heroLead": "Der Sitzplan für Schweizer Büros: wer an welchem Platz sitzt, Umzüge über Nacht, jede Änderung festgehalten. CHF 2 pro Platz und Monat.",
+    "heroLead": "Wer wo sitzt, geplante Umzüge und jede Änderung festgehalten. Für Schweizer Büros, CHF 2 pro Platz.",
     "navHelp": "Hilfe",
     "live": {
       "title": "Ausprobieren: tippen Sie auf einen grünen Platz",
@@ -1223,17 +1223,17 @@
     "chapters": {
       "free": {
         "title": "Freie Plätze finden",
-        "body": "Freie Plätze sind grün. Filtern Sie nach Stehpult, zwei Bildschirmen oder Fenster und ziehen Sie einen Namen darauf.",
+        "body": "Grün heisst frei. Ziehen Sie einen Namen darauf.",
         "link": "So funktioniert das Zuteilen"
       },
       "taken": {
         "title": "Wer dort sitzt, seit wann",
-        "body": "Tippen Sie auf einen Platz oder scannen Sie das Etikett: Name, Team, E-Mail und alle, die vorher dort sassen.",
+        "body": "Platz antippen oder Aufkleber scannen: wer dort sitzt, seit wann.",
         "link": "Etiketten und Exporte"
       },
       "moving": {
         "title": "Umzüge über Nacht",
-        "body": "Planen Sie den Teamumzug auf dem Plan und wählen Sie den Tag. Er passiert früh morgens, und die Zügelfirma erhält eine gedruckte Liste.",
+        "body": "Teamumzug planen, Tag wählen. Er passiert über Nacht.",
         "link": "So funktionieren Umzüge"
       },
       "alt": {
@@ -1289,7 +1289,7 @@
       }
     },
     "priceFigure": "CHF 2",
-    "priceBody": "Alles inbegriffen: alle Funktionen, beliebig viele Personen, Gebäude und Stockwerke. Gesperrte Plätze sind gratis, die ersten 30 Tage auch. Jeden Monat kündbar.",
+    "priceBody": "Alle Funktionen, beliebig viele Personen und Stockwerke. 30 Tage gratis, monatlich kündbar.",
     "priceDemo": "Oder zuerst die Demo ausprobieren",
     "ctaTitle": "Mit Ihrem Stockwerk testen",
     "ctaBody": "30 Tage gratis, ohne Kreditkarte. Anmeldung mit Microsoft 365 oder per E-Mail.",

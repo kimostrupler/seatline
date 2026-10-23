@@ -102,7 +102,8 @@ const WORDS = {
     blocked: 'Blocked',
     assigned: 'Assigned',
     sheet: 'Seating',
-    history: 'History',
+    // not "History": Excel reserves that sheet name (ExcelJS throws)
+    history: 'Seat history',
   },
   de: {
     free: 'Frei',

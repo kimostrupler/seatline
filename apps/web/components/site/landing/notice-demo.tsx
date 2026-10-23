@@ -73,7 +73,6 @@ export function NoticeDemo() {
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
-          <p className="text-sm text-muted-foreground">{t('day.body')}</p>
         </div>
         <div className="grid gap-2">
           <Label htmlFor={`${id}-to`}>{t('to.label')}</Label>
@@ -84,7 +83,6 @@ export function NoticeDemo() {
             maxLength={80}
             onChange={(e) => setTo(e.target.value)}
           />
-          <p className="text-sm text-muted-foreground">{t('to.body')}</p>
         </div>
         <div className="grid gap-2">
           <Label id={`${id}-lang`}>{t('lang.label')}</Label>
@@ -104,7 +102,6 @@ export function NoticeDemo() {
         <div className="flex items-start justify-between gap-4">
           <div className="grid gap-1">
             <Label htmlFor={`${id}-people`}>{t('people.label')}</Label>
-            <p className="text-sm text-muted-foreground">{t('people.body')}</p>
           </div>
           <Switch id={`${id}-people`} checked={people} onCheckedChange={setPeople} />
         </div>

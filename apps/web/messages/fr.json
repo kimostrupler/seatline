@@ -1202,7 +1202,7 @@
     "copyright": "© {year} Seatline",
     "f11Title": "QR codes sur les places",
     "f11Body": "Imprimez une étiquette pour chaque place. En la scannant, on voit qui y est assis.",
-    "heroLead": "Le plan de places des bureaux suisses : qui est assis où, déménagements pendant la nuit, chaque changement conservé. CHF 2 par poste et par mois.",
+    "heroLead": "Qui est assis où, les déménagements planifiés et chaque changement gardé. Pour les bureaux suisses, CHF 2 par poste.",
     "navHelp": "Aide",
     "live": {
       "title": "Essayez : touchez un poste vert",
@@ -1223,17 +1223,17 @@
     "chapters": {
       "free": {
         "title": "Trouver un poste libre",
-        "body": "Les postes libres sont verts. Filtrez par bureau debout, deux écrans ou fenêtre, puis glissez-y un nom.",
+        "body": "Vert veut dire libre. Glissez-y un nom.",
         "link": "Comment attribuer les postes"
       },
       "taken": {
         "title": "Qui est assis là, depuis quand",
-        "body": "Touchez un poste ou scannez son étiquette : nom, équipe, e-mail et tous ceux qui l’ont occupé avant.",
+        "body": "Touchez un poste ou scannez son autocollant : qui y est assis, depuis quand.",
         "link": "Étiquettes et exports"
       },
       "moving": {
         "title": "Déménager pendant la nuit",
-        "body": "Planifiez le déménagement d’une équipe sur le plan et choisissez le jour. Il a lieu tôt le matin, et les déménageurs reçoivent une liste imprimée.",
+        "body": "Planifiez un déménagement d’équipe et choisissez le jour. Il a lieu pendant la nuit.",
         "link": "Comment fonctionnent les déménagements"
       },
       "alt": {
@@ -1289,7 +1289,7 @@
       }
     },
     "priceFigure": "CHF 2",
-    "priceBody": "Tout est inclus : toutes les fonctions, personnes, bâtiments et étages illimités. Les postes bloqués sont gratuits, les 30 premiers jours aussi. Résiliable chaque mois.",
+    "priceBody": "Toutes les fonctions, personnes et étages illimités. 30 jours gratuits, résiliable chaque mois.",
     "priceDemo": "Ou essayez d’abord la démo",
     "ctaTitle": "Essayez sur votre étage",
     "ctaBody": "30 jours gratuits, sans carte de crédit. Connexion avec Microsoft 365 ou par e-mail.",

@@ -1202,7 +1202,7 @@
     "copyright": "© {year} Seatline",
     "f11Title": "QR codes on desks",
     "f11Body": "Print a sticker for every desk. Scan it to see who sits there.",
-    "heroLead": "The seating plan for Swiss offices: who sits at which desk, moves planned overnight, every change kept. CHF 2 per desk a month.",
+    "heroLead": "Who sits where, planned moves and every change kept. Made for Swiss offices, CHF 2 per desk.",
     "navHelp": "Help",
     "live": {
       "title": "Try it: tap a green desk",
@@ -1223,17 +1223,17 @@
     "chapters": {
       "free": {
         "title": "Find a free desk",
-        "body": "Free desks are green. Filter for a standing desk, two screens or the window, then drag a name onto one.",
+        "body": "Green means free. Drag a name onto it.",
         "link": "How seating works"
       },
       "taken": {
         "title": "Who sits there, since when",
-        "body": "Tap a desk or scan its sticker: name, team, e-mail and everyone who sat there before.",
+        "body": "Tap a desk or scan its sticker: who sits there, since when.",
         "link": "Desk stickers and exports"
       },
       "moving": {
         "title": "Moves happen overnight",
-        "body": "Plan a team move on the map and pick the day. It happens early that morning, and the movers get a printed list.",
+        "body": "Plan a team move and pick the day. It happens overnight.",
         "link": "How moves work"
       },
       "alt": {
@@ -1289,7 +1289,7 @@
       }
     },
     "priceFigure": "CHF 2",
-    "priceBody": "Everything included: all features, unlimited people, buildings and floors. Blocked desks are free, the first 30 days too. Cancel any month.",
+    "priceBody": "All features, unlimited people and floors. 30 days free, cancel any month.",
     "priceDemo": "Or try the demo first",
     "ctaTitle": "Try it on your floor",
     "ctaBody": "30 days free, no credit card. Sign in with Microsoft 365 or by e-mail.",
