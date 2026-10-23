@@ -92,6 +92,17 @@ describe('exports', () => {
     expect((other.body as Buffer).toString('utf8')).not.toContain('alpha');
   });
 
+  it('seat history as Excel, also for a company without any history yet', async () => {
+    const res = await download('/exports/history?format=xlsx&lang=de', a.headers).expect(200);
+    const book = new ExcelJS.Workbook();
+    const bytes = res.body as Buffer;
+    await book.xlsx.load(
+      bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer,
+    );
+    expect(book.worksheets[0]!.rowCount).toBe(3);
+    await download('/exports/history?format=xlsx', b.headers).expect(200);
+  });
+
   it('CSV fields are quoted, and formulas are neutralised', () => {
     expect(csvField('Müller; Anna', ';')).toBe('"Müller; Anna"');
     expect(csvField('say "hi"', ',')).toBe('"say ""hi"""');

@@ -328,7 +328,6 @@ export default async function Welcome() {
                           aria-hidden
                         />
                       </span>
-                      <span className="text-sm text-muted-foreground">{topic.summary}</span>
                     </span>
                   </a>
                 </li>
@@ -355,11 +354,7 @@ export default async function Welcome() {
         </Section>
 
         {/* notices to IT */}
-        <Section
-          title={t('notice.title')}
-          lead={t('notice.to.body')}
-          className="border-t bg-canvas"
-        >
+        <Section title={t('notice.title')} className="border-t bg-canvas">
           <div data-reveal>
             <NextIntlClientProvider messages={liveMessages}>
               <NoticeDemo />
