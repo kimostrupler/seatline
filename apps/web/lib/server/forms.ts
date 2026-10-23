@@ -14,6 +14,10 @@ export function fromThisApp(req: NextRequest): boolean {
   return req.headers.get('origin') === new URL(webConfig().APP_URL).origin;
 }
 
-/** The caller's address as seen by the proxy in front of the app. */
-export const clientIp = (req: NextRequest) =>
-  req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+/**
+ * The caller's address as seen by Azure's ingress: the LAST X-Forwarded-For entry, the one the
+ * ingress appended. Earlier entries come from the caller and can be made up (a fake one per
+ * request would get around every per-address limit).
+ */
+export const clientIp = (req: Pick<NextRequest, 'headers'>) =>
+  req.headers.get('x-forwarded-for')?.split(',').at(-1)?.trim() || 'unknown';

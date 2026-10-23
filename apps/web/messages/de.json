@@ -799,7 +799,8 @@
     "search": "Aktivität durchsuchen",
     "searchPlaceholder": "Personen, Arbeitsplätze, Räume, Stockwerke, Notizen suchen …",
     "privacyDpa": "hat sich den Auftragsverarbeitungsvertrag per E-Mail gesendet",
-    "workspaceDeleted": "hat den Arbeitsbereich «{name}» gelöscht (Support)"
+    "workspaceDeleted": "hat den Arbeitsbereich «{name}» gelöscht (Support)",
+    "workspaceTipsStopped": "hat die Tipps für «{name}» gestoppt (Support)"
   },
   "dashboard": {
     "title": "Start",
@@ -1507,6 +1508,11 @@
       "own": "Den Arbeitsbereich, in dem Sie angemeldet sind, können Sie nicht löschen.",
       "mismatch": "Der Name stimmt nicht.",
       "failed": "Der Arbeitsbereich konnte nicht gelöscht werden."
+    },
+    "stopTips": {
+      "action": "Tipps stoppen",
+      "done": "Keine Tipps mehr für {name}",
+      "failed": "Tipps konnten nicht gestoppt werden"
     }
   },
   "loading": {

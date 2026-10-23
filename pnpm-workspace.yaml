@@ -8,3 +8,7 @@ onlyBuiltDependencies:
   - '@swc/core'
   - esbuild
   - prisma
+# patched versions of transitive packages with known advisories (pnpm audit)
+overrides:
+  body-parser@<2.4.0: ^2.4.0
+  postcss@<8.5.23: ^8.5.31

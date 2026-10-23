@@ -266,6 +266,8 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   `list_onboarding_tenants()` (last 10 days, no demos) → admins get day 1 "draw your first floor"
   (skipped if desks exist), day 3 "add your people" (skipped if more than one person), day 7
   "can we help?" (`onboardingDue`, `tenants.onboarding_sent`; workspaces older than the feature = done).
+  Each tip ends with "reply stop" (Swiss UWG: easy opt-out); the operator honours it with the owner
+  page's row ⋯ → **Stop tips** (`POST /owner/workspaces/:id/stop-tips`, audited `owner.workspace.stop_tips`).
 - **People import** (`people/import-file.ts`, pure + unit-tested): Excel (exceljs) or CSV
   (; , tab, quotes, UTF-8 or Windows-1252). Column titles en/de/fr ("Nom" next to "Prénom" = last
   name). `POST /people/import/read` (multipart, saves nothing) returns each row's status (new /
@@ -274,6 +276,11 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - **Security headers** in `apps/web/next.config.ts`: CSP (self only, `blob:` images,
   `frame-ancestors 'none'` + X-Frame-Options DENY), HSTS, nosniff, Referrer/Permissions-Policy, COOP. A new outside
   host (script, font, image, API) must be added to the CSP or it's blocked.
+- **Per-address limits** (`lib/server/rate-limit.ts`, in memory per instance) key on `clientIp()`: the
+  LAST `X-Forwarded-For` entry (added by Azure's ingress); the first one is the caller's and can be faked.
+- **Audit** (`pnpm audit --prod`): transitive fixes are forced in `pnpm-workspace.yaml` `overrides`
+  (body-parser, postcss). Accepted for now: deepmerge-ts (Prisma CLI, build time only) and uuid
+  inside exceljs (the vulnerable `buf` argument is never used). Re-check on each Dependabot round.
 - **Dependabot** (`.github/dependabot.yml`): monthly grouped minor/patch PRs for npm, pip, Docker,
   Actions; majors are skipped (read the changelog; react-konva must match Next's React).
 

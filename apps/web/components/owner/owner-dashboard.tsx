@@ -1,7 +1,7 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Ellipsis, RefreshCw, Trash2 } from 'lucide-react';
+import { BellOff, Ellipsis, RefreshCw, Trash2 } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -394,6 +394,13 @@ function Workspaces({ list }: { list: Workspace[] }) {
   const now = useNow({ updateInterval: 60_000 });
   const [demos, setDemos] = useState(false);
   const [deleting, setDeleting] = useState<Workspace | null>(null);
+  // the workspace's admin replied "stop" to the onboarding tips
+  const stopTips = useMutation({
+    mutationFn: (w: Workspace) =>
+      api<void>(`/owner/workspaces/${w.id}/stop-tips`, { method: 'POST' }),
+    onSuccess: (_, w) => toast.success(t('stopTips.done', { name: w.name })),
+    onError: () => toast.error(t('stopTips.failed')),
+  });
   const shown = list.filter((w) => demos || !w.demo);
   const status = (w: Workspace) => {
     if (w.demo) return { label: t('status.demo'), variant: 'outline' as const };
@@ -480,6 +487,9 @@ function Workspaces({ list }: { list: Workspace[] }) {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem onSelect={() => stopTips.mutate(w)}>
+                            <BellOff /> {t('stopTips.action')}
+                          </DropdownMenuItem>
                           <DropdownMenuItem variant="destructive" onSelect={() => setDeleting(w)}>
                             <Trash2 /> {t('delete.action')}
                           </DropdownMenuItem>

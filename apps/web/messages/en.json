@@ -799,7 +799,8 @@
     "search": "Search activity",
     "searchPlaceholder": "Search people, desks, rooms, floors, notes…",
     "privacyDpa": "e-mailed themselves the data processing agreement",
-    "workspaceDeleted": "deleted the workspace “{name}” (support)"
+    "workspaceDeleted": "deleted the workspace “{name}” (support)",
+    "workspaceTipsStopped": "stopped the tips for “{name}” (support)"
   },
   "dashboard": {
     "title": "Home",
@@ -1507,6 +1508,11 @@
       "own": "You can’t delete the workspace you’re signed in to.",
       "mismatch": "The name doesn’t match.",
       "failed": "The workspace couldn’t be deleted."
+    },
+    "stopTips": {
+      "action": "Stop tips",
+      "done": "No more tips for {name}",
+      "failed": "Couldn’t stop the tips"
     }
   },
   "loading": {
