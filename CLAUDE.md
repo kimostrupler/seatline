@@ -50,7 +50,8 @@ Target customers: Swiss/EU companies using Microsoft 365. Data must stay in Swit
 /packages
   /shared         shared TypeScript types + zod schemas
 /infra            docker-compose for local dev (Postgres, Azurite)
-/.claude/skills   apple-design (HIG references — UI work/reviews), ponytail (coding style)
+/.claude/skills   apple-design (HIG), ponytail (coding style), marketing/SEO, design, engineering
+                  skills (sources + licences: .claude/skills/THIRD_PARTY.md)
 ```
 
 ## Data model (first version)
@@ -451,6 +452,12 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   no hooks): follow its rules on every coding task (smallest complete change, no unrequested
   features, but never cut tests, validation, security, accessibility). The rules here win when
   they differ. Reviews: `ponytail-review`; whole-repo audit: `ponytail-audit`.
+- Other copied skills in `.claude/skills` (see `THIRD_PARTY.md`): marketing/SEO for seatline.ch
+  (`seo-audit`, `ai-seo`, `copywriting`, `cro`, `onboarding`, `pricing`, `emails`, `launch`),
+  design (`taste-skill`, `frontend-design` — keep the Linear/Notion look and the CSS tokens),
+  engineering (`security-and-hardening`, `performance-optimization`, `test-driven-development`,
+  `debugging-and-error-recovery`, `frontend-ui-engineering`). This file's rules win (e.g. no
+  named competitors, no tracking beyond the cookieless stats, data stays in Switzerland).
 - Plan before coding larger steps; show the plan first.
 - Small, focused commits with clear messages.
 - Keep `README.md` current with how to run everything locally.
