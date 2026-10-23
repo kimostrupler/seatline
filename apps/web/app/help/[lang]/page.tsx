@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { HelpShell, TOPIC_ICONS } from '@/components/help/help-shell';
@@ -60,7 +59,8 @@ export default async function HelpIndex({ params }: Props) {
             const topic = content.topics[id];
             return (
               <li key={id}>
-                <Link
+                {/* plain links: each help page is a full page load (client navigation here got lost in CI) */}
+                <a
                   href={helpPath(lang, id)}
                   className="grid h-full gap-2 rounded-xl border bg-card p-4 transition-colors hover:border-primary/50 hover:bg-primary/5"
                 >
@@ -69,7 +69,7 @@ export default async function HelpIndex({ params }: Props) {
                   </span>
                   <span className="font-semibold">{topic.title}</span>
                   <span className="text-sm text-muted-foreground">{topic.summary}</span>
-                </Link>
+                </a>
               </li>
             );
           })}

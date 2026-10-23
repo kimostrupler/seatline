@@ -1,6 +1,5 @@
 import { ChevronLeft, ChevronRight, Lightbulb } from 'lucide-react';
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { HelpShell } from '@/components/help/help-shell';
@@ -67,9 +66,9 @@ export default async function HelpTopic({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howTo).replace(/</g, '\\u003c') }}
       />
       <header className="grid gap-3">
-        <Link href={helpPath(lang)} className="text-sm font-medium text-primary hover:underline">
+        <a href={helpPath(lang)} className="text-sm font-medium text-primary hover:underline">
           ← {t('all')}
-        </Link>
+        </a>
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{text.title}</h1>
         <p className="max-w-2xl text-lg text-pretty text-muted-foreground">{text.summary}</p>
       </header>
@@ -129,17 +128,17 @@ export default async function HelpTopic({ params }: Props) {
 
       <nav className="flex flex-wrap justify-between gap-3 border-t pt-6 text-sm">
         {prev ? (
-          <Link href={helpPath(lang, prev)} className="grid gap-0.5 hover:text-primary">
+          <a href={helpPath(lang, prev)} className="grid gap-0.5 hover:text-primary">
             <span className="flex items-center gap-1 text-muted-foreground">
               <ChevronLeft className="size-4" aria-hidden /> {t('previous')}
             </span>
             <span className="font-medium">{HELP[lang].topics[prev].title}</span>
-          </Link>
+          </a>
         ) : (
           <span />
         )}
         {next && (
-          <Link
+          <a
             href={helpPath(lang, next)}
             className="grid justify-items-end gap-0.5 hover:text-primary"
           >
@@ -147,7 +146,7 @@ export default async function HelpTopic({ params }: Props) {
               {t('next')} <ChevronRight className="size-4" aria-hidden />
             </span>
             <span className="font-medium">{HELP[lang].topics[next].title}</span>
-          </Link>
+          </a>
         )}
       </nav>
     </HelpShell>
