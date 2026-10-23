@@ -1242,8 +1242,7 @@
         "moving": "Seatline auf dem Handy: ein Umzugsplan mit seinen Umzügen"
       }
     },
-    "indexTitle": "Alles, was Seatline kann",
-    "indexBody": "Jedes Thema öffnet eine Anleitung Schritt für Schritt mit Bildern aus der App.",
+    "indexTitle": "Was Seatline kann",
     "indexAll": "Hilfe-Center öffnen",
     "stepsTitle": "An einem Nachmittag bereit",
     "steps": {
@@ -1292,7 +1291,33 @@
       "trial": "30 Tage gratis, ohne Kreditkarte"
     },
     "perDesk": "pro aktivem Platz und Monat",
-    "priceTitle": "Ein einfacher Preis"
+    "priceTitle": "Ein einfacher Preis",
+    "features": {
+      "floor": {
+        "title": "Stockwerk zeichnen",
+        "body": "Mit einem Beispielbüro starten oder den Plan Ihres Architekten importieren."
+      },
+      "seat": {
+        "title": "Plätze vergeben",
+        "body": "Einen Namen auf einen grünen Platz ziehen."
+      },
+      "moves": {
+        "title": "Umzüge planen",
+        "body": "Ein ganzes Team am gewählten Tag umziehen."
+      },
+      "people": {
+        "title": "Personen erfassen",
+        "body": "Aus Microsoft 365 oder einer Excel-Liste."
+      },
+      "qr": {
+        "title": "Platz-Aufkleber",
+        "body": "QR-Code scannen und sehen, wer dort sitzt."
+      },
+      "privacy": {
+        "title": "Daten in Zürich",
+        "body": "Der Verlauf bleibt so lange, wie Sie wählen, dann wird er gelöscht."
+      }
+    }
   },
   "planImport": {
     "title": "Architektenplan importieren",

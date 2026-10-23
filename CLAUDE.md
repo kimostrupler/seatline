@@ -400,7 +400,7 @@ folded`) so the person and the actions stand out.
   only holds the scroll entrances (`Reveal` adds `is-live`/`is-in`). Sections: glass sticky header
   (Features, Pricing, Questions, Help, languages, Sign in) → hero + `LiveFloor` (tap a green desk,
   seat colours = the map's) → trust row → three parts with phone pictures (`public/site-img/<lang>/`,
-  made by help-screenshots.spec.ts) → help topics grid (pictures hidden on phones) → 4 steps →
+  made by help-screenshots.spec.ts) → six short feature items (`site.features`, each opens its help topic) → 4 steps →
   `NoticeDemo` (short: one line, DE/FR/EN switch, the IT e-mail's subject + moves, worded like `notices.ts` via `lib/site/notice-sample.ts` — keep in
   step) → price card → FAQ as fold-outs → blue closing band → footer ("Zürich, Switzerland" + local
   time). The live parts get only `site.live`/`site.notice` via a nested `NextIntlClientProvider`.
