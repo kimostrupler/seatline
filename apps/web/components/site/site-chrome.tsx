@@ -9,9 +9,12 @@ import { LANGUAGES, LANGUAGE_NAMES, type Language } from '@/lib/locales';
 import { helpPath } from '@/lib/help';
 import { SITE_LANGUAGE_PATHS } from '@/lib/site';
 import { SiteBeacon } from './site-beacon';
+import { looksSignedIn } from '@/lib/server/auth';
 import { webConfig } from '@/lib/server/config';
 
 export const signInUrl = () => `${webConfig().APP_URL}/signin`;
+/** The app itself, for visitors who are already signed in. */
+export const appHomeUrl = () => `${webConfig().APP_URL}/`;
 /** A demo workspace with sample data, no sign-up. */
 export const demoUrl = () => `${webConfig().APP_URL}/auth/demo`;
 
@@ -67,9 +70,15 @@ export async function SiteHeader({
           <Link href={helpPath((await getLocale()).slice(0, 2) as Language)}>{t('navHelp')}</Link>
         </Button>
         {languagePaths ? <LanguageLinks paths={languagePaths} /> : <LanguageSelect compact />}
-        <Button asChild variant="outline" size="sm">
-          <a href={signInUrl()}>{t('signIn')}</a>
-        </Button>
+        {(await looksSignedIn()) ? (
+          <Button asChild size="sm">
+            <a href={appHomeUrl()}>{t('openApp')}</a>
+          </Button>
+        ) : (
+          <Button asChild variant="outline" size="sm">
+            <a href={signInUrl()}>{t('signIn')}</a>
+          </Button>
+        )}
       </div>
     </header>
   );

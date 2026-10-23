@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { getLocale } from 'next-intl/server';
-import { cookieOptions, publicApi } from '@/lib/server/auth';
+import { cookieOptions, publicApi, signedInMarker } from '@/lib/server/auth';
 import { webConfig } from '@/lib/server/config';
 import { clientIp, fromThisApp, seeOther } from '@/lib/server/forms';
 import { allow } from '@/lib/server/rate-limit';
@@ -23,5 +23,6 @@ export async function POST(req: NextRequest) {
     await sealSession(user, config.SESSION_SECRET),
     cookieOptions(SESSION_HOURS * 3600),
   );
+  signedInMarker(out, SESSION_HOURS * 3600);
   return out;
 }

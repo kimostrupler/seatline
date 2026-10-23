@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { cookieOptions, landing, membership } from '@/lib/server/auth';
+import { cookieOptions, landing, membership, signedInMarker } from '@/lib/server/auth';
 import { webConfig } from '@/lib/server/config';
 import { finishLogin, SignInError, type LoginTransaction } from '@/lib/server/oidc';
 import {
@@ -42,6 +42,7 @@ export async function GET(req: NextRequest) {
       await sealSession(user, config.SESSION_SECRET),
       cookieOptions(SESSION_HOURS * 3600),
     );
+    signedInMarker(res, SESSION_HOURS * 3600);
   } catch (error) {
     console.error('Sign-in failed', error);
     res = to(`/signin?error=${error instanceof SignInError ? 'invalid' : 'failed'}`);
