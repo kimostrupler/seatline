@@ -1242,8 +1242,7 @@
         "moving": "Seatline sur téléphone : un plan de déménagement"
       }
     },
-    "indexTitle": "Tout ce que fait Seatline",
-    "indexBody": "Chaque thème ouvre un guide pas à pas avec des images de l’app.",
+    "indexTitle": "Ce que fait Seatline",
     "indexAll": "Ouvrir le centre d’aide",
     "stepsTitle": "Prêt en un après-midi",
     "steps": {
@@ -1292,7 +1291,33 @@
       "trial": "30 jours gratuits, sans carte de crédit"
     },
     "perDesk": "par poste actif et par mois",
-    "priceTitle": "Un seul prix, simple"
+    "priceTitle": "Un seul prix, simple",
+    "features": {
+      "floor": {
+        "title": "Dessiner l’étage",
+        "body": "Partez d’un bureau exemple ou importez le plan de votre architecte."
+      },
+      "seat": {
+        "title": "Attribuer les postes",
+        "body": "Glissez un nom sur un poste vert."
+      },
+      "moves": {
+        "title": "Planifier les déménagements",
+        "body": "Déplacez toute une équipe le jour choisi."
+      },
+      "people": {
+        "title": "Ajouter vos collaborateurs",
+        "body": "Depuis Microsoft 365 ou une liste Excel."
+      },
+      "qr": {
+        "title": "Autocollants de poste",
+        "body": "Scannez le code QR d’un poste pour voir qui y est assis."
+      },
+      "privacy": {
+        "title": "Données à Zurich",
+        "body": "L’historique est gardé aussi longtemps que vous le choisissez, puis supprimé."
+      }
+    }
   },
   "planImport": {
     "title": "Importer un plan d’architecte",

@@ -1242,8 +1242,7 @@
         "moving": "Seatline on a phone: a move plan with its moves"
       }
     },
-    "indexTitle": "Everything Seatline does",
-    "indexBody": "Each topic opens a step-by-step guide with pictures from the app.",
+    "indexTitle": "What Seatline does",
     "indexAll": "Open the help center",
     "stepsTitle": "Ready in an afternoon",
     "steps": {
@@ -1292,7 +1291,33 @@
       "trial": "30 days free, no credit card"
     },
     "perDesk": "per active desk and month",
-    "priceTitle": "One simple price"
+    "priceTitle": "One simple price",
+    "features": {
+      "floor": {
+        "title": "Draw your floor",
+        "body": "Start from an example office or import your architect’s plan."
+      },
+      "seat": {
+        "title": "Seat people",
+        "body": "Drag a name onto a green desk."
+      },
+      "moves": {
+        "title": "Plan moves",
+        "body": "Move a whole team on the day you pick."
+      },
+      "people": {
+        "title": "Add your people",
+        "body": "From Microsoft 365 or an Excel list."
+      },
+      "qr": {
+        "title": "Desk stickers",
+        "body": "Scan a desk’s QR code to see who sits there."
+      },
+      "privacy": {
+        "title": "Data in Zurich",
+        "body": "Seat history is kept as long as you choose, then deleted."
+      }
+    }
   },
   "planImport": {
     "title": "Import an architect plan",

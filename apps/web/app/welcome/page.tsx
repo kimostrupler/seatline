@@ -12,7 +12,7 @@ import '@/components/site/landing/landing.css';
 import { SiteBeacon } from '@/components/site/site-beacon';
 import { demoUrl, LegalLinks, signInUrl } from '@/components/site/site-chrome';
 import { Button } from '@/components/ui/button';
-import { HELP, HELP_TOPICS, helpImage, helpPath, type HelpTopicId } from '@/lib/help';
+import { helpPath, type HelpTopicId } from '@/lib/help';
 import { OPERATOR } from '@/lib/legal/operator';
 import { LANGUAGES, LANGUAGE_NAMES, LOCALES, type Language } from '@/lib/locales';
 import { webConfig } from '@/lib/server/config';
@@ -57,6 +57,14 @@ const CHAPTERS: Array<{ key: 'free' | 'taken' | 'moving'; dot: string; topic: He
   { key: 'moving', dot: 'var(--seat-reserved-stroke)', topic: 'moves' },
 ];
 const STEPS = ['signup', 'floor', 'people', 'seat'] as const;
+const FEATURES: Array<['floor' | 'seat' | 'moves' | 'people' | 'qr' | 'privacy', HelpTopicId]> = [
+  ['floor', 'floors'],
+  ['seat', 'seating'],
+  ['moves', 'moves'],
+  ['people', 'people'],
+  ['qr', 'exports-and-qr'],
+  ['privacy', 'privacy-and-billing'],
+];
 const TRUST = [
   ['swiss', MapPin],
   ['privacy', ShieldCheck],
@@ -99,7 +107,6 @@ export default async function Welcome() {
   const t = await getTranslations('site');
   const tl = await getTranslations('legal');
   const language = (await getLocale()).slice(0, 2) as Language;
-  const help = HELP[language];
   // site.* texts stay on the server (app/layout.tsx); the two live parts get just theirs
   const { live, notice } = (await getMessages()).site;
   const liveMessages = { site: { live, notice } };
@@ -296,44 +303,30 @@ export default async function Welcome() {
           </div>
         </section>
 
-        {/* everything, as the help center's topics */}
-        <Section title={t('indexTitle')} lead={t('indexBody')} className="border-t bg-canvas">
-          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
-            {HELP_TOPICS.map((id, i) => {
-              const topic = help.topics[id];
-              const image = topic.steps.find((s) => s.image)?.image;
-              return (
-                <li key={id} data-reveal style={delay(i % 3)}>
-                  <a
-                    href={helpPath(language, id)}
-                    className="group grid h-full overflow-hidden rounded-xl border bg-card transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5"
-                  >
-                    {image && (
-                      <span className="block aspect-[16/9] overflow-hidden border-b bg-muted max-sm:hidden">
-                        <img
-                          src={helpImage(language, image)}
-                          alt=""
-                          loading="lazy"
-                          width={1280}
-                          height={800}
-                          className="h-full w-full object-cover object-top-left transition duration-500 group-hover:scale-[1.03]"
-                        />
-                      </span>
-                    )}
-                    <span className="grid gap-1 p-4">
-                      <span className="flex items-center justify-between gap-2 font-medium">
-                        {topic.title}
-                        <ArrowRight
-                          className="size-4 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary"
-                          aria-hidden
-                        />
-                      </span>
-                    </span>
-                  </a>
-                </li>
-              );
-            })}
+        {/* what it does: six short items, each opens its help topic */}
+        <Section title={t('indexTitle')} className="border-t bg-canvas">
+          <ul className="grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+            {FEATURES.map(([key, topic], i) => (
+              <li key={key} data-reveal style={delay(i % 3)}>
+                <a href={helpPath(language, topic)} className="group grid gap-1.5">
+                  <span className="flex items-center gap-1.5 text-lg font-semibold">
+                    {t(`features.${key}.title`)}
+                    <ArrowRight
+                      className="size-4 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary"
+                      aria-hidden
+                    />
+                  </span>
+                  <span className="text-muted-foreground">{t(`features.${key}.body`)}</span>
+                </a>
+              </li>
+            ))}
           </ul>
+          <a
+            href={helpPath(language)}
+            className="inline-flex items-center gap-1.5 font-medium text-primary hover:underline"
+          >
+            {t('indexAll')} <ArrowRight className="size-4" aria-hidden />
+          </a>
         </Section>
 
         {/* getting started */}
