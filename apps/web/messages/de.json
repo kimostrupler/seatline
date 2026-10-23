@@ -1266,26 +1266,9 @@
     },
     "notice": {
       "title": "Alle sind informiert",
-      "output": "E-Mail an die IT, wie Seatline sie sendet",
-      "day": {
-        "title": "Den Umzugstag wählen.",
-        "body": "Ein Umzugsplan wird früh morgens ausgeführt, alle Umzüge auf einmal oder keiner.",
-        "label": "Umzugstag"
-      },
-      "to": {
-        "title": "Die IT wird von selbst informiert.",
-        "body": "Jede eingetragene Adresse erhält pro Änderung eine schlichte E-Mail: wer ging, wer kam, wer wohin zog.",
-        "label": "Mitteilungen an"
-      },
+      "lead": "Die IT erhält pro Änderung eine kurze E-Mail, und wer umzieht, erfährt seinen neuen Platz.",
       "lang": {
-        "title": "In ihrer Sprache.",
-        "body": "Deutsch, Französisch oder Englisch, pro Arbeitsbereich gewählt.",
         "label": "Sprache der E-Mails"
-      },
-      "people": {
-        "title": "Alle erfahren ihren neuen Platz.",
-        "body": "Wer umzieht, erhält eine kurze E-Mail mit dem Platz und einem Link zum Plan.",
-        "label": "Neuen Platz per E-Mail mitteilen"
       }
     },
     "priceFigure": "CHF 2",
