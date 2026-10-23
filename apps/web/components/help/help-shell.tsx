@@ -11,7 +11,6 @@ import {
   Users,
   type LucideIcon,
 } from 'lucide-react';
-import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { SitePage } from '@/components/site/site-chrome';
@@ -55,7 +54,7 @@ export async function HelpShell({
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[14rem_minmax(0,1fr)]">
         <nav aria-label={t('topics')} className="max-lg:hidden">
           <div className="sticky top-20 grid gap-0.5 text-sm">
-            <Link
+            <a
               href={helpPath(language)}
               className={cn(
                 'rounded-md px-2 py-1.5 font-semibold hover:bg-muted',
@@ -63,11 +62,11 @@ export async function HelpShell({
               )}
             >
               {t('title')}
-            </Link>
+            </a>
             {HELP_TOPICS.map((id) => {
               const Icon = TOPIC_ICONS[id];
               return (
-                <Link
+                <a
                   key={id}
                   href={helpPath(language, id)}
                   aria-current={id === topic ? 'page' : undefined}
@@ -78,7 +77,7 @@ export async function HelpShell({
                 >
                   <Icon className="size-4 shrink-0" aria-hidden />
                   {HELP[language].topics[id].title}
-                </Link>
+                </a>
               );
             })}
           </div>
