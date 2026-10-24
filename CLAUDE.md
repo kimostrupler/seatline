@@ -213,6 +213,14 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   GitHub's free minutes are limited: CI runs on pull requests only (main = the merged PR, already
   tested), a newer push cancels the older run, docs-only changes (`*.md`, `docs/`) skip CI and
   deploy. Push each PR once when possible.
+  **Azure from Claude Code sessions**: the cloud environment has a service principal
+  (`seatline-claude`, Contributor on resource group `seatline` only, 1 year) in
+  `AZURE_CLIENT_ID` / `AZURE_CLIENT_SECRET` / `AZURE_TENANT_ID` / `AZURE_SUBSCRIPTION_ID`, the
+  Azure hosts in the network allow-list and `pip install azure-cli` in the setup script
+  (docs/azure-setup.md › Azure access for Claude Code). Use it instead of asking the owner to run
+  Cloud Shell commands; still ask before deleting data or anything that costs more. It can't
+  assign roles or read Key Vault secrets (setup.sh / mail-setup.sh / stripe-setup.sh that need
+  those stay with the owner). Never print or commit the secret.
   Out of minutes (deploy "fails" in seconds, no log): `infra/azure/deploy.sh` in Cloud Shell does
   the same deploy with `az acr build` (docs/azure-setup.md › Deploy without GitHub).
   Docker Hub may rate-limit; Dockerfiles take `--build-arg NODE_IMAGE=…` for a mirror.
