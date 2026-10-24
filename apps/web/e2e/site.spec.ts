@@ -93,3 +93,41 @@ test('search engines: a page per language, structured data, llms.txt', async ({
   expect((await request.get('/favicon.ico')).ok()).toBe(true);
   expect((await request.get('/icon.svg')).ok()).toBe(true);
 });
+
+test('the video tour: from the landing page and help topics, with chapters and subtitles', async ({
+  page,
+  request,
+}) => {
+  await page.goto('/welcome');
+  await expect(page.getByRole('link', { name: 'Watch the full 9-minute tour' })).toHaveAttribute(
+    'href',
+    '/help/en/video-tour',
+  );
+  await page.goto('/help/de/moves');
+  await page.getByTestId('watch-part').click();
+  await expect(page).toHaveURL(/\/help\/de\/video-tour\?t=363$/);
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Video-Tour: Seatline in 9 Minuten' }),
+  ).toBeVisible();
+  const video = page.getByTestId('video-tour');
+  // streamed from Blob Storage in Zurich, starting at the chapter; German subtitles
+  await expect(video.locator('source')).toHaveAttribute(
+    'src',
+    /^https:\/\/seatlinemedia3148\.blob\.core\.windows\.net\/media\/seatline-tutorial\.mp4#t=363$/,
+  );
+  await expect(video.locator('track')).toHaveAttribute('src', '/help/de/video-tour/subtitles');
+  await expect(page.getByTestId('video-chapters').getByRole('button')).toHaveCount(17);
+  await expect(page.getByRole('button', { name: /6:03\s*Umzüge/ })).toHaveAttribute(
+    'aria-current',
+    'true',
+  );
+  await page.getByText('Das ganze Video zum Lesen').click();
+  await expect(page.getByText(/Öffnen Sie «Umzüge»/)).toBeVisible();
+
+  const vtt = await request.get('/help/fr/video-tour/subtitles');
+  expect(vtt.headers()['content-type']).toContain('text/vtt');
+  expect(await vtt.text()).toContain('Bienvenue dans Seatline.');
+  // English is burned into the video: no extra track
+  await page.goto('/help/en/video-tour');
+  await expect(page.getByTestId('video-tour').locator('track')).toHaveCount(0);
+});

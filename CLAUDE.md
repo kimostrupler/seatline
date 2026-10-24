@@ -475,6 +475,17 @@ folded`) so the person and the actions stand out.
   the real app: `HELP_SCREENSHOTS=1 pnpm exec playwright test help-screenshots --project
 chromium` (re-run after UI changes). In the app: **Help** in the top bar, a dismissible banner
   on Home. Help texts must use the app's real labels (from messages) and only true facts.
+- **Video tour** (`/help/<lang>/video-tour`, `lib/help/video.ts`): the 9-minute tutorial (English
+  voice, AI-generated with Google AI Studio, no music; English captions burned in). The mp4 (45 MB)
+  is NOT in the image: it lives in Blob Storage in Zurich (`lib/media.ts`, storage account
+  `seatlinemedia3148`, container `media`, public read; CSP `media-src`). Page: big player
+  (`components/help/video-player.tsx`, `preload="none"`, poster `public/site-video/seatline-tutorial.webp`),
+  chapters that jump (`CHAPTERS`, `?t=` seconds starts there), German/French subtitles as WebVTT
+  at the top of the picture (`video-tour/subtitles` route, from `CUES` in `video-cues.ts`: every
+  sentence in en/de/fr, aligned), the whole text as a fold-out, VideoObject JSON-LD with clips.
+  Linked from: a card on the help home, the help sidebar, "Watch this part" on topics with a
+  chapter (`topic` in `CHAPTERS`), a button under the landing page's promo video, the footer,
+  sitemap and llms.txt. A new video version = upload over the same blob, update the cues/chapters.
 - **Free Excel template** (`/help/<lang>/excel-template`, `lib/help/template.ts`; in the help
   sidebar, footers, sitemap, llms.txt): a seating-plan .xlsx per language in
   `apps/web/public/templates/`, made by `node apps/api/scripts/seating-template.mjs` (re-run after

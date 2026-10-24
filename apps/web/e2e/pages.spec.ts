@@ -80,7 +80,16 @@ test('every page runs with a per-request script nonce and nothing is blocked', a
     if (m.type() === 'error' && /Content Security Policy/i.test(m.text())) blocked.push(m.text());
   });
   const nonces = new Set<string>();
-  for (const path of ['/', '/map', '/moves', '/people', '/activity', '/welcome', '/help/en']) {
+  for (const path of [
+    '/',
+    '/map',
+    '/moves',
+    '/people',
+    '/activity',
+    '/welcome',
+    '/help/en',
+    '/help/de/video-tour',
+  ]) {
     const res = await page.goto(path);
     const csp = res?.headers()['content-security-policy'] ?? '';
     expect(csp).toMatch(/script-src 'self' 'nonce-[^']+' 'strict-dynamic'/);
@@ -88,7 +97,7 @@ test('every page runs with a per-request script nonce and nothing is blocked', a
     nonces.add(/'nonce-([^']+)'/.exec(csp)![1]!);
     await page.waitForLoadState('networkidle');
   }
-  expect(nonces.size).toBe(7); // a new one for every request
+  expect(nonces.size).toBe(8); // a new one for every request
   // the app still works (React ran): the map draws
   await page.goto('/map');
   await expect(page.getByTestId('floor-map').locator('canvas').first()).toBeVisible();

@@ -2,6 +2,7 @@ import {
   ArrowRightLeft,
   BarChart3,
   Building2,
+  Clapperboard,
   CreditCard,
   FileDown,
   FileSpreadsheet,
@@ -17,6 +18,7 @@ import type { ReactNode } from 'react';
 import { SitePage } from '@/components/site/site-chrome';
 import { HELP, HELP_TOPICS, helpPath, type HelpTopicId } from '@/lib/help';
 import { TEMPLATE, templatePath } from '@/lib/help/template';
+import { VIDEO, videoPath } from '@/lib/help/video';
 import type { Language } from '@/lib/locales';
 import { OPERATOR } from '@/lib/legal/operator';
 import { cn } from '@/lib/utils';
@@ -43,11 +45,12 @@ export async function HelpShell({
 }: {
   language: Language;
   topic?: HelpTopicId;
-  /** language links for pages outside the topics (e.g. the Excel template) */
+  /** language links for pages outside the topics (the Excel template, the video tour) */
   paths?: Record<Language, string>;
   children: ReactNode;
 }) {
   const t = await getTranslations('help');
+  const page = paths?.en;
   return (
     <SitePage
       languagePaths={
@@ -70,6 +73,17 @@ export async function HelpShell({
             >
               {t('title')}
             </a>
+            <a
+              href={videoPath(language)}
+              aria-current={page === videoPath('en') ? 'page' : undefined}
+              className={cn(
+                'mb-2 flex items-center gap-2 rounded-md px-2 py-1.5 font-medium text-primary hover:bg-muted',
+                page === videoPath('en') && 'bg-muted',
+              )}
+            >
+              <Clapperboard className="size-4 shrink-0" aria-hidden />
+              {VIDEO[language].short}
+            </a>
             {HELP_TOPICS.map((id) => {
               const Icon = TOPIC_ICONS[id];
               return (
@@ -89,10 +103,10 @@ export async function HelpShell({
             })}
             <a
               href={templatePath(language)}
-              aria-current={paths ? 'page' : undefined}
+              aria-current={page === templatePath('en') ? 'page' : undefined}
               className={cn(
                 'mt-3 flex items-center gap-2 rounded-md border-t px-2 pt-3 pb-1.5 text-muted-foreground hover:bg-muted hover:text-foreground',
-                paths && 'bg-muted font-medium text-foreground',
+                page === templatePath('en') && 'bg-muted font-medium text-foreground',
               )}
             >
               <FileSpreadsheet className="size-4 shrink-0" aria-hidden />
