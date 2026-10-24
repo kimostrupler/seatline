@@ -176,3 +176,16 @@ test('colour seats by team; highlight one team; the choice is remembered', async
   await page.reload();
   await expect(page.getByTestId('map-legend').getByRole('radio', { name: 'Team' })).toBeChecked();
 });
+
+test.describe('tablet width', () => {
+  test.use({ viewport: { width: 900, height: 1000 } });
+  test('the floors and people stay beside the map; seat details open from below', async ({
+    page,
+  }) => {
+    await expect(page.getByRole('button', { name: 'Floors and people' })).toBeHidden();
+    await expect(page.getByPlaceholder('Find a person')).toBeVisible();
+    await page.screenshot({ path: test.info().outputPath('tablet-map.png') });
+    await selectSeat(page, '1.01');
+    await expect(page.getByRole('dialog')).toBeVisible();
+  });
+});
