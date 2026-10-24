@@ -1,4 +1,5 @@
 import { sanitizeReport } from '@/lib/client-errors';
+import { tooLarge } from '@/lib/server/body-limit';
 
 // Browser errors end up in the server log (Azure Log Analytics, Switzerland), where the
 // error alert picks them up. A small per-instance budget keeps a broken page from flooding it.
@@ -13,7 +14,8 @@ export async function POST(req: Request) {
     count = 0;
   }
   if (++count > PER_MINUTE) return new Response(null, { status: 429 });
-  const text = (await req.text()).slice(0, 5000);
+  if (tooLarge(req, 5000)) return new Response(null, { status: 413 });
+  const text = await req.text();
   let report;
   try {
     report = sanitizeReport(JSON.parse(text));

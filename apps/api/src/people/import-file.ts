@@ -14,6 +14,8 @@ export interface ImportRow {
 }
 
 export const MAX_IMPORT_ROWS = 2000;
+/** An .xlsx is a zip; what it unpacks to must stay far below the API's memory (2000 rows ≈ 1 MB). */
+export const MAX_XLSX_UNPACKED_BYTES = 50 * 1024 * 1024;
 
 type Field = 'name' | 'first' | 'last' | 'email' | 'department' | 'jobTitle';
 
@@ -159,6 +161,8 @@ export async function readPeopleFile(buffer: Buffer, filename: string): Promise<
       });
     return rowsFromTable(parseCsv(decode(buffer)));
   }
+  if (zipUnpackedSize(buffer) > MAX_XLSX_UNPACKED_BYTES)
+    throw new BadRequestException({ message: 'This Excel file is too big', code: 'too_many' });
   const book = new ExcelJS.Workbook();
   try {
     await book.xlsx.load(buffer as unknown as ArrayBuffer);
@@ -191,4 +195,34 @@ function cellText(v: ExcelJS.CellValue): string {
     return '';
   }
   return String(v);
+}
+
+/**
+ * What a zip file unpacks to, read from its central directory (the sizes are stored there, so
+ * nothing is inflated). A zip can shrink 1000:1 — 2 MB in, 2 GB out — so the upload limit
+ * alone is no protection. Anything unreadable or ZIP64 counts as infinite.
+ */
+export function zipUnpackedSize(zip: Buffer): number {
+  const EOCD = 0x06054b50;
+  const ENTRY = 0x02014b50;
+  // the end record sits in the last 22 bytes + a comment of up to 65535
+  let end = -1;
+  for (let i = zip.length - 22; i >= Math.max(0, zip.length - 22 - 65535); i--)
+    if (zip.readUInt32LE(i) === EOCD) {
+      end = i;
+      break;
+    }
+  if (end < 0) return Infinity;
+  const entries = zip.readUInt16LE(end + 10);
+  let at = zip.readUInt32LE(end + 16);
+  if (entries === 0xffff || at === 0xffffffff) return Infinity; // ZIP64
+  let total = 0;
+  for (let n = 0; n < entries; n++) {
+    if (at + 46 > zip.length || zip.readUInt32LE(at) !== ENTRY) return Infinity;
+    const size = zip.readUInt32LE(at + 24);
+    if (size === 0xffffffff) return Infinity; // ZIP64
+    total += size;
+    at += 46 + zip.readUInt16LE(at + 28) + zip.readUInt16LE(at + 30) + zip.readUInt16LE(at + 32);
+  }
+  return total;
 }

@@ -58,24 +58,24 @@ export class DeskMailService {
     let sent = 0;
     for (const { personId, startAt, person, seat } of rows) {
       if (!person?.active || person.forgottenAt || !person.email) continue;
-      // back on the desk they had a few minutes ago (an undo): nothing changed for them
-      const back = await this.db.run(tenantId, (tx) =>
-        tx.seatAssignment.findFirst({
-          where: {
-            tenantId,
-            personId,
-            seatId: seat.id,
-            endAt: { gte: new Date(startAt.getTime() - UNDO_WINDOW_MS), lte: startAt },
-          },
-          select: { id: true },
-        }),
-      );
-      if (back) continue;
       // a link only for people who can open Seatline
       const link = person.appRole
         ? `${this.mail.appUrl}/map?building=${seat.floor.building.id}&floor=${seat.floor.id}&seat=${seat.id}`
         : null;
       try {
+        // back on the desk they had a few minutes ago (an undo): nothing changed for them
+        const back = await this.db.run(tenantId, (tx) =>
+          tx.seatAssignment.findFirst({
+            where: {
+              tenantId,
+              personId,
+              seatId: seat.id,
+              endAt: { gte: new Date(startAt.getTime() - UNDO_WINDOW_MS), lte: startAt },
+            },
+            select: { id: true },
+          }),
+        );
+        if (back) continue;
         await this.mail.send(
           deskMail(
             person.email,

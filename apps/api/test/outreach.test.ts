@@ -137,12 +137,27 @@ describe('outreach (owner leads)', () => {
       week,
     );
 
-    // they answer before it goes out: the lead is "replied", the follow-up is cancelled
+    // mail from the lead's domain that is no answer: a colleague's out-of-office, a newsletter.
+    // Neither marks the lead "replied" nor cancels the follow-up.
     await mkdir(inbox(), { recursive: true });
-    await writeFile(
-      join(inbox(), 'reply.json'),
-      JSON.stringify({ from: 'silvan@livingdocs.io', date: week.toISOString() }),
-    );
+    const mail = (name: string, m: object) => writeFile(join(inbox(), name), JSON.stringify(m));
+    await mail('ooo.json', {
+      from: 'contact@livingdocs.io',
+      date: week.toISOString(),
+      inReplyTo: first!.messageId,
+      autoSubmitted: 'auto-replied',
+    });
+    await mail('news.json', { from: 'news@livingdocs.io', date: week.toISOString() });
+    expect(await leads.runOutreach(a.tenantId, new Date(week.getTime() + 60_000))).toMatchObject({
+      replied: 0,
+    });
+    // a colleague answers our e-mail before the follow-up goes out: the lead is "replied", the
+    // follow-up is cancelled
+    await mail('reply.json', {
+      from: 'silvan@livingdocs.io',
+      date: week.toISOString(),
+      inReplyTo: `<other@example.com> ${first!.messageId}`,
+    });
     await clearMails();
     const r = await leads.runOutreach(a.tenantId, new Date(fu.scheduledFor.getTime() + 60_000));
     expect(r).toMatchObject({ replied: 1, sent: 0 });

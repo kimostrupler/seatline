@@ -65,6 +65,28 @@ describe('floor plan images', () => {
     expect(log).toHaveLength(1);
   });
 
+  it('the plan file is only ever set by the upload', async () => {
+    await upload(a, png(3, 2)).expect(201);
+    const key = (await api(app).get(`/floors/${a.floorId}`).set(a.headers)).body.planFileKey;
+    // a client naming a key (another floor's, or a missing file) is a validation error
+    await api(app)
+      .patch(`/floors/${b.floorId}`)
+      .set(b.headers)
+      .send({ planFileKey: key, planWidth: 3, planHeight: 2 })
+      .expect(400);
+    await api(app)
+      .post('/floors')
+      .set(b.headers)
+      .send({ buildingId: b.buildingId, name: 'x', level: 2, planFileKey: key })
+      .expect(400);
+    // a key whose file is gone is a 404, not a crash
+    await owner.floor.update({
+      where: { id: a.floorId },
+      data: { planFileKey: `${a.tenantId}/floors/${a.floorId}/missing.png` },
+    });
+    await api(app).get(`/floors/${a.floorId}/plan`).set(a.headers).expect(404);
+  });
+
   it('never serves another company’s plan', async () => {
     await upload(b, png(10, 10)).expect(201);
     await api(app).get(`/floors/${b.floorId}/plan`).set(a.headers).expect(404);

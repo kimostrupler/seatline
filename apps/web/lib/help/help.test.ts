@@ -1,7 +1,15 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { HELP, HELP_TOPICS, helpAlternates, helpImage, helpTopicFor, isHelpTopic } from './index';
+import {
+  HELP,
+  HELP_TOPICS,
+  helpAlternates,
+  helpImage,
+  helpTopicFor,
+  isHelpLanguage,
+  isHelpTopic,
+} from './index';
 
 const LANGS = ['en', 'de', 'fr'] as const;
 
@@ -34,6 +42,9 @@ describe('help center', () => {
   it('addresses', () => {
     expect(isHelpTopic('moves')).toBe(true);
     expect(isHelpTopic('nope')).toBe(false);
+    expect(isHelpLanguage('de')).toBe(true);
+    for (const l of ['xx', 'constructor', 'toString', '__proto__'])
+      expect(isHelpLanguage(l)).toBe(false);
     expect(helpAlternates('https://seatline.ch', 'moves').de).toBe(
       'https://seatline.ch/help/de/moves',
     );

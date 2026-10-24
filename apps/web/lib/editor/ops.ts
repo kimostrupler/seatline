@@ -133,19 +133,22 @@ export function inverse(before: LayoutDoc, c: Changes): Changes {
   const seat = (id: string) => before.seats.find((s) => s.id === id)!;
   const marker = (id: string) => (before.markers ?? []).find((m) => m.id === id)!;
   const m = c.markers ?? changes({}).markers;
+  // something selected here may already be gone (deleted in another tab): nothing to recreate
+  const known = <T extends { id: string }>(items: T[] | undefined, ids: string[]) =>
+    ids.filter((id) => items?.some((x) => x.id === id));
   return changes({
     markers: {
-      create: m.delete.map((id) => toLayoutMarker(marker(id))),
+      create: known(before.markers, m.delete).map((id) => toLayoutMarker(marker(id))),
       update: m.update.map((u) => ({ id: u.id, ...pick(marker(u.id), MARKER_KEYS, u) })),
       delete: m.create.map((x) => x.id),
     },
     rooms: {
-      create: c.rooms.delete.map((id) => toLayoutRoom(room(id))),
+      create: known(before.rooms, c.rooms.delete).map((id) => toLayoutRoom(room(id))),
       update: c.rooms.update.map((u) => ({ id: u.id, ...pick(room(u.id), ROOM_KEYS, u) })),
       delete: c.rooms.create.map((r) => r.id),
     },
     seats: {
-      create: c.seats.delete.map((id) => toLayoutSeat(seat(id))),
+      create: known(before.seats, c.seats.delete).map((id) => toLayoutSeat(seat(id))),
       update: c.seats.update.map((u) => ({ id: u.id, ...pick(seat(u.id), SEAT_KEYS, u) })),
       delete: c.seats.create.map((s) => s.id),
     },
@@ -250,14 +253,18 @@ export function renumberSeats(
   const labels = new Map<string, string>();
   let n = 0;
   const pad = doc.seats.length > 99 ? 3 : 2;
+  // letters per room NUMBER, not per room: "1.04 Office" and "1.04 Meeting" share 1.04, and two
+  // "1.04-A" would be refused (labels are unique per floor)
+  const used = new Map<string, number>();
   for (const { room, seats } of groups) {
     const number = numbering === 'room' && room ? roomNumber(room.name) : null;
-    readingOrder(seats, rowTolerance).forEach((s, i) => {
-      labels.set(
-        s.id,
-        number ? `${number}-${letters(i)}` : `${level}.${String(++n).padStart(pad, '0')}`,
-      );
-    });
+    for (const s of readingOrder(seats, rowTolerance)) {
+      if (number) {
+        const i = used.get(number) ?? 0;
+        used.set(number, i + 1);
+        labels.set(s.id, `${number}-${letters(i)}`);
+      } else labels.set(s.id, `${level}.${String(++n).padStart(pad, '0')}`);
+    }
   }
   return changes({
     seats: {

@@ -68,6 +68,19 @@ describe('layout batch', () => {
     expect(res.body.seats.find((x: { id: string }) => x.id === s.id).roomId).toBeNull();
   });
 
+  it('accepts a request as big as the schemas allow (2000 seats ≈ 300 KB)', async () => {
+    const update = Array.from({ length: 2000 }, (_, i) => ({
+      id: `00000000-0000-4000-8000-${String(i).padStart(12, '0')}`,
+      label: `Desk ${i}`,
+      x: i,
+      y: i,
+      rotation: 0,
+    }));
+    expect(JSON.stringify({ seats: { update } }).length).toBeGreaterThan(150_000); // > 100 KB
+    // parsed (no 413) — the ids just aren't on this floor
+    await layout(a, { seats: { update } }).expect(404);
+  });
+
   it('is all or nothing, and seats with history cannot be deleted', async () => {
     await api(app)
       .post('/assignments')

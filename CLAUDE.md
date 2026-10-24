@@ -149,7 +149,10 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - Numbering per floor (`seat_numbering`): `floor` = 1.01…, `room` = room number + A, B… (`roomNumber`,
   `seatLabelAt`, `renumberSeats` in ops.ts). A batch may swap labels (the server relabels in two steps).
 - Seats with any assignment history can't be deleted (block them) — enforced in
-  `LayoutService`, and the history rows' FK restrict backs it up.
+  `LayoutService`, and the history rows' FK restrict backs it up. Nor seats a draft/scheduled/
+  failed move plan points at (`OPEN_PLANS`): change the plan first.
+- Big batches (layout batch, people import, move plan apply, floor copy) run with `BIG_BATCH`
+  (60 s transaction); the JSON body limit is 2 MB (`app-setup.ts`, used by main.ts and tests).
 - Plan images: raster only (PNG/JPG/WebP, checked by content). The image's pixel size is the
   floor's coordinate space. Storage keys must start with the tenant id; `getPlan` checks it.
 - The canvas uses **pointer events** (mouse, pen and touch alike). One finger on empty floor pans,
@@ -200,7 +203,9 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   sign-in); changing the setting doesn't touch existing people.
 - People sync (`sync/people-sync.service.ts`) stores only name, e-mail, department, job title,
   active. Never changes roles. Teams = `department`; admins can set one by hand (`PATCH /people/:id/team`,
-  sets `team_manual`, then the sync keeps it until `fromDirectory`). Leavers: inactive + open seats closed (history kept).
+  sets `team_manual`, then the sync keeps it until `fromDirectory`). Renaming a team
+  (`POST /people/teams/rename`) also renames its team zones (`rooms.team`) and space plan.
+  Leavers: inactive + open seats closed (history kept).
 - Jobs: pg-boss in schema `pgboss` (owned by the API role, created by a migration) for
   "Sync now"; the nightly sync is a separate scheduled container (`dist/jobs/nightly-sync.js`)
   because the API scales to zero. Keep queue code in `jobs/job-queue.service.ts`.
@@ -244,6 +249,8 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   workspace (`tenantId`); `IdentityService.resolveEmail` only lets in people of workspaces
   WITHOUT Microsoft (those keep Microsoft sign-in: `use_microsoft`); several workspaces → `choose`
   (`/signin/workspace`). It never creates people; a new address gets onboarding (+ "Your name").
+  `email_workspaces` also returns `active`: workspaces the person left aren't offered when there
+  is one they're still in, and don't block starting their own.
 - Admins add people by hand (`POST /people`, optional invitation e-mail), correct them
   (`PATCH /people/:id`), mark them left/back (`PATCH /people/:id/active`: leaving ends open seats,
   history stays). People from Microsoft (`entra_object_id`) are changed in Microsoft (409
@@ -423,8 +430,13 @@ folded`) so the person and the actions stand out.
 - Stripe state arrives only via the signed webhook (`@Public`, raw body; the web proxy passes
   `billing/webhook` through without a session). Subscriptions carry `metadata.tenantId`, but a
   webhook only applies if its customer matches the tenant's `stripe_customer_id`.
+  The webhook re-reads the subscription from Stripe and applies that (events arrive late and
+  out of order). Checkout is refused (409 `subscribed`) while a subscription exists.
 - The operator's own workspace (an active admin from `OWNER_EMAILS`, e-mail sign-in) is billing
-  state `off` like demos: never a trial, never read-only.
+  state `off` like demos: never a trial, never read-only. So nobody may add an `OWNER_EMAILS`
+  address to their list by hand (`POST /people`, import, `PATCH /people/:id` → 409
+  `reserved_email`); it only gets there when the operator signs up with it.
+- The nightly job catches errors per workspace: one broken workspace never stops the others.
 - Checkout allows promotion codes (`allow_promotion_codes`); the codes are made in the Stripe
   dashboard (docs/azure-setup.md).
 - Checkout and the customer portal run on Stripe's own pages under **pay.seatline.ch** (Stripe
@@ -544,8 +556,11 @@ chromium` (re-run after UI changes). In the app: **Help** in the top bar, a dism
   07:00 UTC (cron `0 1,7 * * *`, set by deploy.yml/deploy.sh/bicep): the night run does the
   nightly work, both runs check replies (`runOutreach`), only the morning one sends (7–11 am
   Zurich, `isSendingHour`) and e-mails the operator about due follow-ups (after 7 days). A
-  reply (IMAP `InboxService`: envelopes only, the lead's domain or the exact address at mail
-  providers) or a "no" cancels what's scheduled; 14 days after the follow-up → `no_answer`;
+  reply (IMAP `InboxService`: envelopes + References/Auto-Submitted headers only; it counts
+  when it answers one of our Message-IDs, or comes from the contact's own address and isn't
+  auto-submitted — a colleague's out-of-office or a newsletter from the domain doesn't) or a
+  "no" cancels what's scheduled; a message is claimed (`sent_at`) before SMTP so it never goes
+  out twice; 14 days after the follow-up → `no_answer`;
   "no"/"no_answer" leads are deleted after 12 months. Sent mails: plain text + HTML with the
   video GIF (`outreachHtml`, no tracking), sender "Kimo Strupler · Seatline", Message-ID kept so
   the follow-up is a reply; a copy goes to the mailbox's Sent folder. IMAP: `IMAP_HOST`

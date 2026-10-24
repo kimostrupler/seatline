@@ -165,10 +165,17 @@ export class AssignmentsService {
   }
 
   /** The one allowed change to a history row. */
-  private close(tx: Tx, ctx: RequestContext, id: string, at: Date) {
-    return tx.seatAssignment.update({
-      where: { id, tenantId: ctx.tenantId, endAt: null },
-      data: { endAt: at },
-    });
+  private async close(tx: Tx, ctx: RequestContext, id: string, at: Date) {
+    try {
+      return await tx.seatAssignment.update({
+        where: { id, tenantId: ctx.tenantId, endAt: null },
+        data: { endAt: at },
+      });
+    } catch (error) {
+      // someone else closed it a moment ago (two admins moving the same person)
+      if ((error as { code?: string }).code === 'P2025')
+        throw new ConflictException('This seat was just changed by someone else — reload');
+      throw error;
+    }
   }
 }

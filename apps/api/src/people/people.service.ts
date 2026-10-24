@@ -20,9 +20,10 @@ import { zurichToday } from '../moves/moves.service';
 import { inviteMail } from '../mail/texts';
 import { readPeopleFile } from './import-file';
 import { audit } from '../common/audit';
+import { loadConfig } from '../config';
 import type { RequestContext } from '../auth/request-context';
 import { orNotFound } from '../common/errors';
-import { TenantDb } from '../db/tenant-db.service';
+import { BIG_BATCH, TenantDb } from '../db/tenant-db.service';
 
 /** The person's current seat (if any), with its floor. */
 const withSeat = {
@@ -50,6 +51,8 @@ const withSeat = {
 @Injectable()
 export class PeopleService {
   private readonly logger = new Logger(PeopleService.name);
+
+  private readonly config = loadConfig();
 
   constructor(
     private readonly db: TenantDb,
@@ -154,6 +157,7 @@ export class PeopleService {
 
   /** Add someone by hand; optionally e-mail them how to sign in. */
   async create(ctx: RequestContext, input: CreatePersonInput) {
+    this.refuseOwnerAddress(input.email);
     const person = await this.db.run(ctx.tenantId, async (tx) => {
       await this.emailFree(tx, ctx.tenantId, input.email);
       const created = await tx.person.create({
@@ -210,6 +214,7 @@ export class PeopleService {
     const seen = new Set<string>();
     return {
       rows: rows.map((r) => {
+        if (!r.problem && this.isOwnerAddress(r.email)) r.problem = 'bad_email';
         const status = r.problem
           ? ('invalid' as const)
           : known.has(r.email)
@@ -225,46 +230,51 @@ export class PeopleService {
 
   /** Add many people at once (all or nothing). People already in the list are skipped. */
   async importPeople(ctx: RequestContext, input: ImportPeopleInput) {
-    const created = await this.db.run(ctx.tenantId, async (tx) => {
-      const taken = await tx.person.findMany({
-        where: {
-          tenantId: ctx.tenantId,
-          email: { in: input.people.map((p) => p.email), mode: 'insensitive' },
-        },
-        select: { email: true },
-      });
-      const skip = new Set(taken.map((p) => p.email.toLowerCase()));
-      const out: Person[] = [];
-      for (const p of input.people) {
-        if (skip.has(p.email)) continue;
-        skip.add(p.email);
-        const person = await tx.person.create({
-          data: {
+    for (const p of input.people) this.refuseOwnerAddress(p.email);
+    const created = await this.db.run(
+      ctx.tenantId,
+      async (tx) => {
+        const taken = await tx.person.findMany({
+          where: {
             tenantId: ctx.tenantId,
-            displayName: p.displayName,
-            email: p.email,
-            department: p.department || null,
-            teamManual: !!p.department,
-            jobTitle: p.jobTitle || null,
-            appRole: input.appRole,
+            email: { in: input.people.map((p) => p.email), mode: 'insensitive' },
           },
+          select: { email: true },
         });
-        await audit(tx, ctx, {
-          action: 'person.create',
-          entityType: 'person',
-          entityId: person.id,
-          after: {
-            displayName: person.displayName,
-            email: person.email,
-            department: person.department,
-            appRole: person.appRole,
-            imported: true,
-          },
-        });
-        out.push(person);
-      }
-      return out;
-    });
+        const skip = new Set(taken.map((p) => p.email.toLowerCase()));
+        const out: Person[] = [];
+        for (const p of input.people) {
+          if (skip.has(p.email)) continue;
+          skip.add(p.email);
+          const person = await tx.person.create({
+            data: {
+              tenantId: ctx.tenantId,
+              displayName: p.displayName,
+              email: p.email,
+              department: p.department || null,
+              teamManual: !!p.department,
+              jobTitle: p.jobTitle || null,
+              appRole: input.appRole,
+            },
+          });
+          await audit(tx, ctx, {
+            action: 'person.create',
+            entityType: 'person',
+            entityId: person.id,
+            after: {
+              displayName: person.displayName,
+              email: person.email,
+              department: person.department,
+              appRole: person.appRole,
+              imported: true,
+            },
+          });
+          out.push(person);
+        }
+        return out;
+      },
+      BIG_BATCH,
+    );
     await this.notify.send(
       ctx.tenantId,
       created.map((p) => ({ kind: 'joined', person: p.displayName, team: p.department })),
@@ -282,6 +292,7 @@ export class PeopleService {
 
   /** Correct name, e-mail or job title of someone added by hand. */
   update(ctx: RequestContext, id: string, input: UpdatePersonInput) {
+    if (input.email) this.refuseOwnerAddress(input.email);
     return this.db.run(ctx.tenantId, async (tx) => {
       const before = await this.manual(tx, ctx.tenantId, id);
       if (input.email && input.email !== before.email.toLowerCase())
@@ -359,6 +370,9 @@ export class PeopleService {
           if (c.leavesOn && c.leavesOn <= today) {
             if (person.active) out.push((await this.leave(tx, ctx, person, c.leavesOn)).notice);
           } else if (c.leavesOn !== was) {
+            // the night it comes, leave() would refuse — say so now, not in a log nobody reads
+            if (c.leavesOn && person.active)
+              await this.assertNotLastAdmin(tx, ctx.tenantId, person);
             const seats = c.leavesOn ? await openSeats(tx, ctx.tenantId, [person.id]) : null;
             person = await tx.person.update({
               where: { id: person.id },
@@ -424,6 +438,22 @@ export class PeopleService {
         where: { tenantId: ctx.tenantId, department: input.from },
         data: { department: input.to, teamManual: true },
       });
+      // the team's zones on the map and its space plan follow the name
+      await tx.room.updateMany({
+        where: { tenantId: ctx.tenantId, team: input.from },
+        data: { team: input.to },
+      });
+      const plan = await tx.teamPlan.findFirst({
+        where: { tenantId: ctx.tenantId, team: input.from },
+      });
+      if (plan) {
+        const taken = input.to
+          ? await tx.teamPlan.count({ where: { tenantId: ctx.tenantId, team: input.to } })
+          : 0;
+        if (input.to && !taken)
+          await tx.teamPlan.update({ where: { id: plan.id }, data: { team: input.to } });
+        else await tx.teamPlan.delete({ where: { id: plan.id } });
+      }
       await audit(tx, ctx, {
         action: input.to ? 'team.rename' : 'team.remove',
         entityType: 'tenant',
@@ -442,12 +472,7 @@ export class PeopleService {
     person: Person,
     day = zurichToday(),
   ): Promise<{ after: Person; notice: Notice }> {
-    if (person.appRole === 'admin') {
-      const admins = await tx.person.count({
-        where: { tenantId: actor.tenantId, appRole: 'admin', active: true },
-      });
-      if (admins <= 1) throw new ConflictException('A workspace needs at least one admin');
-    }
+    await this.assertNotLastAdmin(tx, actor.tenantId, person);
     const seats = (await openSeats(tx, actor.tenantId, [person.id])).get(person.id) ?? [];
     const at = new Date();
     const after = await tx.person.update({
@@ -486,12 +511,8 @@ export class PeopleService {
     before: Person,
     appRole: AppRole | null,
   ) {
-    if (before.appRole === 'admin' && appRole !== 'admin') {
-      const admins = await tx.person.count({
-        where: { tenantId: ctx.tenantId, appRole: 'admin', active: true },
-      });
-      if (admins <= 1) throw new ConflictException('A workspace needs at least one admin');
-    }
+    if (appRole !== 'admin' && before.active)
+      await this.assertNotLastAdmin(tx, ctx.tenantId, before);
     const after = await tx.person.update({ where: { id: before.id }, data: { appRole } });
     await audit(tx, ctx, {
       action: 'person.role',
@@ -594,6 +615,30 @@ export class PeopleService {
         code: 'from_microsoft',
       });
     return person;
+  }
+
+  /** Leaving or losing the admin role is refused for the workspace's last active admin. */
+  private async assertNotLastAdmin(tx: Prisma.TransactionClient, tenantId: string, person: Person) {
+    if (person.appRole !== 'admin') return;
+    const admins = await tx.person.count({ where: { tenantId, appRole: 'admin', active: true } });
+    if (admins <= 1) throw new ConflictException('A workspace needs at least one admin');
+  }
+
+  private isOwnerAddress(email: string) {
+    return this.config.OWNER_EMAILS.includes(email.toLowerCase());
+  }
+
+  /**
+   * The operator's address can't be added to a list by hand: the workspace holding it as an
+   * active admin is the operator's own (free, and the door to /owner). It only gets there when
+   * the operator signs up with it — the e-mail link proves the address.
+   */
+  private refuseOwnerAddress(email: string) {
+    if (this.isOwnerAddress(email))
+      throw new ConflictException({
+        message: 'This address can’t be added here',
+        code: 'reserved_email',
+      });
   }
 
   private async emailFree(tx: Prisma.TransactionClient, tenantId: string, email: string) {

@@ -62,19 +62,22 @@ export class IdentityService {
    */
   private async resolveEmail(identity: EmailIdentity): Promise<Membership> {
     const rows = await this.db.emailWorkspaces(identity.email);
-    const open = rows.filter((r) => !r.microsoft).map((r) => ({ id: r.tenant_id, name: r.name }));
+    const open = rows.filter((r) => !r.microsoft);
+    // workspaces the person left aren't offered when there's one they're still in
+    const current = open.filter((r) => r.active).length ? open.filter((r) => r.active) : open;
+    const workspace = (r: (typeof rows)[number]) => ({ id: r.tenant_id, name: r.name });
     const picked = identity.tenantId
-      ? open.find((w) => w.id === identity.tenantId)
-      : open.length === 1
-        ? open[0]
+      ? open.find((w) => w.tenant_id === identity.tenantId)
+      : current.length === 1
+        ? current[0]
         : undefined;
     if (!picked) {
-      if (open.length > 1) return { status: 'choose', workspaces: open };
+      if (current.length > 1) return { status: 'choose', workspaces: current.map(workspace) };
       if (open.length === 0 && rows.length > 0) return { status: 'use_microsoft' };
       return { status: 'no_workspace' };
     }
-    return this.db.run(picked.id, async (tx) => {
-      const tenant = await tx.tenant.findUniqueOrThrow({ where: { id: picked.id } });
+    return this.db.run(picked.tenant_id, async (tx) => {
+      const tenant = await tx.tenant.findUniqueOrThrow({ where: { id: picked.tenant_id } });
       if (tenant.entraTenantId) return { status: 'use_microsoft' };
       const workspace = { id: tenant.id, name: tenant.name };
       const person = await tx.person.findFirst({
@@ -173,7 +176,8 @@ export class IdentityService {
     if (identity.kind === 'email') {
       if (!yourName) throw new BadRequestException('Please enter your name');
       const rows = await this.db.emailWorkspaces(identity.email);
-      if (rows.some((r) => !r.microsoft))
+      // someone who left a company may start their own (an inactive row doesn't count)
+      if (rows.some((r) => !r.microsoft && r.active))
         throw new ConflictException('You already have a Seatline workspace');
     } else if (await this.db.resolveTenant(identity.tid))
       throw new ConflictException('Your organisation already has a Seatline workspace');

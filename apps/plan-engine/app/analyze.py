@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import base64
 import multiprocessing as mp
+import resource
 import traceback
 from typing import Any
 
@@ -13,6 +14,14 @@ from .pdf_import import analyze_pdf, analyze_raster
 
 MAX_BYTES = 25 * 1024 * 1024
 TIMEOUT_S = 90
+# The child may use this much memory (the container has 2 GiB). Linux overcommits, so without a
+# limit a hostile plan would hit the container's OOM killer instead of a clean MemoryError.
+MEMORY_LIMIT_BYTES = 1500 * 1024 * 1024
+
+
+def limit_memory(limit: int = MEMORY_LIMIT_BYTES) -> None:
+    """Cap the calling process's data memory: allocating more raises MemoryError."""
+    resource.setrlimit(resource.RLIMIT_DATA, (limit, limit))
 
 
 def kind_of(data: bytes) -> str:
@@ -46,6 +55,7 @@ def analyze(data: bytes) -> Draft:
 
 def _child(data: bytes, conn) -> None:  # pragma: no cover - runs in the child process
     try:
+        limit_memory()
         conn.send(("ok", to_json(analyze(data))))
     except DrawingError as error:
         conn.send(("error", error.code))

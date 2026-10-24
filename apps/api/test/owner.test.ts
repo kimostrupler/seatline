@@ -85,6 +85,34 @@ describe('owner dashboard', () => {
     });
   });
 
+  it('nobody can add the operator’s address to their list (it would make them the operator)', async () => {
+    const add = (email: string) =>
+      api(app).post('/people').set(b.headers).send({ displayName: 'Someone', email });
+    const refused = await add('admin@ALPHA.example').expect(409);
+    expect(refused.body.code).toBe('reserved_email');
+    await add('someone@else.example').expect(409);
+    const ok = await add('fine@beta.example').expect(201);
+    await api(app)
+      .patch(`/people/${ok.body.id}`)
+      .set(b.headers)
+      .send({ email: 'admin@alpha.example' })
+      .expect(409);
+    await api(app)
+      .post('/people/import')
+      .set(b.headers)
+      .send({ people: [{ displayName: 'Op', email: 'admin@alpha.example' }] })
+      .expect(409);
+    const read = await api(app)
+      .post('/people/import/read')
+      .set(b.headers)
+      .attach('file', Buffer.from('Name;E-Mail\nOp;admin@alpha.example\n'), 'p.csv')
+      .expect(200);
+    expect(read.body.rows[0]).toMatchObject({ status: 'invalid', problem: 'bad_email' });
+    // beta is still an ordinary trial workspace
+    const res = await api(app).get('/owner/overview').set(a.headers).expect(200);
+    expect(res.body.workspaces.find((w: { name: string }) => w.name === 'beta').owner).toBe(false);
+  });
+
   it('the operator stops the onboarding tips of a workspace whose admin replied "stop"', async () => {
     await owner.tenant.update({ where: { id: b.tenantId }, data: { onboardingSent: 1 } });
     // only the operator: beta's own admin gets the same 404 as for a missing page

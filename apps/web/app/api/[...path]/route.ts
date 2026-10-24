@@ -40,12 +40,15 @@ async function proxy(req: NextRequest, { params }: { params: Promise<{ path: str
       `Bearer ${await internalToken(user, config.INTERNAL_AUTH_SECRET)}`,
     );
   }
+  // the body is streamed through, never held in memory (a big upload or a hostile post would
+  // otherwise sit in this process until the API answers)
   const res = await fetch(url, {
     method: req.method,
     headers,
-    body: hasBody ? await req.arrayBuffer() : undefined,
+    body: hasBody ? req.body : undefined,
+    duplex: 'half',
     cache: 'no-store',
-  });
+  } as RequestInit);
   const out = new Headers({
     'content-type': res.headers.get('content-type') ?? 'application/json',
   });

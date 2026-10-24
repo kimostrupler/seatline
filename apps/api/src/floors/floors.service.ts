@@ -6,7 +6,7 @@ import { relabel, type CreateFloorInput, type UpdateFloorInput } from '@seatline
 import type { RequestContext } from '../auth/request-context';
 import { audit } from '../common/audit';
 import { orNotFound } from '../common/errors';
-import { TenantDb } from '../db/tenant-db.service';
+import { BIG_BATCH, TenantDb } from '../db/tenant-db.service';
 import { present, withCurrent } from '../seats/seats.service';
 import { StorageService } from '../storage/storage.service';
 import { inspectPlanImage } from './plan-image';
@@ -72,42 +72,46 @@ export class FloorsService {
     const id = randomUUID();
     const source = copyFromFloorId ? await this.get(ctx, copyFromFloorId) : null;
     // the plan file is copied first; if the floor can't be created it's removed again
-    let planFileKey = data.planFileKey ?? null;
+    let planFileKey: string | null = null;
     if (source?.planFileKey) {
       planFileKey = `${ctx.tenantId}/floors/${id}/${randomUUID()}${extname(source.planFileKey)}`;
       await this.storage.copy(source.planFileKey, planFileKey);
     }
     try {
-      return await this.db.run(ctx.tenantId, async (tx) => {
-        orNotFound(
-          await tx.building.findFirst({ where: { id: data.buildingId, tenantId: ctx.tenantId } }),
-          'Building',
-        );
-        const floor = await tx.floor.create({
-          data: {
-            ...(source && {
-              planWidth: source.planWidth,
-              planHeight: source.planHeight,
-              scale: source.scale,
-              deskWidth: source.deskWidth,
-              deskDepth: source.deskDepth,
-              seatNumbering: source.seatNumbering,
-            }),
-            ...data,
-            planFileKey,
-            id,
-            tenantId: ctx.tenantId,
-          },
-        });
-        await audit(tx, ctx, {
-          action: 'floor.create',
-          entityType: 'floor',
-          entityId: floor.id,
-          after: source ? { ...floor, copiedFromFloorId: source.id } : floor,
-        });
-        if (source) await this.copyLayout(tx, ctx, source, floor);
-        return floor;
-      });
+      return await this.db.run(
+        ctx.tenantId,
+        async (tx) => {
+          orNotFound(
+            await tx.building.findFirst({ where: { id: data.buildingId, tenantId: ctx.tenantId } }),
+            'Building',
+          );
+          const floor = await tx.floor.create({
+            data: {
+              ...(source && {
+                planWidth: source.planWidth,
+                planHeight: source.planHeight,
+                scale: source.scale,
+                deskWidth: source.deskWidth,
+                deskDepth: source.deskDepth,
+                seatNumbering: source.seatNumbering,
+              }),
+              ...data,
+              planFileKey,
+              id,
+              tenantId: ctx.tenantId,
+            },
+          });
+          await audit(tx, ctx, {
+            action: 'floor.create',
+            entityType: 'floor',
+            entityId: floor.id,
+            after: source ? { ...floor, copiedFromFloorId: source.id } : floor,
+          });
+          if (source) await this.copyLayout(tx, ctx, source, floor);
+          return floor;
+        },
+        BIG_BATCH,
+      );
     } catch (error) {
       if (source?.planFileKey && planFileKey) await this.storage.delete(planFileKey);
       throw error;
@@ -278,7 +282,9 @@ export class FloorsService {
     const floor = await this.get(ctx, id);
     // the key prefix is a second check that a file can only be served to its own tenant
     if (!floor.planFileKey?.startsWith(`${ctx.tenantId}/`)) throw new NotFoundException('No plan');
-    return { key: floor.planFileKey, file: await this.storage.get(floor.planFileKey) };
+    const file = await this.storage.get(floor.planFileKey);
+    if (!file) throw new NotFoundException('No plan');
+    return { key: floor.planFileKey, file };
   }
 
   async removePlan(ctx: RequestContext, id: string) {

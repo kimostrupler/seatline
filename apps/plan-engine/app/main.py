@@ -6,6 +6,7 @@ the answer is the background image (PNG, base64) plus suggested rooms and desks 
 
 from __future__ import annotations
 
+import asyncio
 import hmac
 import os
 
@@ -18,6 +19,7 @@ from .dxf_import import DrawingError
 
 app = FastAPI(title="Seatline plan engine", docs_url=None, redoc_url=None, openapi_url=None)
 TOKEN = os.environ.get("PLAN_ENGINE_TOKEN", "")
+ANALYSES = asyncio.Semaphore(1)
 
 
 @app.get("/health")
@@ -38,6 +40,8 @@ async def analyze(
     if not data:
         return JSONResponse({"code": "empty"}, status_code=422)
     try:
-        return await run_in_threadpool(analyze_isolated, data)
+        # one plan at a time per instance: each analysis is a child process of its own
+        async with ANALYSES:
+            return await run_in_threadpool(analyze_isolated, data)
     except DrawingError as error:
         return JSONResponse({"code": error.code}, status_code=422)

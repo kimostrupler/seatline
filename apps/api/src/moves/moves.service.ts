@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, Logger } from '@nestjs/common';
-import { Prisma, type MovePlan } from '@prisma/client';
+import { Prisma, type MovePlan, type MovePlanStatus } from '@prisma/client';
 import type {
   CreateMovePlanInput,
   ListMovePlansQuery,
@@ -10,7 +10,7 @@ import type {
 import type { RequestContext } from '../auth/request-context';
 import { audit } from '../common/audit';
 import { orNotFound } from '../common/errors';
-import { TenantDb, type Tx } from '../db/tenant-db.service';
+import { BIG_BATCH, TenantDb, type Tx } from '../db/tenant-db.service';
 import type { Notice } from '../mail/notices';
 import { JobQueue } from '../jobs/job-queue.service';
 import { NotifyService } from '../mail/notify.service';
@@ -33,6 +33,9 @@ const personRef = { select: { id: true, displayName: true } } satisfies Prisma.P
 
 type Actor = Pick<RequestContext, 'tenantId'> & { actorId: string | null };
 type Named = { code: string; personId?: string; seatId?: string; byPersonId?: string };
+
+/** Plans that may still be applied (a deleted desk would silently drop out of them). */
+export const OPEN_PLANS: MovePlanStatus[] = ['draft', 'scheduled', 'failed'];
 
 /**
  * Move plans: seat changes prepared as a draft, checked, then applied together — now, or
@@ -219,14 +222,19 @@ export class MovesService {
   /** Apply now (any open plan). All or nothing: any problem → nothing changes. */
   async applyNow(ctx: RequestContext, id: string) {
     const created: string[] = [];
-    const { detail, notice } = await this.db.run(ctx.tenantId, async (tx) => {
-      const plan = await this.editable(tx, ctx.tenantId, id, ['draft', 'scheduled', 'failed']);
-      const check = await this.check(tx, ctx.tenantId, id);
-      if (!check.moves.length) throw new ConflictException('This plan has no moves');
-      if (check.problems.length) throw new ConflictException('Fix the problems in this plan first');
-      const notice = await this.apply(tx, ctx, ctx.actorId, plan, check, created);
-      return { detail: await this.detail(tx, ctx.tenantId, id), notice };
-    });
+    const { detail, notice } = await this.db.run(
+      ctx.tenantId,
+      async (tx) => {
+        const plan = await this.editable(tx, ctx.tenantId, id, ['draft', 'scheduled', 'failed']);
+        const check = await this.check(tx, ctx.tenantId, id);
+        if (!check.moves.length) throw new ConflictException('This plan has no moves');
+        if (check.problems.length)
+          throw new ConflictException('Fix the problems in this plan first');
+        const notice = await this.apply(tx, ctx, ctx.actorId, plan, check, created);
+        return { detail: await this.detail(tx, ctx.tenantId, id), notice };
+      },
+      BIG_BATCH,
+    );
     await this.notify.send(ctx.tenantId, [notice]);
     await this.jobs.enqueueDeskMail(ctx.tenantId, created, 0);
     return detail;
@@ -252,25 +260,36 @@ export class MovesService {
     for (const plan of due) {
       const system: Actor = { tenantId, actorId: null };
       const created: string[] = [];
-      const ok = await this.db.run(tenantId, async (tx) => {
-        const check = await this.check(tx, tenantId, plan.id);
-        if (check.problems.length || !check.moves.length) {
-          const problems = check.moves.length ? check.problems : [{ code: 'no_moves' }];
-          await tx.movePlan.update({
-            where: { id: plan.id },
-            data: { status: 'failed', problems: problems as unknown as Prisma.InputJsonValue },
-          });
-          await audit(tx, system, {
-            action: 'move_plan.failed',
-            entityType: 'move_plan',
-            entityId: plan.id,
-            after: { name: plan.name, problems },
-          });
-          return false;
-        }
-        // the person who scheduled it is recorded as having made the moves
-        return this.apply(tx, system, plan.scheduledById ?? plan.createdById, plan, check, created);
-      });
+      const ok = await this.db.run(
+        tenantId,
+        async (tx) => {
+          const check = await this.check(tx, tenantId, plan.id);
+          if (check.problems.length || !check.moves.length) {
+            const problems = check.moves.length ? check.problems : [{ code: 'no_moves' }];
+            await tx.movePlan.update({
+              where: { id: plan.id },
+              data: { status: 'failed', problems: problems as unknown as Prisma.InputJsonValue },
+            });
+            await audit(tx, system, {
+              action: 'move_plan.failed',
+              entityType: 'move_plan',
+              entityId: plan.id,
+              after: { name: plan.name, problems },
+            });
+            return false;
+          }
+          // the person who scheduled it is recorded as having made the moves
+          return this.apply(
+            tx,
+            system,
+            plan.scheduledById ?? plan.createdById,
+            plan,
+            check,
+            created,
+          );
+        },
+        BIG_BATCH,
+      );
       if (ok) {
         await this.notify.send(tenantId, [ok]);
         await this.jobs.enqueueDeskMail(tenantId, created, 0);

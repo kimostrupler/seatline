@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import type { MailLanguage } from '@seatline/shared';
 import { TenantDb } from '../db/tenant-db.service';
 import { MailService } from './mail.service';
@@ -16,6 +16,8 @@ export function onboardingDue(day: number, sent: number): 1 | 3 | 7 | null {
  */
 @Injectable()
 export class OnboardingService {
+  private readonly logger = new Logger(OnboardingService.name);
+
   constructor(
     private readonly db: TenantDb,
     private readonly mail: MailService,
@@ -44,9 +46,14 @@ export class OnboardingService {
     const path = { 1: '/map', 3: '/people', 7: `/help/${language}` }[due];
     if (!done)
       for (const admin of admins)
-        await this.mail.send(
-          onboardingMail(admin.email, tenant.name, due, this.mail.appUrl + path, language),
-        );
+        try {
+          await this.mail.send(
+            onboardingMail(admin.email, tenant.name, due, this.mail.appUrl + path, language),
+          );
+        } catch (error) {
+          // one bad address must not make the others get the tip again tomorrow
+          this.logger.error(`Onboarding e-mail to ${admin.email} failed: ${String(error)}`);
+        }
     await this.db.run(tenantId, (tx) =>
       tx.tenant.update({ where: { id: tenantId }, data: { onboardingSent: due } }),
     );

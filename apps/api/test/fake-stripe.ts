@@ -12,6 +12,8 @@ export interface StripeCall {
 export async function startFakeStripe() {
   const calls: StripeCall[] = [];
   const quantities = new Map<string, number>();
+  /** what GET /v1/subscriptions/:id answers (tests set status, customer, metadata) */
+  const subscriptions = new Map<string, Record<string, unknown>>();
   const server = http.createServer((req, res) => {
     let raw = '';
     req.on('data', (c: Buffer) => (raw += c.toString()));
@@ -45,6 +47,9 @@ export async function startFakeStripe() {
         return json({
           id,
           object: 'subscription',
+          status: 'active',
+          customer: 'cus_test',
+          ...subscriptions.get(id),
           items: { data: [{ id: 'si_test', quantity: quantities.get(id) ?? 3 }] },
         });
       }
@@ -54,5 +59,5 @@ export async function startFakeStripe() {
   });
   await new Promise<void>((resolve) => server.listen(0, resolve));
   const { port } = server.address() as AddressInfo;
-  return { url: `http://localhost:${port}`, calls, close: () => server.close() };
+  return { url: `http://localhost:${port}`, calls, subscriptions, close: () => server.close() };
 }

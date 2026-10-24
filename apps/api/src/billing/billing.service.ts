@@ -6,6 +6,7 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import Stripe from 'stripe';
+import { zurichClock } from '@seatline/shared/dist/outreach';
 import type { RequestContext } from '../auth/request-context';
 import { audit } from '../common/audit';
 import { orNotFound } from '../common/errors';
@@ -15,6 +16,12 @@ import { MailService } from '../mail/mail.service';
 import { trialMail } from '../mail/texts';
 import type { MailLanguage } from '@seatline/shared';
 import { billingState } from './billing-state';
+
+/** Whole calendar days (Zurich) from `now` to `date`: tomorrow = 1, today = 0. */
+export function daysUntil(date: Date, now = new Date()): number {
+  const day = (d: Date) => Date.parse(`${zurichClock(d).day}T00:00:00Z`);
+  return Math.round((day(date) - day(now)) / 86_400_000);
+}
 
 /** Which trial reminder is due (7 or 1 days left), or null; each is sent once. */
 export function trialReminderDue(daysLeft: number, reminded: number | null): 7 | 1 | null {
@@ -90,14 +97,20 @@ export class BillingService {
       }),
     }));
     if (tenant.stripeSubscriptionId) return null;
-    const left = Math.ceil((tenant.trialEndsAt.getTime() - now.getTime()) / 86_400_000);
+    // calendar days in Zurich: "ends tomorrow" must go out the night before the last day
+    const left = daysUntil(tenant.trialEndsAt, now);
     const due = trialReminderDue(left, tenant.trialReminded);
     if (!due || !admins.length) return null;
     const link = `${this.mail.appUrl}/billing`;
     for (const admin of admins)
-      await this.mail.send(
-        trialMail(admin.email, tenant.name, left, link, tenant.notifyLanguage as MailLanguage),
-      );
+      try {
+        await this.mail.send(
+          trialMail(admin.email, tenant.name, left, link, tenant.notifyLanguage as MailLanguage),
+        );
+      } catch (error) {
+        // one bad address must not make the others get the mail again tomorrow
+        this.logger.error(`Trial reminder to ${admin.email} failed: ${String(error)}`);
+      }
     await this.db.run(tenantId, (tx) =>
       tx.tenant.update({ where: { id: tenantId }, data: { trialReminded: due } }),
     );
@@ -271,6 +284,12 @@ export class BillingService {
         message: 'This is a demo workspace — start a free trial with your own account',
         code: 'demo',
       });
+    // a stale page or second tab: the portal changes the subscription there is
+    if (tenant.stripeSubscriptionId)
+      throw new ConflictException({
+        message: 'This workspace already has a subscription — manage it in the portal',
+        code: 'subscribed',
+      });
     let customer = tenant.stripeCustomerId;
     if (!customer) {
       customer = (
@@ -350,9 +369,12 @@ export class BillingService {
     return { received: true };
   }
 
-  private async applySubscription(sub: Stripe.Subscription) {
-    const tenantId = sub.metadata?.tenantId;
+  private async applySubscription(event: Stripe.Subscription) {
+    const tenantId = event.metadata?.tenantId;
     if (!tenantId) return;
+    // Stripe retries for days and doesn't keep the order: an old "active" arriving after the
+    // "deleted" would unlock a workspace with no subscription. The live object is the truth.
+    const sub = await this.stripe().subscriptions.retrieve(event.id);
     const customer = typeof sub.customer === 'string' ? sub.customer : sub.customer.id;
     await this.db.run(tenantId, async (tx) => {
       const tenant = await tx.tenant.findFirst({ where: { id: tenantId }, select: billingSelect });

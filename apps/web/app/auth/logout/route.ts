@@ -2,13 +2,16 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { siteHosts, siteUrl } from '@/lib/site';
 import { cookieOptions, signedInMarker } from '@/lib/server/auth';
 import { webConfig } from '@/lib/server/config';
+import { fromThisApp, seeOther } from '@/lib/server/forms';
 import { SESSION_COOKIE } from '@/lib/server/session';
 
 /**
- * Sign out of Seatline (POST, so a link on another site can't sign people out). Leaving the
- * demo (`to=site`) goes back to the website instead of the sign-in page.
+ * Sign out of Seatline (POST from our own pages only, so another site can't sign people out
+ * with a hidden form). Leaving the demo (`to=site`) goes back to the website instead of the
+ * sign-in page.
  */
 export async function POST(req: NextRequest) {
+  if (!fromThisApp(req)) return seeOther('/');
   const appUrl = webConfig().APP_URL;
   const to = String((await req.formData().catch(() => null))?.get('to') ?? '');
   const website = siteHosts(appUrl).length ? `${siteUrl(appUrl)}/` : new URL('/welcome', appUrl);

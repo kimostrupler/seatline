@@ -385,14 +385,26 @@ export class LeadsService {
       this.logger.warn(`Checking for outreach replies failed: ${(error as Error).message}`);
       return 0;
     }
+    const ours = await this.db.run(system.tenantId, (tx) =>
+      tx.leadMessage.findMany({
+        where: { tenantId: system.tenantId, leadId: { in: waiting.map((l) => l.id) } },
+        select: { leadId: true, messageId: true },
+      }),
+    );
     let n = 0;
     for (const lead of waiting) {
       const key = replyKey(lead.contactEmail!);
+      const sent = ours.filter((m) => m.leadId === lead.id).map((m) => m.messageId);
+      // a reply answers one of our e-mails (In-Reply-To / References), or comes from the contact
+      // themselves and not from a machine. A colleague's out-of-office or a newsletter from
+      // the same domain is neither, and must not cancel the follow-up.
       const reply = replies.find(
         (r) =>
-          (key.exact ? r.from === key.exact : r.from.endsWith(`@${key.domain}`)) &&
           lead.firstSentAt &&
-          r.date >= lead.firstSentAt,
+          r.date >= lead.firstSentAt &&
+          !r.auto &&
+          (r.answers.some((id) => sent.includes(id)) ||
+            r.from === (key.exact ?? lead.contactEmail!.toLowerCase())),
       );
       if (!reply) continue;
       n++;
@@ -441,6 +453,15 @@ export class LeadsService {
     rethrow = false,
   ): Promise<boolean> {
     const lead = message.lead;
+    // claim it first: the morning job and a "Send now" click (or a retry after a lost DB
+    // connection) must never both send the same e-mail
+    const { count } = await this.db.run(actor.tenantId, (tx) =>
+      tx.leadMessage.updateMany({
+        where: { id: message.id, sentAt: null, canceledAt: null },
+        data: { sentAt: now },
+      }),
+    );
+    if (count === 0) return false;
     const replyTo = message.kind === 'follow_up' ? lead.messages[0]?.messageId : undefined;
     const mail = {
       to: message.toAddress,
@@ -454,12 +475,15 @@ export class LeadsService {
     try {
       await this.mail.send(mail);
     } catch (error) {
+      // not sent: give the claim back so the next morning run (or the operator) tries again
+      await this.db.run(actor.tenantId, (tx) =>
+        tx.leadMessage.update({ where: { id: message.id }, data: { sentAt: null } }),
+      );
       if (rethrow) throw error;
-      return false; // MailService logged it; the next morning run tries again
+      return false; // MailService logged it
     }
     await this.inbox.fileSent({ ...mail, from: `${mail.fromName} <${this.mail.fromAddress}>` });
     await this.db.run(actor.tenantId, async (tx) => {
-      await tx.leadMessage.update({ where: { id: message.id }, data: { sentAt: now } });
       await tx.lead.update({
         where: { id: lead.id },
         data:

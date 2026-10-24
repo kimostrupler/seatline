@@ -4,6 +4,9 @@ import { PrismaService } from './prisma.service';
 
 export type Tx = Prisma.TransactionClient;
 
+/** Transaction time for one big batch (a plan import of 2000 desks, an import of 2000 people). */
+export const BIG_BATCH = { timeoutMs: 60_000 };
+
 /**
  * The only way feature code talks to the database. Each call is one transaction with
  * app.tenant_id set, so RLS limits every statement to that tenant. Queries must still
@@ -22,8 +25,9 @@ export class TenantDb {
 
   /** Every workspace where someone has this e-mail address (e-mail sign-in, before the tenant is known). */
   emailWorkspaces(email: string) {
-    return this.prisma.$queryRaw<{ tenant_id: string; name: string; microsoft: boolean }[]>`
-      SELECT tenant_id, name, microsoft FROM email_workspaces(${email})`;
+    return this.prisma.$queryRaw<
+      { tenant_id: string; name: string; microsoft: boolean; active: boolean }[]
+    >`SELECT tenant_id, name, microsoft, active FROM email_workspaces(${email})`;
   }
 
   /** Stores a sign-in link's hash; false when this address asked for too many links lately. */
