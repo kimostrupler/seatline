@@ -1,5 +1,17 @@
 import type { FloorMap, MoveItem, Seat } from './types';
 
+/**
+ * The earliest day a plan can be scheduled: tomorrow in Zurich (YYYY-MM-DD), whatever the
+ * browser's time zone. One calendar day after today there — not now + 24 h, which is still
+ * today on the night the clocks go back.
+ */
+export function zurichTomorrow(now = new Date()): string {
+  const today = now.toLocaleDateString('en-CA', { timeZone: 'Europe/Zurich' });
+  const day = new Date(`${today}T12:00:00Z`);
+  day.setUTCDate(day.getUTCDate() + 1);
+  return day.toISOString().slice(0, 10);
+}
+
 /** How a seat changes in a plan: someone arrives, someone leaves, or both. */
 export type PlannedChange = 'in' | 'out' | 'swap';
 

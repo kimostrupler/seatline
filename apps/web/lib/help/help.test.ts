@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
+  adminConsentUrl,
   HELP,
   HELP_TOPICS,
   helpAlternates,
@@ -37,6 +38,21 @@ describe('help center', () => {
 
   it('German uses Swiss spelling', () => {
     expect(JSON.stringify(HELP.de)).not.toContain('ß');
+  });
+
+  it('the IT approval link for Microsoft 365', () => {
+    const url = new URL(
+      adminConsentUrl('https://login.microsoftonline.com', 'client-1', 'https://app.seatline.ch'),
+    );
+    expect(url.origin + url.pathname).toBe(
+      'https://login.microsoftonline.com/organizations/adminconsent',
+    );
+    expect(url.searchParams.get('client_id')).toBe('client-1');
+    // a reply address the app registration has (infra/azure/setup.sh adds <app>/people)
+    expect(url.searchParams.get('redirect_uri')).toBe('https://app.seatline.ch/people');
+    // the IT guide shows it in every language
+    for (const l of LANGS)
+      expect(HELP[l].topics['microsoft-365'].steps.some((s) => s.approvalLink)).toBe(true);
   });
 
   it('addresses', () => {

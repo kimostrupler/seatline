@@ -52,6 +52,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { zurichTomorrow } from '@/lib/moves';
 import { useMovePlan, useMovePlanActions, useOverview, useStats } from '@/lib/queries';
 import type { MoveItem, MovePlanDetail, PlanSeatRef } from '@/lib/types';
 import { PlanStatus } from './plan-status';
@@ -434,11 +435,7 @@ function ScheduleDialog({
   onSchedule: (date: string) => Promise<unknown>;
 }) {
   const t = useTranslations('moves');
-  const tomorrow = (() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 1);
-    return d.toLocaleDateString('en-CA', { timeZone: 'Europe/Zurich' });
-  })();
+  const tomorrow = zurichTomorrow();
   const [date, setDate] = useState<string | null>(null);
   const value = date ?? current ?? tomorrow;
   return (

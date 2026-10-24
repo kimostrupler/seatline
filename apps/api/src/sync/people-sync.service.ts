@@ -108,7 +108,7 @@ export class PeopleSyncService {
     );
     const emailOwner = new Map(people.map((p) => [p.email.toLowerCase(), p.id]));
     const seen = new Set<string>();
-    const created: string[] = [];
+    const fresh: Prisma.PersonCreateManyInput[] = [];
     const updated: string[] = [];
     const deactivated: string[] = [];
     const synced: string[] = [];
@@ -141,23 +141,29 @@ export class PeopleSyncService {
         unlinkedByEmail.delete(match.email.toLowerCase());
       } else {
         if (emailOwner.has(u.email)) continue; // same e-mail, different Microsoft account: leave it to an admin
-        const person = await tx.person.create({
-          data: {
-            tenantId,
-            entraObjectId: u.oid,
-            email: u.email,
-            displayName: u.displayName,
-            department: u.department,
-            jobTitle: u.jobTitle,
-            active: u.active,
-            appRole: u.active ? defaultAppRole : null,
-            syncedAt: at,
-          },
+        fresh.push({
+          tenantId,
+          entraObjectId: u.oid,
+          email: u.email,
+          displayName: u.displayName,
+          department: u.department,
+          jobTitle: u.jobTitle,
+          active: u.active,
+          appRole: u.active ? defaultAppRole : null,
+          syncedAt: at,
         });
-        emailOwner.set(u.email, person.id);
-        created.push(person.id);
+        emailOwner.set(u.email, u.oid);
       }
     }
+    // A whole company arrives at once: someone may sign in for the first time while this runs
+    // (their sign-in creates them). They are skipped here, not a reason to undo the whole sync.
+    const created = (
+      await tx.person.createManyAndReturn({
+        data: fresh,
+        skipDuplicates: true,
+        select: { id: true },
+      })
+    ).map((p) => p.id);
 
     if (synced.length)
       await tx.person.updateMany({

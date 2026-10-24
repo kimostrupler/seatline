@@ -189,6 +189,55 @@ export const EN: HelpContent = {
         },
       ],
     },
+    'microsoft-365': {
+      title: 'Microsoft 365: approval for IT',
+      summary:
+        'For IT admins: what Seatline asks Microsoft 365 for, how to approve it once, and how to limit or remove it.',
+      steps: [
+        {
+          title: 'What Seatline asks for',
+          text: [
+            'Sign-in: colleagues sign in with their Microsoft 365 work account. Seatline gets their name, e-mail address and Microsoft’s ID for them (permissions openid, profile, email and User.Read).',
+            'People list, for the nightly update: the application permission User.Read.All (“Read all users’ full profiles”). Of that, Seatline keeps only name, e-mail, department, job title and whether the account is active. Guest accounts are skipped.',
+            'Seatline never writes anything to Microsoft 365, and it doesn’t read mail, calendars, files or Teams.',
+          ],
+        },
+        {
+          title: 'Who gets in',
+          text: [
+            'The first person from your organisation who signs in creates the workspace and becomes its admin. Everyone else from the same organisation joins that workspace when they sign in — there is never a second workspace for your organisation.',
+            'An admin decides what newcomers get under People & access → Settings → Who can open Seatline: “Everyone in the organisation can view the map” (they start as Viewer) or “Only people you give a role”.',
+          ],
+        },
+        {
+          title: 'Approve Seatline once',
+          text: [
+            'The people list always needs an admin’s approval. In Seatline, an admin opens People & access → Settings → Microsoft 365 and clicks Sync now. If Microsoft hasn’t approved it yet, the button Approve in Microsoft appears: a Global Administrator or Privileged Role Administrator clicks it and accepts.',
+            'If your organisation doesn’t let people approve apps themselves, the first person already sees “Need admin approval” when signing in. Then IT opens the approval link below and accepts — that covers sign-in and the people list together.',
+          ],
+          approvalLink: 'Approval link for IT:',
+        },
+        {
+          title: 'Limit Seatline to some people (optional)',
+          text: [
+            'In the Microsoft Entra admin center, open Enterprise applications → Seatline → Properties, set “Assignment required?” to Yes and save. Then add the people or groups who may sign in under Users and groups.',
+            'This limits who can sign in. The nightly people list still comes from the whole directory, so everyone can get a desk.',
+          ],
+        },
+        {
+          title: 'Remove the approval',
+          text: [
+            'In the Microsoft Entra admin center, Enterprise applications → Seatline → Properties → Delete removes Seatline from your organisation. New sign-ins and the nightly update stop at once; someone who is already signed in stays signed in for up to 30 days.',
+            'Your data in Seatline stays until your workspace is deleted. To delete it, write to hello@seatline.ch.',
+          ],
+        },
+      ],
+      tips: [
+        'Everyone signs in through Microsoft, so your MFA and Conditional Access rules apply as usual.',
+        'People removed or disabled in Microsoft 365 lose access and their desk the next night; their seat history stays.',
+        'Your data stays in Switzerland (Microsoft Azure, Zurich). The data processing agreement is at seatline.ch/legal/dpa.',
+      ],
+    },
     'teams-and-changes': {
       title: 'Teams, HR changes and notices',
       summary: 'Keep teams up to date, handle joiners and leavers, and let IT know automatically.',

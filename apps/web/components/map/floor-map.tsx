@@ -227,15 +227,8 @@ export function FloorMap({
             scaleY={view.scale}
             draggable
             onWheel={vp.onWheel}
-            // follow the drag live, so the markers (an HTML layer) move with the floor
-            onDragMove={(e) => {
-              if (e.target === e.target.getStage())
-                vp.setView((v) => ({ ...v, x: e.target.x(), y: e.target.y() }));
-            }}
-            onDragEnd={(e) => {
-              if (e.target === e.target.getStage())
-                vp.setView((v) => ({ ...v, x: e.target.x(), y: e.target.y() }));
-            }}
+            onDragMove={vp.onPanMove}
+            onDragEnd={vp.onPanEnd}
             onClick={(e) => {
               if (e.target === e.target.getStage()) onSelectSeat(null);
             }}
@@ -288,7 +281,9 @@ export function FloorMap({
         </SeatSizeContext.Provider>
       )}
 
-      <MarkerOverlay markers={map.markers ?? []} view={view} />
+      <div ref={vp.overlayRef} className="pointer-events-none absolute inset-0">
+        <MarkerOverlay markers={map.markers ?? []} view={view} />
+      </div>
 
       {/* The canvas is invisible to keyboards and screen readers: this list is the accessible map. */}
       <ul className="sr-only" aria-label={t('seatsList')}>

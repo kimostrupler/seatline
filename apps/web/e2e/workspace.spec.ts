@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { DEMO_TENANTS } from '@seatline/shared';
 import { expect, test, type Page } from '@playwright/test';
 import { resetE2eDb } from './db';
@@ -53,6 +54,43 @@ test('shows the floor, and a seat with its person and history', async ({ page })
   await expect(panel.getByRole('button', { name: 'Anna Meier' })).toBeVisible();
   await expect(panel.getByTestId('history')).toContainText('Anna Meier');
   await expect(panel.getByTestId('history')).toContainText('Moved closer to the team');
+});
+
+test('dragging the empty floor moves it; the markers move along', async ({ page }) => {
+  const map = page.getByTestId('floor-map');
+  const floorId = new URL(page.url()).searchParams.get('floor');
+  const res = await page.request.patch(`/api/floors/${floorId}/layout`, {
+    headers: { 'x-tenant-id': admin.tenantId, 'x-user-id': admin.userId },
+    data: { markers: { create: [{ id: randomUUID(), kind: 'kitchen', x: 100, y: 100 }] } },
+  });
+  expect(res.ok()).toBe(true);
+  await page.reload();
+  const marker = map.locator('[data-marker="kitchen"]');
+  await expect(marker).toBeVisible();
+  const view = async () => JSON.parse((await map.getAttribute('data-view'))!) as { x: number };
+  // the floor is framed once its size is known: wait until it stays put
+  await page.waitForLoadState('networkidle');
+  let settled = '';
+  await expect
+    .poll(async () => {
+      const now = (await map.getAttribute('data-view'))!;
+      const same = now === settled;
+      settled = now;
+      return same;
+    })
+    .toBe(true);
+  const start = await view();
+  const before = (await marker.boundingBox())!;
+  const box = (await map.boundingBox())!;
+  await page.mouse.move(box.x + 8, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + 58, box.y + box.height / 2, { steps: 5 });
+  // while dragging, the marker already follows the floor
+  expect(Math.round((await marker.boundingBox())!.x - before.x)).toBe(50);
+  await page.mouse.move(box.x + 128, box.y + box.height / 2, { steps: 5 });
+  await page.mouse.up();
+  await expect.poll(async () => Math.round((await view()).x - start.x)).toBe(120);
+  expect(Math.round((await marker.boundingBox())!.x - before.x)).toBe(120);
 });
 
 test('clicking a seat on the map selects it', async ({ page }) => {

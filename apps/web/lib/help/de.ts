@@ -191,6 +191,55 @@ export const DE: HelpContent = {
         },
       ],
     },
+    'microsoft-365': {
+      title: 'Microsoft 365: Freigabe durch die IT',
+      summary:
+        'Für IT-Admins: was Seatline bei Microsoft 365 anfragt, wie Sie es einmal freigeben und wie Sie es einschränken oder entfernen.',
+      steps: [
+        {
+          title: 'Was Seatline anfragt',
+          text: [
+            'Anmelden: Mitarbeitende melden sich mit ihrem Microsoft-365-Geschäftskonto an. Seatline erhält Name, E-Mail-Adresse und die Microsoft-ID der Person (Berechtigungen openid, profile, email und User.Read).',
+            'Personenliste für den nächtlichen Abgleich: die Anwendungsberechtigung User.Read.All („Vollständige Profile aller Benutzer lesen“). Davon speichert Seatline nur Name, E-Mail, Abteilung, Funktion und ob das Konto aktiv ist. Gastkonten werden übersprungen.',
+            'Seatline schreibt nie etwas in Microsoft 365 und liest keine E-Mails, Kalender, Dateien oder Teams.',
+          ],
+        },
+        {
+          title: 'Wer hineinkommt',
+          text: [
+            'Die erste Person Ihrer Organisation, die sich anmeldet, erstellt den Arbeitsbereich und wird dessen Admin. Alle anderen aus derselben Organisation kommen bei der Anmeldung in diesen Arbeitsbereich — Ihre Organisation hat nie einen zweiten.',
+            'Was Neue erhalten, legt ein Admin unter Personen & Zugang → Einstellungen → Wer Seatline öffnen kann fest: „Alle in der Organisation können den Plan ansehen“ (sie starten als Betrachter) oder „Nur Personen, denen Sie eine Rolle geben“.',
+          ],
+        },
+        {
+          title: 'Seatline einmal freigeben',
+          text: [
+            'Die Personenliste braucht immer die Freigabe eines Admins. In Seatline öffnet ein Admin Personen & Zugang → Einstellungen → Microsoft 365 und klickt auf Jetzt abgleichen. Fehlt die Freigabe noch, erscheint die Schaltfläche Bei Microsoft bestätigen: Ein Globaler Administrator oder Administrator für privilegierte Rollen klickt darauf und stimmt zu.',
+            'Erlaubt Ihre Organisation nicht, dass Mitarbeitende Apps selbst freigeben, sieht schon die erste Person bei der Anmeldung „Administratorgenehmigung erforderlich“. Dann öffnet die IT den Freigabe-Link unten und stimmt zu — das gilt für die Anmeldung und die Personenliste zusammen.',
+          ],
+          approvalLink: 'Freigabe-Link für die IT:',
+        },
+        {
+          title: 'Seatline auf einige Personen beschränken (optional)',
+          text: [
+            'Öffnen Sie im Microsoft Entra Admin Center Unternehmensanwendungen → Seatline → Eigenschaften, stellen Sie „Zuweisung erforderlich?“ auf Ja und speichern Sie. Fügen Sie dann unter Benutzer und Gruppen die Personen oder Gruppen hinzu, die sich anmelden dürfen.',
+            'Das beschränkt, wer sich anmelden kann. Die nächtliche Personenliste kommt weiterhin aus dem ganzen Verzeichnis, so können alle einen Platz erhalten.',
+          ],
+        },
+        {
+          title: 'Freigabe entfernen',
+          text: [
+            'Im Microsoft Entra Admin Center entfernt Unternehmensanwendungen → Seatline → Eigenschaften → Löschen Seatline aus Ihrer Organisation. Neue Anmeldungen und der nächtliche Abgleich hören sofort auf; wer bereits angemeldet ist, bleibt bis zu 30 Tage angemeldet.',
+            'Ihre Daten in Seatline bleiben, bis Ihr Arbeitsbereich gelöscht wird. Dafür schreiben Sie an hello@seatline.ch.',
+          ],
+        },
+      ],
+      tips: [
+        'Alle melden sich über Microsoft an — Ihre MFA- und Conditional-Access-Regeln gelten wie gewohnt.',
+        'Wer in Microsoft 365 entfernt oder deaktiviert wird, verliert in der folgenden Nacht den Zugang und den Platz; die Platzhistorie bleibt.',
+        'Ihre Daten bleiben in der Schweiz (Microsoft Azure, Zürich). Der Auftragsverarbeitungsvertrag steht unter seatline.ch/legal/dpa.',
+      ],
+    },
     'teams-and-changes': {
       title: 'Teams, HR-Änderungen und Mitteilungen',
       summary:

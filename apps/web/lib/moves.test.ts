@@ -1,5 +1,18 @@
 import { describe, expect, it } from 'vitest';
-import { projectFloor } from './moves';
+import { projectFloor, zurichTomorrow } from './moves';
+
+describe('the earliest day to schedule a plan', () => {
+  it('is tomorrow in Zurich, whatever the browser’s time zone', () => {
+    // the night the clocks go back: 22:30 UTC on 24 Oct is already 25 Oct in Zurich, and
+    // now + 24 h (22:30 UTC on 25 Oct = 23:30 in Zurich) would still be "today" there
+    expect(zurichTomorrow(new Date('2026-10-24T22:30:00Z'))).toBe('2026-10-26');
+    // just before midnight in Zurich
+    expect(zurichTomorrow(new Date('2026-11-10T22:59:00Z'))).toBe('2026-11-11');
+    expect(zurichTomorrow(new Date('2026-11-10T23:01:00Z'))).toBe('2026-11-12');
+    // month and year ends
+    expect(zurichTomorrow(new Date('2026-12-31T10:00:00Z'))).toBe('2027-01-01');
+  });
+});
 import type { FloorMap, Seat } from './types';
 
 const seat = (id: string, person?: string, extra: Partial<Seat> = {}): Seat => ({

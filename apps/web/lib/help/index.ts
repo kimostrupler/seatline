@@ -15,6 +15,16 @@ export const isHelpLanguage = (l: string): l is Language =>
 export const isHelpTopic = (t: string): t is HelpTopicId =>
   (HELP_TOPICS as readonly string[]).includes(t);
 
+/**
+ * The link a customer's IT opens to approve Seatline for their whole organisation (sign-in and
+ * the people sync together). Microsoft sends them back to People & access afterwards.
+ */
+export const adminConsentUrl = (loginUrl: string, clientId: string, appUrl: string) =>
+  `${loginUrl}/organizations/adminconsent?${new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: `${appUrl}/people`,
+  })}`;
+
 export const helpPath = (language: Language, topic?: HelpTopicId) =>
   `/help/${language}${topic ? `/${topic}` : ''}`;
 export const helpImage = (language: Language, image: HelpImage) =>

@@ -255,14 +255,16 @@ describe('billing', () => {
   it('reminds the admins 7 days and 1 day before the trial ends, each once', async () => {
     await clearMails();
     const billing = app.get(BillingService);
-    // the trial ends at noon (Zurich) in `days` days: the reminders count calendar days there
-    const endsIn = (days: number) =>
-      owner.tenant.update({
+    // the trial ends at noon (Zurich) `days` calendar days from today there — not now + 24 h,
+    // which is still today on the night the clocks go back
+    const endsIn = (days: number) => {
+      const day = new Date(`${zurichClock(new Date()).day}T12:00:00Z`);
+      day.setUTCDate(day.getUTCDate() + days);
+      return owner.tenant.update({
         where: { id: a.tenantId },
-        data: {
-          trialEndsAt: zurichTime(zurichClock(new Date(Date.now() + days * 86_400_000)).day, 12),
-        },
+        data: { trialEndsAt: zurichTime(day.toISOString().slice(0, 10), 12) },
       });
+    };
     await endsIn(20);
     expect(await app.get(TenantDb).listTrialTenants()).not.toContain(a.tenantId);
     await endsIn(7);
