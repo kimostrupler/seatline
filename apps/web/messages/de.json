@@ -17,7 +17,7 @@
     "floor": "Stockwerk",
     "chooseBuilding": "Gebäude wählen",
     "chooseFloor": "Stockwerk wählen",
-    "noBuildings": "Noch keine Gebäude.",
+    "noBuildings": "Noch keine Gebäude. Richten Sie Ihr Büro in zwei kurzen Schritten ein: Gebäude, Stockwerk und Plätze.",
     "noFloors": "Dieses Gebäude hat noch keine Stockwerke.",
     "newBuilding": "Neues Gebäude",
     "newFloor": "Neues Stockwerk",
@@ -28,7 +28,7 @@
     "floorLevelHint": "0 = Erdgeschoss, negativ = Untergeschoss",
     "create": "Erstellen",
     "cancel": "Abbrechen",
-    "createFirstBuilding": "Erstes Gebäude erstellen",
+    "createFirstBuilding": "Mein Büro einrichten",
     "created": "{name} erstellt",
     "createFirstFloor": "Erstes Stockwerk erstellen",
     "startWith": "Beginnen mit",
@@ -57,7 +57,7 @@
     "fit": "Stockwerk einpassen",
     "openSidebar": "Stockwerke und Personen",
     "loading": "Stockwerk wird geladen…",
-    "empty": "Dieses Stockwerk hat noch keine Plätze.",
+    "empty": "Dieses Stockwerk hat noch keine Plätze. Beginnen Sie mit einem Beispielbüro oder zeichnen Sie Ihr eigenes unter «Plan bearbeiten».",
     "error": "Das Stockwerk konnte nicht geladen werden.",
     "retry": "Erneut versuchen",
     "seatsList": "Plätze auf diesem Stockwerk",
@@ -82,6 +82,25 @@
       "result": "{count, plural, =0 {Kein freier Platz hat all das.} one {# freier Platz passt – auf dem Plan hervorgehoben.} other {# freie Plätze passen – auf dem Plan hervorgehoben.}}",
       "hint": "Wählen Sie, was der Platz haben soll.",
       "clear": "Platzsuche zurücksetzen"
+    },
+    "tour": {
+      "progress": "Tipp {n} von {total}",
+      "next": "Weiter",
+      "done": "Verstanden",
+      "skip": "Tipps überspringen",
+      "colours": {
+        "title": "Willkommen auf Ihrem Stockwerk",
+        "body": "Grüne Plätze sind frei, graue besetzt, gelbe reserviert."
+      },
+      "click": {
+        "title": "Klicken Sie auf einen Platz",
+        "body": "Sie sehen, wer dort sitzt und seit wann. Bei einem freien Platz wählen Sie «Person zuweisen» – oder ziehen einen Namen aus der Liste darauf.",
+        "bodyViewer": "Sie sehen, wer dort sitzt und seit wann. Suchen Sie links eine Person, um ihren Platz zu finden."
+      },
+      "undo": {
+        "title": "Es kann nichts schiefgehen",
+        "body": "Jede Änderung zeigt eine Meldung mit «Rückgängig». Mehrere Umzüge auf einmal? Nutzen Sie «Umzüge» im Menü."
+      }
     }
   },
   "seat": {
@@ -985,7 +1004,7 @@
     "cancel": "Abbrechen",
     "openPlans": "Offene Pläne",
     "donePlans": "Erledigt",
-    "noOpenPlans": "Keine offenen Pläne.",
+    "noOpenPlans": "Keine offenen Pläne. Ein Plan sammelt mehrere Umzüge (ein Team zieht um, ein neues Stockwerk) und führt sie gemeinsam aus – sofort oder an einem Datum.",
     "noDonePlans": "Noch nichts angewendet.",
     "summary": "{count, plural, =0 {Noch keine Umzüge} one {# Umzug} other {# Umzüge}} · {name} · {date}",
     "notFound": "Diesen Plan gibt es nicht (mehr).",
@@ -1493,7 +1512,8 @@
       "status": "Status",
       "lastActivity": "Letzte Änderung",
       "admins": "Admins",
-      "email": "E-Mail-Link"
+      "email": "E-Mail-Link",
+      "setup": "Einrichtung"
     },
     "delete": {
       "options": "Optionen für {name}",
@@ -1513,6 +1533,12 @@
       "action": "Tipps stoppen",
       "done": "Keine Tipps mehr für {name}",
       "failed": "Tipps konnten nicht gestoppt werden"
+    },
+    "setup": {
+      "desks": "Noch keine Plätze",
+      "people": "Noch keine Personen",
+      "seated": "Niemand platziert",
+      "done": "In Gebrauch"
     }
   },
   "loading": {
@@ -1541,5 +1567,33 @@
     "stuck": "Noch Fragen?",
     "contact": "Schreiben Sie an <mail>{email}</mail>.",
     "openApp": "Seatline öffnen"
+  },
+  "setup": {
+    "progress": "Einrichtungsschritte",
+    "step1": "Ihr Büro",
+    "step2": "Ihre Personen",
+    "officeTitle": "Richten Sie Ihr Büro ein",
+    "officeBody": "Wir zeichnen ein erstes Stockwerk für Sie. Sie können später alles ändern.",
+    "building": "Gebäude",
+    "floor": "Stockwerk",
+    "floorDefault": "Erdgeschoss",
+    "size": "Wie gross ist das Büro?",
+    "sizeHint": "Ein Beispielbüro mit Plätzen, Sitzungszimmern und Küche. Unter «Plan bearbeiten» können Sie alles verschieben, ergänzen oder entfernen.",
+    "empty": "Selbst zeichnen",
+    "emptyHint": "Mit einem leeren Stockwerk beginnen",
+    "create": "Mein Büro erstellen",
+    "creating": "Wird erstellt…",
+    "failed": "Das Büro konnte nicht erstellt werden: {message}",
+    "peopleTitle": "Erfassen Sie Ihre Personen",
+    "peopleBody": "Sobald Ihre Kolleginnen und Kollegen in Seatline sind, können Sie ihnen Plätze geben.",
+    "peopleBodyMicrosoft": "Ihre Kolleginnen und Kollegen kommen von selbst aus Microsoft 365, sobald Ihre IT Seatline das Verzeichnis lesen lässt.",
+    "import": "Liste importieren",
+    "importHint": "Excel oder CSV – Name und E-Mail genügen.",
+    "byHand": "Einzeln hinzufügen",
+    "byHandHint": "Passend für ein kleines Team.",
+    "microsoft": "Microsoft 365 verbinden",
+    "microsoftHint": "Bitten Sie Ihre IT, Seatline freizugeben (Personen › Einstellungen).",
+    "template": "Noch keine Liste? Nutzen Sie unsere <link>gratis Excel-Vorlage</link>.",
+    "later": "Zuerst den Plan ansehen"
   }
 }

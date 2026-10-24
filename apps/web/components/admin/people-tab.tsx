@@ -14,6 +14,7 @@ import {
   UserX,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import { useDeferredValue, useId, useState } from 'react';
 import { toast } from 'sonner';
@@ -105,7 +106,9 @@ export function PeopleTab() {
   const setRole = useSetRole();
   const colorOf = useTeamColor();
   const [adding, setAdding] = useState(false);
-  const [importing, setImporting] = useState(false);
+  // /people?import=1 (from the setup wizard) opens the list import right away
+  const params = useSearchParams();
+  const [importing, setImporting] = useState(() => params.get('import') === '1');
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
   const q = useDeferredValue(search.trim().toLowerCase());

@@ -2,10 +2,11 @@
 
 import { CircleHelp } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { AccountMenu } from '@/components/workspace/account-menu';
-import { helpPath } from '@/lib/help';
+import { helpPath, helpTopicFor } from '@/lib/help';
 import type { Language } from '@/lib/locales';
 import { LanguageSelect } from './language-select';
 import { Logo } from './logo';
@@ -16,6 +17,9 @@ import { NavLinks } from './nav-links';
 export function TopBar() {
   const t = useTranslations('nav');
   const language = useLocale().slice(0, 2) as Language;
+  // Help opens the topic for this page (map, moves, people…)
+  const pathname = usePathname();
+  const search = useSearchParams();
   return (
     <>
       <header
@@ -45,7 +49,11 @@ export function TopBar() {
             className="shrink-0 max-md:hidden"
             data-testid="help-link"
           >
-            <Link href={helpPath(language)} target="_blank" rel="noopener">
+            <Link
+              href={helpPath(language, helpTopicFor(pathname, search))}
+              target="_blank"
+              rel="noopener"
+            >
               <CircleHelp /> <span className="max-md:sr-only">{t('help')}</span>
             </Link>
           </Button>

@@ -343,6 +343,17 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - Widgets: catalog + role rules + pure layout helpers in `lib/dashboard.ts`; bodies in
   `components/dashboard/widgets.tsx`. New widget = `WIDGET_TYPES` + `WIDGETS` + body + texts.
   Numbers come from `GET /stats` (one snapshot; weeks are Swiss weeks starting Monday).
+- **Setup wizard** (`/setup`, `components/setup/setup-wizard.tsx`): the onboarding form goes there
+  (not to an empty map). Step 1: building (company name), floor ("Ground floor"), size = an example
+  office (`templateChanges`, sent as one layout batch) or empty; step 2: how people get in (import
+  → `/people?import=1` opens the import dialog, by hand, or Microsoft 365) + the free Excel
+  template. Uses only existing APIs; a workspace with a building is sent to `/map`. The empty map's
+  "Set up my office" button opens it again.
+- **Map tour** (`components/map/map-tour.tsx`): three tips over the view map on the first visit
+  (colours, click a desk, undo), per browser (`useDismissed('seatline-map-tour-v1')`). e2e projects
+  mark it seen via `storageState`; `e2e/map-tour.spec.ts` tests it in a fresh browser.
+- **Help button** (top bar + phone "More" menu) opens the topic for the current page
+  (`helpTopicFor` in `lib/help`, unit-tested). Help texts must be updated with every UI change.
 - **Getting started** (`components/dashboard/getting-started.tsx`, admins, not in demos): 4 steps
   ticked from `/overview` + `/people/directory` (`setupProgress`, `lib/getting-started.ts`);
   hidden per browser + workspace (`useDismissed`), and by itself once all are done.
@@ -479,6 +490,8 @@ chromium` (re-run after UI changes). In the app: **Help** in the top bar, a dism
 - Reached from the main menu: **Overview** appears (admins only ask) when `GET /owner/check`
   answers 204; everyone else gets the same 404. The operator's own workspace shows as
   "Owner · free" (`owner` flag, same rule as billing) and isn't counted as a trial.
+  The **Setup** column (`setupStep`, `lib/setup-step.ts`) shows where a workspace stopped: no
+  desks → no people → nobody seated → in use.
 - **Delete a workspace (support)**: row ⋯ → type its name → `DELETE /owner/workspaces/:id`
   (`{ name }` must match). Refused for the operator's own workspace and while a Stripe
   subscription runs (cancel it in Stripe first). SECURITY DEFINER `delete_tenant(uuid)` removes

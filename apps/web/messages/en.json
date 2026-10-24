@@ -17,7 +17,7 @@
     "floor": "Floor",
     "chooseBuilding": "Choose a building",
     "chooseFloor": "Choose a floor",
-    "noBuildings": "No buildings yet.",
+    "noBuildings": "No buildings yet. Set up your office in two short steps: building, floor and desks.",
     "noFloors": "This building has no floors yet.",
     "newBuilding": "New building",
     "newFloor": "New floor",
@@ -28,7 +28,7 @@
     "floorLevelHint": "0 = ground floor, negative = basement",
     "create": "Create",
     "cancel": "Cancel",
-    "createFirstBuilding": "Create your first building",
+    "createFirstBuilding": "Set up my office",
     "created": "{name} created",
     "createFirstFloor": "Create the first floor",
     "startWith": "Start with",
@@ -57,7 +57,7 @@
     "fit": "Fit floor to screen",
     "openSidebar": "Floors and people",
     "loading": "Loading floor…",
-    "empty": "This floor has no seats yet.",
+    "empty": "This floor has no desks yet. Start from an example office or draw your own in Edit layout.",
     "error": "The floor couldn’t be loaded.",
     "retry": "Try again",
     "seatsList": "Seats on this floor",
@@ -82,6 +82,25 @@
       "result": "{count, plural, =0 {No free desk has all of these.} one {# free desk matches — highlighted on the map.} other {# free desks match — highlighted on the map.}}",
       "hint": "Pick what the desk should have.",
       "clear": "Clear the desk search"
+    },
+    "tour": {
+      "progress": "Tip {n} of {total}",
+      "next": "Next",
+      "done": "Got it",
+      "skip": "Skip the tips",
+      "colours": {
+        "title": "Welcome to your floor",
+        "body": "Green desks are free, grey ones are taken, yellow ones are reserved."
+      },
+      "click": {
+        "title": "Click a desk",
+        "body": "You see who sits there and since when. On a free desk, choose “Assign person” — or drag a name from the list onto it.",
+        "bodyViewer": "You see who sits there and since when. Search for a person on the left to find their desk."
+      },
+      "undo": {
+        "title": "Nothing can go wrong",
+        "body": "Every change shows a message with “Undo”. Planning several moves at once? Use “Moves” in the menu."
+      }
     }
   },
   "seat": {
@@ -985,7 +1004,7 @@
     "cancel": "Cancel",
     "openPlans": "Open plans",
     "donePlans": "Done",
-    "noOpenPlans": "No open plans.",
+    "noOpenPlans": "No open plans. A plan collects several moves (a team moving, a new floor) and carries them out together — now or on a date.",
     "noDonePlans": "Nothing applied yet.",
     "summary": "{count, plural, =0 {No moves yet} one {# move} other {# moves}} · {name} · {date}",
     "notFound": "This plan doesn’t exist (any more).",
@@ -1493,7 +1512,8 @@
       "status": "Status",
       "lastActivity": "Last change",
       "admins": "Admins",
-      "email": "E-mail link"
+      "email": "E-mail link",
+      "setup": "Setup"
     },
     "delete": {
       "options": "Options for {name}",
@@ -1513,6 +1533,12 @@
       "action": "Stop tips",
       "done": "No more tips for {name}",
       "failed": "Couldn’t stop the tips"
+    },
+    "setup": {
+      "desks": "No desks yet",
+      "people": "No people yet",
+      "seated": "Nobody seated",
+      "done": "In use"
     }
   },
   "loading": {
@@ -1541,5 +1567,33 @@
     "stuck": "Still stuck?",
     "contact": "Write to <mail>{email}</mail>.",
     "openApp": "Open Seatline"
+  },
+  "setup": {
+    "progress": "Setup steps",
+    "step1": "Your office",
+    "step2": "Your people",
+    "officeTitle": "Set up your office",
+    "officeBody": "We’ll draw a first floor for you. You can change everything later.",
+    "building": "Building",
+    "floor": "Floor",
+    "floorDefault": "Ground floor",
+    "size": "How big is the office?",
+    "sizeHint": "An example office with desks, meeting rooms and a kitchen. Move, add or remove anything in Edit layout.",
+    "empty": "Draw it myself",
+    "emptyHint": "Start with an empty floor",
+    "create": "Create my office",
+    "creating": "Creating…",
+    "failed": "Couldn’t create the office: {message}",
+    "peopleTitle": "Add your people",
+    "peopleBody": "Once your colleagues are in Seatline, you can give them desks.",
+    "peopleBodyMicrosoft": "Your colleagues come from Microsoft 365 by themselves, once your IT allows Seatline to read the directory.",
+    "import": "Import a list",
+    "importHint": "Excel or CSV — name and e-mail are enough.",
+    "byHand": "Add them one by one",
+    "byHandHint": "Good for a small team.",
+    "microsoft": "Connect Microsoft 365",
+    "microsoftHint": "Ask your IT to approve Seatline (People › Settings).",
+    "template": "No list yet? Use our <link>free Excel template</link>.",
+    "later": "Show me the map first"
   }
 }

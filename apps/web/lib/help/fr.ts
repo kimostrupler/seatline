@@ -4,7 +4,7 @@ export const FR: HelpContent = {
   topics: {
     'getting-started': {
       title: 'Bien démarrer',
-      summary: 'Créez votre espace et mettez votre bureau dans Seatline en quatre étapes.',
+      summary: 'Créez votre espace et mettez votre bureau dans Seatline en quelques minutes.',
       steps: [
         {
           title: 'S’inscrire ou essayer la démo',
@@ -20,6 +20,13 @@ export const FR: HelpContent = {
           ],
         },
         {
+          title: 'Configurer votre bureau en deux étapes',
+          text: [
+            'Juste après, Seatline demande votre bâtiment, le nom de l’étage et la taille du bureau (Petit 12, Moyen 33 ou Grand 74 places, ou un étage vide). Il dessine un bureau d’exemple pour vous ; vous l’adaptez ensuite dans « Modifier le plan ».',
+            'Choisissez ensuite comment vos collègues arrivent : importer une liste Excel ou CSV, les ajouter un par un ou – avec Microsoft 365 – les reprendre de votre annuaire. À la première ouverture du plan, trois courts conseils montrent comment ça marche.',
+          ],
+        },
+        {
           title: 'Suivre la liste sur l’accueil',
           text: [
             'L’accueil affiche la liste « Bien démarrer avec Seatline » : ajouter votre bâtiment, dessiner un étage avec des postes, ajouter vos collègues et attribuer les postes. Chaque étape a un bouton qui vous mène au bon endroit et se coche toute seule.',
@@ -29,7 +36,7 @@ export const FR: HelpContent = {
         },
       ],
       tips: [
-        'Le départ le plus rapide : ajoutez un bâtiment, puis choisissez un bureau d’exemple pour l’étage et adaptez-le.',
+        'Le départ le plus rapide : laissez la configuration dessiner un bureau d’exemple, puis déplacez les places et renommez les salles comme chez vous.',
         'Tout peut être annulé, et chaque changement de place reste dans l’historique.',
       ],
     },

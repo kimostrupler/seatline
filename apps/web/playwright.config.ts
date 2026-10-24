@@ -19,6 +19,17 @@ const INTERNAL_AUTH_SECRET = 'e2e-internal-secret-0123456789-abcdefghij';
 // Azurite's well-known public development account (not a secret)
 const BLOB_CONNECTION = `DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:${BLOB_PORT}/devstoreaccount1;`;
 
+// the first-visit map tour is tested on its own (e2e/map-tour.spec.ts); elsewhere it's "seen"
+const tourSeen = (port: number) => ({
+  cookies: [],
+  origins: [
+    {
+      origin: `http://localhost:${port}`,
+      localStorage: [{ name: 'seatline-map-tour-v1', value: '1' }],
+    },
+  ],
+});
+
 export default defineConfig({
   testDir: './e2e',
   globalSetup: './e2e/global-setup.ts',
@@ -34,7 +45,11 @@ export default defineConfig({
     {
       name: 'chromium',
       testIgnore: /entra\.spec\.ts/,
-      use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1440, height: 900 },
+        storageState: tourSeen(WEB_PORT),
+      },
     },
     {
       // the same app with Microsoft sign-in (against e2e/fake-microsoft.mjs)
@@ -44,6 +59,7 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         viewport: { width: 1440, height: 900 },
         baseURL: `http://localhost:${ENTRA_WEB_PORT}`,
+        storageState: tourSeen(ENTRA_WEB_PORT),
       },
     },
   ],

@@ -29,6 +29,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { api, ApiError } from '@/lib/api';
 import type { OwnerOverview } from '@/lib/types';
+import { setupStep } from '@/lib/setup-step';
 import { cn } from '@/lib/utils';
 
 type Workspace = OwnerOverview['workspaces'][number];
@@ -438,6 +439,7 @@ function Workspaces({ list }: { list: Workspace[] }) {
               <th className="px-2 py-2 font-medium">{t('workspaces.signIn')}</th>
               <th className="px-2 py-2 text-right font-medium">{t('workspaces.people')}</th>
               <th className="px-2 py-2 text-right font-medium">{t('workspaces.desks')}</th>
+              <th className="px-2 py-2 font-medium">{t('workspaces.setup')}</th>
               <th className="px-2 py-2 font-medium">{t('workspaces.status')}</th>
               <th className="px-2 py-2 font-medium">{t('workspaces.lastActivity')}</th>
               <th className="px-4 py-2 font-medium">{t('workspaces.admins')}</th>
@@ -459,6 +461,9 @@ function Workspaces({ list }: { list: Workspace[] }) {
                   <td className="px-2 py-2 text-right tabular-nums">{w.people}</td>
                   <td className="px-2 py-2 text-right tabular-nums">
                     {w.seated}/{w.seats}
+                  </td>
+                  <td className="px-2 py-2 whitespace-nowrap text-muted-foreground">
+                    {t(`setup.${setupStep(w)}`)}
                   </td>
                   <td className="px-2 py-2">
                     <Badge variant={s.variant}>{s.label}</Badge>

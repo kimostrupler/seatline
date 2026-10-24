@@ -4,7 +4,7 @@ export const EN: HelpContent = {
   topics: {
     'getting-started': {
       title: 'Getting started',
-      summary: 'Create your workspace and get your office into Seatline in four steps.',
+      summary: 'Create your workspace and get your office into Seatline in a few minutes.',
       steps: [
         {
           title: 'Sign up or try the demo',
@@ -20,6 +20,13 @@ export const EN: HelpContent = {
           ],
         },
         {
+          title: 'Set up your office in two steps',
+          text: [
+            'Right after that, Seatline asks for your building, the floor’s name and how big the office is (Small 12, Medium 33 or Large 74 desks, or an empty floor). It draws an example office for you; you change it later in Edit layout.',
+            'Then choose how your colleagues get in: import an Excel or CSV list, add them one by one, or — with Microsoft 365 — let them come from your directory. The first time you open Map, three short tips show how it works.',
+          ],
+        },
+        {
           title: 'Follow the checklist on Home',
           text: [
             'Home shows a “Get started” checklist: add your building, draw a floor with desks, add your colleagues and give people their desks. Each step has a button that takes you to the right place and ticks itself off.',
@@ -29,7 +36,7 @@ export const EN: HelpContent = {
         },
       ],
       tips: [
-        'The fastest start: add a building, then pick an example office for the floor and adjust it.',
+        'The fastest start: let the setup draw an example office, then move desks and rename rooms to match yours.',
         'Everything you change can be undone, and every seat change is kept in the history.',
       ],
     },

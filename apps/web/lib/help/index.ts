@@ -25,3 +25,18 @@ export const helpAlternates = (base: string, topic?: HelpTopicId) => ({
   fr: `${base}${helpPath('fr', topic)}`,
   'x-default': `${base}${helpPath('en', topic)}`,
 });
+
+/** The help topic for the page someone is on (the app's Help button opens it). */
+export function helpTopicFor(pathname: string, search: URLSearchParams): HelpTopicId | undefined {
+  if (pathname === '/') return 'getting-started';
+  if (pathname === '/map/qr') return 'exports-and-qr';
+  if (pathname === '/map') return search.get('mode') === 'edit' ? 'editor' : 'seating';
+  if (pathname.startsWith('/moves')) return 'moves';
+  if (pathname === '/people') {
+    const tab = search.get('tab');
+    return tab === 'teams' || tab === 'changes' ? 'teams-and-changes' : 'people';
+  }
+  if (pathname === '/planning' || pathname === '/activity') return 'home-planning-activity';
+  if (pathname === '/billing') return 'privacy-and-billing';
+  return undefined;
+}
