@@ -348,7 +348,7 @@ export function LayoutEditor({
 
   const onPointerDown = (e: Konva.KonvaEventObject<PointerEvent>) => {
     // a second finger means pinch-zoom: drop whatever the first one started
-    if (!e.evt.isPrimary) return setDrag(null);
+    if (!e.evt.isPrimary) return stopDrag();
     if (spaceDown || e.evt.button !== 0) return;
     const touch = e.evt.pointerType === 'touch';
     const raw = planPointer();
@@ -414,13 +414,10 @@ export function LayoutEditor({
   const onPointerMove = (e: Konva.KonvaEventObject<PointerEvent>) => {
     if (!e.evt.isPrimary) return;
     if (drag?.kind === 'pan') {
+      // moved without React (see useViewport); the view is set once the pointer lets go
       const screen = vp.stageRef.current?.getPointerPosition();
       if (screen)
-        vp.setView((v) => ({
-          ...v,
-          x: drag.origin.x + screen.x - drag.start.x,
-          y: drag.origin.y + screen.y - drag.start.y,
-        }));
+        vp.panTo(drag.origin.x + screen.x - drag.start.x, drag.origin.y + screen.y - drag.start.y);
       return;
     }
     const raw = planPointer();
@@ -442,9 +439,15 @@ export function LayoutEditor({
     else setDrag({ ...drag, end: raw });
   };
 
+  /** end any drag; a pan hands its end position to React */
+  const stopDrag = () => {
+    if (drag?.kind === 'pan') vp.endPan();
+    setDrag(null);
+  };
+
   const onPointerUp = (e: Konva.KonvaEventObject<PointerEvent>) => {
     if (!drag || !e.evt.isPrimary) return;
-    setDrag(null);
+    stopDrag();
     if (drag.kind === 'marker') {
       const m = doc.markers?.find((x) => x.id === drag.id);
       const dx = drag.at.x - drag.start.x;
@@ -539,19 +542,13 @@ export function LayoutEditor({
             scaleX={view.scale}
             scaleY={view.scale}
             draggable={spaceDown}
-            onDragMove={(e) => {
-              if (e.target === e.target.getStage())
-                vp.setView((v) => ({ ...v, x: e.target.x(), y: e.target.y() }));
-            }}
-            onDragEnd={(e) => {
-              if (e.target === e.target.getStage())
-                vp.setView((v) => ({ ...v, x: e.target.x(), y: e.target.y() }));
-            }}
+            onDragMove={vp.onPanMove}
+            onDragEnd={vp.onPanEnd}
             onWheel={vp.onWheel}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
-            onPointerCancel={() => setDrag(null)}
+            onPointerCancel={stopDrag}
             onMouseLeave={() => {
               setPointer(null);
               setHover(null);
@@ -752,25 +749,27 @@ export function LayoutEditor({
           </Stage>
         </SeatSizeContext.Provider>
       )}
-      <MarkerOverlay
-        markers={doc.markers ?? []}
-        view={view}
-        selectedId={editor.marker}
-        moving={
-          drag?.kind === 'marker'
-            ? (() => {
-                const m = doc.markers?.find((x) => x.id === drag.id);
-                return m
-                  ? {
-                      id: m.id,
-                      x: m.x + drag.at.x - drag.start.x,
-                      y: m.y + drag.at.y - drag.start.y,
-                    }
-                  : null;
-              })()
-            : null
-        }
-      />
+      <div ref={vp.overlayRef} className="pointer-events-none absolute inset-0">
+        <MarkerOverlay
+          markers={doc.markers ?? []}
+          view={view}
+          selectedId={editor.marker}
+          moving={
+            drag?.kind === 'marker'
+              ? (() => {
+                  const m = doc.markers?.find((x) => x.id === drag.id);
+                  return m
+                    ? {
+                        id: m.id,
+                        x: m.x + drag.at.x - drag.start.x,
+                        y: m.y + drag.at.y - drag.start.y,
+                      }
+                    : null;
+                })()
+              : null
+          }
+        />
+      </div>
 
       {/* keyboard / screen reader access: select items, then use the inspector or shortcuts */}
       <ul className="sr-only" aria-label={t('accessibleList')}>

@@ -45,6 +45,26 @@ async function dragPlan(page: Page, from: { x: number; y: number }, to: { x: num
   await page.mouse.up();
 }
 
+test('dragging the empty floor moves around (also after a second drag)', async ({ page }) => {
+  const view = async () =>
+    JSON.parse((await editor(page).getAttribute('data-view'))!) as { x: number; y: number };
+  const start = await view();
+  const box = (await editor(page).boundingBox())!;
+  // from the empty right edge (the tools sit on the left), to the left
+  const drag = async (dx: number) => {
+    await page.mouse.move(box.x + box.width - 20, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width - 20 - dx, box.y + box.height / 2, { steps: 6 });
+    await page.mouse.up();
+  };
+  await drag(90);
+  await expect.poll(async () => Math.round(start.x - (await view()).x)).toBe(90);
+  await drag(40);
+  await expect.poll(async () => Math.round(start.x - (await view()).x)).toBe(130);
+  // the floor didn't change: a pan is not an edit
+  await expect(page.getByTestId('save-state')).not.toHaveText('Saving…');
+});
+
 test('add a seat, then undo it', async ({ page }) => {
   const before = (await floorMap(page)).seats.length;
   await page.keyboard.press('s');

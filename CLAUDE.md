@@ -157,6 +157,9 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   floor's coordinate space. Storage keys must start with the tenant id; `getPlan` checks it.
 - The canvas uses **pointer events** (mouse, pen and touch alike). One finger on empty floor pans,
   two fingers pinch-zoom (`useViewport`); a second finger cancels the first one's drag.
+- Panning never re-renders React per move: the stage moves itself (Konva drag, or `vp.panTo`),
+  the HTML layer over it (`vp.overlayRef`, markers) is shifted by a CSS transform, and the view
+  state is set once at the end (`onPanEnd` / `vp.endPan`). Big floors stuttered otherwise.
 - Copy/paste goes through `lib/editor/clipboard.ts` (memory + localStorage), so it works across
   floors. Pasting keeps names/labels when free (labels follow the target floor's level) and
   shifts aside if it would land on top of existing items (`pasteClip`, `pasteOffset`).

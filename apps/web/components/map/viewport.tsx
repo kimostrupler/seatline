@@ -3,7 +3,7 @@
 import type Konva from 'konva';
 import { Maximize, Minus, Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { fitView, zoomAt, type Bounds, type View } from '@/lib/map-geometry';
@@ -76,6 +76,34 @@ export function useViewport(bounds: Bounds | null, fitKey: string) {
     };
   }, [containerRef]);
 
+  // Dragging the floor: Konva moves the canvas by itself, so React only hears about it at the
+  // end. Until then the HTML layer over the canvas (markers) is shifted directly — redrawing
+  // every desk on every pointer move made big floors stutter on phones.
+  const overlayRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    if (overlayRef.current) overlayRef.current.style.transform = '';
+  }, [view]);
+  const followStage = () => {
+    const stage = stageRef.current;
+    if (stage && overlayRef.current)
+      overlayRef.current.style.transform = `translate(${stage.x() - view.x}px, ${stage.y() - view.y}px)`;
+  };
+  /** move the floor to this screen offset now; `endPan` tells React where it ended up */
+  const panTo = (x: number, y: number) => {
+    stageRef.current?.position({ x, y }).batchDraw();
+    followStage();
+  };
+  const endPan = () => {
+    const stage = stageRef.current;
+    if (stage) setView((v) => ({ ...v, x: stage.x(), y: stage.y() }));
+  };
+  const onPanMove = (e: Konva.KonvaEventObject<DragEvent>) => {
+    if (e.target === e.target.getStage()) followStage();
+  };
+  const onPanEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
+    if (e.target === e.target.getStage()) endPan();
+  };
+
   const zoomBy = (factor: number) =>
     setView((v) => zoomAt(v, factor, { x: size.width / 2, y: size.height / 2 }));
 
@@ -97,6 +125,12 @@ export function useViewport(bounds: Bounds | null, fitKey: string) {
     fit,
     zoomBy,
     onWheel,
+    /** put on the HTML layer drawn over the canvas, and pass onPanMove/onPanEnd to the Stage */
+    overlayRef,
+    onPanMove,
+    onPanEnd,
+    panTo,
+    endPan,
     /** keeps text readable when zoomed out (screen size never below the base size) */
     textScale: 1 / Math.min(view.scale, 1),
   };
