@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { readSession, SESSION_COOKIE } from '@/lib/server/session';
 import { PAGE_LANGUAGE_HEADER } from '@/lib/locales';
 import { contentSecurityPolicy, newNonce } from '@/lib/csp';
-import { isPublicPath, siteHosts } from '@/lib/site';
+import { isPublicPath, siteHosts, videoLink } from '@/lib/site';
 
 /**
  * seatline.ch / www: the public website (landing page + legal pages); anything else there goes
@@ -26,6 +26,9 @@ async function route(req: NextRequest, csp: string) {
   const host = (req.headers.get('x-forwarded-host') ?? req.headers.get('host') ?? '')
     .split(':')[0]!
     .toLowerCase();
+  // short links for e-mails: seatline.ch/video (or /de/video, /fr/video) → the promo video
+  const video = videoLink(appUrl, pathname, search);
+  if (video) return NextResponse.redirect(video);
   // the landing page in German / French: its own address, so search engines index each language
   if (pathname === '/de' || pathname === '/fr') {
     headers.set(PAGE_LANGUAGE_HEADER, pathname.slice(1));

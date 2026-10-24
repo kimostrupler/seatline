@@ -16,6 +16,19 @@ export function siteUrl(appUrl: string): string {
   return apex ? `https://${apex}` : new URL(appUrl).origin;
 }
 
+/**
+ * Short links for e-mails (seatline.ch/video, /de/video, /fr/video): where they lead, the landing
+ * page in that language scrolled to the promo video, keeping ?utm_source=… for the statistics.
+ * Without a site domain (local, e2e) the English landing page is /welcome, since / is the app.
+ */
+export function videoLink(appUrl: string, pathname: string, search: string): string | null {
+  const match = /^\/(?:(de|fr)\/)?video\/?$/.exec(pathname);
+  if (!match) return null;
+  const site = siteUrl(appUrl);
+  const path = match[1] ? `/${match[1]}` : siteHosts(appUrl).length ? '/' : '/welcome';
+  return `${site}${path}${search}#video`;
+}
+
 /** Paths anyone may open without signing in (on the app and the site domain). */
 export function isPublicPath(pathname: string): boolean {
   return (

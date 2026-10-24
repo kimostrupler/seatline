@@ -154,3 +154,13 @@ test('the promo video with subtitles and the comparison; the short video moved t
     '/site-video/seatline-promo.mp4',
   );
 });
+
+test('short links for e-mails open the promo video; the e-mail pictures are online', async ({
+  request,
+}) => {
+  const res = await request.get('/de/video?utm_source=email', { maxRedirects: 0 });
+  expect(res.status()).toBe(307);
+  expect(res.headers()['location']).toMatch(/\/de\?utm_source=email#video$/);
+  for (const file of ['seatline-video.jpg', 'seatline-video.gif'])
+    expect((await request.get(`/site-video/email/${file}`)).ok()).toBe(true);
+});
