@@ -115,10 +115,21 @@ export class OwnerController {
     @Ctx() ctx: RequestContext,
     @Param('id', IdPipe) id: string,
     @Body(new ZodPipe(leadMessageSchema))
-    body: { kind: LeadMessageKind; subject: string; body: string },
+    body: { kind: LeadMessageKind; subject: string; body: string; sendNow?: boolean },
   ) {
     await this.owner.assertOwner(ctx, `/owner/leads/${id}/messages`);
     return this.leads.schedule(ctx, id, body);
+  }
+
+  /** Send a scheduled e-mail right away instead of waiting for its slot. */
+  @Post('leads/:id/messages/:messageId/send')
+  async sendNow(
+    @Ctx() ctx: RequestContext,
+    @Param('id', IdPipe) id: string,
+    @Param('messageId', IdPipe) messageId: string,
+  ) {
+    await this.owner.assertOwner(ctx, `/owner/leads/${id}/messages/${messageId}/send`);
+    return this.leads.sendNow(ctx, id, messageId);
   }
 
   @Delete('leads/:id/messages/:messageId')

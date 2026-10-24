@@ -387,6 +387,15 @@ function LeadPanel({ id, onDeleted }: { id: string; onDeleted: () => void }) {
     },
     onError: (error) => toast.error(t('failed', { message: failedMessage(error) })),
   });
+  const sendNow = useMutation({
+    mutationFn: (messageId: string) =>
+      api(`/owner/leads/${id}/messages/${messageId}/send`, { method: 'POST' }),
+    onSuccess: () => {
+      refresh();
+      toast.success(t('compose.sent'));
+    },
+    onError: (error) => toast.error(t('failed', { message: failedMessage(error) })),
+  });
   const lead = query.data;
   if (!lead) return <Skeleton className="m-6 mt-12 h-96" />;
 
@@ -446,9 +455,17 @@ function LeadPanel({ id, onDeleted }: { id: string; onDeleted: () => void }) {
           <span>
             {t(`kind.${pending.kind}`)} · {t('scheduledFor', { when: when(pending.scheduledFor) })}
           </span>
-          <Button size="sm" variant="outline" onClick={() => cancel.mutate(pending.id)}>
-            {t('compose.cancel')}
-          </Button>
+          <div className="flex gap-2">
+            <SendNowButton
+              to={pending.toAddress}
+              size="sm"
+              disabled={sendNow.isPending}
+              onConfirm={() => sendNow.mutate(pending.id)}
+            />
+            <Button size="sm" variant="outline" onClick={() => cancel.mutate(pending.id)}>
+              {t('compose.cancel')}
+            </Button>
+          </div>
         </div>
       )}
       {kind && <Composer lead={lead} kind={kind} onScheduled={refresh} />}
@@ -538,13 +555,15 @@ function Composer({
     }
   }, [draft.data]);
   const schedule = useMutation({
-    mutationFn: () =>
+    mutationFn: (sendNow: boolean) =>
       api<LeadMessage>(`/owner/leads/${lead.id}/messages`, {
         method: 'POST',
-        body: { kind, subject, body },
+        body: { kind, subject, body, sendNow },
       }),
     onSuccess: (m) => {
-      toast.success(t('compose.scheduled', { when: when(m.scheduledFor) }));
+      toast.success(
+        m.sentAt ? t('compose.sent') : t('compose.scheduled', { when: when(m.scheduledFor) }),
+      );
       setWriting(false);
       onScheduled();
     },
@@ -617,10 +636,15 @@ function Composer({
           <div className="flex flex-wrap items-center gap-3">
             <Button
               disabled={!!problem || !subject.trim() || schedule.isPending}
-              onClick={() => schedule.mutate()}
+              onClick={() => schedule.mutate(false)}
             >
               <Send aria-hidden /> {t('compose.schedule')}
             </Button>
+            <SendNowButton
+              to={lead.contactEmail ?? ''}
+              disabled={!!problem || !subject.trim() || schedule.isPending}
+              onConfirm={() => schedule.mutate(true)}
+            />
             <span className="text-xs text-muted-foreground">
               {t('compose.scheduleHint', { when: when(nextSendSlot(new Date())) })}
             </span>
@@ -628,5 +652,38 @@ function Composer({
         </>
       )}
     </section>
+  );
+}
+
+/** Sending can't be undone: one confirmation, naming the address. */
+function SendNowButton({
+  to,
+  disabled,
+  size,
+  onConfirm,
+}: {
+  to: string;
+  disabled: boolean;
+  size?: 'sm';
+  onConfirm: () => void;
+}) {
+  const t = useTranslations('owner.leads');
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Button variant="outline" size={size} disabled={disabled} onClick={() => setOpen(true)}>
+        {t('compose.sendNow')}
+      </Button>
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogContent>
+          <AlertDialogTitle>{t('compose.sendNow')}</AlertDialogTitle>
+          <AlertDialogDescription>{t('compose.sendNowConfirm', { to })}</AlertDialogDescription>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('keep')}</AlertDialogCancel>
+            <AlertDialogAction onClick={onConfirm}>{t('compose.sendNow')}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

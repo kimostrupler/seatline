@@ -4,7 +4,9 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
+import type { Prisma } from '@prisma/client';
 import type { MailLanguage } from '@seatline/shared';
 import {
   cleanLead,
@@ -211,14 +213,14 @@ export class LeadsService {
     });
   }
 
-  /** Schedule one e-mail to one lead; it goes out at the next send slot. */
+  /** Schedule one e-mail to one lead; it goes out at the next send slot, or now (`sendNow`). */
   async schedule(
     ctx: RequestContext,
     id: string,
-    message: { kind: LeadMessageKind; subject: string; body: string },
+    message: { kind: LeadMessageKind; subject: string; body: string; sendNow?: boolean },
     now = new Date(),
   ) {
-    return this.db.run(ctx.tenantId, async (tx) => {
+    const scheduled = await this.db.run(ctx.tenantId, async (tx) => {
       const lead = await tx.lead.findFirst({
         where: { id, tenantId: ctx.tenantId },
         include: { messages: { where: { canceledAt: null } } },
@@ -249,7 +251,7 @@ export class LeadsService {
           subject: message.subject,
           body: message.body,
           toAddress: lead.contactEmail!,
-          scheduledFor: nextSendSlot(now),
+          scheduledFor: message.sendNow ? now : nextSendSlot(now),
           messageId: `<${randomUUID()}@${this.mail.fromAddress.split('@')[1] ?? 'seatline.ch'}>`,
         },
       });
@@ -263,6 +265,40 @@ export class LeadsService {
       });
       return scheduled;
     });
+    if (!message.sendNow) return scheduled;
+    try {
+      return await this.sendNow(ctx, id, scheduled.id, now);
+    } catch (error) {
+      // not sent: it waits for the next send slot instead (and the page says why)
+      await this.db.run(ctx.tenantId, (tx) =>
+        tx.leadMessage.update({
+          where: { id: scheduled.id },
+          data: { scheduledFor: nextSendSlot(now) },
+        }),
+      );
+      throw error;
+    }
+  }
+
+  /** Send a scheduled e-mail right away (the operator clicked "Send now"). */
+  async sendNow(ctx: RequestContext, id: string, messageId: string, now = new Date()) {
+    const message = await this.db.run(ctx.tenantId, (tx) =>
+      tx.leadMessage.findFirst({
+        where: {
+          id: messageId,
+          leadId: id,
+          tenantId: ctx.tenantId,
+          sentAt: null,
+          canceledAt: null,
+        },
+        include: { lead: { include: { messages: { where: { kind: 'first' } } } } },
+      }),
+    );
+    if (!message) throw new ConflictException({ message: 'Already sent', code: 'sent' });
+    if (!this.mail.configured)
+      throw new ServiceUnavailableException({ message: 'E-mail is not set up', code: 'mail_off' });
+    await this.deliver(ctx, message, now, true);
+    return { ...message, lead: undefined, sentAt: now };
   }
 
   async cancel(ctx: RequestContext, id: string, messageId: string) {
@@ -391,43 +427,54 @@ export class LeadsService {
       }),
     );
     let n = 0;
-    for (const message of due) {
-      const lead = message.lead;
-      const replyTo = message.kind === 'follow_up' ? lead.messages[0]?.messageId : undefined;
-      const mail = {
-        to: message.toAddress,
-        subject: message.subject,
-        text: message.body,
-        html: outreachHtml(message.body, lead.language as LeadLanguage),
-        fromName: `${OPERATOR.name} · Seatline`,
-        messageId: message.messageId,
-        inReplyTo: replyTo,
-      };
-      try {
-        await this.mail.send(mail);
-      } catch {
-        continue; // MailService logged it; the next morning run tries again
-      }
-      await this.inbox.fileSent({ ...mail, from: `${mail.fromName} <${this.mail.fromAddress}>` });
-      n++;
-      await this.db.run(system.tenantId, async (tx) => {
-        await tx.leadMessage.update({ where: { id: message.id }, data: { sentAt: now } });
-        await tx.lead.update({
-          where: { id: lead.id },
-          data:
-            message.kind === 'first'
-              ? { status: 'sent', firstSentAt: now }
-              : { status: 'followed_up', followUpSentAt: now },
-        });
-        await audit(tx, system, {
-          action: 'owner.lead.sent',
-          entityType: 'lead',
-          entityId: lead.id,
-          after: { company: lead.company, kind: message.kind },
-        });
-      });
-    }
+    for (const message of due) if (await this.deliver(system, message, now)) n++;
     return n;
+  }
+
+  /** Send one e-mail, mark it sent and move the lead on. False (or the error) if it failed. */
+  private async deliver(
+    actor: RequestContext | System,
+    message: Prisma.LeadMessageGetPayload<{
+      include: { lead: { include: { messages: true } } };
+    }>,
+    now: Date,
+    rethrow = false,
+  ): Promise<boolean> {
+    const lead = message.lead;
+    const replyTo = message.kind === 'follow_up' ? lead.messages[0]?.messageId : undefined;
+    const mail = {
+      to: message.toAddress,
+      subject: message.subject,
+      text: message.body,
+      html: outreachHtml(message.body, lead.language as LeadLanguage),
+      fromName: `${OPERATOR.name} · Seatline`,
+      messageId: message.messageId,
+      inReplyTo: replyTo,
+    };
+    try {
+      await this.mail.send(mail);
+    } catch (error) {
+      if (rethrow) throw error;
+      return false; // MailService logged it; the next morning run tries again
+    }
+    await this.inbox.fileSent({ ...mail, from: `${mail.fromName} <${this.mail.fromAddress}>` });
+    await this.db.run(actor.tenantId, async (tx) => {
+      await tx.leadMessage.update({ where: { id: message.id }, data: { sentAt: now } });
+      await tx.lead.update({
+        where: { id: lead.id },
+        data:
+          message.kind === 'first'
+            ? { status: 'sent', firstSentAt: now }
+            : { status: 'followed_up', followUpSentAt: now },
+      });
+      await audit(tx, actor, {
+        action: 'owner.lead.sent',
+        entityType: 'lead',
+        entityId: lead.id,
+        after: { company: lead.company, kind: message.kind },
+      });
+    });
+    return true;
   }
 
   /** One e-mail to the operator listing the follow-ups that are due (none scheduled yet). */

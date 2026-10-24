@@ -1684,7 +1684,10 @@
         "canceled": "Envoi annulé",
         "copy": "Copier le texte",
         "copied": "Copié",
-        "manualHint": "Ce prospect est joint par {channel} : copiez le texte, envoyez-le là-bas, puis mettez le statut sur « Envoyé »."
+        "manualHint": "Ce prospect est joint par {channel} : copiez le texte, envoyez-le là-bas, puis mettez le statut sur « Envoyé ».",
+        "sendNow": "Envoyer maintenant",
+        "sendNowConfirm": "L’envoyer à {to} maintenant ? C’est définitif.",
+        "sent": "E-mail envoyé"
       },
       "problems": {
         "no_email": "Ajoutez d’abord une adresse e-mail publiée (canal : E-mail).",

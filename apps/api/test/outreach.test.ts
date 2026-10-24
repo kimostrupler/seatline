@@ -209,4 +209,32 @@ describe('outreach (owner leads)', () => {
       expect.arrayContaining(['owner.lead.create', 'owner.lead.schedule', 'owner.lead.update']),
     );
   });
+
+  it('sends right away when asked: at once, or a scheduled one with "Send now"', async () => {
+    const id = await newLead();
+    const draft = await api(app).get(`/owner/leads/${id}/draft?kind=first`).set(a.headers);
+    const sent = await api(app)
+      .post(`/owner/leads/${id}/messages`)
+      .set(a.headers)
+      .send({ kind: 'first', ...draft.body, sendNow: true })
+      .expect(201);
+    expect(sent.body.sentAt).not.toBeNull();
+    expect(await sentMails()).toHaveLength(1);
+    let got = await api(app).get(`/owner/leads/${id}`).set(a.headers).expect(200);
+    expect(got.body.status).toBe('sent');
+
+    // a scheduled follow-up, sent early by hand
+    const leads = app.get(LeadsService);
+    const ctx = { tenantId: a.tenantId, actorId: a.adminId } as never;
+    const fu = await leads.draft(ctx, id, 'follow_up');
+    const m = await leads.schedule(ctx, id, { kind: 'follow_up', ...fu });
+    await api(app).post(`/owner/leads/${id}/messages/${m.id}/send`).set(b.headers).expect(404);
+    await api(app).post(`/owner/leads/${id}/messages/${m.id}/send`).set(a.headers).expect(201);
+    await api(app).post(`/owner/leads/${id}/messages/${m.id}/send`).set(a.headers).expect(409);
+    const mails = (await sentMails()) as Array<Record<string, string>>;
+    expect(mails).toHaveLength(2);
+    expect(mails[1]!.inReplyTo).toBe(mails[0]!.messageId);
+    got = await api(app).get(`/owner/leads/${id}`).set(a.headers).expect(200);
+    expect(got.body.status).toBe('followed_up');
+  });
 });
