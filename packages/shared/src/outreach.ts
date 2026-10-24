@@ -199,18 +199,16 @@ const FIRST: Record<LeadLanguage, { subject: string; body: string }> = {
     subject: 'Wer sitzt wo bei {company}?',
     body: `Guten Tag {greeting}
 
-{whyNow} Genau dann wird «Wer sitzt wo?» schnell mühsam.
+{whyNow} Genau dann wird "Wer sitzt wo?" schnell mühsam.
 
 Dafür habe ich Seatline gebaut: Sitzplan in einem Nachmittag, Personen per Drag & Drop platzieren, Team-Umzüge über Nacht. Daten in Zürich, CHF 2 pro Arbeitsplatz, 30 Tage gratis.
 
 90-Sekunden-Video:
 {video}
 
-Schicken Sie mir Ihren Grundriss, und ich richte Ihr Büro{place} kostenlos ein. Hätten Sie nächste Woche 15 Minuten?
-
 {signature}
 
-PS: Kein Thema? Ein kurzes «Nein danke» genügt.`,
+PS: Kein Thema? Ein kurzes "Nein danke" genügt.`,
   },
   fr: {
     subject: 'Qui est assis où chez {company} ?',
@@ -222,8 +220,6 @@ C’est pour cela que j’ai créé Seatline : un plan de bureau en un après-mi
 
 Vidéo de 90 secondes :
 {video}
-
-Envoyez-moi votre plan d’étage, et je configure votre bureau{place} gratuitement. Auriez-vous 15 minutes la semaine prochaine ?
 
 {signature}
 
@@ -240,8 +236,6 @@ So I built Seatline: a seating plan in an afternoon, people placed by drag and d
 90-second video:
 {video}
 
-Send me your floor plan and I’ll set up your office{place} for free. Would you have 15 minutes next week?
-
 {signature}
 
 PS: Not for you? A short “no thanks” is enough.`,
@@ -253,9 +247,7 @@ const FOLLOW_UP: Record<LeadLanguage, string> = {
 
 Nur ein kurzes Nachfassen zu meiner Nachricht von letzter Woche.
 
-Mein Angebot gilt weiterhin: Sie schicken mir Ihren Grundriss (PDF oder Foto genügt), und ich richte Ihr Büro in Seatline kostenlos ein. Danach sehen Sie in 5 Minuten, ob es Ihnen hilft.
-
-Oder schauen Sie selbst kurz rein, ohne Konto: seatline.ch → «Demo ausprobieren».
+Falls Sie Seatline selbst kurz ansehen möchten, ganz ohne Konto: seatline.ch → "Demo ausprobieren".
 
 {signature}
 
@@ -264,9 +256,7 @@ PS: Falls jemand anderes bei Ihnen dafür zuständig ist, wäre ich für einen H
 
 Je me permets de revenir brièvement sur mon message de la semaine dernière.
 
-Mon offre tient toujours : vous m’envoyez votre plan d’étage (un PDF ou une photo suffit), et je configure votre bureau dans Seatline gratuitement. Vous verrez en 5 minutes si cela vous aide.
-
-Ou jetez un œil vous-même, sans compte : seatline.ch → « Essayer la démo ».
+Si vous souhaitez jeter un œil à Seatline, sans créer de compte : seatline.ch → « Essayer la démo ».
 
 {signature}
 
@@ -275,9 +265,7 @@ PS : Si quelqu’un d’autre s’en occupe chez vous, je vous remercie de me l�
 
 Just a short follow-up on my message from last week.
 
-My offer still stands: send me your floor plan (a PDF or photo is enough) and I’ll set up your office in Seatline for free. You’ll see in 5 minutes whether it helps.
-
-Or take a look yourself, no account needed: seatline.ch → “Try the demo”.
+If you’d like to take a quick look yourself, no account needed: seatline.ch → “Try the demo”.
 
 {signature}
 
@@ -300,17 +288,11 @@ export function draftMessage(
   firstSubject?: string,
 ): { subject: string; body: string } {
   const l = lead.language;
-  // the street only ("Tellstrasse 31, 8004 Zürich" → "an der Tellstrasse 31")
-  const street = lead.address?.split(',')[0]?.trim();
-  const place = street
-    ? { de: ` an der ${street}`, fr: ` à la ${street}`, en: ` at ${street}` }[l]
-    : '';
   const fill = (s: string) =>
     s
       .replaceAll('{company}', lead.company)
       .replaceAll('{greeting}', lead.greeting ?? '[Name]')
       .replaceAll('{whyNow}', lead.whyNow ?? '[Why now]')
-      .replaceAll('{place}', place)
       .replaceAll('{video}', videoLink(l))
       .replaceAll('{signature}', SIGNATURE[l]);
   if (kind === 'follow_up')
