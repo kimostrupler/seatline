@@ -20,3 +20,50 @@ test('the owner dashboard: only for the operator, linked nowhere', async ({ page
   await expect(page.getByText('This page could not be found.')).toBeVisible();
   await expect(page.getByText('Business overview')).toHaveCount(0);
 });
+
+test('outreach leads: one personal e-mail, at most 100 words, scheduled for the morning', async ({
+  page,
+}) => {
+  await page.goto('/owner');
+  await page.getByRole('link', { name: 'Leads' }).click();
+  await expect(page.getByRole('heading', { name: 'Leads' })).toBeVisible();
+  await page.getByRole('button', { name: 'New lead' }).click();
+  const panel = page.getByRole('dialog');
+  await panel.getByLabel('Company').fill('Livingdocs');
+  await panel.getByLabel('Greeting').fill('Herr van der Ploeg');
+  await panel.getByLabel('E-mail', { exact: true }).fill('contact@livingdocs.io');
+  await panel.getByRole('button', { name: 'Add lead' }).click();
+  await expect(panel.getByRole('heading', { name: 'Livingdocs' })).toBeVisible();
+
+  // without the personal "why now" sentence nothing can be scheduled
+  await panel.getByRole('button', { name: 'Write the first e-mail' }).click();
+  const body = panel.getByLabel('Message');
+  await expect(body).toHaveValue(/Guten Tag Herr van der Ploeg/);
+  await expect(panel.getByRole('button', { name: 'Schedule' })).toBeDisabled();
+  await expect(panel.getByText(/Write the “why now” sentence first/)).toBeVisible();
+
+  await panel
+    .getByLabel('Why now (the first sentence)')
+    .fill('Ich habe gesehen, dass Livingdocs weiter wächst.');
+  await panel.getByRole('button', { name: 'Save' }).click();
+  // the draft follows the saved lead
+  await expect(body).toHaveValue(/Ich habe gesehen, dass Livingdocs weiter wächst\./);
+  await expect(panel.getByTestId('word-count')).toHaveText(/^\d+ \/ 100 words$/);
+  // too long: refused until it's short again
+  const text = await body.inputValue();
+  await body.fill(`${text}\n${'Wort '.repeat(40)}`);
+  await expect(panel.getByText('Over 100 words: shorten it.')).toBeVisible();
+  await expect(panel.getByRole('button', { name: 'Schedule' })).toBeDisabled();
+  await body.fill(text);
+  await panel.getByRole('button', { name: 'Schedule' }).click();
+  await expect(page.getByText(/E-mail scheduled for/)).toBeVisible();
+  await expect(panel.getByText(/First e-mail · Goes out/)).toBeVisible();
+  await panel.getByRole('button', { name: 'Don’t send' }).click();
+  await expect(panel.getByText('Not sent (cancelled)')).toBeVisible();
+
+  // anyone else: not found
+  await page.goto('/');
+  await switchUser(page, 'Luca Rossi');
+  await page.goto('/owner/leads');
+  await expect(page.getByText('This page could not be found.')).toBeVisible();
+});

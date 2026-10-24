@@ -819,7 +819,14 @@
     "searchPlaceholder": "Rechercher des personnes, postes, pièces, étages, notes…",
     "privacyDpa": "s’est envoyé l’accord de sous-traitance par e-mail",
     "workspaceDeleted": "a supprimé l’espace « {name} » (support)",
-    "workspaceTipsStopped": "a arrêté les conseils pour « {name} » (support)"
+    "workspaceTipsStopped": "a arrêté les conseils pour « {name} » (support)",
+    "leadCreated": "a ajouté le prospect « {name} »",
+    "leadUpdated": "a modifié le prospect « {name} »",
+    "leadDeleted": "a supprimé le prospect « {name} »",
+    "leadScheduled": "a planifié un e-mail à « {name} »",
+    "leadCanceled": "a annulé un e-mail à « {name} »",
+    "leadSent": "a envoyé l’e-mail à « {name} »",
+    "leadReplied": "a détecté une réponse de « {name} »"
   },
   "dashboard": {
     "title": "Accueil",
@@ -1582,6 +1589,119 @@
       "people": "Pas encore de personnes",
       "seated": "Personne placé",
       "done": "Utilisé"
+    },
+    "nav": {
+      "overview": "Vue d’ensemble",
+      "leads": "Prospects"
+    },
+    "leads": {
+      "title": "Prospects",
+      "add": "Nouveau prospect",
+      "empty": "Pas encore de prospects. Ajoutez la première entreprise à qui vous voulez écrire.",
+      "filters": {
+        "todo": "À faire",
+        "all": "Tous",
+        "waiting": "En attente",
+        "done": "Terminés"
+      },
+      "columns": {
+        "company": "Entreprise",
+        "why": "Pourquoi maintenant",
+        "contact": "Contact",
+        "status": "Statut",
+        "next": "Prochaine étape"
+      },
+      "status": {
+        "research": "Recherche",
+        "ready": "Prêt",
+        "sent": "Envoyé",
+        "followed_up": "Relancé",
+        "replied": "A répondu",
+        "meeting": "Rendez-vous",
+        "customer": "Client",
+        "no": "Non",
+        "no_answer": "Pas de réponse"
+      },
+      "next": {
+        "research": "Trouver la personne et la raison",
+        "write_first": "Écrire le premier e-mail",
+        "scheduled": "Part {when}",
+        "waiting": "Attendre une réponse",
+        "follow_up_due": "Relance à faire",
+        "talk": "Répondre",
+        "done": "Terminé"
+      },
+      "mailOff": "L’e-mail n’est pas configuré sur le serveur : rien ne peut encore être envoyé.",
+      "repliesOff": "Les réponses ne sont pas détectées automatiquement (IMAP n’est pas configuré) : marquez-les vous-même.",
+      "rules": "Une personne, un e-mail personnel. 100 mots au maximum. Les e-mails partent du mardi au jeudi à 8 h, et une réponse arrête tout ce qui est encore prévu.",
+      "fields": {
+        "company": "Entreprise",
+        "website": "Site web",
+        "address": "Adresse",
+        "whyNow": "Pourquoi maintenant (la première phrase)",
+        "whyNowHint": "Une phrase personnelle, p. ex. « J’ai vu que … a déménagé à Oerlikon. »",
+        "sourceUrl": "Source (lien)",
+        "contactName": "Personne de contact",
+        "greeting": "Formule d’appel",
+        "greetingHint": "Le début de l’e-mail, p. ex. « Madame Dubois »",
+        "contactRole": "Fonction",
+        "channel": "Canal",
+        "contactEmail": "E-mail",
+        "contactEmailHint": "Seulement une adresse publiée (info@, contact@ …), jamais une adresse devinée",
+        "linkedinUrl": "LinkedIn",
+        "language": "Langue",
+        "notes": "Notes",
+        "status": "Statut"
+      },
+      "channels": {
+        "email": "E-mail",
+        "form": "Formulaire de contact",
+        "linkedin": "LinkedIn"
+      },
+      "languages": {
+        "de": "Allemand",
+        "fr": "Français",
+        "en": "Anglais"
+      },
+      "save": "Enregistrer",
+      "saved": "Enregistré",
+      "create": "Ajouter le prospect",
+      "created": "Prospect ajouté",
+      "back": "Tous les prospects",
+      "delete": "Supprimer le prospect",
+      "deleteConfirm": "Supprimer {company} et ses e-mails ? C’est définitif.",
+      "deleted": "Prospect supprimé",
+      "compose": {
+        "first": "Écrire le premier e-mail",
+        "follow_up": "Écrire la relance",
+        "subject": "Objet",
+        "body": "Message",
+        "words": "{count} / {max} mots",
+        "schedule": "Planifier",
+        "scheduleHint": "Part {when}.",
+        "scheduled": "E-mail planifié pour {when}",
+        "cancel": "Ne pas envoyer",
+        "canceled": "Envoi annulé",
+        "copy": "Copier le texte",
+        "copied": "Copié",
+        "manualHint": "Ce prospect est joint par {channel} : copiez le texte, envoyez-le là-bas, puis mettez le statut sur « Envoyé »."
+      },
+      "problems": {
+        "no_email": "Ajoutez d’abord une adresse e-mail publiée (canal : E-mail).",
+        "no_reason": "Écrivez d’abord la phrase « pourquoi maintenant » : c’est elle qui rend l’e-mail personnel.",
+        "too_long": "Plus de {max} mots : raccourcissez-le.",
+        "placeholder": "Complétez tout ce qui est entre [crochets]."
+      },
+      "messages": "E-mails",
+      "kind": {
+        "first": "Premier e-mail",
+        "follow_up": "Relance"
+      },
+      "sentAt": "Envoyé {when}",
+      "scheduledFor": "Part {when}",
+      "canceledMsg": "Pas envoyé (annulé)",
+      "failed": "Cela n’a pas fonctionné : {message}",
+      "keep": "Garder"
     }
   },
   "loading": {

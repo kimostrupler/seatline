@@ -192,3 +192,27 @@ export function dpaMail(to: string, workspace: string, pdf: Buffer, language: Ma
     attachments: [{ filename: t.file, content: pdf, contentType: 'application/pdf' }],
   };
 }
+
+/** Outreach, to the operator: follow-ups that are due (the morning job), with links to the leads. */
+export function outreachReminderMail(
+  to: string,
+  leads: Array<{ company: string; link: string }>,
+  language: MailLanguage,
+): Mail {
+  const list = leads.map((l) => `- ${l.company}: ${l.link}`).join('\n');
+  const t = {
+    en: {
+      subject: `${leads.length} follow-up(s) due today`,
+      text: `Good morning,\n\nThese leads haven’t answered for a week. Their follow-up is ready to check and schedule:\n\n${list}\n\nSeatline`,
+    },
+    de: {
+      subject: `${leads.length} Nachfass-E-Mail(s) heute fällig`,
+      text: `Guten Morgen\n\nDiese Leads haben seit einer Woche nicht geantwortet. Die Nachfass-E-Mail ist bereit zum Prüfen und Planen:\n\n${list}\n\nSeatline`,
+    },
+    fr: {
+      subject: `${leads.length} relance(s) à faire aujourd’hui`,
+      text: `Bonjour,\n\nCes leads n’ont pas répondu depuis une semaine. La relance est prête à être relue et planifiée :\n\n${list}\n\nSeatline`,
+    },
+  }[language];
+  return { to, ...t };
+}

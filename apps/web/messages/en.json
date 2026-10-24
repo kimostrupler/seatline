@@ -819,7 +819,14 @@
     "searchPlaceholder": "Search people, desks, rooms, floors, notes…",
     "privacyDpa": "e-mailed themselves the data processing agreement",
     "workspaceDeleted": "deleted the workspace “{name}” (support)",
-    "workspaceTipsStopped": "stopped the tips for “{name}” (support)"
+    "workspaceTipsStopped": "stopped the tips for “{name}” (support)",
+    "leadCreated": "added the lead “{name}”",
+    "leadUpdated": "changed the lead “{name}”",
+    "leadDeleted": "deleted the lead “{name}”",
+    "leadScheduled": "scheduled an e-mail to “{name}”",
+    "leadCanceled": "cancelled an e-mail to “{name}”",
+    "leadSent": "sent the e-mail to “{name}”",
+    "leadReplied": "noticed a reply from “{name}”"
   },
   "dashboard": {
     "title": "Home",
@@ -1582,6 +1589,119 @@
       "people": "No people yet",
       "seated": "Nobody seated",
       "done": "In use"
+    },
+    "nav": {
+      "overview": "Overview",
+      "leads": "Leads"
+    },
+    "leads": {
+      "title": "Leads",
+      "add": "New lead",
+      "empty": "No leads yet. Add the first company you want to write to.",
+      "filters": {
+        "todo": "To do",
+        "all": "All",
+        "waiting": "Waiting",
+        "done": "Done"
+      },
+      "columns": {
+        "company": "Company",
+        "why": "Why now",
+        "contact": "Contact",
+        "status": "Status",
+        "next": "Next step"
+      },
+      "status": {
+        "research": "Research",
+        "ready": "Ready",
+        "sent": "Sent",
+        "followed_up": "Followed up",
+        "replied": "Replied",
+        "meeting": "Meeting",
+        "customer": "Customer",
+        "no": "No",
+        "no_answer": "No answer"
+      },
+      "next": {
+        "research": "Find the person and the reason",
+        "write_first": "Write the first e-mail",
+        "scheduled": "Goes out {when}",
+        "waiting": "Wait for an answer",
+        "follow_up_due": "Follow-up due",
+        "talk": "Answer them",
+        "done": "Done"
+      },
+      "mailOff": "E-mail isn’t set up on the server, so nothing can be sent yet.",
+      "repliesOff": "Replies aren’t checked automatically (IMAP isn’t set up): mark replies yourself.",
+      "rules": "One person, one personal e-mail. At most 100 words. E-mails go out Tuesday to Thursday at 8 am, and a reply stops everything still scheduled.",
+      "fields": {
+        "company": "Company",
+        "website": "Website",
+        "address": "Address",
+        "whyNow": "Why now (the first sentence)",
+        "whyNowHint": "One personal sentence, e.g. “I saw that … has moved to Oerlikon.”",
+        "sourceUrl": "Source (link)",
+        "contactName": "Contact person",
+        "greeting": "Greeting",
+        "greetingHint": "How the e-mail starts, e.g. “Herr van der Ploeg”",
+        "contactRole": "Role",
+        "channel": "Channel",
+        "contactEmail": "E-mail",
+        "contactEmailHint": "Only a published address (info@, contact@ …), never a guessed one",
+        "linkedinUrl": "LinkedIn",
+        "language": "Language",
+        "notes": "Notes",
+        "status": "Status"
+      },
+      "channels": {
+        "email": "E-mail",
+        "form": "Contact form",
+        "linkedin": "LinkedIn"
+      },
+      "languages": {
+        "de": "German",
+        "fr": "French",
+        "en": "English"
+      },
+      "save": "Save",
+      "saved": "Saved",
+      "create": "Add lead",
+      "created": "Lead added",
+      "back": "All leads",
+      "delete": "Delete lead",
+      "deleteConfirm": "Delete {company} and its e-mails? This can’t be undone.",
+      "deleted": "Lead deleted",
+      "compose": {
+        "first": "Write the first e-mail",
+        "follow_up": "Write the follow-up",
+        "subject": "Subject",
+        "body": "Message",
+        "words": "{count} / {max} words",
+        "schedule": "Schedule",
+        "scheduleHint": "Goes out {when}.",
+        "scheduled": "E-mail scheduled for {when}",
+        "cancel": "Don’t send",
+        "canceled": "Sending cancelled",
+        "copy": "Copy text",
+        "copied": "Copied",
+        "manualHint": "This lead is reached by {channel}: copy the text, send it there, then set the status to “Sent”."
+      },
+      "problems": {
+        "no_email": "Add a published e-mail address first (channel: E-mail).",
+        "no_reason": "Write the “why now” sentence first: it’s what makes the e-mail personal.",
+        "too_long": "Over {max} words: shorten it.",
+        "placeholder": "Fill in everything in [brackets]."
+      },
+      "messages": "E-mails",
+      "kind": {
+        "first": "First e-mail",
+        "follow_up": "Follow-up"
+      },
+      "sentAt": "Sent {when}",
+      "scheduledFor": "Goes out {when}",
+      "canceledMsg": "Not sent (cancelled)",
+      "failed": "That didn’t work: {message}",
+      "keep": "Keep"
     }
   },
   "loading": {

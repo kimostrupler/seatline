@@ -1,16 +1,29 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query } from '@nestjs/common';
+import {
+  leadCreateSchema,
+  leadMessageSchema,
+  leadUpdateSchema,
+  LEAD_MESSAGE_KINDS,
+  type LeadInput,
+  type LeadMessageKind,
+} from '@seatline/shared/dist/outreach';
 import { z } from 'zod';
 import { Ctx } from '../auth/decorators';
 import { IdPipe, ZodPipe } from '../common/zod.pipe';
 import type { RequestContext } from '../auth/request-context';
+import { LeadsService } from './leads.service';
 import { OwnerService } from './owner.service';
 
+const kindSchema = z.enum(LEAD_MESSAGE_KINDS);
 const deleteWorkspaceSchema = z.strictObject({ name: z.string().min(1).max(200) });
 
 /** The operator's dashboard (OWNER_EMAILS only; a 404 for everyone else). */
 @Controller('owner')
 export class OwnerController {
-  constructor(private readonly owner: OwnerService) {}
+  constructor(
+    private readonly owner: OwnerService,
+    private readonly leads: LeadsService,
+  ) {}
 
   /** 204 for the operator (the app then shows a menu link), the same 404 for everyone else. */
   @Get('check')
@@ -43,5 +56,79 @@ export class OwnerController {
   async overview(@Ctx() ctx: RequestContext) {
     await this.owner.assertOwner(ctx, '/owner/overview');
     return this.owner.overview();
+  }
+
+  // --- outreach (Leads page): one personal e-mail at a time, never in bulk ---
+
+  @Get('leads')
+  async listLeads(@Ctx() ctx: RequestContext) {
+    await this.owner.assertOwner(ctx, '/owner/leads');
+    return this.leads.list(ctx);
+  }
+
+  @Post('leads')
+  async createLead(
+    @Ctx() ctx: RequestContext,
+    @Body(new ZodPipe(leadCreateSchema)) body: LeadInput & { company: string },
+  ) {
+    await this.owner.assertOwner(ctx, '/owner/leads');
+    return this.leads.create(ctx, body);
+  }
+
+  @Get('leads/:id')
+  async getLead(@Ctx() ctx: RequestContext, @Param('id', IdPipe) id: string) {
+    await this.owner.assertOwner(ctx, `/owner/leads/${id}`);
+    return this.leads.get(ctx, id);
+  }
+
+  @Patch('leads/:id')
+  async updateLead(
+    @Ctx() ctx: RequestContext,
+    @Param('id', IdPipe) id: string,
+    @Body(new ZodPipe(leadUpdateSchema)) body: LeadInput,
+  ) {
+    await this.owner.assertOwner(ctx, `/owner/leads/${id}`);
+    return this.leads.update(ctx, id, body);
+  }
+
+  @Delete('leads/:id')
+  @HttpCode(204)
+  async deleteLead(@Ctx() ctx: RequestContext, @Param('id', IdPipe) id: string) {
+    await this.owner.assertOwner(ctx, `/owner/leads/${id}`);
+    await this.leads.remove(ctx, id);
+  }
+
+  /** The template for this lead, filled in, to start writing from. */
+  @Get('leads/:id/draft')
+  async draft(
+    @Ctx() ctx: RequestContext,
+    @Param('id', IdPipe) id: string,
+    @Query('kind', new ZodPipe(kindSchema)) kind: LeadMessageKind,
+  ) {
+    await this.owner.assertOwner(ctx, `/owner/leads/${id}/draft`);
+    return this.leads.draft(ctx, id, kind);
+  }
+
+  /** Schedule one e-mail; it goes out at the next send slot (Tue–Thu, 8 am Zurich). */
+  @Post('leads/:id/messages')
+  async schedule(
+    @Ctx() ctx: RequestContext,
+    @Param('id', IdPipe) id: string,
+    @Body(new ZodPipe(leadMessageSchema))
+    body: { kind: LeadMessageKind; subject: string; body: string },
+  ) {
+    await this.owner.assertOwner(ctx, `/owner/leads/${id}/messages`);
+    return this.leads.schedule(ctx, id, body);
+  }
+
+  @Delete('leads/:id/messages/:messageId')
+  @HttpCode(204)
+  async cancel(
+    @Ctx() ctx: RequestContext,
+    @Param('id', IdPipe) id: string,
+    @Param('messageId', IdPipe) messageId: string,
+  ) {
+    await this.owner.assertOwner(ctx, `/owner/leads/${id}/messages/${messageId}`);
+    await this.leads.cancel(ctx, id, messageId);
   }
 }

@@ -64,6 +64,14 @@ const envSchema = z.object({
   COST_IDENTITY_CLIENT_ID: z.string().optional(),
   /** tests only: write e-mails as JSON files into this folder instead of sending them */
   MAIL_OUTBOX: z.string().optional(),
+  /**
+   * The same mailbox over IMAP (Hostpoint: imap.mail.hostpoint.ch): outreach e-mails are filed
+   * in its Sent folder, and the morning job looks for replies. Login = SMTP_USER/SMTP_PASSWORD.
+   */
+  IMAP_HOST: z.string().optional(),
+  IMAP_PORT: z.coerce.number().int().default(993),
+  /** tests only: replies as JSON files ({ from, date }) instead of an IMAP inbox */
+  MAIL_INBOX: z.string().optional(),
   /** Trust x-tenant-id / x-user-id headers. Dev only — replaced by Entra ID in Phase 4. */
   DEV_AUTH: z
     .enum(['true', 'false'])

@@ -32,6 +32,8 @@ export default defineConfig({
       INTERNAL_AUTH_SECRET: 'test-internal-secret-0123456789-abcdefghijkl',
       // e-mails land as JSON files here (test/mail.ts reads them)
       MAIL_OUTBOX: join(tmpdir(), 'seatline-test-mail'),
+      // outreach replies: JSON files ({ from, date }) instead of an IMAP inbox
+      MAIL_INBOX: join(tmpdir(), 'seatline-test-inbox'),
       APP_URL: 'https://app.seatline.test',
       DESK_MAIL_DELAY_SECONDS: '0',
     },

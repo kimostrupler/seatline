@@ -119,4 +119,20 @@ group('activity sentences', () => {
     );
     expect(removed.key).toBe('teamRemoved');
   });
+  it('outreach steps name the company (the operator’s leads)', () => {
+    const lead = (action: string) =>
+      describe(entry({ action, entityType: 'lead', after: { company: 'Livingdocs' } }), refs, '?');
+    expect(lead('owner.lead.schedule')).toEqual({
+      key: 'leadScheduled',
+      values: { name: 'Livingdocs' },
+    });
+    expect(lead('owner.lead.replied').key).toBe('leadReplied');
+    expect(
+      describe(
+        entry({ action: 'owner.lead.delete', entityType: 'lead', before: { company: 'X' } }),
+        refs,
+        '?',
+      ).values,
+    ).toEqual({ name: 'X' });
+  });
 });

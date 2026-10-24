@@ -168,6 +168,20 @@ Stripe; Stripe checks it for a few hours, then switches over by itself). Seatlin
 for this: it always opens the address Stripe returns. If the domain is ever removed, Stripe falls
 back to checkout.stripe.com / billing.stripe.com, which also works.
 
+## Outreach replies (owner Leads page)
+
+The Leads page sends personal outreach e-mails in the morning and notices replies by reading
+the hello@ mailbox over IMAP (sender and date only). It uses the same mailbox login as e-mail;
+it only needs the IMAP server. `mail-setup.sh` sets it; on an existing setup, run once in
+Cloud Shell:
+
+```bash
+az containerapp update -n api -g seatline --set-env-vars IMAP_HOST=imap.mail.hostpoint.ch -o none
+az containerapp job update -n nightly-sync -g seatline --set-env-vars IMAP_HOST=imap.mail.hostpoint.ch -o none
+```
+
+Without it, everything works except that replies must be marked by hand.
+
 ## Media storage (the video tour)
 
 The 9-minute video tour is too big for the app's image, so it lives in a small public Blob

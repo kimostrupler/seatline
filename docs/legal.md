@@ -25,6 +25,11 @@ sections — `docs.test.ts` checks it).
   needs a policy update (and possibly a consent banner).
 - **E-mail** (sign-in links, invitations) goes out through Hostpoint's SMTP as hello@seatline.ch;
   only a hash of each link is stored, for at most a day.
+- **Outreach** (owner Leads page): one personal e-mail per person, to published business
+  addresses only, never in bulk (UWG Art. 3 lit. o), with an easy "no thanks". Stored: company,
+  contact name/role, the published address, notes; replies are only checked for sender and date
+  (IMAP, Hostpoint). "No" / "no answer" leads are deleted after 12 months. The privacy policy
+  (section 3) says so.
 - **Sub-processors**: Microsoft, Stripe, Hostpoint. A new one (e.g. an e-mail service) must be added to the privacy policy and
   announced to customers in advance.
 - **Deleting workspaces**: on request, and at the latest 6 months after the subscription or

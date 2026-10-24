@@ -30,6 +30,7 @@ import { Switch } from '@/components/ui/switch';
 import { api, ApiError } from '@/lib/api';
 import type { OwnerOverview } from '@/lib/types';
 import { setupStep } from '@/lib/setup-step';
+import { OwnerNav } from './owner-nav';
 import { cn } from '@/lib/utils';
 
 type Workspace = OwnerOverview['workspaces'][number];
@@ -85,6 +86,7 @@ export function OwnerDashboard({ initial }: { initial: OwnerOverview | null }) {
         </div>
       }
     >
+      <OwnerNav current="overview" />
       {!data ? <Skeleton className="h-96" /> : <Overview data={data} />}
     </PageFrame>
   );

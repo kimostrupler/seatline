@@ -336,6 +336,24 @@ export function describe(e: ActivityEntry, refs: ActivityRefs, unknownName: stri
       return { key: 'workspaceDeleted', values: { name: pick('name') ?? '' } };
     case 'owner.workspace.stop_tips':
       return { key: 'workspaceTipsStopped', values: { name: pick('name') ?? '' } };
+    case 'owner.lead.create':
+    case 'owner.lead.update':
+    case 'owner.lead.delete':
+    case 'owner.lead.schedule':
+    case 'owner.lead.cancel':
+    case 'owner.lead.sent':
+    case 'owner.lead.replied': {
+      const key = {
+        create: 'leadCreated',
+        update: 'leadUpdated',
+        delete: 'leadDeleted',
+        schedule: 'leadScheduled',
+        cancel: 'leadCanceled',
+        sent: 'leadSent',
+        replied: 'leadReplied',
+      }[e.action.slice('owner.lead.'.length)]!;
+      return { key, values: { name: pick('company') ?? '' } };
+    }
     case 'privacy.forget':
       return { key: 'privacyForget', values: {} };
     case 'privacy.purge':

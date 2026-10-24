@@ -63,7 +63,7 @@ MIN=0; WEB_MIN=0
 bash infra/azure/plan-engine.sh "$ENGINE_IMAGE"
 az containerapp update -n api -g "$RG" --image "$API_IMAGE" --min-replicas "$MIN" -o none
 az containerapp update -n web -g "$RG" --image "$WEB_IMAGE" --min-replicas "$WEB_MIN" -o none
-az containerapp job update -n nightly-sync -g "$RG" --image "$API_IMAGE" -o none
+az containerapp job update -n nightly-sync -g "$RG" --image "$API_IMAGE" --cron-expression "0 1,7 * * *" -o none
 if [ -n "${ALERT_EMAIL:-}" ]; then
   bash infra/azure/alerts.sh || echo "⚠ Could not set up the error alert (see above)"
   bash infra/azure/uptime.sh || echo "⚠ Could not set up the uptime check (see above)"
