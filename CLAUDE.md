@@ -115,6 +115,9 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - Floor map = Konva (`components/map/floor-map.tsx`). **Next 15 bundles React 19.2**, so
   react-konva must stay on **19.2.x** (19.3 refuses to run). Canvas colours come from the CSS
   tokens in `app/globals.css` via `useCssVars`.
+- Layout (`components/workspace/shell.tsx`): sidebar · map · details from `lg`; from `md` (tablets,
+  half-screen windows) the sidebar stays docked and seat details open as a bottom sheet; below
+  `md` the sidebar is a sheet behind the ☰ button.
 - The canvas is invisible to keyboards/screen readers: the hidden seat-button list next to it is
   the accessible map — keep it in sync with what the canvas shows.
 - Seat status is colour **and** content (initials / R / cross). Status colours mean seat status
