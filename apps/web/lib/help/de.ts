@@ -4,7 +4,7 @@ export const DE: HelpContent = {
   topics: {
     'getting-started': {
       title: 'Erste Schritte',
-      summary: 'Arbeitsbereich erstellen und Ihr Büro in vier Schritten in Seatline bringen.',
+      summary: 'Arbeitsbereich erstellen und Ihr Büro in wenigen Minuten in Seatline bringen.',
       steps: [
         {
           title: 'Registrieren oder Demo ausprobieren',
@@ -20,6 +20,13 @@ export const DE: HelpContent = {
           ],
         },
         {
+          title: 'Ihr Büro in zwei Schritten einrichten',
+          text: [
+            'Gleich danach fragt Seatline nach Ihrem Gebäude, dem Namen des Stockwerks und der Grösse des Büros (Klein 12, Mittel 33 oder Gross 74 Plätze, oder ein leeres Stockwerk). Es zeichnet ein Beispielbüro für Sie; anpassen können Sie es später unter «Plan bearbeiten».',
+            'Dann wählen Sie, wie Ihre Kolleginnen und Kollegen hinzukommen: eine Excel- oder CSV-Liste importieren, einzeln hinzufügen oder – mit Microsoft 365 – aus Ihrem Verzeichnis übernehmen. Beim ersten Öffnen des Plans zeigen drei kurze Tipps, wie es funktioniert.',
+          ],
+        },
+        {
           title: 'Der Checkliste auf Start folgen',
           text: [
             'Start zeigt die Checkliste «Erste Schritte mit Seatline»: Gebäude hinzufügen, ein Stockwerk mit Arbeitsplätzen zeichnen, Mitarbeitende hinzufügen und Plätze zuteilen. Jeder Schritt hat einen Knopf, der Sie an die richtige Stelle führt, und hakt sich selbst ab.',
@@ -29,7 +36,7 @@ export const DE: HelpContent = {
         },
       ],
       tips: [
-        'Der schnellste Start: Gebäude hinzufügen, dann für das Stockwerk ein Beispielbüro wählen und anpassen.',
+        'Der schnellste Start: Lassen Sie die Einrichtung ein Beispielbüro zeichnen und verschieben Sie dann Plätze und benennen Sie Räume wie bei Ihnen.',
         'Alles lässt sich rückgängig machen, und jede Platzänderung bleibt im Verlauf.',
       ],
     },

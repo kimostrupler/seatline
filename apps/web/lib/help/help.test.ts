@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { HELP, HELP_TOPICS, helpAlternates, helpImage, isHelpTopic } from './index';
+import { HELP, HELP_TOPICS, helpAlternates, helpImage, helpTopicFor, isHelpTopic } from './index';
 
 const LANGS = ['en', 'de', 'fr'] as const;
 
@@ -37,5 +37,20 @@ describe('help center', () => {
     expect(helpAlternates('https://seatline.ch', 'moves').de).toBe(
       'https://seatline.ch/help/de/moves',
     );
+  });
+});
+
+describe('the Help button opens the topic of the current page', () => {
+  const at = (path: string, query = '') => helpTopicFor(path, new URLSearchParams(query));
+  it('picks the matching topic', () => {
+    expect(at('/')).toBe('getting-started');
+    expect(at('/map')).toBe('seating');
+    expect(at('/map', 'mode=edit&floor=x')).toBe('editor');
+    expect(at('/map/qr', 'floor=x')).toBe('exports-and-qr');
+    expect(at('/moves/123')).toBe('moves');
+    expect(at('/people', 'tab=changes')).toBe('teams-and-changes');
+    expect(at('/people')).toBe('people');
+    expect(at('/billing')).toBe('privacy-and-billing');
+    expect(at('/owner')).toBeUndefined();
   });
 });

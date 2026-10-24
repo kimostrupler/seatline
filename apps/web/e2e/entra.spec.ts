@@ -88,10 +88,12 @@ test('a new organisation creates its workspace; a colleague joins as viewer', as
   await page.getByLabel('Organisation name').fill('NewCo AG');
   await page.getByRole('button', { name: 'Create workspace' }).click();
 
-  // the empty workspace, with the first person as admin
+  // the setup wizard comes first; skipped, the empty map offers it again
+  await expect(page.getByTestId('setup-wizard')).toBeVisible();
+  await page.goto('/map');
   await expect(page.getByTestId('account-menu')).toContainText('NewCo AG');
   await expect(page.getByTestId('account-menu')).toContainText('Admin');
-  await expect(page.getByRole('button', { name: 'Create your first building' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Set up my office' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'People & access' })).toBeVisible();
 
   // a colleague from the same organisation, in another browser
@@ -114,7 +116,7 @@ test('another organisation never sees the first one’s workspace', async ({ pag
   await signInAs(page, 'first@newco.example');
   await page.getByLabel('Organisation name').fill('NewCo AG');
   await page.getByRole('button', { name: 'Create workspace' }).click();
-  await expect(page.getByTestId('account-menu')).toContainText('NewCo AG');
+  await expect(page.getByTestId('setup-wizard')).toBeVisible();
 
   const stranger = await browser.newPage();
   await signInAs(stranger, 'boss@otherorg.example');
@@ -205,13 +207,30 @@ test('a new company signs up with an e-mail link', async ({ page }) => {
   await page.getByLabel('Organisation name').fill('Small GmbH');
   await page.getByLabel('Your name').fill('Fiona Founder');
   await page.getByRole('button', { name: 'Create workspace' }).click();
-  await expect(page.getByTestId('account-menu')).toContainText('Small GmbH');
 
-  // Home shows the first steps until they're done (or hidden)
+  // the setup wizard draws a first office instead of leaving an empty app
+  const wizard = page.getByTestId('setup-wizard');
+  await expect(wizard.getByRole('heading', { name: 'Set up your office' })).toBeVisible();
+  await expect(wizard.getByLabel('Building')).toHaveValue('Small GmbH');
+  await wizard.getByText('Small', { exact: true }).click();
+  await wizard.getByRole('button', { name: 'Create my office' }).click();
+  await expect(wizard.getByRole('heading', { name: 'Add your people' })).toBeVisible();
+  await expect(wizard.getByRole('link', { name: /Import a list/ })).toHaveAttribute(
+    'href',
+    '/people?import=1',
+  );
+  await wizard.getByRole('link', { name: 'Show me the map first' }).click();
+  await expect(page.getByTestId('floor-map').locator('canvas').first()).toBeVisible();
+  await expect(page.getByTestId('account-menu')).toContainText('Small GmbH');
+  // the import link opens the list import right away
+  await page.goto('/people?import=1');
+  await expect(page.getByRole('dialog', { name: 'Import people from a list' })).toBeVisible();
+  await page.keyboard.press('Escape');
+
+  // Home shows the first steps until they're done (or hidden): building and desks are done
   await page.goto('/');
   const steps = page.getByTestId('getting-started');
-  await expect(steps).toContainText('0 of 4 done');
-  await expect(steps.getByRole('link', { name: 'Add building' })).toHaveAttribute('href', '/map');
+  await expect(steps).toContainText('2 of 4 done');
   await steps.getByRole('button', { name: 'Hide this checklist' }).click();
   await expect(steps).toBeHidden();
   await page.reload();

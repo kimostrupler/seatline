@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { ExportMenu } from '@/components/common/export-menu';
+import { MapTour } from '@/components/map/map-tour';
 import { PlanBar, PlanSeatPanel, usePlanEdits } from '@/components/moves/plan-mode';
 import { useRouter } from 'next/navigation';
 import { projectFloor } from '@/lib/moves';
@@ -224,7 +225,7 @@ export function Workspace() {
             text={t('place.noBuildings')}
             action={
               canEdit
-                ? { label: t('place.createFirstBuilding'), onClick: () => setDialog('building') }
+                ? { label: t('place.createFirstBuilding'), onClick: () => router.push('/setup') }
                 : undefined
             }
           />
@@ -270,6 +271,7 @@ export function Workspace() {
                   if (to) planEdits.move(moving, to);
                 }}
               />
+              {!plan && <MapTour canEdit={canEdit} />}
             </div>
           </div>
         )

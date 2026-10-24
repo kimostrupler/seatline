@@ -2,7 +2,7 @@
 
 import { CircleHelp, Ellipsis } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import {
   DropdownMenu,
@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { helpPath } from '@/lib/help';
+import { helpPath, helpTopicFor } from '@/lib/help';
 import type { Language } from '@/lib/locales';
 import { cn } from '@/lib/utils';
 import { isCurrent, useNavLinks } from './nav-links';
@@ -29,6 +29,7 @@ export function MobileTabBar() {
   const t = useTranslations('nav');
   const short: Record<string, string> = { '/people': t('people') };
   const pathname = usePathname();
+  const search = useSearchParams();
   const language = useLocale().slice(0, 2) as Language;
   const links = useNavLinks();
   if (!links.length) return null;
@@ -84,7 +85,11 @@ export function MobileTabBar() {
             </DropdownMenuItem>
           ))}
           <DropdownMenuItem asChild className="rounded-xl py-2.5">
-            <Link href={helpPath(language)} target="_blank" rel="noopener">
+            <Link
+              href={helpPath(language, helpTopicFor(pathname, search))}
+              target="_blank"
+              rel="noopener"
+            >
               <CircleHelp /> {t('help')}
             </Link>
           </DropdownMenuItem>

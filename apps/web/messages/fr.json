@@ -17,7 +17,7 @@
     "floor": "Étage",
     "chooseBuilding": "Choisir un bâtiment",
     "chooseFloor": "Choisir un étage",
-    "noBuildings": "Aucun bâtiment pour l’instant.",
+    "noBuildings": "Aucun bâtiment pour l’instant. Configurez votre bureau en deux étapes : bâtiment, étage et places.",
     "noFloors": "Ce bâtiment n’a pas encore d’étage.",
     "newBuilding": "Nouveau bâtiment",
     "newFloor": "Nouvel étage",
@@ -28,7 +28,7 @@
     "floorLevelHint": "0 = rez-de-chaussée, négatif = sous-sol",
     "create": "Créer",
     "cancel": "Annuler",
-    "createFirstBuilding": "Créer votre premier bâtiment",
+    "createFirstBuilding": "Configurer mon bureau",
     "created": "{name} créé",
     "createFirstFloor": "Créer le premier étage",
     "startWith": "Commencer avec",
@@ -57,7 +57,7 @@
     "fit": "Ajuster l’étage à l’écran",
     "openSidebar": "Étages et personnes",
     "loading": "Chargement de l’étage…",
-    "empty": "Cet étage n’a pas encore de places.",
+    "empty": "Cet étage n’a pas encore de places. Partez d’un bureau d’exemple ou dessinez le vôtre dans « Modifier le plan ».",
     "error": "L’étage n’a pas pu être chargé.",
     "retry": "Réessayer",
     "seatsList": "Places de cet étage",
@@ -82,6 +82,25 @@
       "result": "{count, plural, =0 {Aucun poste libre n’a tout cela.} one {# poste libre correspond — mis en évidence sur le plan.} other {# postes libres correspondent — mis en évidence sur le plan.}}",
       "hint": "Choisissez ce que le poste doit avoir.",
       "clear": "Effacer la recherche de poste"
+    },
+    "tour": {
+      "progress": "Conseil {n} sur {total}",
+      "next": "Suivant",
+      "done": "Compris",
+      "skip": "Passer les conseils",
+      "colours": {
+        "title": "Bienvenue sur votre étage",
+        "body": "Les places vertes sont libres, les grises occupées, les jaunes réservées."
+      },
+      "click": {
+        "title": "Cliquez sur une place",
+        "body": "Vous voyez qui y est assis et depuis quand. Sur une place libre, choisissez « Attribuer une personne » – ou glissez un nom de la liste dessus.",
+        "bodyViewer": "Vous voyez qui y est assis et depuis quand. Cherchez une personne à gauche pour trouver sa place."
+      },
+      "undo": {
+        "title": "Rien ne peut mal tourner",
+        "body": "Chaque changement affiche un message avec « Annuler ». Plusieurs déménagements à la fois ? Utilisez « Déménagements » dans le menu."
+      }
     }
   },
   "seat": {
@@ -985,7 +1004,7 @@
     "cancel": "Annuler",
     "openPlans": "Plans en cours",
     "donePlans": "Terminés",
-    "noOpenPlans": "Aucun plan en cours.",
+    "noOpenPlans": "Aucun plan en cours. Un plan regroupe plusieurs déménagements (une équipe qui déménage, un nouvel étage) et les effectue ensemble – tout de suite ou à une date.",
     "noDonePlans": "Rien d’appliqué pour l’instant.",
     "summary": "{count, plural, =0 {Pas encore de déménagement} one {# déménagement} other {# déménagements}} · {name} · {date}",
     "notFound": "Ce plan n’existe pas (ou plus).",
@@ -1493,7 +1512,8 @@
       "status": "Statut",
       "lastActivity": "Dernier changement",
       "admins": "Admins",
-      "email": "Lien e-mail"
+      "email": "Lien e-mail",
+      "setup": "Configuration"
     },
     "delete": {
       "options": "Options pour {name}",
@@ -1513,6 +1533,12 @@
       "action": "Arrêter les conseils",
       "done": "Plus de conseils pour {name}",
       "failed": "Impossible d’arrêter les conseils"
+    },
+    "setup": {
+      "desks": "Pas encore de places",
+      "people": "Pas encore de personnes",
+      "seated": "Personne placé",
+      "done": "Utilisé"
     }
   },
   "loading": {
@@ -1541,5 +1567,33 @@
     "stuck": "Encore une question ?",
     "contact": "Écrivez à <mail>{email}</mail>.",
     "openApp": "Ouvrir Seatline"
+  },
+  "setup": {
+    "progress": "Étapes de configuration",
+    "step1": "Votre bureau",
+    "step2": "Vos collaborateurs",
+    "officeTitle": "Configurez votre bureau",
+    "officeBody": "Nous dessinons un premier étage pour vous. Vous pourrez tout modifier ensuite.",
+    "building": "Bâtiment",
+    "floor": "Étage",
+    "floorDefault": "Rez-de-chaussée",
+    "size": "Quelle est la taille du bureau ?",
+    "sizeHint": "Un bureau d’exemple avec des places, des salles de réunion et une cuisine. Dans « Modifier le plan », vous pouvez tout déplacer, ajouter ou supprimer.",
+    "empty": "Le dessiner moi-même",
+    "emptyHint": "Commencer avec un étage vide",
+    "create": "Créer mon bureau",
+    "creating": "Création…",
+    "failed": "Impossible de créer le bureau : {message}",
+    "peopleTitle": "Ajoutez vos collaborateurs",
+    "peopleBody": "Une fois vos collègues dans Seatline, vous pouvez leur attribuer des places.",
+    "peopleBodyMicrosoft": "Vos collègues arrivent d’eux-mêmes depuis Microsoft 365, dès que votre service informatique autorise Seatline à lire l’annuaire.",
+    "import": "Importer une liste",
+    "importHint": "Excel ou CSV – le nom et l’e-mail suffisent.",
+    "byHand": "Les ajouter un par un",
+    "byHandHint": "Idéal pour une petite équipe.",
+    "microsoft": "Connecter Microsoft 365",
+    "microsoftHint": "Demandez à votre service informatique d’approuver Seatline (Personnes › Réglages).",
+    "template": "Pas encore de liste ? Utilisez notre <link>modèle Excel gratuit</link>.",
+    "later": "Voir d’abord le plan"
   }
 }

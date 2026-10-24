@@ -25,7 +25,7 @@ export function OnboardingForm({ signedInAs, askName }: { signedInAs: string; as
         try {
           const body = { companyName: name.trim(), ...(askName && { yourName: yourName.trim() }) };
           await api('/onboarding', { method: 'POST', body });
-          router.replace('/map');
+          router.replace('/setup');
           router.refresh();
         } catch (error) {
           toast.error(error instanceof Error ? error.message : String(error));
