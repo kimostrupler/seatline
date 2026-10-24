@@ -157,7 +157,13 @@ export function onboardingMail(
       },
     },
   }[language][day];
-  return { to, ...t };
+  // promotional-style tips need an easy way out (Swiss UWG): the operator stops them on request
+  const stop = {
+    en: 'Don’t want these tips? Reply “stop” and we won’t send more.',
+    de: 'Keine Tipps mehr? Antworten Sie mit «stop», dann senden wir keine weiteren.',
+    fr: 'Plus de conseils ? Répondez « stop » et nous n’en enverrons plus.',
+  }[language];
+  return { to, subject: t.subject, text: `${t.text}\n\n--\n${stop}` };
 }
 
 /** To an admin who asked for it: the DPA as a PDF attachment. */

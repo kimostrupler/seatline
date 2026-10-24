@@ -111,6 +111,25 @@ export class OwnerService {
     this.logger.log(`Workspace deleted by the operator: ${tenantId}`);
   }
 
+  /** No more onboarding tips for this workspace (its admin replied "stop"). */
+  async stopTips(ctx: RequestContext, tenantId: string) {
+    const tenant = await this.db.run(tenantId, (tx) =>
+      tx.tenant.findUnique({ where: { id: tenantId }, select: { name: true } }),
+    );
+    if (!tenant) throw new NotFoundException('Workspace not found');
+    await this.db.run(tenantId, (tx) =>
+      tx.tenant.update({ where: { id: tenantId }, data: { onboardingSent: 7 } }),
+    );
+    await this.db.run(ctx.tenantId, (tx) =>
+      audit(tx, ctx, {
+        action: 'owner.workspace.stop_tips',
+        entityType: 'tenant',
+        entityId: tenantId,
+        after: { name: tenant.name },
+      }),
+    );
+  }
+
   async overview() {
     const now = Date.now();
     const [rows, stripe, azure, usage] = await Promise.all([

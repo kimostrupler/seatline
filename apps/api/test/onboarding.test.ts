@@ -57,6 +57,8 @@ describe('onboarding e-mails', () => {
     const mails = await sentMails();
     expect(mails.map((m) => m.to)).toEqual(Array(3).fill('admin@beta.example'));
     expect(mails[0]!.text).toContain('https://app.seatline.test/map');
+    // every tip says how to stop them
+    expect(mails.every((m) => /«stop»|“stop”|« stop »/.test(m.text))).toBe(true);
     expect(mails[1]!.text).toContain('https://app.seatline.test/people');
     expect(mails[2]!.text).toMatch(/https:\/\/app\.seatline\.test\/help\/(en|de|fr)/);
     // done with all three: no longer listed

@@ -799,7 +799,8 @@
     "search": "Rechercher dans l’activité",
     "searchPlaceholder": "Rechercher des personnes, postes, pièces, étages, notes…",
     "privacyDpa": "s’est envoyé l’accord de sous-traitance par e-mail",
-    "workspaceDeleted": "a supprimé l’espace « {name} » (support)"
+    "workspaceDeleted": "a supprimé l’espace « {name} » (support)",
+    "workspaceTipsStopped": "a arrêté les conseils pour « {name} » (support)"
   },
   "dashboard": {
     "title": "Accueil",
@@ -1507,6 +1508,11 @@
       "own": "Vous ne pouvez pas supprimer l’espace dans lequel vous êtes connecté.",
       "mismatch": "Le nom ne correspond pas.",
       "failed": "L’espace n’a pas pu être supprimé."
+    },
+    "stopTips": {
+      "action": "Arrêter les conseils",
+      "done": "Plus de conseils pour {name}",
+      "failed": "Impossible d’arrêter les conseils"
     }
   },
   "loading": {

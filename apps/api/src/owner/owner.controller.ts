@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post } from '@nestjs/common';
 import { z } from 'zod';
 import { Ctx } from '../auth/decorators';
 import { IdPipe, ZodPipe } from '../common/zod.pipe';
@@ -29,6 +29,14 @@ export class OwnerController {
   ) {
     await this.owner.assertOwner(ctx, `/owner/workspaces/${id}`);
     await this.owner.deleteWorkspace(ctx, id, body.name);
+  }
+
+  /** Support: a workspace's admin replied "stop" to the onboarding tips; send no more. */
+  @Post('workspaces/:id/stop-tips')
+  @HttpCode(204)
+  async stopTips(@Ctx() ctx: RequestContext, @Param('id', IdPipe) id: string) {
+    await this.owner.assertOwner(ctx, `/owner/workspaces/${id}/stop-tips`);
+    await this.owner.stopTips(ctx, id);
   }
 
   @Get('overview')

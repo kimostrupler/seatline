@@ -85,6 +85,19 @@ describe('owner dashboard', () => {
     });
   });
 
+  it('the operator stops the onboarding tips of a workspace whose admin replied "stop"', async () => {
+    await owner.tenant.update({ where: { id: b.tenantId }, data: { onboardingSent: 1 } });
+    // only the operator: beta's own admin gets the same 404 as for a missing page
+    await api(app).post(`/owner/workspaces/${b.tenantId}/stop-tips`).set(b.headers).expect(404);
+    await api(app).post(`/owner/workspaces/${b.tenantId}/stop-tips`).set(a.headers).expect(204);
+    const tenant = await owner.tenant.findUniqueOrThrow({ where: { id: b.tenantId } });
+    expect(tenant.onboardingSent).toBe(7);
+    const entry = await owner.auditLog.findFirst({
+      where: { tenantId: a.tenantId, action: 'owner.workspace.stop_tips' },
+    });
+    expect(entry?.entityId).toBe(b.tenantId);
+  });
+
   it('the operator deletes a workspace for support, with every row of it', async () => {
     await api(app)
       .post('/assignments')
