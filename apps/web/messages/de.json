@@ -1684,7 +1684,10 @@
         "canceled": "Senden abgebrochen",
         "copy": "Text kopieren",
         "copied": "Kopiert",
-        "manualHint": "Dieser Lead wird per {channel} erreicht: Kopieren Sie den Text, senden Sie ihn dort und setzen Sie den Status auf «Gesendet»."
+        "manualHint": "Dieser Lead wird per {channel} erreicht: Kopieren Sie den Text, senden Sie ihn dort und setzen Sie den Status auf «Gesendet».",
+        "sendNow": "Jetzt senden",
+        "sendNowConfirm": "Jetzt an {to} senden? Das lässt sich nicht rückgängig machen.",
+        "sent": "E-Mail gesendet"
       },
       "problems": {
         "no_email": "Erfassen Sie zuerst eine veröffentlichte E-Mail-Adresse (Kanal: E-Mail).",

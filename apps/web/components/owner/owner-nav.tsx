@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
@@ -10,7 +9,8 @@ export function OwnerNav({ current }: { current: 'overview' | 'leads' }) {
   return (
     <nav className="-mt-4 flex gap-1 border-b text-sm" aria-label={t('overview')}>
       {(['overview', 'leads'] as const).map((page) => (
-        <Link
+        // a plain link: a full page load each time (client navigation could get lost before hydration)
+        <a
           key={page}
           href={page === 'overview' ? '/owner' : '/owner/leads'}
           aria-current={page === current ? 'page' : undefined}
@@ -20,7 +20,7 @@ export function OwnerNav({ current }: { current: 'overview' | 'leads' }) {
           )}
         >
           {t(page)}
-        </Link>
+        </a>
       ))}
     </nav>
   );

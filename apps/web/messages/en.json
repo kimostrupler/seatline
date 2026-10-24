@@ -1684,7 +1684,10 @@
         "canceled": "Sending cancelled",
         "copy": "Copy text",
         "copied": "Copied",
-        "manualHint": "This lead is reached by {channel}: copy the text, send it there, then set the status to “Sent”."
+        "manualHint": "This lead is reached by {channel}: copy the text, send it there, then set the status to “Sent”.",
+        "sendNow": "Send now",
+        "sendNowConfirm": "Send it to {to} right now? This can’t be undone.",
+        "sent": "E-mail sent"
       },
       "problems": {
         "no_email": "Add a published e-mail address first (channel: E-mail).",

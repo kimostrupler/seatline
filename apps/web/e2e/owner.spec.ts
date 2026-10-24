@@ -61,6 +61,17 @@ test('outreach leads: one personal e-mail, at most 100 words, scheduled for the 
   await panel.getByRole('button', { name: 'Don’t send' }).click();
   await expect(panel.getByText('Not sent (cancelled)')).toBeVisible();
 
+  // or right away, after one confirmation
+  await panel.getByRole('button', { name: 'Write the first e-mail' }).click();
+  await expect(body).toHaveValue(/Livingdocs weiter wächst/);
+  await panel.getByRole('button', { name: 'Send now' }).click();
+  const confirm = page.getByRole('alertdialog');
+  await expect(confirm).toContainText('contact@livingdocs.io');
+  await confirm.getByRole('button', { name: 'Send now' }).click();
+  await expect(page.getByText('E-mail sent')).toBeVisible();
+  await expect(panel.getByText(/^Sent /)).toBeVisible();
+  await expect(panel.getByLabel('Status')).toHaveValue('sent');
+
   // anyone else: not found
   await page.goto('/');
   await switchUser(page, 'Luca Rossi');

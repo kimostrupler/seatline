@@ -72,6 +72,8 @@ export const leadMessageSchema = z.strictObject({
   kind: z.enum(LEAD_MESSAGE_KINDS),
   subject: text(200).min(1),
   body: text(5000).min(1),
+  /** send right away instead of at the next send slot */
+  sendNow: z.boolean().optional(),
 });
 
 /** Words a reader sees (a link counts as one). */
