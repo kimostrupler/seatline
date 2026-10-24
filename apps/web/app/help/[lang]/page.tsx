@@ -1,8 +1,10 @@
+import { Play } from 'lucide-react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { HelpShell, TOPIC_ICONS } from '@/components/help/help-shell';
 import { HELP, HELP_TOPICS, helpAlternates, helpPath, isHelpLanguage } from '@/lib/help';
+import { VIDEO, VIDEO_POSTER, videoPath } from '@/lib/help/video';
 import { webConfig } from '@/lib/server/config';
 import { siteUrl } from '@/lib/site';
 
@@ -48,6 +50,32 @@ export default async function HelpIndex({ params }: Props) {
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{t('title')}</h1>
         <p className="max-w-2xl text-lg text-pretty text-muted-foreground">{t('intro')}</p>
       </header>
+
+      {/* the video tour first, big: many people would rather watch than read */}
+      <a
+        href={videoPath(lang)}
+        className="group grid overflow-hidden rounded-2xl border bg-card transition-colors hover:border-primary/50 sm:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]"
+        data-testid="help-video"
+      >
+        <span className="relative">
+          {/* eslint-disable-next-line @next/next/no-img-element -- small poster, sized */}
+          <img
+            src={VIDEO_POSTER}
+            alt=""
+            width={1280}
+            height={720}
+            className="aspect-video h-auto w-full object-cover"
+          />
+          <span className="absolute bottom-3 left-3 grid size-12 place-items-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform group-hover:scale-110">
+            <Play className="ml-0.5 size-5 fill-current" aria-hidden />
+          </span>
+        </span>
+        <span className="grid content-center gap-2 p-5">
+          <span className="text-xl font-semibold">{VIDEO[lang].title}</span>
+          <span className="text-sm text-pretty text-muted-foreground">{VIDEO[lang].intro}</span>
+          <span className="text-xs text-muted-foreground">{VIDEO[lang].spoken}</span>
+        </span>
+      </a>
 
       <section aria-labelledby="topics" className="grid gap-4">
         <h2 id="topics" className="text-xl font-semibold">

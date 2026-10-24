@@ -1,4 +1,13 @@
-import { ArrowRight, Check, ChevronDown, Gift, LogIn, MapPin, ShieldCheck } from 'lucide-react';
+import {
+  ArrowRight,
+  Check,
+  ChevronDown,
+  Gift,
+  LogIn,
+  MapPin,
+  PlayCircle,
+  ShieldCheck,
+} from 'lucide-react';
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages, getTranslations } from 'next-intl/server';
@@ -15,6 +24,7 @@ import { looksSignedIn } from '@/lib/server/auth';
 import { Button } from '@/components/ui/button';
 import { helpPath, type HelpTopicId } from '@/lib/help';
 import { TEMPLATE, templatePath } from '@/lib/help/template';
+import { VIDEO, videoPath } from '@/lib/help/video';
 import { OPERATOR } from '@/lib/legal/operator';
 import { LANGUAGES, LANGUAGE_NAMES, LOCALES, type Language } from '@/lib/locales';
 import { webConfig } from '@/lib/server/config';
@@ -171,6 +181,7 @@ export default async function Welcome() {
                 ['#pricing', t('navPricing')],
                 ['#faq', t('navFaq')],
                 [helpPath(language), t('navHelp')],
+                [videoPath(language), VIDEO[language].short],
               ] as const
             ).map(([href, label]) => (
               <Button
@@ -274,6 +285,13 @@ export default async function Welcome() {
           >
             <source src="/site-video/seatline-promo.mp4" type="video/mp4" />
           </video>
+          <div className="mt-6 flex justify-center">
+            <Button asChild variant="outline" size="lg">
+              <a href={videoPath(language)} data-track="cta-video-tour">
+                <PlayCircle aria-hidden /> {t('videoTour')}
+              </a>
+            </Button>
+          </div>
         </Section>
 
         {/* the three parts of the app, with pictures */}
@@ -469,6 +487,7 @@ export default async function Welcome() {
                 ['#pricing', t('navPricing')],
                 ['#faq', t('navFaq')],
                 [helpPath(language), t('navHelp')],
+                [videoPath(language), VIDEO[language].short],
                 [templatePath(language), TEMPLATE[language].title],
                 [signInUrl(), t('signIn')],
               ] as const

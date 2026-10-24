@@ -9,6 +9,7 @@ describe('content security policy', () => {
     expect(csp).toContain("frame-ancestors 'none'");
     expect(csp).toContain("object-src 'none'");
     expect(contentSecurityPolicy('x', true)).toContain("'unsafe-eval'");
+    expect(csp).toContain("media-src 'self' https://seatlinemedia3148.blob.core.windows.net");
   });
   it('makes a new nonce every time', () => {
     expect(newNonce()).not.toBe(newNonce());

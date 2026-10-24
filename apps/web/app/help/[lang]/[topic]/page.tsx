@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Lightbulb } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Lightbulb, PlayCircle } from 'lucide-react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
@@ -12,6 +12,7 @@ import {
   isHelpLanguage,
   isHelpTopic,
 } from '@/lib/help';
+import { chapterFor, clock, VIDEO, videoPath } from '@/lib/help/video';
 import { webConfig } from '@/lib/server/config';
 import { siteUrl } from '@/lib/site';
 
@@ -43,6 +44,7 @@ export default async function HelpTopic({ params }: Props) {
   const i = HELP_TOPICS.indexOf(topic);
   const prev = HELP_TOPICS[i - 1];
   const next = HELP_TOPICS[i + 1];
+  const chapter = chapterFor(topic);
   const base = siteUrl(webConfig().APP_URL);
   const howTo = {
     '@context': 'https://schema.org',
@@ -71,6 +73,17 @@ export default async function HelpTopic({ params }: Props) {
         </a>
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{text.title}</h1>
         <p className="max-w-2xl text-lg text-pretty text-muted-foreground">{text.summary}</p>
+        {chapter && (
+          <a
+            href={videoPath(lang, chapter.start)}
+            className="flex items-center gap-2 justify-self-start rounded-full border px-3 py-1.5 text-sm font-medium hover:border-primary/50 hover:bg-primary/5"
+            data-testid="watch-part"
+          >
+            <PlayCircle className="size-4 text-primary" aria-hidden />
+            {VIDEO[lang].watchPart}
+            <span className="text-muted-foreground tabular-nums">{clock(chapter.start)}</span>
+          </a>
+        )}
       </header>
 
       <ol className="grid gap-12" data-testid="help-steps">

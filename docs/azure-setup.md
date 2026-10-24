@@ -168,6 +168,21 @@ Stripe; Stripe checks it for a few hours, then switches over by itself). Seatlin
 for this: it always opens the address Stripe returns. If the domain is ever removed, Stripe falls
 back to checkout.stripe.com / billing.stripe.com, which also works.
 
+## Media storage (the video tour)
+
+The 9-minute video tour is too big for the app's image, so it lives in a small public Blob
+Storage account in Switzerland North (`seatlinemedia3148`, container `media`). The app only links
+to it (`apps/web/lib/media.ts`). To upload a new version, in Cloud Shell:
+
+```bash
+NAME=seatlinemedia3148
+KEY=$(az storage account keys list -g seatline -n $NAME --query "[0].value" -o tsv)
+az storage blob upload --account-name $NAME --account-key "$KEY" -c media \
+  -n seatline-tutorial.mp4 -f ~/seatline-tutorial.mp4 --content-type video/mp4 --overwrite
+```
+
+Using a new storage account? Change the address in `lib/media.ts` (the CSP follows it).
+
 ## Deploy without GitHub
 
 GitHub's free plan has 2,000 Actions minutes a month. When they're used up, GitHub stops the

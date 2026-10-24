@@ -3,6 +3,7 @@ import { LEGAL_UPDATED } from '@/lib/legal/operator';
 import { webConfig } from '@/lib/server/config';
 import { HELP_TOPICS, helpAlternates, helpPath } from '@/lib/help';
 import { templatePath } from '@/lib/help/template';
+import { videoPath } from '@/lib/help/video';
 import { languageAlternates } from '@/lib/seo';
 import { siteUrl, SITE_LANGUAGE_PATHS } from '@/lib/site';
 
@@ -28,16 +29,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
         alternates: { languages: helpAlternates(base, topic) },
       })),
     ),
-    ...(['en', 'de', 'fr'] as const).map((language) => ({
-      url: `${base}${templatePath(language)}`,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-      alternates: {
-        languages: Object.fromEntries(
-          (['en', 'de', 'fr'] as const).map((l) => [l, `${base}${templatePath(l)}`]),
-        ),
-      },
-    })),
+    ...[templatePath, videoPath].flatMap((path) =>
+      (['en', 'de', 'fr'] as const).map((language) => ({
+        url: `${base}${path(language)}`,
+        changeFrequency: 'monthly' as const,
+        priority: 0.7,
+        alternates: {
+          languages: Object.fromEntries(
+            (['en', 'de', 'fr'] as const).map((l) => [l, `${base}${path(l)}`]),
+          ),
+        },
+      })),
+    ),
     ...['terms', 'privacy', 'dpa', 'imprint'].map((doc) => ({
       url: `${base}/legal/${doc}`,
       lastModified: LEGAL_UPDATED,

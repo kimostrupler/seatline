@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { HELP, HELP_TOPICS, helpPath } from '@/lib/help';
 import { TEMPLATE, templatePath } from '@/lib/help/template';
+import { VIDEO, videoPath } from '@/lib/help/video';
 import { webConfig } from '@/lib/server/config';
 import { SITE_PRICE_CHF, siteUrl } from '@/lib/site';
 
@@ -36,6 +37,10 @@ ${faq.join('\n\n')}
 ## Help center (step by step, with screenshots)
 
 ${HELP_TOPICS.map((t) => `- [${HELP.en.topics[t].title}](${base}${helpPath('en', t)}): ${HELP.en.topics[t].summary}`).join('\n')}
+
+## Video tour
+
+- [${VIDEO.en.title}](${base}${videoPath('en')}): ${VIDEO.en.intro} ${VIDEO.en.spoken} The page has chapters and the whole text. (Also with [German](${base}${videoPath('de')}) and [French](${base}${videoPath('fr')}) subtitles.)
 
 ## Free download
 
