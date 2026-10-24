@@ -205,7 +205,14 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   active. Never changes roles. Teams = `department`; admins can set one by hand (`PATCH /people/:id/team`,
   sets `team_manual`, then the sync keeps it until `fromDirectory`). Renaming a team
   (`POST /people/teams/rename`) also renames its team zones (`rooms.team`) and space plan.
-  Leavers: inactive + open seats closed (history kept).
+  Leavers: inactive + open seats closed (history kept). New people are created with one
+  `createManyAndReturn({ skipDuplicates })`: someone signing in during the sync is skipped,
+  not a reason to roll the sync back (`test/company-joins.test.ts`: 2000 people, 20 first
+  sign-ins at once, two colleagues creating the workspace together).
+- IT guide: help topic `microsoft-365` (what Seatline asks for, approve once, limit, remove);
+  its step with `approvalLink` shows `adminConsentUrl` (`/organizations/adminconsent`, back to
+  `<app>/people`), built from the web app's `ENTRA_CLIENT_ID` (hidden without one). Keep it in
+  step with the permissions in `infra/azure/graph-permissions.json`.
 - Jobs: pg-boss in schema `pgboss` (owned by the API role, created by a migration) for
   "Sync now"; the nightly sync is a separate scheduled container (`dist/jobs/nightly-sync.js`)
   because the API scales to zero. Keep queue code in `jobs/job-queue.service.ts`.

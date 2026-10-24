@@ -5,6 +5,7 @@ export const HELP_TOPICS = [
   'editor',
   'seating',
   'people',
+  'microsoft-365',
   'teams-and-changes',
   'moves',
   'home-planning-activity',
@@ -42,6 +43,8 @@ export interface HelpStep {
   /** paragraphs */
   text: string[];
   image?: HelpImage;
+  /** shows the Microsoft 365 approval link for IT under the text, with this label */
+  approvalLink?: string;
 }
 
 export interface HelpTopic {

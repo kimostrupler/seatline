@@ -49,6 +49,16 @@ test('the website and legal pages need no sign-in', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Umzüge planen');
   await expect(page.locator('html')).toHaveAttribute('lang', 'de-CH');
   expect(await (await page.request.get('/sitemap.xml')).text()).toContain('/help/fr/moves');
+
+  // the IT guide for Microsoft 365 shows this app's approval link
+  await page.goto('/help/en/microsoft-365');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Microsoft 365: approval for IT',
+  );
+  const approval = new URL((await page.getByTestId('approval-link').getAttribute('href')) ?? '');
+  expect(approval.pathname).toBe('/organizations/adminconsent');
+  expect(approval.searchParams.get('client_id')).toBe('e2e-client');
+  expect(approval.searchParams.get('redirect_uri')).toMatch(/\/people$/);
 });
 
 test('visitors try a demo workspace from the website, then start a real trial', async ({

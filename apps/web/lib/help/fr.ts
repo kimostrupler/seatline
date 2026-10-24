@@ -190,6 +190,55 @@ export const FR: HelpContent = {
         },
       ],
     },
+    'microsoft-365': {
+      title: 'Microsoft 365 : approbation par l’IT',
+      summary:
+        'Pour les admins IT : ce que Seatline demande à Microsoft 365, comment l’approuver une fois, comment le limiter ou le retirer.',
+      steps: [
+        {
+          title: 'Ce que Seatline demande',
+          text: [
+            'Connexion : vos collègues se connectent avec leur compte professionnel Microsoft 365. Seatline reçoit leur nom, leur adresse e-mail et leur identifiant Microsoft (autorisations openid, profile, email et User.Read).',
+            'Liste des personnes, pour la mise à jour de nuit : l’autorisation d’application User.Read.All (« Lire les profils complets de tous les utilisateurs »). Seatline n’en garde que le nom, l’e-mail, le service, la fonction et si le compte est actif. Les comptes invités sont ignorés.',
+            'Seatline n’écrit jamais rien dans Microsoft 365 et ne lit ni e-mails, ni calendriers, ni fichiers, ni Teams.',
+          ],
+        },
+        {
+          title: 'Qui peut entrer',
+          text: [
+            'La première personne de votre organisation qui se connecte crée l’espace de travail et en devient l’admin. Toutes les autres personnes de la même organisation rejoignent cet espace en se connectant — votre organisation n’en a jamais un deuxième.',
+            'Un admin choisit ce que reçoivent les nouveaux sous Personnes et accès → Réglages → Qui peut ouvrir Seatline : « Tout le monde dans l’organisation peut consulter le plan » (ils commencent comme Lecteur) ou « Seulement les personnes à qui vous donnez un rôle ».',
+          ],
+        },
+        {
+          title: 'Approuver Seatline une fois',
+          text: [
+            'La liste des personnes demande toujours l’approbation d’un admin. Dans Seatline, un admin ouvre Personnes et accès → Réglages → Microsoft 365 et clique sur Synchroniser maintenant. Si l’approbation manque encore, le bouton Approuver chez Microsoft apparaît : un administrateur général ou un administrateur de rôle privilégié clique dessus et accepte.',
+            'Si votre organisation ne permet pas aux personnes d’approuver elles-mêmes des applications, la première personne voit déjà à la connexion un message demandant l’approbation d’un administrateur. L’IT ouvre alors le lien d’approbation ci-dessous et accepte — cela couvre la connexion et la liste des personnes ensemble.',
+          ],
+          approvalLink: 'Lien d’approbation pour l’IT :',
+        },
+        {
+          title: 'Limiter Seatline à certaines personnes (facultatif)',
+          text: [
+            'Dans le centre d’administration Microsoft Entra, ouvrez Applications d’entreprise → Seatline → Propriétés, mettez « Affectation obligatoire ? » sur Oui et enregistrez. Ajoutez ensuite sous Utilisateurs et groupes les personnes ou groupes qui peuvent se connecter.',
+            'Cela limite qui peut se connecter. La liste des personnes de nuit vient toujours de tout l’annuaire, ainsi tout le monde peut recevoir une place.',
+          ],
+        },
+        {
+          title: 'Retirer l’approbation',
+          text: [
+            'Dans le centre d’administration Microsoft Entra, Applications d’entreprise → Seatline → Propriétés → Supprimer retire Seatline de votre organisation. Les nouvelles connexions et la mise à jour de nuit s’arrêtent tout de suite ; une personne déjà connectée le reste jusqu’à 30 jours.',
+            'Vos données dans Seatline restent jusqu’à la suppression de votre espace de travail. Pour cela, écrivez à hello@seatline.ch.',
+          ],
+        },
+      ],
+      tips: [
+        'Tout le monde se connecte via Microsoft : vos règles MFA et d’accès conditionnel s’appliquent comme d’habitude.',
+        'Les personnes supprimées ou désactivées dans Microsoft 365 perdent l’accès et leur place la nuit suivante ; leur historique de places reste.',
+        'Vos données restent en Suisse (Microsoft Azure, Zurich). L’accord de traitement des données se trouve sur seatline.ch/legal/dpa.',
+      ],
+    },
     'teams-and-changes': {
       title: 'Équipes, changements RH et avis',
       summary:

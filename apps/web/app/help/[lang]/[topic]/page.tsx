@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { HelpShell } from '@/components/help/help-shell';
 import {
+  adminConsentUrl,
   HELP,
   HELP_TOPICS,
   helpAlternates,
@@ -45,7 +46,12 @@ export default async function HelpTopic({ params }: Props) {
   const prev = HELP_TOPICS[i - 1];
   const next = HELP_TOPICS[i + 1];
   const chapter = chapterFor(topic);
-  const base = siteUrl(webConfig().APP_URL);
+  const config = webConfig();
+  const base = siteUrl(config.APP_URL);
+  // only where Microsoft sign-in is set up (not locally / in dev mode)
+  const consentLink = config.ENTRA_CLIENT_ID
+    ? adminConsentUrl(config.ENTRA_LOGIN_URL, config.ENTRA_CLIENT_ID, config.APP_URL)
+    : null;
   const howTo = {
     '@context': 'https://schema.org',
     '@type': 'HowTo',
@@ -106,6 +112,18 @@ export default async function HelpTopic({ params }: Props) {
                     {p}
                   </p>
                 ))}
+                {step.approvalLink && consentLink && (
+                  <p className="grid gap-1 rounded-lg border bg-muted/40 p-3 text-sm">
+                    <span className="font-medium">{step.approvalLink}</span>
+                    <a
+                      href={consentLink}
+                      className="break-all text-primary underline-offset-2 hover:underline"
+                      data-testid="approval-link"
+                    >
+                      {consentLink}
+                    </a>
+                  </p>
+                )}
               </div>
             </div>
             {step.image && (

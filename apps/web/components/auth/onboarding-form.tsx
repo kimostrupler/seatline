@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 
 export function OnboardingForm({ signedInAs, askName }: { signedInAs: string; askName: boolean }) {
   const t = useTranslations('auth');
@@ -28,6 +28,12 @@ export function OnboardingForm({ signedInAs, askName }: { signedInAs: string; as
           router.replace('/setup');
           router.refresh();
         } catch (error) {
+          // a colleague created the organisation's workspace a moment ago: just go in
+          if (error instanceof ApiError && error.status === 409 && !askName) {
+            router.replace('/');
+            router.refresh();
+            return;
+          }
           toast.error(error instanceof Error ? error.message : String(error));
           setBusy(false);
         }
