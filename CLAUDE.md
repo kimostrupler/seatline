@@ -288,7 +288,7 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - **Per-address limits** (`lib/server/rate-limit.ts`, in memory per instance) key on `clientIp()`: the
   LAST `X-Forwarded-For` entry (added by Azure's ingress); the first one is the caller's and can be faked.
 - **Audit** (`pnpm audit --prod`): transitive fixes are forced in `pnpm-workspace.yaml` `overrides`
-  (body-parser, postcss). Accepted for now: deepmerge-ts (Prisma CLI, build time only) and uuid
+  (body-parser, postcss, multer). Accepted for now: deepmerge-ts (Prisma CLI, build time only) and uuid
   inside exceljs (the vulnerable `buf` argument is never used). Re-check on each Dependabot round.
 - **Dependabot** (`.github/dependabot.yml`): monthly grouped minor/patch PRs for npm, pip, Docker,
   Actions; majors are skipped (read the changelog; react-konva must match Next's React).
@@ -523,6 +523,24 @@ chromium` (re-run after UI changes). In the app: **Help** in the top bar, a dism
   subscription runs (cancel it in Stripe first). SECURITY DEFINER `delete_tenant(uuid)` removes
   every row (history included, like `purge_demo_tenants`), then `StorageService.deletePrefix`
   removes the files; logged as `owner.workspace.delete` in the operator's own activity.
+- **Leads** (`/owner/leads`, tab next to the overview; `components/owner/leads-page.tsx`): the
+  operator's personal outreach. Tables `leads` + `lead_messages` live in the operator's OWN
+  workspace (normal tenant RLS) and only owner-checked endpoints (`/owner/leads…`,
+  `LeadsService`) use them. Rules and templates en/de/fr are pure in
+  `packages/shared/src/outreach.ts` (imported as `@seatline/shared/dist/outreach`, unit-tested in
+  `apps/api/src/owner/outreach.test.ts`): one e-mail per lead at a time, never in bulk, at most
+  `MAX_WORDS` (100), a "why now" sentence and no `[placeholder]` left (`messageProblem`). Schedule
+  = the next Tue–Thu 8 am Zurich (`nextSendSlot`); the `nightly-sync` job now runs at 01:00 and
+  07:00 UTC (cron `0 1,7 * * *`, set by deploy.yml/deploy.sh/bicep): the night run does the
+  nightly work, both runs check replies (`runOutreach`), only the morning one sends (7–11 am
+  Zurich, `isSendingHour`) and e-mails the operator about due follow-ups (after 7 days). A
+  reply (IMAP `InboxService`: envelopes only, the lead's domain or the exact address at mail
+  providers) or a "no" cancels what's scheduled; 14 days after the follow-up → `no_answer`;
+  "no"/"no_answer" leads are deleted after 12 months. Sent mails: plain text + HTML with the
+  video GIF (`outreachHtml`, no tracking), sender "Kimo Strupler · Seatline", Message-ID kept so
+  the follow-up is a reply; a copy goes to the mailbox's Sent folder. IMAP: `IMAP_HOST`
+  (mail-setup.sh sets imap.mail.hostpoint.ch), login = SMTP user; tests use `MAIL_INBOX` files.
+  Audits `owner.lead.*`. The privacy policy (section 3) describes outreach.
 - Azure costs that fail show Azure's own reason on the dashboard (`detail`); `owner-setup.sh` now
   reports whether the "Cost Management Reader" role could be given (needs Owner / User Access
   Administrator on the subscription).

@@ -1,3 +1,4 @@
+import type { LeadStatus, NextStep } from '@seatline/shared/dist/outreach';
 import type {
   AppRole,
   AssignmentKind,
@@ -453,4 +454,50 @@ export interface OwnerOverview {
     /** null when the file storage couldn't be listed */
     files: null | { bytes: number; files: number; imports: { bytes: number; files: number } };
   };
+}
+
+/** Outreach leads (GET /owner/leads; only for OWNER_EMAILS). */
+export interface LeadMessage {
+  id: string;
+  kind: 'first' | 'follow_up';
+  subject: string;
+  body: string;
+  toAddress: string;
+  scheduledFor: string;
+  sentAt: string | null;
+  canceledAt: string | null;
+}
+
+export interface Lead {
+  id: string;
+  company: string;
+  website: string | null;
+  address: string | null;
+  whyNow: string | null;
+  sourceUrl: string | null;
+  contactName: string | null;
+  greeting: string | null;
+  contactRole: string | null;
+  channel: 'email' | 'form' | 'linkedin';
+  contactEmail: string | null;
+  linkedinUrl: string | null;
+  language: 'de' | 'fr' | 'en';
+  status: LeadStatus;
+  firstSentAt: string | null;
+  followUpSentAt: string | null;
+  repliedAt: string | null;
+  notes: string | null;
+  updatedAt: string;
+}
+
+export interface LeadRow extends Lead {
+  scheduledFor: string | null;
+  followUpDue: string | null;
+  nextStep: NextStep;
+}
+
+export interface LeadList {
+  mailReady: boolean;
+  repliesChecked: boolean;
+  leads: LeadRow[];
 }

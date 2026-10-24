@@ -28,6 +28,8 @@ import { DemoService } from './demo/demo.service';
 import { PlanningController } from './planning/planning.controller';
 import { OwnerController } from './owner/owner.controller';
 import { OwnerService } from './owner/owner.service';
+import { LeadsService } from './owner/leads.service';
+import { InboxService } from './mail/inbox.service';
 import { AzureCostService } from './owner/azure-cost';
 import { PlanningService } from './planning/planning.service';
 import { BuildingsController } from './buildings/buildings.controller';
@@ -104,6 +106,8 @@ import { PeopleSyncService } from './sync/people-sync.service';
     DemoService,
     PlanningService,
     OwnerService,
+    LeadsService,
+    InboxService,
     AzureCostService,
     GraphClient,
     PeopleSyncService,

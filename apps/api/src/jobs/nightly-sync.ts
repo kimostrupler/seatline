@@ -1,8 +1,10 @@
 /**
- * Nightly: people sync for every workspace connected to Microsoft 365, then HR leaving dates
+ * Runs twice a day (cron 0 1,7 * * * UTC). The night run (01:00): people sync for every workspace connected to Microsoft 365, then HR leaving dates
  * that have come, then the scheduled move plans that are due (after the sync, so people who left are already inactive), then the
  * privacy clean-up (history older than each workspace's retention period), billing (seat
- * counts, trial reminders), onboarding e-mails.
+ * counts, trial reminders), onboarding e-mails. Both runs: outreach (the operator's leads):
+ * replies first; the morning run (07:00 UTC = 8 am Zurich in winter, 9 am in summer) also
+ * sends the scheduled outreach e-mails and the follow-up reminder.
  * Runs as its own scheduled container (Azure Container Apps Job), so it works even
  * while the API is scaled to zero:  node dist/jobs/nightly-sync.js
  */
@@ -15,15 +17,37 @@ process.env.JOBS_ENABLED = 'false'; // this process only syncs, it doesn't serve
 async function main() {
   const { AppModule } = await import('../app.module');
   const { TenantDb } = await import('../db/tenant-db.service');
-  const { PeopleSyncService } = await import('../sync/people-sync.service');
-  const { MovesService, zurichToday } = await import('../moves/moves.service');
-  const { PrivacyService } = await import('../privacy/privacy.service');
-  const { BillingService } = await import('../billing/billing.service');
   const logger = new Logger('NightlySync');
   const app = await NestFactory.createApplicationContext(AppModule, {
     logger: ['log', 'warn', 'error'],
   });
   try {
+    if (new Date().getUTCHours() < 5) await nightly(app, logger);
+    const { LeadsService } = await import('../owner/leads.service');
+    for (const tenantId of await app.get(TenantDb).listOutreachTenants()) {
+      try {
+        const r = await app.get(LeadsService).runOutreach(tenantId);
+        logger.log(`${tenantId}: outreach ${JSON.stringify(r)}`);
+      } catch (error) {
+        logger.error(`${tenantId}: outreach failed: ${String(error)}`);
+      }
+    }
+  } finally {
+    await app.close();
+  }
+}
+
+/** The night's work (see the top of this file). */
+async function nightly(
+  app: Awaited<ReturnType<typeof NestFactory.createApplicationContext>>,
+  logger: Logger,
+) {
+  const { TenantDb } = await import('../db/tenant-db.service');
+  const { PeopleSyncService } = await import('../sync/people-sync.service');
+  const { MovesService, zurichToday } = await import('../moves/moves.service');
+  const { PrivacyService } = await import('../privacy/privacy.service');
+  const { BillingService } = await import('../billing/billing.service');
+  {
     const tenants = await app.get(TenantDb).listSyncTenants();
     let failed = 0;
     for (const t of tenants) {
@@ -93,8 +117,6 @@ async function main() {
         logger.error(`${tenantId}: could not send the onboarding e-mail: ${String(error)}`);
       }
     }
-  } finally {
-    await app.close();
   }
 }
 

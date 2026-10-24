@@ -144,6 +144,13 @@ export class TenantDb {
     return rows.map((r) => r.id);
   }
 
+  /** The morning job: workspaces with outreach leads (the operator's). */
+  async listOutreachTenants(): Promise<string[]> {
+    const rows = await this.prisma.$queryRaw<{ id: string }[]>`
+      SELECT id FROM list_outreach_tenants()`;
+    return rows.map((r) => r.id);
+  }
+
   /** Workspaces that limit how long history is kept (months). */
   listRetentionTenants() {
     return this.prisma.$queryRaw<{ id: string; months: number }[]>`

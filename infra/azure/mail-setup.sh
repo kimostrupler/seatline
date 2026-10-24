@@ -7,6 +7,8 @@ set -euo pipefail
 RG=${RG:-seatline}
 SMTP_HOST=${SMTP_HOST:-asmtp.mail.hostpoint.ch}
 SMTP_USER=${SMTP_USER:-hello@seatline.ch}
+# the same mailbox over IMAP: outreach replies and the Sent folder (owner Leads page)
+IMAP_HOST=${IMAP_HOST:-imap.mail.hostpoint.ch}
 MAIL_FROM=${MAIL_FROM:-Seatline <$SMTP_USER>}
 say() { printf '\n\033[1m%s\033[0m\n' "$*"; }
 
@@ -30,7 +32,7 @@ echo "  Accepted."
 
 say "3/3 Saving it in Key Vault and giving it to the API"
 az keyvault secret set --vault-name "$KV" -n smtp-password --value "$PASSWORD" -o none
-ENV=(SMTP_HOST="$SMTP_HOST" SMTP_PORT=465 SMTP_USER="$SMTP_USER" SMTP_PASSWORD=secretref:smtp-password
+ENV=(SMTP_HOST="$SMTP_HOST" SMTP_PORT=465 IMAP_HOST="$IMAP_HOST" SMTP_USER="$SMTP_USER" SMTP_PASSWORD=secretref:smtp-password
   "MAIL_FROM=$MAIL_FROM" APP_URL="$WEB_URL")
 az containerapp secret set -n api -g "$RG" --secrets smtp-password="$PASSWORD" -o none
 az containerapp update -n api -g "$RG" --set-env-vars "${ENV[@]}" -o none

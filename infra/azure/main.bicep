@@ -393,7 +393,7 @@ resource nightlySync 'Microsoft.App/jobs@2024-03-01' = {
       triggerType: 'Schedule'
       replicaTimeout: 1800
       replicaRetryLimit: 1
-      scheduleTriggerConfig: { cronExpression: '0 1 * * *', parallelism: 1, replicaCompletionCount: 1 }
+      scheduleTriggerConfig: { cronExpression: '0 1,7 * * *', parallelism: 1, replicaCompletionCount: 1 }
       registries: registries
       secrets: concat(
         [

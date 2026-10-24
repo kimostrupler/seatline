@@ -819,7 +819,14 @@
     "searchPlaceholder": "Personen, Arbeitsplätze, Räume, Stockwerke, Notizen suchen …",
     "privacyDpa": "hat sich den Auftragsverarbeitungsvertrag per E-Mail gesendet",
     "workspaceDeleted": "hat den Arbeitsbereich «{name}» gelöscht (Support)",
-    "workspaceTipsStopped": "hat die Tipps für «{name}» gestoppt (Support)"
+    "workspaceTipsStopped": "hat die Tipps für «{name}» gestoppt (Support)",
+    "leadCreated": "hat den Lead «{name}» erfasst",
+    "leadUpdated": "hat den Lead «{name}» geändert",
+    "leadDeleted": "hat den Lead «{name}» gelöscht",
+    "leadScheduled": "hat eine E-Mail an «{name}» geplant",
+    "leadCanceled": "hat eine E-Mail an «{name}» abgebrochen",
+    "leadSent": "hat die E-Mail an «{name}» gesendet",
+    "leadReplied": "hat eine Antwort von «{name}» erkannt"
   },
   "dashboard": {
     "title": "Start",
@@ -1582,6 +1589,119 @@
       "people": "Noch keine Personen",
       "seated": "Niemand platziert",
       "done": "In Gebrauch"
+    },
+    "nav": {
+      "overview": "Übersicht",
+      "leads": "Leads"
+    },
+    "leads": {
+      "title": "Leads",
+      "add": "Neuer Lead",
+      "empty": "Noch keine Leads. Erfassen Sie die erste Firma, der Sie schreiben möchten.",
+      "filters": {
+        "todo": "Zu tun",
+        "all": "Alle",
+        "waiting": "Warten",
+        "done": "Erledigt"
+      },
+      "columns": {
+        "company": "Firma",
+        "why": "Warum jetzt",
+        "contact": "Kontakt",
+        "status": "Status",
+        "next": "Nächster Schritt"
+      },
+      "status": {
+        "research": "Recherche",
+        "ready": "Bereit",
+        "sent": "Gesendet",
+        "followed_up": "Nachgefasst",
+        "replied": "Geantwortet",
+        "meeting": "Termin",
+        "customer": "Kunde",
+        "no": "Nein",
+        "no_answer": "Keine Antwort"
+      },
+      "next": {
+        "research": "Person und Anlass finden",
+        "write_first": "Erste E-Mail schreiben",
+        "scheduled": "Geht {when} raus",
+        "waiting": "Auf Antwort warten",
+        "follow_up_due": "Nachfassen fällig",
+        "talk": "Antworten",
+        "done": "Erledigt"
+      },
+      "mailOff": "E-Mail ist auf dem Server nicht eingerichtet, darum kann noch nichts gesendet werden.",
+      "repliesOff": "Antworten werden nicht automatisch erkannt (IMAP ist nicht eingerichtet): Markieren Sie Antworten selbst.",
+      "rules": "Eine Person, eine persönliche E-Mail. Höchstens 100 Wörter. E-Mails gehen Dienstag bis Donnerstag um 8 Uhr raus, und eine Antwort stoppt alles, was noch geplant ist.",
+      "fields": {
+        "company": "Firma",
+        "website": "Website",
+        "address": "Adresse",
+        "whyNow": "Warum jetzt (der erste Satz)",
+        "whyNowHint": "Ein persönlicher Satz, z. B. «Ich habe gesehen, dass … nach Oerlikon umgezogen ist.»",
+        "sourceUrl": "Quelle (Link)",
+        "contactName": "Kontaktperson",
+        "greeting": "Anrede",
+        "greetingHint": "So beginnt die E-Mail, z. B. «Herr van der Ploeg»",
+        "contactRole": "Funktion",
+        "channel": "Kanal",
+        "contactEmail": "E-Mail",
+        "contactEmailHint": "Nur eine veröffentlichte Adresse (info@, contact@ …), nie eine erratene",
+        "linkedinUrl": "LinkedIn",
+        "language": "Sprache",
+        "notes": "Notizen",
+        "status": "Status"
+      },
+      "channels": {
+        "email": "E-Mail",
+        "form": "Kontaktformular",
+        "linkedin": "LinkedIn"
+      },
+      "languages": {
+        "de": "Deutsch",
+        "fr": "Französisch",
+        "en": "Englisch"
+      },
+      "save": "Speichern",
+      "saved": "Gespeichert",
+      "create": "Lead erfassen",
+      "created": "Lead erfasst",
+      "back": "Alle Leads",
+      "delete": "Lead löschen",
+      "deleteConfirm": "{company} und die E-Mails löschen? Das lässt sich nicht rückgängig machen.",
+      "deleted": "Lead gelöscht",
+      "compose": {
+        "first": "Erste E-Mail schreiben",
+        "follow_up": "Nachfass-E-Mail schreiben",
+        "subject": "Betreff",
+        "body": "Nachricht",
+        "words": "{count} / {max} Wörter",
+        "schedule": "Planen",
+        "scheduleHint": "Geht {when} raus.",
+        "scheduled": "E-Mail geplant für {when}",
+        "cancel": "Nicht senden",
+        "canceled": "Senden abgebrochen",
+        "copy": "Text kopieren",
+        "copied": "Kopiert",
+        "manualHint": "Dieser Lead wird per {channel} erreicht: Kopieren Sie den Text, senden Sie ihn dort und setzen Sie den Status auf «Gesendet»."
+      },
+      "problems": {
+        "no_email": "Erfassen Sie zuerst eine veröffentlichte E-Mail-Adresse (Kanal: E-Mail).",
+        "no_reason": "Schreiben Sie zuerst den «Warum jetzt»-Satz: Er macht die E-Mail persönlich.",
+        "too_long": "Mehr als {max} Wörter: Kürzen Sie sie.",
+        "placeholder": "Füllen Sie alles in [Klammern] aus."
+      },
+      "messages": "E-Mails",
+      "kind": {
+        "first": "Erste E-Mail",
+        "follow_up": "Nachfassen"
+      },
+      "sentAt": "Gesendet {when}",
+      "scheduledFor": "Geht {when} raus",
+      "canceledMsg": "Nicht gesendet (abgebrochen)",
+      "failed": "Das hat nicht geklappt: {message}",
+      "keep": "Behalten"
     }
   },
   "loading": {

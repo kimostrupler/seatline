@@ -9,6 +9,13 @@ export interface Mail {
   to: string;
   subject: string;
   text: string;
+  /** optional HTML version (outreach: the video picture); `text` stays the plain version */
+  html?: string;
+  /** another display name for MAIL_FROM's address ("Kimo Strupler · Seatline") */
+  fromName?: string;
+  /** threading: our own Message-ID, and the one this e-mail answers */
+  messageId?: string;
+  inReplyTo?: string;
   attachments?: Array<{ filename: string; content: Buffer; contentType: string }>;
 }
 
@@ -30,6 +37,11 @@ export class MailService {
   /** Where links in e-mails point (the web app). */
   get appUrl(): string {
     return this.config.APP_URL!.replace(/\/+$/, '');
+  }
+
+  /** The address in MAIL_FROM ("Seatline <hello@seatline.ch>" → hello@seatline.ch). */
+  get fromAddress(): string {
+    return /<([^>]+)>/.exec(this.config.MAIL_FROM)?.[1] ?? this.config.MAIL_FROM;
   }
 
   async send(mail: Mail): Promise<void> {
@@ -63,8 +75,13 @@ export class MailService {
         ? { user: this.config.SMTP_USER, pass: this.config.SMTP_PASSWORD }
         : undefined,
     });
+    const { fromName, ...rest } = mail;
     try {
-      await this.transport.sendMail({ from: this.config.MAIL_FROM, ...mail });
+      await this.transport.sendMail({
+        ...rest,
+        from: fromName ? { name: fromName, address: this.fromAddress } : this.config.MAIL_FROM,
+        references: mail.inReplyTo,
+      });
     } catch (error) {
       // never log the address or the content (links are secrets)
       this.logger.error(`Sending an e-mail failed: ${(error as Error).message}`);

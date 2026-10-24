@@ -12,3 +12,4 @@ onlyBuiltDependencies:
 overrides:
   body-parser@<2.4.0: ^2.4.0
   postcss@<8.5.23: ^8.5.31
+  multer@>=2.0.0 <2.5.0: ^2.5.0

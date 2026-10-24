@@ -103,6 +103,8 @@ model Tenant {
   moveItems    MovePlanItem[]
   floorMarkers FloorMarker[]
   teamPlans    TeamPlan[]
+  leads        Lead[]
+  leadMessages LeadMessage[]
 
   @@map("tenants")
 }
@@ -401,4 +403,63 @@ model TeamPlan {
 
   @@unique([tenantId, team])
   @@map("team_plans")
+}
+
+/// Possible customers the operator writes to (the Leads page under /owner). Stored in the
+/// operator's own workspace, so RLS applies like everywhere; only owner-checked endpoints use it.
+model Lead {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @map("tenant_id") @db.Uuid
+  company        String
+  website        String?
+  address        String?
+  whyNow         String?   @map("why_now")
+  sourceUrl      String?   @map("source_url")
+  contactName    String?   @map("contact_name")
+  greeting       String?
+  contactRole    String?   @map("contact_role")
+  /// email | form | linkedin
+  channel        String    @default("email")
+  contactEmail   String?   @map("contact_email")
+  linkedinUrl    String?   @map("linkedin_url")
+  /// de | fr | en
+  language       String    @default("de")
+  /// research | ready | sent | followed_up | replied | meeting | customer | no | no_answer
+  status         String    @default("research")
+  firstSentAt    DateTime? @map("first_sent_at") @db.Timestamptz(3)
+  followUpSentAt DateTime? @map("follow_up_sent_at") @db.Timestamptz(3)
+  repliedAt      DateTime? @map("replied_at") @db.Timestamptz(3)
+  notes          String?
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant   Tenant        @relation(fields: [tenantId], references: [id])
+  messages LeadMessage[]
+
+  @@index([tenantId, status])
+  @@map("leads")
+}
+
+/// One e-mail to a lead: scheduled (sent by the morning job), sent, or cancelled.
+model LeadMessage {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String    @map("tenant_id") @db.Uuid
+  leadId       String    @map("lead_id") @db.Uuid
+  /// first | follow_up
+  kind         String
+  subject      String
+  body         String
+  toAddress    String    @map("to_address")
+  scheduledFor DateTime  @map("scheduled_for") @db.Timestamptz(3)
+  sentAt       DateTime? @map("sent_at") @db.Timestamptz(3)
+  canceledAt   DateTime? @map("canceled_at") @db.Timestamptz(3)
+  /// the Message-ID header (a follow-up refers to the first e-mail's)
+  messageId    String    @map("message_id")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, scheduledFor])
+  @@map("lead_messages")
 }
