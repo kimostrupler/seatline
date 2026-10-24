@@ -8,17 +8,29 @@ export interface ClientErrorReport {
 
 const cut = (v: unknown, n: number) => (typeof v === 'string' ? v.slice(0, n) : '');
 
-/** Keep only safe, short fields; drop query strings and e-mail-like text. */
+/**
+ * Keep only safe, short fields; drop query strings and e-mail-like text. Line breaks go too:
+ * the report becomes log lines, and a break could forge another line (a fake "[site-visit]"
+ * count or "ERROR").
+ */
 export function sanitizeReport(input: unknown): ClientErrorReport | null {
   if (!input || typeof input !== 'object') return null;
   const r = input as Record<string, unknown>;
   const scrub = (s: string) => s.replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, '<email>');
-  const message = scrub(cut(r.message, 500));
+  const message = scrub(cut(r.message, 500))
+    .replace(/[\r\n]+/g, ' ')
+    .trim();
   if (!message) return null;
   const kind = r.kind === 'rejection' || r.kind === 'render' ? r.kind : 'error';
   return {
     message,
-    stack: scrub(cut(r.stack, 2000)).split('\n').slice(0, 8).join('\n') || undefined,
+    stack:
+      scrub(cut(r.stack, 2000))
+        .split(/\r?\n/)
+        .slice(0, 8)
+        .map((l) => l.trim())
+        .filter(Boolean)
+        .join(' | ') || undefined,
     path: cut(r.path, 200).split('?')[0]!.split('#')[0]! || '/',
     kind,
   };

@@ -109,6 +109,11 @@ describe('HR changes and notices to IT', () => {
     ).toBeNull();
     await changes([{ personId: a.personIds[0], department: 'Ops' }], a.viewerHeaders).expect(403);
     await changes([{ personId: a.adminId, appRole: 'viewer' }]).expect(409); // last admin
+    // nor may the last admin get a leaving date: the night it came, nothing could let them go
+    await changes([{ personId: a.adminId, leavesOn: dayOffset(14) }]).expect(409);
+    expect(
+      (await owner.person.findUniqueOrThrow({ where: { id: a.adminId } })).leavesOn,
+    ).toBeNull();
     await changes([{ personId: a.personIds[0], leavesOn: '31.12.2026' }]).expect(400);
   });
 

@@ -72,7 +72,7 @@ export class FloorsService {
     const id = randomUUID();
     const source = copyFromFloorId ? await this.get(ctx, copyFromFloorId) : null;
     // the plan file is copied first; if the floor can't be created it's removed again
-    let planFileKey = data.planFileKey ?? null;
+    let planFileKey: string | null = null;
     if (source?.planFileKey) {
       planFileKey = `${ctx.tenantId}/floors/${id}/${randomUUID()}${extname(source.planFileKey)}`;
       await this.storage.copy(source.planFileKey, planFileKey);
@@ -278,7 +278,9 @@ export class FloorsService {
     const floor = await this.get(ctx, id);
     // the key prefix is a second check that a file can only be served to its own tenant
     if (!floor.planFileKey?.startsWith(`${ctx.tenantId}/`)) throw new NotFoundException('No plan');
-    return { key: floor.planFileKey, file: await this.storage.get(floor.planFileKey) };
+    const file = await this.storage.get(floor.planFileKey);
+    if (!file) throw new NotFoundException('No plan');
+    return { key: floor.planFileKey, file };
   }
 
   async removePlan(ctx: RequestContext, id: string) {

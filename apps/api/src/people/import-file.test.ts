@@ -1,6 +1,12 @@
 import ExcelJS from 'exceljs';
 import { describe, expect, it } from 'vitest';
-import { mapColumns, parseCsv, readPeopleFile } from './import-file';
+import {
+  MAX_XLSX_UNPACKED_BYTES,
+  mapColumns,
+  parseCsv,
+  readPeopleFile,
+  zipUnpackedSize,
+} from './import-file';
 
 describe('reading people from a spreadsheet', () => {
   it('finds the columns in English, German and French', () => {
@@ -84,5 +90,26 @@ describe('reading people from a spreadsheet', () => {
     await expect(readPeopleFile(Buffer.from('xx'), 'old.xls')).rejects.toMatchObject({
       response: { code: 'bad_format' },
     });
+  });
+
+  it('refuses an Excel file that unpacks to too much (zip bomb) before inflating it', async () => {
+    const book = new ExcelJS.Workbook();
+    book.addWorksheet('People').addRow(['Name', 'E-Mail']);
+    const real = Buffer.from(await book.xlsx.writeBuffer());
+    const size = zipUnpackedSize(real);
+    expect(size).toBeGreaterThan(0);
+    expect(size).toBeLessThan(1024 * 1024);
+
+    // the same file with one entry claiming 3 GB uncompressed in the central directory
+    const bomb = Buffer.from(real);
+    const end = bomb.lastIndexOf(Buffer.from([0x50, 0x4b, 0x05, 0x06]));
+    const first = bomb.readUInt32LE(end + 16);
+    bomb.writeUInt32LE(3 * 1024 ** 3, first + 24);
+    expect(zipUnpackedSize(bomb)).toBeGreaterThan(MAX_XLSX_UNPACKED_BYTES);
+    await expect(readPeopleFile(bomb, 'people.xlsx')).rejects.toMatchObject({
+      response: { code: 'too_many' },
+    });
+    // not a zip at all → "infinite"
+    expect(zipUnpackedSize(Buffer.from('PK\x03\x04 nope'))).toBe(Infinity);
   });
 });

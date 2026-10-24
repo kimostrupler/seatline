@@ -1,4 +1,4 @@
-import type { Language } from '../locales';
+import { LANGUAGES, type Language } from '../locales';
 import { DE } from './de';
 import { EN } from './en';
 import { FR } from './fr';
@@ -9,7 +9,9 @@ export { HELP_TOPICS, type HelpTopicId };
 /** The help center's texts; screenshots in public/help-img (e2e/help-screenshots.spec.ts). */
 export const HELP: Record<Language, HelpContent> = { en: EN, de: DE, fr: FR };
 
-export const isHelpLanguage = (l: string): l is Language => l in HELP;
+// not `l in HELP`: 'constructor' and the other Object.prototype names would pass
+export const isHelpLanguage = (l: string): l is Language =>
+  (LANGUAGES as readonly string[]).includes(l);
 export const isHelpTopic = (t: string): t is HelpTopicId =>
   (HELP_TOPICS as readonly string[]).includes(t);
 

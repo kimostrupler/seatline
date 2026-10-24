@@ -29,9 +29,8 @@ export const createFloorSchema = z.strictObject({
   buildingId: id,
   name,
   level: z.int().min(-20).max(300),
-  planFileKey: z.string().max(500).nullish(),
-  planWidth: z.number().positive().nullish(),
-  planHeight: z.number().positive().nullish(),
+  // the plan image (planFileKey/planWidth/planHeight) is only set by the upload — a client
+  // naming a key could point two floors at one file
   /** Plan units per metre. */
   scale: z.number().positive().nullish(),
   /** Desk size in metres (null = 1.6 × 0.8). */

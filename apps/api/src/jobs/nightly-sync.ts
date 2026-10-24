@@ -51,32 +51,52 @@ async function nightly(
     const tenants = await app.get(TenantDb).listSyncTenants();
     let failed = 0;
     for (const t of tenants) {
-      const result = await app.get(PeopleSyncService).syncTenant(t.id);
-      if (!result.ok) failed++;
-      logger.log(`${t.id}: ${JSON.stringify(result)}`);
+      try {
+        const result = await app.get(PeopleSyncService).syncTenant(t.id);
+        if (!result.ok) failed++;
+        logger.log(`${t.id}: ${JSON.stringify(result)}`);
+      } catch (error) {
+        failed++;
+        logger.error(`${t.id}: people sync failed: ${String(error)}`);
+      }
     }
     logger.log(`Synced ${tenants.length - failed}/${tenants.length} workspaces`);
 
     const today = zurichToday();
     // HR leaving dates that have come (before moves, so a leaver's seat counts as free)
     const { PeopleService } = await import('../people/people.service');
+    // One workspace's failure must never stop the others' (every step below catches per workspace).
     for (const tenantId of await app.get(TenantDb).listLeavingTenants(today)) {
-      const n = await app.get(PeopleService).leaveDue(tenantId, today);
-      logger.log(`${tenantId}: ${n} people left as planned`);
+      try {
+        const n = await app.get(PeopleService).leaveDue(tenantId, today);
+        logger.log(`${tenantId}: ${n} people left as planned`);
+      } catch (error) {
+        logger.error(`${tenantId}: planned leaves failed: ${String(error)}`);
+      }
     }
 
     for (const tenantId of await app.get(TenantDb).listDueMoveTenants(today)) {
-      const results = await app.get(MovesService).applyDue(tenantId, today);
-      for (const r of results)
-        if (r.ok) logger.log(`${tenantId}: move plan ${r.id} applied`);
-        else
-          logger.error(`${tenantId}: move plan ${r.id} could not be applied (see the Moves page)`);
+      try {
+        const results = await app.get(MovesService).applyDue(tenantId, today);
+        for (const r of results)
+          if (r.ok) logger.log(`${tenantId}: move plan ${r.id} applied`);
+          else
+            logger.error(
+              `${tenantId}: move plan ${r.id} could not be applied (see the Moves page)`,
+            );
+      } catch (error) {
+        logger.error(`${tenantId}: scheduled moves failed: ${String(error)}`);
+      }
     }
 
     // privacy: delete history older than each workspace's retention period
     for (const t of await app.get(TenantDb).listRetentionTenants()) {
-      const result = await app.get(PrivacyService).purge(t.id, t.months);
-      logger.log(`${t.id}: privacy clean-up ${JSON.stringify(result)}`);
+      try {
+        const result = await app.get(PrivacyService).purge(t.id, t.months);
+        logger.log(`${t.id}: privacy clean-up ${JSON.stringify(result)}`);
+      } catch (error) {
+        logger.error(`${t.id}: privacy clean-up failed: ${String(error)}`);
+      }
     }
 
     // billing: the subscription follows the number of active seats
@@ -93,8 +113,12 @@ async function nightly(
 
     // demo workspaces live a day
     const { DemoService } = await import('../demo/demo.service');
-    const demos = await app.get(DemoService).purge();
-    if (demos) logger.log(`Deleted ${demos} demo workspaces`);
+    try {
+      const demos = await app.get(DemoService).purge();
+      if (demos) logger.log(`Deleted ${demos} demo workspaces`);
+    } catch (error) {
+      logger.error(`Demo clean-up failed: ${String(error)}`);
+    }
 
     // billing: tell admins their free trial ends soon (7 days, then 1 day before)
     if (billing.configured)

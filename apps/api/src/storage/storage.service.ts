@@ -41,14 +41,20 @@ export class StorageService {
     });
   }
 
-  async get(key: string): Promise<StoredFile> {
+  /** The file as a stream, or null if there is none. */
+  async get(key: string): Promise<StoredFile | null> {
     const container = await this.client();
-    const res = await container.getBlockBlobClient(key).download();
-    return {
-      stream: res.readableStreamBody as Readable,
-      contentType: res.contentType ?? 'application/octet-stream',
-      size: res.contentLength ?? 0,
-    };
+    try {
+      const res = await container.getBlockBlobClient(key).download();
+      return {
+        stream: res.readableStreamBody as Readable,
+        contentType: res.contentType ?? 'application/octet-stream',
+        size: res.contentLength ?? 0,
+      };
+    } catch (error) {
+      if ((error as { statusCode?: number }).statusCode === 404) return null;
+      throw error;
+    }
   }
 
   /** The whole file, or null if there is none. */

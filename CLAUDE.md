@@ -416,7 +416,10 @@ folded`) so the person and the actions stand out.
   `billing/webhook` through without a session). Subscriptions carry `metadata.tenantId`, but a
   webhook only applies if its customer matches the tenant's `stripe_customer_id`.
 - The operator's own workspace (an active admin from `OWNER_EMAILS`, e-mail sign-in) is billing
-  state `off` like demos: never a trial, never read-only.
+  state `off` like demos: never a trial, never read-only. So nobody may add an `OWNER_EMAILS`
+  address to their list by hand (`POST /people`, import, `PATCH /people/:id` → 409
+  `reserved_email`); it only gets there when the operator signs up with it.
+- The nightly job catches errors per workspace: one broken workspace never stops the others.
 - Checkout allows promotion codes (`allow_promotion_codes`); the codes are made in the Stripe
   dashboard (docs/azure-setup.md).
 - Checkout and the customer portal run on Stripe's own pages under **pay.seatline.ch** (Stripe

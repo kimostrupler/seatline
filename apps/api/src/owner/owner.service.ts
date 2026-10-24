@@ -98,8 +98,8 @@ export class OwnerService {
         message: 'This workspace has a subscription — cancel it in Stripe first',
         code: 'subscribed',
       });
-    await this.db.deleteTenant(tenantId);
-    await this.storage.deletePrefix(`${tenantId}/`);
+    // the trace first, then the rows, then the files: if Blob Storage fails, the deletion is
+    // still on record and the log names the folder to clean up
     await this.db.run(ctx.tenantId, (tx) =>
       audit(tx, ctx, {
         action: 'owner.workspace.delete',
@@ -108,6 +108,12 @@ export class OwnerService {
         before: { name: tenant.name },
       }),
     );
+    await this.db.deleteTenant(tenantId);
+    try {
+      await this.storage.deletePrefix(`${tenantId}/`);
+    } catch (error) {
+      this.logger.error(`Workspace ${tenantId} deleted, but its files were not: ${String(error)}`);
+    }
     this.logger.log(`Workspace deleted by the operator: ${tenantId}`);
   }
 

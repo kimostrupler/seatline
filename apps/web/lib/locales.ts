@@ -11,7 +11,8 @@ export const LANGUAGE_NAMES: Record<Language, string> = {
   en: 'English',
 };
 
-const isLanguage = (v: string | undefined): v is Language => !!v && v in LOCALES;
+const isLanguage = (v: string | undefined): v is Language =>
+  !!v && (LANGUAGES as readonly string[]).includes(v);
 
 /** The person's choice (cookie) wins; otherwise the browser's preferred language; else English. */
 export function pickLanguage(cookie: string | undefined, acceptLanguage: string | null): Language {
