@@ -275,9 +275,13 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   name). `POST /people/import/read` (multipart, saves nothing) returns each row's status (new /
   exists / duplicate / invalid); `POST /people/import` adds the new ones in one transaction,
   sends one "joined" notice and optional invitations. Manual add also sends "joined" now.
-- **Security headers** in `apps/web/next.config.ts`: CSP (self only, `blob:` images,
-  `frame-ancestors 'none'` + X-Frame-Options DENY), HSTS, nosniff, Referrer/Permissions-Policy, COOP. A new outside
-  host (script, font, image, API) must be added to the CSP or it's blocked.
+- **Security headers** in `apps/web/next.config.ts`: HSTS, X-Frame-Options DENY, nosniff,
+  Referrer/Permissions-Policy, COOP. The **CSP** is set per request in `middleware.ts`
+  (`lib/csp.ts`, tested): self only, `blob:` images, `frame-ancestors 'none'`, and scripts only
+  with that request's nonce + `'strict-dynamic'` (no `'unsafe-inline'` scripts; Next.js stamps its
+  own scripts with the nonce). JSON-LD `<script type="application/ld+json">` blocks are data and
+  need none. `e2e/pages.spec.ts` fails on any CSP console error. A new outside host (script, font,
+  image, API) must be added to the CSP or it's blocked.
 - **Per-address limits** (`lib/server/rate-limit.ts`, in memory per instance) key on `clientIp()`: the
   LAST `X-Forwarded-For` entry (added by Azure's ingress); the first one is the caller's and can be faked.
 - **Audit** (`pnpm audit --prod`): transitive fixes are forced in `pnpm-workspace.yaml` `overrides`

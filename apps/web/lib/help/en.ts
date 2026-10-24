@@ -25,6 +25,7 @@ export const EN: HelpContent = {
             'Right after that, Seatline asks for your building, the floor’s name and how big the office is (Small 12, Medium 33 or Large 74 desks, or an empty floor). It draws an example office for you; you change it later in Edit layout.',
             'Then choose how your colleagues get in: import an Excel or CSV list, add them one by one, or — with Microsoft 365 — let them come from your directory. The first time you open Map, three short tips show how it works.',
           ],
+          image: 'setup',
         },
         {
           title: 'Follow the checklist on Home',
@@ -130,7 +131,7 @@ export const EN: HelpContent = {
         {
           title: 'Assign or move someone',
           text: [
-            'Drag a person from the list on the left onto a free desk. If they already sit somewhere, that is a move: their old desk becomes free. You can also click a free desk and choose Assign person.',
+            'Click a free (green) desk and choose Assign person, then pick the person. Or drag a name from the list on the left onto the desk. If they already sit somewhere, that is a move: their old desk becomes free.',
             'Every change shows a message with Undo. The history keeps both the change and the undo.',
           ],
         },
@@ -348,7 +349,7 @@ export const EN: HelpContent = {
     },
     {
       q: 'How do I give someone a desk?',
-      a: 'On the map, drag the person from the list on the left onto a free (green) desk. Or click the desk and choose Assign person.',
+      a: 'On the map, click a free (green) desk and choose Assign person. Or drag the person from the list on the left onto the desk.',
     },
     {
       q: 'Someone moves to another desk — do I free the old one first?',

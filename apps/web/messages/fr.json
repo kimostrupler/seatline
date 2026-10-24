@@ -43,7 +43,7 @@
     "seat": "Place {label}",
     "otherFloor": "Place {label} · autre étage",
     "none": "Personne ne correspond à « {search} ».",
-    "dragHint": "Glissez une personne sur une place pour l’y attribuer."
+    "dragHint": "Cliquez sur une place libre et choisissez « Attribuer une personne » – ou glissez un nom sur une place."
   },
   "status": {
     "free": "Libre",

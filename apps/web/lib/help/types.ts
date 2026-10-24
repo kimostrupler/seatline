@@ -15,6 +15,7 @@ export type HelpTopicId = (typeof HELP_TOPICS)[number];
 
 /** Screenshots in public/help-img/<language>/, made by e2e/help-screenshots.spec.ts. */
 export type HelpImage =
+  | 'setup'
   | 'home'
   | 'map-seat'
   | 'export-menu'
