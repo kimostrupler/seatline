@@ -453,7 +453,10 @@ folded`) so the person and the actions stand out.
   90 s story "the usual way vs Seatline", 1080p H.264 ~4.6 MB + 13 KB poster, `preload="none"`;
   no captions burned in, so WebVTT subtitles en/de/fr sit next to it, the page language on by
   default) + a comparison table (`COMPARE`, texts `site.compare`: "Many office tools" vs Seatline;
-  never name a competitor, only claims true of Seatline, the data row says "depends") →
+  never name a competitor, only claims true of Seatline, the data row says "depends"). Short
+  links for e-mails: `/video`, `/de/video`, `/fr/video` redirect to that landing page `#video`,
+  keeping `?utm_source=…` (`videoLink` in `lib/site.ts`, middleware); e-mail pictures (a JPG with
+  a play button, a 6 s GIF) in `public/site-video/email/` →
   three parts with phone pictures (`public/site-img/<lang>/`,
   made by help-screenshots.spec.ts) → six short feature items (`site.features`, each opens its help topic) → 4 steps →
   `NoticeDemo` (short: one line, DE/FR/EN switch, the IT e-mail's subject + moves, worded like `notices.ts` via `lib/site/notice-sample.ts` — keep in

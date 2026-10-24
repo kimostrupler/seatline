@@ -277,7 +277,7 @@ export default async function Welcome() {
 
         {/* the promo video (a story: the usual way vs Seatline), nothing loads until play (poster
             13 KB, video 4.6 MB, 1080p); subtitles in all three languages (no captions burned in) */}
-        <Section title={t('videoTitle')} lead={t('videoLead')} className="pb-0 sm:pb-0">
+        <Section id="video" title={t('videoTitle')} lead={t('videoLead')} className="pb-0 sm:pb-0">
           <video
             controls
             playsInline
