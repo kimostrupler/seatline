@@ -168,6 +168,19 @@ Stripe; Stripe checks it for a few hours, then switches over by itself). Seatlin
 for this: it always opens the address Stripe returns. If the domain is ever removed, Stripe falls
 back to checkout.stripe.com / billing.stripe.com, which also works.
 
+## Deploy without GitHub
+
+GitHub's free plan has 2,000 Actions minutes a month. When they're used up, GitHub stops the
+deploy before it starts (no log, "failed" after a few seconds) until the 1st of the next month.
+Deploy from **Azure Cloud Shell** instead; Azure builds the images itself (a few cents per deploy):
+
+```bash
+cd ~/seatline && git pull && bash infra/azure/deploy.sh
+```
+
+It does the same as the GitHub deploy: build, database migration, update the apps, check the site.
+Add `KEEP_WARM=true` (or `web`) and `ALERT_EMAIL=you@example.com` in front if you use those.
+
 ## Good to know
 
 - **Other companies** can sign in the same way: their first person creates their workspace.

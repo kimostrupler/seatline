@@ -210,6 +210,8 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   GitHub's free minutes are limited: CI runs on pull requests only (main = the merged PR, already
   tested), a newer push cancels the older run, docs-only changes (`*.md`, `docs/`) skip CI and
   deploy. Push each PR once when possible.
+  Out of minutes (deploy "fails" in seconds, no log): `infra/azure/deploy.sh` in Cloud Shell does
+  the same deploy with `az acr build` (docs/azure-setup.md › Deploy without GitHub).
   Docker Hub may rate-limit; Dockerfiles take `--build-arg NODE_IMAGE=…` for a mirror.
 - Fast pipeline: deploy builds the three images in parallel with buildx and a registry layer cache
   (`<image>:buildcache` in ACR); the API/web Dockerfiles `pnpm fetch` from the lockfile first so
