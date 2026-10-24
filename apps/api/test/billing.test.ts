@@ -1,8 +1,9 @@
 import type { INestApplication } from '@nestjs/common';
 import Stripe from 'stripe';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { zurichClock, zurichTime } from '@seatline/shared/dist/outreach';
 import { billingState } from '../src/billing/billing-state';
-import { BillingService } from '../src/billing/billing.service';
+import { BillingService, daysUntil } from '../src/billing/billing.service';
 import { startFakeStripe } from './fake-stripe';
 import { clearMails, sentMails } from './mail';
 import { TenantDb } from '../src/db/tenant-db.service';
@@ -34,6 +35,7 @@ afterAll(async () => {
 beforeEach(async () => {
   await resetDb();
   stripe.calls.length = 0;
+  stripe.subscriptions.clear();
   a = await createTenant('alpha');
   b = await createTenant('beta');
 });
@@ -60,7 +62,13 @@ function webhook(event: object, secret = WEBHOOK_SECRET) {
     .set('content-type', 'application/json')
     .send(payload);
 }
-const subscription = (f: Fixture, status: string, customer = 'cus_test') => ({
+/** A subscription event — and, unless `stale`, what Stripe says the subscription is now. */
+const subscription = (f: Fixture, status: string, customer = 'cus_test', stale = false) => {
+  if (!stale)
+    stripe.subscriptions.set('sub_1', { status, customer, metadata: { tenantId: f.tenantId } });
+  return event(f, status, customer);
+};
+const event = (f: Fixture, status: string, customer = 'cus_test') => ({
   id: 'evt_1',
   object: 'event',
   type: 'customer.subscription.updated',
@@ -140,9 +148,21 @@ describe('billing', () => {
       price: { amount: 2, currency: 'chf', interval: 'month' },
     });
 
+    // a second checkout would start a second subscription: the portal is the place now
+    const again = await api(app)
+      .post('/billing/checkout')
+      .set(a.headers)
+      .send({ returnUrl: 'https://app.seatline.ch/billing' })
+      .expect(409);
+    expect(again.body.code).toBe('subscribed');
+
     await webhook({ ...subscription(a, 'canceled'), type: 'customer.subscription.deleted' }).expect(
       200,
     );
+    expect((await me(a)).billing.state).toBe('read_only');
+    // Stripe retries and reorders: an old "active" event after the cancellation changes nothing,
+    // because the subscription is read back from Stripe
+    await webhook(subscription(a, 'active', 'cus_test', true)).expect(200);
     expect((await me(a)).billing.state).toBe('read_only');
   });
 
@@ -204,6 +224,17 @@ describe('billing', () => {
       .expect(400); // no customer yet
   });
 
+  it('"ends tomorrow" means the next calendar day in Zurich, not 24 hours', () => {
+    // the night run at 01:00 UTC, trial ends the same day at 10:00 UTC → "today", no mail
+    expect(daysUntil(new Date('2026-11-10T10:00:00Z'), new Date('2026-11-10T01:00:00Z'))).toBe(0);
+    // the night before: 1 → "ends tomorrow"
+    expect(daysUntil(new Date('2026-11-10T10:00:00Z'), new Date('2026-11-09T01:00:00Z'))).toBe(1);
+    // 23:30 UTC on the 2nd is already the 3rd in Zurich
+    expect(daysUntil(new Date('2026-11-10T10:00:00Z'), new Date('2026-11-02T23:30:00Z'))).toBe(7);
+    // across the DST change (25 Oct 2026) it's still whole days
+    expect(daysUntil(new Date('2026-10-31T12:00:00Z'), new Date('2026-10-24T12:00:00Z'))).toBe(7);
+  });
+
   it('states', () => {
     const future = new Date(Date.now() + 1000);
     const past = new Date(Date.now() - 1000);
@@ -224,10 +255,13 @@ describe('billing', () => {
   it('reminds the admins 7 days and 1 day before the trial ends, each once', async () => {
     await clearMails();
     const billing = app.get(BillingService);
+    // the trial ends at noon (Zurich) in `days` days: the reminders count calendar days there
     const endsIn = (days: number) =>
       owner.tenant.update({
         where: { id: a.tenantId },
-        data: { trialEndsAt: new Date(Date.now() + days * 86_400_000 - 60_000) },
+        data: {
+          trialEndsAt: zurichTime(zurichClock(new Date(Date.now() + days * 86_400_000)).day, 12),
+        },
       });
     await endsIn(20);
     expect(await app.get(TenantDb).listTrialTenants()).not.toContain(a.tenantId);

@@ -415,6 +415,8 @@ folded`) so the person and the actions stand out.
 - Stripe state arrives only via the signed webhook (`@Public`, raw body; the web proxy passes
   `billing/webhook` through without a session). Subscriptions carry `metadata.tenantId`, but a
   webhook only applies if its customer matches the tenant's `stripe_customer_id`.
+  The webhook re-reads the subscription from Stripe and applies that (events arrive late and
+  out of order). Checkout is refused (409 `subscribed`) while a subscription exists.
 - The operator's own workspace (an active admin from `OWNER_EMAILS`, e-mail sign-in) is billing
   state `off` like demos: never a trial, never read-only. So nobody may add an `OWNER_EMAILS`
   address to their list by hand (`POST /people`, import, `PATCH /people/:id` → 409
@@ -539,8 +541,11 @@ chromium` (re-run after UI changes). In the app: **Help** in the top bar, a dism
   07:00 UTC (cron `0 1,7 * * *`, set by deploy.yml/deploy.sh/bicep): the night run does the
   nightly work, both runs check replies (`runOutreach`), only the morning one sends (7–11 am
   Zurich, `isSendingHour`) and e-mails the operator about due follow-ups (after 7 days). A
-  reply (IMAP `InboxService`: envelopes only, the lead's domain or the exact address at mail
-  providers) or a "no" cancels what's scheduled; 14 days after the follow-up → `no_answer`;
+  reply (IMAP `InboxService`: envelopes + References/Auto-Submitted headers only; it counts
+  when it answers one of our Message-IDs, or comes from the contact's own address and isn't
+  auto-submitted — a colleague's out-of-office or a newsletter from the domain doesn't) or a
+  "no" cancels what's scheduled; a message is claimed (`sent_at`) before SMTP so it never goes
+  out twice; 14 days after the follow-up → `no_answer`;
   "no"/"no_answer" leads are deleted after 12 months. Sent mails: plain text + HTML with the
   video GIF (`outreachHtml`, no tracking), sender "Kimo Strupler · Seatline", Message-ID kept so
   the follow-up is a reply; a copy goes to the mailbox's Sent folder. IMAP: `IMAP_HOST`
