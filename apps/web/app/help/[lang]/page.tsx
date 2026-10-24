@@ -77,6 +77,31 @@ export default async function HelpIndex({ params }: Props) {
         </span>
       </a>
 
+      {/* the short overview (the landing page's first video; English captions are burned in) */}
+      <section
+        aria-labelledby="quick"
+        className="grid items-center gap-4 sm:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]"
+      >
+        <video
+          controls
+          playsInline
+          preload="none"
+          poster="/site-video/seatline-promo.webp"
+          width={1280}
+          height={720}
+          className="aspect-video h-auto w-full rounded-2xl border bg-card"
+          data-testid="help-quick-video"
+        >
+          <source src="/site-video/seatline-promo.mp4" type="video/mp4" />
+        </video>
+        <div className="grid gap-1">
+          <h2 id="quick" className="text-lg font-semibold">
+            {VIDEO[lang].quick}
+          </h2>
+          <p className="text-sm text-pretty text-muted-foreground">{VIDEO[lang].quickBody}</p>
+        </div>
+      </section>
+
       <section aria-labelledby="topics" className="grid gap-4">
         <h2 id="topics" className="text-xl font-semibold">
           {t('topics')}

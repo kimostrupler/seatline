@@ -1181,8 +1181,8 @@
     "ctaTrial": "Try it free for 30 days",
     "ctaDemo": "Try the demo",
     "ctaNote": "No credit card. Sign in with Microsoft 365 or by e-mail.",
-    "videoTitle": "See Seatline in 48 seconds",
-    "videoLead": "Press play: sign in, draw a floor, seat people, plan moves.",
+    "videoTitle": "Seatline in 90 seconds",
+    "videoLead": "Why a seating plan shouldn’t need a sales call.",
     "videoTour": "Watch the full 9-minute tour",
     "f1Title": "Floor map",
     "f1Body": "Free, taken and reserved desks at a glance. Find anyone in seconds.",
@@ -1342,7 +1342,49 @@
         "body": "Seat history is kept as long as you choose, then deleted."
       }
     },
-    "openApp": "Open Seatline"
+    "openApp": "Open Seatline",
+    "compare": {
+      "title": "There’s an easier way",
+      "lead": "The usual way to a seating plan takes weeks and starts with a sales call. With Seatline, an afternoon is enough.",
+      "usual": "Many office tools",
+      "us": "Seatline",
+      "yes": "Yes",
+      "no": "No",
+      "depends": "Depends",
+      "note": "Compared with typical workplace tools for companies. Details vary by product.",
+      "rows": {
+        "price": {
+          "label": "Price",
+          "usual": "“Talk to sales”",
+          "us": "CHF 2 per desk per month, on the website"
+        },
+        "trial": {
+          "label": "Trying it",
+          "usual": "Book a demo call first",
+          "us": "30 days free, no credit card. Demo in one click"
+        },
+        "contract": {
+          "label": "Contract",
+          "usual": "Billed yearly, plus onboarding",
+          "us": "Cancel any month"
+        },
+        "setup": {
+          "label": "Setup",
+          "usual": "A few weeks",
+          "us": "Ready in an afternoon"
+        },
+        "focus": {
+          "label": "Made for",
+          "usual": "Booking hot desks",
+          "us": "Knowing who sits where"
+        },
+        "data": {
+          "label": "Your data",
+          "usual": "Depends on the tool",
+          "us": "Stays in Zurich"
+        }
+      }
+    }
   },
   "planImport": {
     "title": "Import an architect plan",

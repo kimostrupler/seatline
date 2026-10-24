@@ -7,6 +7,7 @@ import {
   MapPin,
   PlayCircle,
   ShieldCheck,
+  X,
 } from 'lucide-react';
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
@@ -31,6 +32,9 @@ import { webConfig } from '@/lib/server/config';
 import { landingJsonLd, languageAlternates, pageUrl } from '@/lib/seo';
 import { SITE_LANGUAGE_PATHS, siteUrl } from '@/lib/site';
 import { cn } from '@/lib/utils';
+
+/** The rows of the comparison under the promo video (texts in site.compare.rows). */
+const COMPARE = ['price', 'trial', 'contract', 'setup', 'focus', 'data'] as const;
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('site');
@@ -271,21 +275,111 @@ export default async function Welcome() {
           </ul>
         </section>
 
-        {/* the promo video: nothing loads until play (poster 23 KB, video 4.5 MB, 1080p) */}
+        {/* the promo video (a story: the usual way vs Seatline), nothing loads until play (poster
+            13 KB, video 4.6 MB, 1080p); subtitles in all three languages (no captions burned in) */}
         <Section title={t('videoTitle')} lead={t('videoLead')} className="pb-0 sm:pb-0">
           <video
             controls
             playsInline
             preload="none"
-            poster="/site-video/seatline-promo.webp"
+            poster="/site-video/seatline-promo-2.webp"
             width={1280}
             height={720}
             className="aspect-video h-auto w-full rounded-2xl border bg-card shadow-xl shadow-black/5"
             data-reveal
+            data-testid="promo-video"
           >
-            <source src="/site-video/seatline-promo.mp4" type="video/mp4" />
+            <source src="/site-video/seatline-promo-2.mp4" type="video/mp4" />
+            {LANGUAGES.map((l) => (
+              <track
+                key={l}
+                kind="subtitles"
+                srcLang={l}
+                label={LANGUAGE_NAMES[l]}
+                src={`/site-video/seatline-promo-2.${l}.vtt`}
+                default={l === language}
+              />
+            ))}
           </video>
-          <div className="mt-6 flex justify-center">
+
+          {/* the same story in a table: no names, only what's true of us */}
+          <div className="grid gap-3" data-reveal>
+            <h3 className="text-2xl font-semibold tracking-tight">{t('compare.title')}</h3>
+            <p className="max-w-2xl text-pretty text-muted-foreground">{t('compare.lead')}</p>
+            <div className="overflow-hidden rounded-2xl border bg-card">
+              <table className="w-full text-left text-sm" data-testid="compare">
+                <thead className="bg-canvas text-xs text-muted-foreground">
+                  <tr>
+                    <th scope="col" className="w-1/4 px-4 py-3 font-medium max-sm:hidden">
+                      <span className="sr-only">{t('compare.rows.price.label')}</span>
+                    </th>
+                    <th scope="col" className="px-4 py-3 font-medium">
+                      {t('compare.usual')}
+                    </th>
+                    <th scope="col" className="px-4 py-3 font-semibold text-primary">
+                      <span className="inline-flex items-center gap-1.5">
+                        <Logo className="size-4" /> {t('compare.us')}
+                      </span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {COMPARE.map((row) => (
+                    <tr key={row} className="align-top">
+                      <th scope="row" className="px-4 py-3 font-medium max-sm:hidden">
+                        {t(`compare.rows.${row}.label`)}
+                      </th>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        <span className="flex gap-2">
+                          {row === 'data' ? (
+                            <span
+                              className="grid size-4 shrink-0 translate-y-0.5 place-items-center rounded-full bg-muted text-[10px] font-bold"
+                              aria-label={t('compare.depends')}
+                            >
+                              ?
+                            </span>
+                          ) : (
+                            <X
+                              className="size-4 shrink-0 translate-y-0.5 text-destructive"
+                              aria-label={t('compare.no')}
+                            />
+                          )}
+                          <span>
+                            <span className="block text-xs font-medium text-foreground sm:hidden">
+                              {t(`compare.rows.${row}.label`)}
+                            </span>
+                            {t(`compare.rows.${row}.usual`)}
+                          </span>
+                        </span>
+                      </td>
+                      <td className="bg-primary/5 px-4 py-3 font-medium">
+                        <span className="flex gap-2">
+                          <Check
+                            className="size-4 shrink-0 translate-y-0.5 text-seat-free"
+                            aria-label={t('compare.yes')}
+                          />
+                          <span>
+                            <span className="block text-xs text-muted-foreground sm:hidden">
+                              &nbsp;
+                            </span>
+                            {t(`compare.rows.${row}.us`)}
+                          </span>
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="text-xs text-muted-foreground">{t('compare.note')}</p>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-3">
+            <Button asChild size="lg">
+              <a href={signInUrl()} data-track="cta-compare-trial">
+                {t('ctaTrial')} <ArrowRight aria-hidden />
+              </a>
+            </Button>
             <Button asChild variant="outline" size="lg">
               <a href={videoPath(language)} data-track="cta-video-tour">
                 <PlayCircle aria-hidden /> {t('videoTour')}

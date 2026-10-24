@@ -131,3 +131,26 @@ test('the video tour: from the landing page and help topics, with chapters and s
   await page.goto('/help/en/video-tour');
   await expect(page.getByTestId('video-tour').locator('track')).toHaveCount(0);
 });
+
+test('the promo video with subtitles and the comparison; the short video moved to help', async ({
+  page,
+  request,
+}) => {
+  await page.goto('/de');
+  const promo = page.getByTestId('promo-video');
+  await expect(promo.locator('source')).toHaveAttribute('src', '/site-video/seatline-promo-2.mp4');
+  await expect(promo.locator('track[default]')).toHaveAttribute('srclang', 'de');
+  const compare = page.getByTestId('compare');
+  await expect(compare.getByRole('row')).toHaveCount(7);
+  await expect(compare).toContainText('CHF 2 pro Platz und Monat, auf der Website');
+  for (const l of ['en', 'de', 'fr']) {
+    const vtt = await request.get(`/site-video/seatline-promo-2.${l}.vtt`);
+    expect(vtt.ok()).toBe(true);
+    expect(await vtt.text()).toMatch(/^WEBVTT/);
+  }
+  await page.goto('/help/en');
+  await expect(page.getByTestId('help-quick-video').locator('source')).toHaveAttribute(
+    'src',
+    '/site-video/seatline-promo.mp4',
+  );
+});
