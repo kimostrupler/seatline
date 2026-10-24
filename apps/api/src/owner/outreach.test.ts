@@ -42,12 +42,11 @@ describe('outreach rules', () => {
     const d = draftMessage('first', lead);
     expect(d.subject).toBe('Wer sitzt wo bei Livingdocs?');
     expect(d.body).toContain('Guten Tag Herr van der Ploeg');
-    expect(d.body).toContain('an der Tellstrasse 31 kostenlos');
+    expect(d.body).not.toContain('Grundriss');
     expect(d.body).toContain('https://seatline.ch/de/video?utm_source=email');
     expect(wordCount(d.body)).toBeLessThanOrEqual(100);
     const blank = draftMessage('first', { ...lead, greeting: null, whyNow: null, address: null });
     expect(blank.body).toContain('[Name]');
-    expect(blank.body).toContain('Ihr Büro kostenlos');
     expect(draftMessage('follow_up', lead, d.subject).subject).toBe(`Re: ${d.subject}`);
     for (const language of ['fr', 'en'] as const)
       for (const kind of ['first', 'follow_up'] as const)

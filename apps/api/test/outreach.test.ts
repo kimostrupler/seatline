@@ -64,7 +64,7 @@ describe('outreach (owner leads)', () => {
       .get(`/owner/leads/${id}/draft?kind=first`)
       .set(a.headers)
       .expect(200);
-    expect(draft.body.body).toContain('an der Tellstrasse 31');
+    expect(draft.body.body).toContain('Ich habe gesehen, dass Livingdocs weiter wächst.');
     // too long, or a placeholder left: refused
     await api(app)
       .post(`/owner/leads/${id}/messages`)
