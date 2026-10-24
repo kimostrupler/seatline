@@ -25,6 +25,7 @@ export const FR: HelpContent = {
             'Juste après, Seatline demande votre bâtiment, le nom de l’étage et la taille du bureau (Petit 12, Moyen 33 ou Grand 74 places, ou un étage vide). Il dessine un bureau d’exemple pour vous ; vous l’adaptez ensuite dans « Modifier le plan ».',
             'Choisissez ensuite comment vos collègues arrivent : importer une liste Excel ou CSV, les ajouter un par un ou – avec Microsoft 365 – les reprendre de votre annuaire. À la première ouverture du plan, trois courts conseils montrent comment ça marche.',
           ],
+          image: 'setup',
         },
         {
           title: 'Suivre la liste sur l’accueil',
@@ -131,7 +132,7 @@ export const FR: HelpContent = {
         {
           title: 'Attribuer ou déménager',
           text: [
-            'Glissez une personne de la liste de gauche sur un poste libre. Si elle a déjà un poste, c’est un déménagement : l’ancien devient libre. Ou cliquez sur un poste libre et choisissez « Attribuer une personne ».',
+            'Cliquez sur un poste libre (vert), choisissez « Attribuer une personne », puis la personne. Ou glissez un nom de la liste de gauche sur le poste. Si elle a déjà un poste, c’est un déménagement : l’ancien devient libre.',
             'Chaque changement affiche un message avec Annuler. L’historique garde le changement et l’annulation.',
           ],
         },
@@ -353,7 +354,7 @@ export const FR: HelpContent = {
     },
     {
       q: 'Comment attribuer un poste ?',
-      a: 'Sur le plan, glissez la personne de la liste de gauche sur un poste libre (vert). Ou cliquez sur le poste et choisissez « Attribuer une personne ».',
+      a: 'Sur le plan, cliquez sur un poste libre (vert) et choisissez « Attribuer une personne ». Ou glissez la personne de la liste de gauche sur le poste.',
     },
     {
       q: 'Quelqu’un change de poste — dois-je d’abord libérer l’ancien ?',

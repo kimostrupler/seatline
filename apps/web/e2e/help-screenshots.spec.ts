@@ -5,7 +5,7 @@ import de from '../messages/de.json';
 import en from '../messages/en.json';
 import fr from '../messages/fr.json';
 import type { FloorMap } from '../lib/types';
-import { resetE2eDb } from './db';
+import { resetE2eDb, sqlE2e } from './db';
 import { adminHeaders, floorMap, openFold, toScreen } from './helpers';
 
 // The help center's screenshots (public/help-img/<language>/<name>.jpg) and the landing page's
@@ -166,6 +166,13 @@ for (const language of ['en', 'de', 'fr'] as const) {
       viewport: { width: 390, height: 520 },
       deviceScaleFactor: 2,
       extraHTTPHeaders: adminHeaders,
+      // no first-visit tips over the pictures
+      storageState: {
+        cookies: [],
+        origins: [
+          { origin: baseURL!, localStorage: [{ name: 'seatline-map-tour-v1', value: '1' }] },
+        ],
+      },
     });
     await portrait
       .context()
@@ -189,5 +196,11 @@ for (const language of ['en', 'de', 'fr'] as const) {
     await expect(portrait.getByTestId('plan-moves')).toBeVisible();
     await portraitShot('moving');
     await portrait.close();
+
+    // The setup wizard, as a new workspace sees it (last: it empties the sample office)
+    sqlE2e('TRUNCATE buildings CASCADE;');
+    await page.goto('/setup');
+    await expect(page.getByTestId('setup-wizard')).toBeVisible();
+    await shot('setup');
   });
 }

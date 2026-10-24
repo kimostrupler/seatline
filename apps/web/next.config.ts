@@ -4,27 +4,8 @@ import createNextIntlPlugin from 'next-intl/plugin';
 
 const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
-const dev = process.env.NODE_ENV !== 'production';
-
-/**
- * Content Security Policy: everything comes from our own origin (no third-party scripts, fonts
- * or trackers). Inline scripts/styles are needed by Next.js and the map; plan images are
- * blob: URLs. No site may show it in a frame (clickjacking).
- */
-const csp = [
-  "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${dev ? " 'unsafe-eval'" : ''}`,
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
-  "font-src 'self' data:",
-  `connect-src 'self'${dev ? ' ws:' : ''}`,
-  "object-src 'none'",
-  "base-uri 'self'",
-  "frame-ancestors 'none'",
-].join('; ');
-
+// the Content Security Policy is set per request (with a nonce) in middleware.ts
 const securityHeaders = [
-  { key: 'Content-Security-Policy', value: csp },
   { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains' },
   { key: 'X-Frame-Options', value: 'DENY' },
   { key: 'X-Content-Type-Options', value: 'nosniff' },

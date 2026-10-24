@@ -73,3 +73,24 @@ test('viewers see Home but not the change history', async ({ page }) => {
   await page.goto('/activity');
   await expect(page.getByText('Only editors and admins can see the change history.')).toBeVisible();
 });
+
+test('every page runs with a per-request script nonce and nothing is blocked', async ({ page }) => {
+  const blocked: string[] = [];
+  page.on('console', (m) => {
+    if (m.type() === 'error' && /Content Security Policy/i.test(m.text())) blocked.push(m.text());
+  });
+  const nonces = new Set<string>();
+  for (const path of ['/', '/map', '/moves', '/people', '/activity', '/welcome', '/help/en']) {
+    const res = await page.goto(path);
+    const csp = res?.headers()['content-security-policy'] ?? '';
+    expect(csp).toMatch(/script-src 'self' 'nonce-[^']+' 'strict-dynamic'/);
+    expect(csp).not.toContain("script-src 'self' 'unsafe-inline'");
+    nonces.add(/'nonce-([^']+)'/.exec(csp)![1]!);
+    await page.waitForLoadState('networkidle');
+  }
+  expect(nonces.size).toBe(7); // a new one for every request
+  // the app still works (React ran): the map draws
+  await page.goto('/map');
+  await expect(page.getByTestId('floor-map').locator('canvas').first()).toBeVisible();
+  expect(blocked).toEqual([]);
+});

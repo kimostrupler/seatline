@@ -25,6 +25,7 @@ export const DE: HelpContent = {
             'Gleich danach fragt Seatline nach Ihrem Gebäude, dem Namen des Stockwerks und der Grösse des Büros (Klein 12, Mittel 33 oder Gross 74 Plätze, oder ein leeres Stockwerk). Es zeichnet ein Beispielbüro für Sie; anpassen können Sie es später unter «Plan bearbeiten».',
             'Dann wählen Sie, wie Ihre Kolleginnen und Kollegen hinzukommen: eine Excel- oder CSV-Liste importieren, einzeln hinzufügen oder – mit Microsoft 365 – aus Ihrem Verzeichnis übernehmen. Beim ersten Öffnen des Plans zeigen drei kurze Tipps, wie es funktioniert.',
           ],
+          image: 'setup',
         },
         {
           title: 'Der Checkliste auf Start folgen',
@@ -132,7 +133,7 @@ export const DE: HelpContent = {
         {
           title: 'Zuweisen oder umziehen',
           text: [
-            'Ziehen Sie eine Person aus der Liste links auf einen freien Platz. Sitzt sie schon irgendwo, ist das ein Umzug: der alte Platz wird frei. Oder klicken Sie auf einen freien Platz und wählen Sie «Person zuweisen».',
+            'Klicken Sie auf einen freien (grünen) Platz, wählen Sie «Person zuweisen» und dann die Person. Oder ziehen Sie einen Namen aus der Liste links auf den Platz. Sitzt sie schon irgendwo, ist das ein Umzug: der alte Platz wird frei.',
             'Jede Änderung zeigt eine Meldung mit Rückgängig. Der Verlauf behält die Änderung und das Rückgängigmachen.',
           ],
         },
@@ -354,7 +355,7 @@ export const DE: HelpContent = {
     },
     {
       q: 'Wie gebe ich jemandem einen Platz?',
-      a: 'Ziehen Sie die Person auf dem Plan aus der Liste links auf einen freien (grünen) Platz. Oder klicken Sie auf den Platz und wählen Sie «Person zuweisen».',
+      a: 'Klicken Sie auf dem Plan auf einen freien (grünen) Platz und wählen Sie «Person zuweisen». Oder ziehen Sie die Person aus der Liste links auf den Platz.',
     },
     {
       q: 'Jemand wechselt den Platz – muss ich den alten zuerst freigeben?',

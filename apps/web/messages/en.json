@@ -43,7 +43,7 @@
     "seat": "Seat {label}",
     "otherFloor": "Seat {label} · other floor",
     "none": "Nobody matches “{search}”.",
-    "dragHint": "Drag a person onto a seat to assign them."
+    "dragHint": "Click a free seat and choose “Assign person” — or drag a name onto a seat."
   },
   "status": {
     "free": "Free",

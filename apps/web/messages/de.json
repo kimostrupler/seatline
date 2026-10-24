@@ -43,7 +43,7 @@
     "seat": "Platz {label}",
     "otherFloor": "Platz {label} · anderes Stockwerk",
     "none": "Niemand passt zu «{search}».",
-    "dragHint": "Ziehen Sie eine Person auf einen Platz, um sie zuzuweisen."
+    "dragHint": "Klicken Sie auf einen freien Platz und wählen Sie «Person zuweisen» – oder ziehen Sie einen Namen auf einen Platz."
   },
   "status": {
     "free": "Frei",
