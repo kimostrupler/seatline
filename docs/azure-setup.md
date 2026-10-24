@@ -197,6 +197,31 @@ az storage blob upload --account-name $NAME --account-key "$KEY" -c media \
 
 Using a new storage account? Change the address in `lib/media.ts` (the CSP follows it).
 
+## Azure access for Claude Code (cloud sessions)
+
+Claude Code cloud sessions can manage the `seatline` resource group themselves (deploys,
+settings, logs, uploads), so nobody has to copy commands into Cloud Shell.
+
+- **Login**: a service principal `seatline-claude` with role **Contributor on the resource group
+  `seatline` only** (no other resource groups, no role assignments, no Key Vault secret reads),
+  valid 1 year. Made once in Cloud Shell:
+  ```bash
+  az ad sp create-for-rbac --name seatline-claude --role Contributor \
+    --scopes /subscriptions/$(az account show --query id -o tsv)/resourceGroups/seatline --years 1
+  ```
+  New password (e.g. after it was shown somewhere, or once a year):
+  `az ad sp credential reset --id <appId> --years 1`. Revoke: `az ad sp delete --id <appId>`.
+- **Where the values live**: the Claude Code cloud environment's settings (title bar → environment
+  → Edit), never in the repo or a chat: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`,
+  `AZURE_SUBSCRIPTION_ID` as environment variables, `AZURE_CLIENT_SECRET` under Network secrets
+  if offered. New sessions read them; sign in with
+  `az login --service-principal -u "$AZURE_CLIENT_ID" -p "$AZURE_CLIENT_SECRET" --tenant "$AZURE_TENANT_ID"`.
+- **Network access** (same settings, Allowed domains): `management.azure.com`,
+  `login.microsoftonline.com`, `*.azurecr.io`, `*.blob.core.windows.net`, `api.loganalytics.io`
+  (package managers stay allowed).
+- **Setup script**: `pip install --quiet azure-cli`, so every session has `az`.
+- Claude asks before anything that deletes data or costs extra money.
+
 ## Deploy without GitHub
 
 GitHub's free plan has 2,000 Actions minutes a month. When they're used up, GitHub stops the

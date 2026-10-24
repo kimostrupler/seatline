@@ -240,6 +240,9 @@ The database enforces the hard rules itself, so a bug in the API can't break the
 
 See **[docs/azure-setup.md](docs/azure-setup.md)** — one script in Azure Cloud Shell, then every
 merge to `main` deploys automatically (`.github/workflows/deploy.yml`).
+Claude Code cloud sessions have their own Azure login (Contributor on the `seatline` resource
+group only) and can deploy and change settings directly: docs/azure-setup.md › Azure access for
+Claude Code.
 
 ## Running it (monitoring, backups, staging, statistics)
 
