@@ -449,8 +449,11 @@ folded`) so the person and the actions stand out.
   light/dark follows the system), built with Tailwind like the app; `components/site/landing/landing.css`
   only holds the scroll entrances (`Reveal` adds `is-live`/`is-in`). Sections: glass sticky header
   (Features, Pricing, Questions, Help, languages, Sign in) → hero + `LiveFloor` (tap a green desk,
-  seat colours = the map's) → trust row → promo video (`public/site-video/`, 1080p H.264 ~4.5 MB +
-  ~23 KB WebP poster, `preload="none"`: nothing loads before play; captions are burned in, English) →
+  seat colours = the map's) → trust row → promo video (`public/site-video/seatline-promo-2.*`: a
+  90 s story "the usual way vs Seatline", 1080p H.264 ~4.6 MB + 13 KB poster, `preload="none"`;
+  no captions burned in, so WebVTT subtitles en/de/fr sit next to it, the page language on by
+  default) + a comparison table (`COMPARE`, texts `site.compare`: "Many office tools" vs Seatline;
+  never name a competitor, only claims true of Seatline, the data row says "depends") →
   three parts with phone pictures (`public/site-img/<lang>/`,
   made by help-screenshots.spec.ts) → six short feature items (`site.features`, each opens its help topic) → 4 steps →
   `NoticeDemo` (short: one line, DE/FR/EN switch, the IT e-mail's subject + moves, worded like `notices.ts` via `lib/site/notice-sample.ts` — keep in
@@ -486,6 +489,8 @@ chromium` (re-run after UI changes). In the app: **Help** in the top bar, a dism
   chapters that jump (`CHAPTERS`, `?t=` seconds starts there), German/French subtitles as WebVTT
   at the top of the picture (`video-tour/subtitles` route, from `CUES` in `video-cues.ts`: every
   sentence in en/de/fr, aligned), the whole text as a fold-out, VideoObject JSON-LD with clips.
+  The help home also has the 48 s overview (`seatline-promo.mp4`, the landing page's first video,
+  English captions burned in; texts `VIDEO[lang].quick`).
   Linked from: a card on the help home, the help sidebar, "Watch this part" on topics with a
   chapter (`topic` in `CHAPTERS`), a button under the landing page's promo video, the footer,
   sitemap and llms.txt. A new video version = upload over the same blob, update the cues/chapters.

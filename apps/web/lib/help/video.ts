@@ -125,6 +125,9 @@ export const VIDEO: Record<
     voice: string;
     watchPart: string;
     subtitles: string;
+    /** the 48-second overview (the old landing page video) on the help home */
+    quick: string;
+    quickBody: string;
   }
 > = {
   en: {
@@ -139,6 +142,8 @@ export const VIDEO: Record<
     voice: 'The voice is AI-generated (Google AI Studio).',
     watchPart: 'Watch this part in the video tour',
     subtitles: 'English',
+    quick: 'Seatline in 48 seconds',
+    quickBody: 'The short version: sign in, draw a floor, seat people, plan moves.',
   },
   de: {
     short: 'Video-Tour',
@@ -152,6 +157,9 @@ export const VIDEO: Record<
     voice: 'Die Stimme ist KI-generiert (Google AI Studio).',
     watchPart: 'Diesen Teil in der Video-Tour ansehen',
     subtitles: 'Deutsch',
+    quick: 'Seatline in 48 Sekunden',
+    quickBody:
+      'Die Kurzfassung: anmelden, Stockwerk zeichnen, Plätze vergeben, Umzüge planen. Auf Englisch, mit englischen Untertiteln.',
   },
   fr: {
     short: 'Visite vidéo',
@@ -165,5 +173,8 @@ export const VIDEO: Record<
     voice: 'La voix est générée par IA (Google AI Studio).',
     watchPart: 'Voir cette partie dans la visite vidéo',
     subtitles: 'Français',
+    quick: 'Seatline en 48 secondes',
+    quickBody:
+      'La version courte : connexion, dessin de l’étage, attribution des places, déménagements planifiés. En anglais, sous-titres en anglais.',
   },
 };

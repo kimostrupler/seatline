@@ -1181,8 +1181,8 @@
     "ctaTrial": "30 Tage gratis testen",
     "ctaDemo": "Demo ausprobieren",
     "ctaNote": "Ohne Kreditkarte. Anmeldung mit Microsoft 365 oder per E-Mail.",
-    "videoTitle": "Seatline in 48 Sekunden",
-    "videoLead": "Starten Sie das Video: anmelden, Stockwerk zeichnen, Plätze vergeben, Umzüge planen. Auf Englisch, mit Untertiteln.",
+    "videoTitle": "Seatline in 90 Sekunden",
+    "videoLead": "Warum ein Sitzplan kein Verkaufsgespräch braucht. Auf Englisch, mit Untertiteln.",
     "videoTour": "Die ganze Tour ansehen (9 Minuten)",
     "f1Title": "Grundriss",
     "f1Body": "Freie, besetzte und reservierte Plätze auf einen Blick. Alle in Sekunden finden.",
@@ -1342,7 +1342,49 @@
         "body": "Der Verlauf bleibt so lange, wie Sie wählen, dann wird er gelöscht."
       }
     },
-    "openApp": "Seatline öffnen"
+    "openApp": "Seatline öffnen",
+    "compare": {
+      "title": "Es geht einfacher",
+      "lead": "Der übliche Weg zum Sitzplan dauert Wochen und beginnt mit einem Verkaufsgespräch. Mit Seatline reicht ein Nachmittag.",
+      "usual": "Viele Büro-Tools",
+      "us": "Seatline",
+      "yes": "Ja",
+      "no": "Nein",
+      "depends": "Je nachdem",
+      "note": "Verglichen mit typischen Arbeitsplatz-Tools für Unternehmen. Die Details sind je nach Produkt verschieden.",
+      "rows": {
+        "price": {
+          "label": "Preis",
+          "usual": "«Kontaktieren Sie den Vertrieb»",
+          "us": "CHF 2 pro Platz und Monat, auf der Website"
+        },
+        "trial": {
+          "label": "Ausprobieren",
+          "usual": "Zuerst einen Demo-Termin buchen",
+          "us": "30 Tage gratis, ohne Kreditkarte. Demo mit einem Klick"
+        },
+        "contract": {
+          "label": "Vertrag",
+          "usual": "Jährliche Rechnung, plus Onboarding",
+          "us": "Jeden Monat kündbar"
+        },
+        "setup": {
+          "label": "Einrichtung",
+          "usual": "Einige Wochen",
+          "us": "An einem Nachmittag bereit"
+        },
+        "focus": {
+          "label": "Gemacht für",
+          "usual": "Desk-Sharing-Buchungen",
+          "us": "Wissen, wer wo sitzt"
+        },
+        "data": {
+          "label": "Ihre Daten",
+          "usual": "Je nach Tool",
+          "us": "Bleiben in Zürich"
+        }
+      }
+    }
   },
   "planImport": {
     "title": "Architektenplan importieren",

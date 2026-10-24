@@ -1181,8 +1181,8 @@
     "ctaTrial": "Essayer 30 jours gratuitement",
     "ctaDemo": "Essayer la démo",
     "ctaNote": "Sans carte de crédit. Connexion avec Microsoft 365 ou par e-mail.",
-    "videoTitle": "Seatline en 48 secondes",
-    "videoLead": "Lancez la vidéo : connexion, dessin de l’étage, attribution des places, déménagements planifiés. En anglais, sous-titrée.",
+    "videoTitle": "Seatline en 90 secondes",
+    "videoLead": "Pourquoi un plan de bureau n’a pas besoin d’un appel commercial. En anglais, sous-titrée.",
     "videoTour": "Voir la visite complète (9 minutes)",
     "f1Title": "Plan",
     "f1Body": "Places libres, occupées et réservées d’un coup d’œil. Retrouvez chacun en quelques secondes.",
@@ -1342,7 +1342,49 @@
         "body": "L’historique est gardé aussi longtemps que vous le choisissez, puis supprimé."
       }
     },
-    "openApp": "Ouvrir Seatline"
+    "openApp": "Ouvrir Seatline",
+    "compare": {
+      "title": "Il y a plus simple",
+      "lead": "Le chemin habituel vers un plan de bureau prend des semaines et commence par un appel commercial. Avec Seatline, un après-midi suffit.",
+      "usual": "Beaucoup d’outils de bureau",
+      "us": "Seatline",
+      "yes": "Oui",
+      "no": "Non",
+      "depends": "Selon le cas",
+      "note": "Comparé aux outils d’entreprise habituels pour les postes de travail. Les détails varient selon le produit.",
+      "rows": {
+        "price": {
+          "label": "Prix",
+          "usual": "« Contactez le service commercial »",
+          "us": "CHF 2 par poste et par mois, sur le site"
+        },
+        "trial": {
+          "label": "Essayer",
+          "usual": "Réserver d’abord une démo",
+          "us": "30 jours gratuits, sans carte de crédit. Démo en un clic"
+        },
+        "contract": {
+          "label": "Contrat",
+          "usual": "Facturé à l’année, plus l’onboarding",
+          "us": "Résiliable chaque mois"
+        },
+        "setup": {
+          "label": "Mise en place",
+          "usual": "Quelques semaines",
+          "us": "Prêt en un après-midi"
+        },
+        "focus": {
+          "label": "Conçu pour",
+          "usual": "Réserver des postes partagés",
+          "us": "Savoir qui est assis où"
+        },
+        "data": {
+          "label": "Vos données",
+          "usual": "Selon l’outil",
+          "us": "Restent à Zurich"
+        }
+      }
+    }
   },
   "planImport": {
     "title": "Importer un plan d’architecte",
