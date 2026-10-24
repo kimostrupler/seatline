@@ -6,7 +6,7 @@ import { relabel, type CreateFloorInput, type UpdateFloorInput } from '@seatline
 import type { RequestContext } from '../auth/request-context';
 import { audit } from '../common/audit';
 import { orNotFound } from '../common/errors';
-import { TenantDb } from '../db/tenant-db.service';
+import { BIG_BATCH, TenantDb } from '../db/tenant-db.service';
 import { present, withCurrent } from '../seats/seats.service';
 import { StorageService } from '../storage/storage.service';
 import { inspectPlanImage } from './plan-image';
@@ -78,36 +78,40 @@ export class FloorsService {
       await this.storage.copy(source.planFileKey, planFileKey);
     }
     try {
-      return await this.db.run(ctx.tenantId, async (tx) => {
-        orNotFound(
-          await tx.building.findFirst({ where: { id: data.buildingId, tenantId: ctx.tenantId } }),
-          'Building',
-        );
-        const floor = await tx.floor.create({
-          data: {
-            ...(source && {
-              planWidth: source.planWidth,
-              planHeight: source.planHeight,
-              scale: source.scale,
-              deskWidth: source.deskWidth,
-              deskDepth: source.deskDepth,
-              seatNumbering: source.seatNumbering,
-            }),
-            ...data,
-            planFileKey,
-            id,
-            tenantId: ctx.tenantId,
-          },
-        });
-        await audit(tx, ctx, {
-          action: 'floor.create',
-          entityType: 'floor',
-          entityId: floor.id,
-          after: source ? { ...floor, copiedFromFloorId: source.id } : floor,
-        });
-        if (source) await this.copyLayout(tx, ctx, source, floor);
-        return floor;
-      });
+      return await this.db.run(
+        ctx.tenantId,
+        async (tx) => {
+          orNotFound(
+            await tx.building.findFirst({ where: { id: data.buildingId, tenantId: ctx.tenantId } }),
+            'Building',
+          );
+          const floor = await tx.floor.create({
+            data: {
+              ...(source && {
+                planWidth: source.planWidth,
+                planHeight: source.planHeight,
+                scale: source.scale,
+                deskWidth: source.deskWidth,
+                deskDepth: source.deskDepth,
+                seatNumbering: source.seatNumbering,
+              }),
+              ...data,
+              planFileKey,
+              id,
+              tenantId: ctx.tenantId,
+            },
+          });
+          await audit(tx, ctx, {
+            action: 'floor.create',
+            entityType: 'floor',
+            entityId: floor.id,
+            after: source ? { ...floor, copiedFromFloorId: source.id } : floor,
+          });
+          if (source) await this.copyLayout(tx, ctx, source, floor);
+          return floor;
+        },
+        BIG_BATCH,
+      );
     } catch (error) {
       if (source?.planFileKey && planFileKey) await this.storage.delete(planFileKey);
       throw error;

@@ -373,6 +373,34 @@ describe('numbering per room', () => {
   });
 });
 
+describe('renumbering rooms that share a number', () => {
+  it('continues the letters instead of making two "1.04-A"', () => {
+    const d = {
+      rooms: [
+        { ...room('r1', 0), name: '1.04 Office' },
+        { ...room('r2', 200), name: '1.04 Workshop' },
+      ],
+      seats: [
+        { ...seat('a', 20), roomId: 'r1', label: 'x1' },
+        { ...seat('b', 60), roomId: 'r1', label: 'x2' },
+        { ...seat('c', 220), roomId: 'r2', label: 'x3' },
+      ],
+    };
+    const labels = renumberSeats(d, 1, 'room', 10).seats.update.map((u) => u.label);
+    expect(labels).toEqual(['1.04-A', '1.04-B', '1.04-C']);
+    expect(new Set(labels).size).toBe(labels.length);
+  });
+});
+
+describe('undo of a deletion whose items are already gone (another tab)', () => {
+  it('recreates only what was really there', () => {
+    const c = changes({ seats: { delete: ['s1', 'gone'] }, rooms: { delete: ['nope'] } });
+    const back = inverse(doc, c);
+    expect(back.seats.create.map((s) => s.id)).toEqual(['s1']);
+    expect(back.rooms.create).toEqual([]);
+  });
+});
+
 describe('markers', () => {
   it('are created, moved and deleted with undo like rooms and seats', () => {
     const base = { ...doc, markers: [{ id: 'm1', kind: 'kitchen' as const, x: 10, y: 10 }] };

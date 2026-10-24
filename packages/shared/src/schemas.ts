@@ -11,7 +11,14 @@ import {
 } from './enums';
 
 const id = z.uuid();
-const calendarDay = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD');
+/** A real calendar day as YYYY-MM-DD ("2026-02-30" is not one). */
+export const calendarDay = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD')
+  .refine((d) => {
+    const t = Date.parse(`${d}T00:00:00Z`);
+    return !Number.isNaN(t) && new Date(t).toISOString().startsWith(d);
+  }, 'Not a real date');
 const name = z.string().trim().min(1).max(200);
 const note = z.string().trim().max(1000);
 
@@ -341,8 +348,6 @@ export const listPeopleQuerySchema = z.strictObject({
 export const ACTIVITY_KINDS = ['seating', 'moves', 'layout', 'places', 'people'] as const;
 export type ActivityKind = (typeof ACTIVITY_KINDS)[number];
 
-const day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD');
-
 export const activityQuerySchema = z.strictObject({
   /** id of the last entry already shown (pages go back in time) */
   cursor: id.optional(),
@@ -353,8 +358,8 @@ export const activityQuerySchema = z.strictObject({
   /** free text: names, labels, rooms, places, notes… (current names and the log's own snapshots) */
   q: z.string().trim().min(1).max(100).optional(),
   /** from/to are calendar days in Swiss time, both included */
-  from: day.optional(),
-  to: day.optional(),
+  from: calendarDay.optional(),
+  to: calendarDay.optional(),
 });
 export type ActivityQuery = z.infer<typeof activityQuerySchema>;
 
@@ -424,7 +429,7 @@ export const movePlanItemsSchema = z.strictObject({
 });
 export const scheduleMovePlanSchema = z.strictObject({
   /** a Swiss calendar day, tomorrow or later (today: apply now instead) */
-  effectiveDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD'),
+  effectiveDate: calendarDay,
 });
 export const placeTeamSchema = z.strictObject({
   /** null = people without a department */
@@ -484,9 +489,6 @@ export type ListPeopleQuery = z.infer<typeof listPeopleQuerySchema>;
 export const setTeamPlanSchema = z.strictObject({
   team: z.string().trim().min(1).max(100),
   headcount: z.number().int().min(0).max(100_000).nullable(),
-  byDate: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD')
-    .nullish(),
+  byDate: calendarDay.nullish(),
 });
 export type SetTeamPlanInput = z.infer<typeof setTeamPlanSchema>;

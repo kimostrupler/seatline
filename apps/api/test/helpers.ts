@@ -1,5 +1,7 @@
 import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
+import type { NestExpressApplication } from '@nestjs/platform-express';
+import { setupApp } from '../src/app-setup';
 import { PrismaClient, type Prisma } from '@prisma/client';
 import { SignJWT } from 'jose';
 import { randomUUID } from 'node:crypto';
@@ -92,7 +94,9 @@ export async function createTenant(slug: string): Promise<Fixture> {
 
 export async function createApp(): Promise<INestApplication> {
   const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
-  const app = moduleRef.createNestApplication({ logger: false, rawBody: true });
+  const app = setupApp(
+    moduleRef.createNestApplication<NestExpressApplication>({ logger: false, rawBody: true }),
+  );
   await app.init();
   return app;
 }

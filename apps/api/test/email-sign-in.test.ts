@@ -125,6 +125,28 @@ describe('sign-in with an e-mail link', () => {
     expect((await session('admin@alpha.example', c.tenantId)).status).toBe('choose');
   });
 
+  it('someone who left a company can start their own workspace with that address', async () => {
+    await owner.person.update({
+      where: { id: a.viewerId },
+      data: { email: 'leaver@example.com', active: false, leftAt: new Date() },
+    });
+    expect((await session('leaver@example.com')).status).toBe('inactive');
+    const who = await emailToken('leaver@example.com');
+    const res = await api(app)
+      .post('/onboarding')
+      .set(who)
+      .send({ companyName: 'Own GmbH', yourName: 'Lea Leaver' })
+      .expect(201);
+    // the new workspace is the one offered now, not a chooser with the old one
+    expect(await session('leaver@example.com')).toMatchObject({
+      status: 'ok',
+      role: 'admin',
+      workspace: { id: res.body.workspace.id },
+    });
+    // the old one can still be named explicitly (and still says "left")
+    expect((await session('leaver@example.com', a.tenantId)).status).toBe('inactive');
+  });
+
   it('a new company signs up with e-mail: its first person becomes admin', async () => {
     const who = await emailToken('founder@new.example');
     await api(app).post('/onboarding').set(who).send({ companyName: 'New AG' }).expect(400);

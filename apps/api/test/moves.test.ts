@@ -137,6 +137,19 @@ describe('move plans', () => {
       .put(`/move-plans/${id}/items`, { items: [{ personId: p2, toSeatId: s2 }] })
       .expect(409);
 
+    // the desk the plan points at can't be deleted meanwhile (the move would silently vanish)
+    const del = (seatId: string) =>
+      api(app)
+        .patch(`/floors/${a.floorId}/layout`)
+        .set(a.headers)
+        .send({ seats: { delete: [seatId] } });
+    expect((await del(s1).expect(409)).body.message).toContain('open move plan');
+    await api(app).delete(`/seats/${s1}`).set(a.headers).expect(409);
+    expect(await owner.movePlanItem.count({ where: { toSeatId: s1 } })).toBe(1);
+    // an impossible day is refused, not a crash
+    await http().post(`/move-plans/${id}/schedule`, { effectiveDate: '2027-13-01' }).expect(400);
+    await http().post(`/move-plans/${id}/schedule`, { effectiveDate: '2027-02-30' }).expect(400);
+
     const second = await newPlan('Second');
     await http().put(`/move-plans/${second}/items`, { items: [{ personId: p2, toSeatId: s2 }] });
     await http().post(`/move-plans/${second}/schedule`, { effectiveDate: day }).expect(201);

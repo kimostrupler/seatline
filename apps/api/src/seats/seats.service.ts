@@ -5,6 +5,7 @@ import type { RequestContext } from '../auth/request-context';
 import { audit } from '../common/audit';
 import { orNotFound } from '../common/errors';
 import { TenantDb, type Tx } from '../db/tenant-db.service';
+import { OPEN_PLANS } from '../moves/moves.service';
 import { seatOccupancy } from './occupancy';
 
 /** A seat plus its open assignment (if any) — what the floor map needs. */
@@ -104,6 +105,13 @@ export class SeatsService {
           'This seat has assignment history — block it instead of deleting',
         );
       }
+      const planned = await tx.movePlanItem.count({
+        where: { tenantId: ctx.tenantId, toSeatId: id, plan: { status: { in: OPEN_PLANS } } },
+      });
+      if (planned > 0)
+        throw new ConflictException(
+          'This seat is in an open move plan — change the plan before deleting it',
+        );
       await tx.seat.delete({ where: { id } });
       await audit(tx, ctx, { action: 'seat.delete', entityType: 'seat', entityId: id, before });
     });

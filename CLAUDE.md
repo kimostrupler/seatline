@@ -149,7 +149,10 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - Numbering per floor (`seat_numbering`): `floor` = 1.01…, `room` = room number + A, B… (`roomNumber`,
   `seatLabelAt`, `renumberSeats` in ops.ts). A batch may swap labels (the server relabels in two steps).
 - Seats with any assignment history can't be deleted (block them) — enforced in
-  `LayoutService`, and the history rows' FK restrict backs it up.
+  `LayoutService`, and the history rows' FK restrict backs it up. Nor seats a draft/scheduled/
+  failed move plan points at (`OPEN_PLANS`): change the plan first.
+- Big batches (layout batch, people import, move plan apply, floor copy) run with `BIG_BATCH`
+  (60 s transaction); the JSON body limit is 2 MB (`app-setup.ts`, used by main.ts and tests).
 - Plan images: raster only (PNG/JPG/WebP, checked by content). The image's pixel size is the
   floor's coordinate space. Storage keys must start with the tenant id; `getPlan` checks it.
 - The canvas uses **pointer events** (mouse, pen and touch alike). One finger on empty floor pans,
@@ -200,7 +203,9 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   sign-in); changing the setting doesn't touch existing people.
 - People sync (`sync/people-sync.service.ts`) stores only name, e-mail, department, job title,
   active. Never changes roles. Teams = `department`; admins can set one by hand (`PATCH /people/:id/team`,
-  sets `team_manual`, then the sync keeps it until `fromDirectory`). Leavers: inactive + open seats closed (history kept).
+  sets `team_manual`, then the sync keeps it until `fromDirectory`). Renaming a team
+  (`POST /people/teams/rename`) also renames its team zones (`rooms.team`) and space plan.
+  Leavers: inactive + open seats closed (history kept).
 - Jobs: pg-boss in schema `pgboss` (owned by the API role, created by a migration) for
   "Sync now"; the nightly sync is a separate scheduled container (`dist/jobs/nightly-sync.js`)
   because the API scales to zero. Keep queue code in `jobs/job-queue.service.ts`.
@@ -236,6 +241,8 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   workspace (`tenantId`); `IdentityService.resolveEmail` only lets in people of workspaces
   WITHOUT Microsoft (those keep Microsoft sign-in: `use_microsoft`); several workspaces → `choose`
   (`/signin/workspace`). It never creates people; a new address gets onboarding (+ "Your name").
+  `email_workspaces` also returns `active`: workspaces the person left aren't offered when there
+  is one they're still in, and don't block starting their own.
 - Admins add people by hand (`POST /people`, optional invitation e-mail), correct them
   (`PATCH /people/:id`), mark them left/back (`PATCH /people/:id/active`: leaving ends open seats,
   history stays). People from Microsoft (`entra_object_id`) are changed in Microsoft (409

@@ -154,10 +154,29 @@ describe('teams', () => {
       data: { department: 'Sales' },
     });
     await owner.person.update({ where: { id: a.viewerId }, data: { department: 'Finance' } });
+    // the team's zone on the map and its space plan carry the name too
+    await owner.room.update({ where: { id: a.roomId }, data: { team: 'Sales' } });
+    await owner.teamPlan.createMany({
+      data: [
+        { tenantId: a.tenantId, team: 'Sales', headcount: 12 },
+        { tenantId: a.tenantId, team: 'Finance', headcount: 3 },
+      ],
+    });
     expect((await rename({ from: 'Sales', to: 'Customer Success' }).expect(200)).body).toEqual({
       people: 2,
     });
     expect(await owner.person.count({ where: { department: 'Customer Success' } })).toBe(2);
+    expect((await owner.room.findUniqueOrThrow({ where: { id: a.roomId } })).team).toBe(
+      'Customer Success',
+    );
+    expect(
+      (
+        await owner.teamPlan.findMany({ where: { tenantId: a.tenantId }, orderBy: { team: 'asc' } })
+      ).map((p) => [p.team, p.headcount]),
+    ).toEqual([
+      ['Customer Success', 12],
+      ['Finance', 3],
+    ]);
     expect((await rename({ from: 'Customer Success', to: 'Finance' }).expect(409)).body.code).toBe(
       'team_exists',
     );
@@ -165,6 +184,10 @@ describe('teams', () => {
     expect(
       (await owner.person.findUniqueOrThrow({ where: { id: a.viewerId } })).department,
     ).toBeNull();
+    // a removed team has no space plan any more
+    expect(await owner.teamPlan.count({ where: { tenantId: a.tenantId, team: 'Finance' } })).toBe(
+      0,
+    );
     await rename({ from: 'Customer Success', to: 'X' }, a.viewerHeaders).expect(403);
     // other workspaces keep their teams
     await owner.person.update({ where: { id: b.viewerId }, data: { department: 'Sales' } });

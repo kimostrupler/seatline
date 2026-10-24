@@ -111,6 +111,30 @@ def test_broken_files_fail_cleanly_in_the_child_process():
     assert e.value.code == "unsupported"
 
 
+def _hog(conn):  # runs in a child: allocate more than the cap
+    from app.analyze import MEMORY_LIMIT_BYTES, limit_memory
+
+    limit_memory()
+    try:
+        bytearray(MEMORY_LIMIT_BYTES + 200 * 1024 * 1024)
+        conn.send("allocated")
+    except MemoryError:
+        conn.send("memory_error")
+    conn.close()
+
+
+def test_child_memory_is_capped_with_a_clean_memory_error():
+    import multiprocessing as mp
+
+    parent, child = mp.get_context("spawn").Pipe(duplex=False)
+    proc = mp.get_context("spawn").Process(target=_hog, args=(child,))
+    proc.start()
+    child.close()
+    assert parent.poll(60)
+    assert parent.recv() == "memory_error"
+    proc.join(5)
+
+
 def test_json_is_what_the_api_expects(files):
     out = to_json(analyze(files["office.dxf"]))
     assert set(out) == {"source", "width", "height", "scale", "image", "rooms", "seats", "warnings"}

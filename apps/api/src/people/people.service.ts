@@ -23,7 +23,7 @@ import { audit } from '../common/audit';
 import { loadConfig } from '../config';
 import type { RequestContext } from '../auth/request-context';
 import { orNotFound } from '../common/errors';
-import { TenantDb } from '../db/tenant-db.service';
+import { BIG_BATCH, TenantDb } from '../db/tenant-db.service';
 
 /** The person's current seat (if any), with its floor. */
 const withSeat = {
@@ -231,46 +231,50 @@ export class PeopleService {
   /** Add many people at once (all or nothing). People already in the list are skipped. */
   async importPeople(ctx: RequestContext, input: ImportPeopleInput) {
     for (const p of input.people) this.refuseOwnerAddress(p.email);
-    const created = await this.db.run(ctx.tenantId, async (tx) => {
-      const taken = await tx.person.findMany({
-        where: {
-          tenantId: ctx.tenantId,
-          email: { in: input.people.map((p) => p.email), mode: 'insensitive' },
-        },
-        select: { email: true },
-      });
-      const skip = new Set(taken.map((p) => p.email.toLowerCase()));
-      const out: Person[] = [];
-      for (const p of input.people) {
-        if (skip.has(p.email)) continue;
-        skip.add(p.email);
-        const person = await tx.person.create({
-          data: {
+    const created = await this.db.run(
+      ctx.tenantId,
+      async (tx) => {
+        const taken = await tx.person.findMany({
+          where: {
             tenantId: ctx.tenantId,
-            displayName: p.displayName,
-            email: p.email,
-            department: p.department || null,
-            teamManual: !!p.department,
-            jobTitle: p.jobTitle || null,
-            appRole: input.appRole,
+            email: { in: input.people.map((p) => p.email), mode: 'insensitive' },
           },
+          select: { email: true },
         });
-        await audit(tx, ctx, {
-          action: 'person.create',
-          entityType: 'person',
-          entityId: person.id,
-          after: {
-            displayName: person.displayName,
-            email: person.email,
-            department: person.department,
-            appRole: person.appRole,
-            imported: true,
-          },
-        });
-        out.push(person);
-      }
-      return out;
-    });
+        const skip = new Set(taken.map((p) => p.email.toLowerCase()));
+        const out: Person[] = [];
+        for (const p of input.people) {
+          if (skip.has(p.email)) continue;
+          skip.add(p.email);
+          const person = await tx.person.create({
+            data: {
+              tenantId: ctx.tenantId,
+              displayName: p.displayName,
+              email: p.email,
+              department: p.department || null,
+              teamManual: !!p.department,
+              jobTitle: p.jobTitle || null,
+              appRole: input.appRole,
+            },
+          });
+          await audit(tx, ctx, {
+            action: 'person.create',
+            entityType: 'person',
+            entityId: person.id,
+            after: {
+              displayName: person.displayName,
+              email: person.email,
+              department: person.department,
+              appRole: person.appRole,
+              imported: true,
+            },
+          });
+          out.push(person);
+        }
+        return out;
+      },
+      BIG_BATCH,
+    );
     await this.notify.send(
       ctx.tenantId,
       created.map((p) => ({ kind: 'joined', person: p.displayName, team: p.department })),
@@ -434,6 +438,22 @@ export class PeopleService {
         where: { tenantId: ctx.tenantId, department: input.from },
         data: { department: input.to, teamManual: true },
       });
+      // the team's zones on the map and its space plan follow the name
+      await tx.room.updateMany({
+        where: { tenantId: ctx.tenantId, team: input.from },
+        data: { team: input.to },
+      });
+      const plan = await tx.teamPlan.findFirst({
+        where: { tenantId: ctx.tenantId, team: input.from },
+      });
+      if (plan) {
+        const taken = input.to
+          ? await tx.teamPlan.count({ where: { tenantId: ctx.tenantId, team: input.to } })
+          : 0;
+        if (input.to && !taken)
+          await tx.teamPlan.update({ where: { id: plan.id }, data: { team: input.to } });
+        else await tx.teamPlan.delete({ where: { id: plan.id } });
+      }
       await audit(tx, ctx, {
         action: input.to ? 'team.rename' : 'team.remove',
         entityType: 'tenant',
