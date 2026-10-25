@@ -205,6 +205,40 @@ describe('billing', () => {
     expect((await app.get(BillingService).syncSeats(a.tenantId)).changed).toBe(false);
   });
 
+  it('a subscription Stripe doesn’t know any more counts as ended (no error every night)', async () => {
+    await webhook(subscription(a, 'active')).expect(200);
+    await owner.seat.create({
+      data: { tenantId: a.tenantId, floorId: a.floorId, label: 'A4', x: 5, y: 5 },
+    });
+    await endTrial(a);
+    // the seat count changed since the last bill, so the job asks Stripe
+    await owner.tenant.update({ where: { id: a.tenantId }, data: { billedSeats: 1 } });
+    stripe.missing.add('sub_1');
+    try {
+      expect(await app.get(BillingService).syncSeats(a.tenantId)).toEqual({
+        changed: false,
+        seats: 4,
+        ended: true,
+      });
+    } finally {
+      stripe.missing.delete('sub_1');
+    }
+    const t = await owner.tenant.findUniqueOrThrow({ where: { id: a.tenantId } });
+    expect(t).toMatchObject({
+      stripeSubscriptionId: null,
+      billingStatus: 'canceled',
+      billedSeats: null,
+    });
+    expect((await me(a)).billing.state).toBe('read_only');
+    expect(
+      await owner.auditLog.count({
+        where: { tenantId: a.tenantId, action: 'billing.subscription' },
+      }),
+    ).toBe(2);
+    // nothing left to sync the next night
+    expect((await app.get(BillingService).syncSeats(a.tenantId)).changed).toBe(false);
+  });
+
   it('admins only; return addresses must be our own pages', async () => {
     await api(app).get('/billing').set(a.viewerHeaders).expect(403);
     await api(app)

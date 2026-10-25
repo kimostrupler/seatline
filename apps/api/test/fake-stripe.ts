@@ -14,6 +14,8 @@ export async function startFakeStripe() {
   const quantities = new Map<string, number>();
   /** what GET /v1/subscriptions/:id answers (tests set status, customer, metadata) */
   const subscriptions = new Map<string, Record<string, unknown>>();
+  /** subscriptions Stripe answers "No such subscription" for */
+  const missing = new Set<string>();
   const server = http.createServer((req, res) => {
     let raw = '';
     req.on('data', (c: Buffer) => (raw += c.toString()));
@@ -43,6 +45,18 @@ export async function startFakeStripe() {
         });
       if (path.startsWith('/v1/subscriptions/')) {
         const id = path.split('/').pop()!;
+        if (missing.has(id)) {
+          res.writeHead(404, { 'content-type': 'application/json' });
+          return res.end(
+            JSON.stringify({
+              error: {
+                type: 'invalid_request_error',
+                code: 'resource_missing',
+                message: `No such subscription: '${id}'`,
+              },
+            }),
+          );
+        }
         if (req.method === 'POST') quantities.set(id, Number(body['items[0][quantity]']));
         return json({
           id,
@@ -59,5 +73,11 @@ export async function startFakeStripe() {
   });
   await new Promise<void>((resolve) => server.listen(0, resolve));
   const { port } = server.address() as AddressInfo;
-  return { url: `http://localhost:${port}`, calls, subscriptions, close: () => server.close() };
+  return {
+    url: `http://localhost:${port}`,
+    calls,
+    subscriptions,
+    missing,
+    close: () => server.close(),
+  };
 }

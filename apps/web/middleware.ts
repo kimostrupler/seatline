@@ -19,6 +19,9 @@ export async function middleware(req: NextRequest) {
 }
 
 async function route(req: NextRequest, csp: string) {
+  // Seatline has no server actions: such requests are bots probing, and Next.js would log each
+  // one as a server error (→ the error alert)
+  if (req.headers.has('next-action')) return new NextResponse(null, { status: 404 });
   const { pathname, search } = req.nextUrl;
   const headers = new Headers(req.headers);
   headers.set('Content-Security-Policy', csp);

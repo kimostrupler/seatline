@@ -412,7 +412,17 @@ export class BillingService {
     if (!tenant?.stripeSubscriptionId || tenant.billedSeats === seats)
       return { changed: false, seats };
     const stripe = this.stripe();
-    const sub = await stripe.subscriptions.retrieve(tenant.stripeSubscriptionId);
+    let sub: Stripe.Subscription;
+    try {
+      sub = await stripe.subscriptions.retrieve(tenant.stripeSubscriptionId);
+    } catch (error) {
+      // Stripe doesn't know it (e.g. made with test keys): it ended. But only when our price is
+      // found, so wrong keys never end every subscription at once.
+      if ((error as { code?: string }).code !== 'resource_missing' || !(await this.priceInfo()))
+        throw error;
+      await this.endMissing(tenantId, tenant.stripeSubscriptionId, tenant.billingStatus);
+      return { changed: false, seats, ended: true };
+    }
     const item = sub.items.data[0];
     if (!item) return { changed: false, seats };
     await stripe.subscriptions.update(sub.id, {
@@ -434,5 +444,27 @@ export class BillingService {
       );
     });
     return { changed: true, seats };
+  }
+
+  /** A subscription Stripe no longer has: treated like a cancelled one (as the webhook would). */
+  private async endMissing(tenantId: string, subscriptionId: string, status: string | null) {
+    this.logger.warn(`${tenantId}: Stripe has no subscription ${subscriptionId}; marked as ended`);
+    await this.db.run(tenantId, async (tx) => {
+      await tx.tenant.update({
+        where: { id: tenantId },
+        data: { stripeSubscriptionId: null, billingStatus: 'canceled', billedSeats: null },
+      });
+      await audit(
+        tx,
+        { tenantId, actorId: null },
+        {
+          action: 'billing.subscription',
+          entityType: 'tenant',
+          entityId: tenantId,
+          before: { status },
+          after: { status: 'canceled', reason: 'missing_in_stripe' },
+        },
+      );
+    });
   }
 }

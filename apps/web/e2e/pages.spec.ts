@@ -105,3 +105,12 @@ test('every page runs with a per-request script nonce and nothing is blocked', a
   await expect(page.getByTestId('floor-map').locator('canvas').first()).toBeVisible();
   expect(blocked).toEqual([]);
 });
+
+test('server-action probes from bots get a plain 404 (Seatline has no server actions)', async ({
+  request,
+}) => {
+  const res = await request.post('/', { headers: { 'next-action': 'x' }, data: '[]' });
+  expect(res.status()).toBe(404);
+  // ordinary pages still work
+  expect((await request.get('/welcome')).status()).toBe(200);
+});
