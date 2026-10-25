@@ -43,6 +43,17 @@ export class TenantDb {
     return rows[0]?.ok === true;
   }
 
+  /** Sign-out: this session id is no longer accepted (until `expiresAt`, when its cookie dies). */
+  async signOutSession(sid: string, expiresAt: Date) {
+    await this.prisma.$executeRaw`SELECT session_sign_out(${sid}, ${expiresAt})`;
+  }
+
+  async sessionSignedOut(sid: string): Promise<boolean> {
+    const rows = await this.prisma.$queryRaw<{ out: boolean }[]>`
+      SELECT session_signed_out(${sid}) AS out`;
+    return rows[0]?.out === true;
+  }
+
   /** Uses a sign-in code once: the address while valid (and not guessed at too often), else null. */
   async useEmailSignInCode(email: string, codeHash: string, maxFailed: number) {
     const rows = await this.prisma.$queryRaw<{ email: string | null }[]>`

@@ -2,6 +2,7 @@ import type { INestApplication } from '@nestjs/common';
 import http from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { StorageService } from '../src/storage/storage.service';
 import { api, appDb, createApp, createTenant, owner, resetDb, type Fixture } from './helpers';
 
 // a 1×1 PNG with its header saying 800 × 400 (only the header is checked)
@@ -131,6 +132,26 @@ describe('plan import', () => {
       .get(`/floors/${a.floorId}/imports/${other.body.importId}/image`)
       .set(a.headers)
       .expect(404);
+  });
+
+  it('an import nobody applied or discarded is deleted after 7 days', async () => {
+    const left = await importPlan(a).expect(201);
+    const image = () =>
+      api(app).get(`/floors/${a.floorId}/imports/${left.body.importId}/image`).set(a.headers);
+    await image().expect(200);
+    const storage = app.get(StorageService);
+    // a day later it is still there; after 7 days the nightly clean-up removes it
+    expect(await storage.deleteOldImports(7, new Date(Date.now() + 86_400_000))).toBe(0);
+    await image().expect(200);
+    expect(await storage.deleteOldImports(7, new Date(Date.now() + 8 * 86_400_000))).toBe(1);
+    await image().expect(404);
+    // the floor's own plan image is never touched
+    await api(app)
+      .post(`/floors/${a.floorId}/plan`)
+      .set(a.headers)
+      .attach('file', png(3, 2), 'p.png');
+    expect(await storage.deleteOldImports(7, new Date(Date.now() + 30 * 86_400_000))).toBe(0);
+    await api(app).get(`/floors/${a.floorId}/plan`).set(a.headers).expect(200);
   });
 
   it('is for editors of the floor’s own company only', async () => {

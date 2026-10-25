@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import type { INestApplication } from '@nestjs/common';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import {
@@ -47,6 +48,52 @@ describe('Microsoft sign-in tokens', () => {
       .set(await msToken(id, { audience: 'someone-else' }))
       .expect(401);
     await api(app).get('/me').set({ authorization: 'Bearer not-a-jwt' }).expect(401);
+  });
+
+  it('signing out ends that session everywhere, and only that one', async () => {
+    const tid = await connectMicrosoft(a);
+    const person = newMsIdentity(tid);
+    const phone = { ...person, sid: randomUUID().replaceAll('-', '') };
+    const laptop = { ...person, sid: randomUUID().replaceAll('-', '') };
+    await api(app)
+      .get('/me')
+      .set(await msToken(phone))
+      .expect(200);
+    await api(app)
+      .post('/auth/signout')
+      .set(await msToken(phone))
+      .expect(204);
+    // a copy of the phone's cookie is refused from now on…
+    const refused = await api(app)
+      .get('/me')
+      .set(await msToken(phone))
+      .expect(401);
+    expect(refused.body.code).toBe('signed_out');
+    await api(app)
+      .post('/auth/session')
+      .set(await msToken(phone))
+      .expect(401);
+    // …the laptop stays signed in, and so do sessions from before ids existed
+    await api(app)
+      .get('/me')
+      .set(await msToken(laptop))
+      .expect(200);
+    await api(app)
+      .get('/me')
+      .set(await msToken(person))
+      .expect(200);
+    // the ended copy can't do anything any more, not even sign out again; only the id is
+    // kept, and only until the cookie would have expired anyway
+    await api(app)
+      .post('/auth/signout')
+      .set(await msToken(phone))
+      .expect(401);
+    const rows = await owner.$queryRaw<{ sid: string; expires_at: Date }[]>`
+      SELECT sid, expires_at FROM signed_out_sessions WHERE sid = ${phone.sid}`;
+    expect(rows).toHaveLength(1);
+    expect(rows[0]!.expires_at.getTime()).toBeLessThan(Date.now() + 32 * 864e5);
+    // the app role can't read or change the table directly
+    await expect(appDb.$queryRaw`SELECT sid FROM signed_out_sessions`).rejects.toThrow();
   });
 
   it('first sign-in creates the person with the workspace’s default role', async () => {

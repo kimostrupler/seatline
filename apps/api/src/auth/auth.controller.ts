@@ -13,6 +13,7 @@ import {
 } from '@seatline/shared';
 import { ZodPipe } from '../common/zod.pipe';
 import { DemoService } from '../demo/demo.service';
+import { TenantDb } from '../db/tenant-db.service';
 import { CurrentIdentity, IdentityOnly, Public } from './decorators';
 import { EmailSignInService } from './email-sign-in.service';
 import type { Identity } from './identity';
@@ -24,6 +25,7 @@ export class AuthController {
     private readonly identities: IdentityService,
     private readonly emailSignIn: EmailSignInService,
     private readonly demo: DemoService,
+    private readonly db: TenantDb,
   ) {}
 
   /**
@@ -84,6 +86,18 @@ export class AuthController {
       workspaces: membership.status === 'choose' ? membership.workspaces : [],
       role: membership.status === 'ok' ? membership.ctx.role : null,
     };
+  }
+
+  /**
+   * Sign-out (called by the web app before it deletes the cookie): this session's id is refused
+   * from now on, so a copy of the cookie elsewhere stops working too. Other sign-ins stay.
+   */
+  @IdentityOnly()
+  @Post('auth/signout')
+  @HttpCode(204)
+  async signOut(@CurrentIdentity() identity: Identity) {
+    // a session cookie lives at most 30 days (web SESSION_HOURS); keep the record a bit longer
+    if (identity.sid) await this.db.signOutSession(identity.sid, new Date(Date.now() + 31 * 864e5));
   }
 
   /** First person from a new organisation creates its workspace and becomes admin. */

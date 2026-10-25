@@ -164,17 +164,50 @@ describe('access and validation', () => {
     await api(app).get('/seats/not-a-uuid').set(t.headers).expect(400);
   });
 
-  it('a seat’s room must be on the same floor', async () => {
-    const other = await api(app)
-      .post('/floors')
-      .set(t.headers)
-      .send({ buildingId: t.buildingId, name: '2. OG', level: 2 })
-      .expect(201);
+  it('a seat’s room is the room it stands in (clients can’t set one)', async () => {
+    const room = (await api(app).get(`/floors/${t.floorId}/map`).set(t.headers)).body.rooms[0] as {
+      polygon: Array<{ x: number; y: number }>;
+    };
+    const inside = {
+      x: (room.polygon[0]!.x + room.polygon[2]!.x) / 2,
+      y: (room.polygon[0]!.y + room.polygon[2]!.y) / 2,
+    };
     await api(app)
       .post('/seats')
       .set(t.headers)
-      .send({ floorId: other.body.id, roomId: t.roomId, label: 'B1', x: 0, y: 0 })
+      .send({ floorId: t.floorId, roomId: t.roomId, label: 'B1', x: 0, y: 0 })
       .expect(400);
+    const created = await api(app)
+      .post('/seats')
+      .set(t.headers)
+      .send({ floorId: t.floorId, label: 'B1', ...inside })
+      .expect(201);
+    expect(created.body.roomId).toBe(t.roomId);
+    // moved out of the room: no room any more
+    const moved = await api(app)
+      .patch(`/seats/${created.body.id}`)
+      .set(t.headers)
+      .send({ x: -5000, y: -5000 })
+      .expect(200);
+    expect(moved.body.roomId).toBeNull();
+    // a room drawn around it later takes it in
+    const around = await api(app)
+      .post('/rooms')
+      .set(t.headers)
+      .send({
+        floorId: t.floorId,
+        name: 'Annex',
+        type: 'office',
+        polygon: [
+          { x: -5100, y: -5100 },
+          { x: -4900, y: -5100 },
+          { x: -4900, y: -4900 },
+          { x: -5100, y: -4900 },
+        ],
+      })
+      .expect(201);
+    const seat = (await api(app).get(`/seats/${created.body.id}`).set(t.headers)).body;
+    expect(seat.roomId).toBe(around.body.id);
   });
 
   it('deleting a room keeps its seats on the floor', async () => {

@@ -10,6 +10,8 @@ export const microsoftIdentitySchema = z.object({
   oid: z.uuid(),
   name: z.string().min(1).max(200),
   email: z.string().min(3).max(320),
+  /** the session's id (sessions from before sign-out ended them have none) */
+  sid: z.string().max(64).optional(),
 });
 
 /** Signed in with a one-time e-mail link: the address is proven, nothing else. */
@@ -18,6 +20,7 @@ export const emailIdentitySchema = z.object({
   email: z.string().min(3).max(320),
   /** the workspace picked when the address belongs to several (null = not picked yet) */
   tenantId: z.uuid().nullable(),
+  sid: z.string().max(64).optional(),
 });
 
 /** Who signed in, as vouched for by the web app (BFF). */

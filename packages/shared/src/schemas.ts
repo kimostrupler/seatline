@@ -68,9 +68,9 @@ export const listRoomsQuerySchema = z.strictObject({ floorId: id });
 
 // ---- Seats -----------------------------------------------------------------
 
+/** A seat's room isn't sent: it is the room it stands in, worked out on the server. */
 export const createSeatSchema = z.strictObject({
   floorId: id,
-  roomId: id.nullish(),
   label: z.string().trim().min(1).max(50),
   x: z.number(),
   y: z.number(),

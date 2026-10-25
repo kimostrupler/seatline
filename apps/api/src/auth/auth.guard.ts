@@ -68,6 +68,9 @@ export class AuthGuard implements CanActivate {
     if (bearer && this.config.INTERNAL_AUTH_SECRET) {
       const identity = await verifyInternalToken(bearer, this.config.INTERNAL_AUTH_SECRET);
       if (!identity) throw new UnauthorizedException('Your sign-in has expired');
+      // a copy of a session that was signed out (another browser, a stolen cookie)
+      if (identity.sid && (await this.db.sessionSignedOut(identity.sid)))
+        throw new UnauthorizedException({ message: 'You signed out', code: 'signed_out' });
       if (this.flag(IDENTITY_ONLY, context)) {
         req.identity = identity;
         return true;

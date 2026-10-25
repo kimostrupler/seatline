@@ -131,7 +131,7 @@ describe('session cookie', () => {
 
   it('round-trips, and refuses tampered cookies or another secret', async () => {
     const cookie = await sealSession(user, secret);
-    expect(await readSession(cookie, secret)).toEqual(user);
+    expect(await readSession(cookie, secret)).toEqual({ ...user, sid: expect.any(String) });
     expect(await readSession(cookie, 'x'.repeat(40))).toBeNull();
     expect(await readSession(cookie.slice(0, -4) + 'AAAA', secret)).toBeNull();
     expect(await readSession(undefined, secret)).toBeNull();
@@ -140,7 +140,10 @@ describe('session cookie', () => {
 
   it('e-mail sign-ins, and Microsoft cookies from before there was a kind', async () => {
     const byEmail = { kind: 'email' as const, email: 'nora@example.com', tenantId: null };
-    expect(await readSession(await sealSession(byEmail, secret), secret)).toEqual(byEmail);
+    expect(await readSession(await sealSession(byEmail, secret), secret)).toEqual({
+      ...byEmail,
+      sid: expect.any(String),
+    });
     const old = await seal(
       { tid: TID, oid: OID, name: 'Anna', email: 'a@b.ch' },
       secret,

@@ -34,6 +34,7 @@ export class JobQueue implements OnModuleInit, OnModuleDestroy {
     if (!this.config.JOBS_ENABLED) return;
     const boss = new PgBoss({
       connectionString: this.config.APP_DATABASE_URL,
+      max: this.config.JOB_POOL_SIZE, // its own pool (default 10); see DB_POOL_SIZE
       schema: 'pgboss',
       createSchema: false, // created by our migration, owned by the API role
       schedule: false, // the nightly sync runs as its own scheduled job (works with scale-to-zero)

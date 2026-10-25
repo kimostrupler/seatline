@@ -1,9 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { siteHosts, siteUrl } from '@/lib/site';
-import { cookieOptions, signedInMarker } from '@/lib/server/auth';
+import { apiAsUser, cookieOptions, signedInMarker } from '@/lib/server/auth';
 import { webConfig } from '@/lib/server/config';
 import { fromThisApp, seeOther } from '@/lib/server/forms';
-import { SESSION_COOKIE } from '@/lib/server/session';
+import { readSession, SESSION_COOKIE } from '@/lib/server/session';
 
 /**
  * Sign out of Seatline (POST from our own pages only, so another site can't sign people out
@@ -12,7 +12,12 @@ import { SESSION_COOKIE } from '@/lib/server/session';
  */
 export async function POST(req: NextRequest) {
   if (!fromThisApp(req)) return seeOther('/');
-  const appUrl = webConfig().APP_URL;
+  const config = webConfig();
+  const appUrl = config.APP_URL;
+  // end this sign-in in the API too, so a copy of the cookie stops working (best effort: the
+  // cookie goes either way)
+  const user = await readSession(req.cookies.get(SESSION_COOKIE)?.value, config.SESSION_SECRET);
+  if (user?.sid) await apiAsUser(user, '/auth/signout', { method: 'POST' }).catch(() => null);
   const to = String((await req.formData().catch(() => null))?.get('to') ?? '');
   const website = siteHosts(appUrl).length ? `${siteUrl(appUrl)}/` : new URL('/welcome', appUrl);
   const target = to === 'site' ? website : new URL('/signin?signedOut=1', appUrl);
