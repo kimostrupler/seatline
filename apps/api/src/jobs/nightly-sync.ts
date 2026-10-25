@@ -1,8 +1,8 @@
 /**
  * Runs twice a day (cron 0 1,7 * * * UTC). The night run (01:00): people sync for every workspace connected to Microsoft 365, then HR leaving dates
  * that have come, then the scheduled move plans that are due (after the sync, so people who left are already inactive), then the
- * privacy clean-up (history older than each workspace's retention period), billing (seat
- * counts, trial reminders), onboarding e-mails. Both runs: outreach (the operator's leads):
+ * privacy clean-up (history older than each workspace's retention period), unused plan imports
+ * (after 7 days), billing (seat counts, trial reminders), onboarding e-mails. Both runs: outreach (the operator's leads):
  * replies first; the morning run (07:00 UTC = 8 am Zurich in winter, 9 am in summer) also
  * sends the scheduled outreach e-mails and the follow-up reminder.
  * Runs as its own scheduled container (Azure Container Apps Job), so it works even
@@ -118,6 +118,15 @@ async function nightly(
       if (demos) logger.log(`Deleted ${demos} demo workspaces`);
     } catch (error) {
       logger.error(`Demo clean-up failed: ${String(error)}`);
+    }
+
+    // plan imports that were never applied or discarded (the page was closed)
+    try {
+      const { StorageService } = await import('../storage/storage.service');
+      const old = await app.get(StorageService).deleteOldImports(7);
+      if (old) logger.log(`Deleted ${old} unused plan imports`);
+    } catch (error) {
+      logger.error(`Clean-up of unused plan imports failed: ${String(error)}`);
     }
 
     // billing: tell admins their free trial ends soon (7 days, then 1 day before)

@@ -88,6 +88,26 @@ export class StorageService {
     }
   }
 
+  /**
+   * Nightly: plan imports nobody applied or discarded (the tab was closed) — their images wait
+   * under <tenant>/floors/<id>/imports/ — are deleted after `days`. Returns how many.
+   */
+  async deleteOldImports(days: number, now = new Date()): Promise<number> {
+    const container = await this.client();
+    const cutoff = now.getTime() - days * 86_400_000;
+    let n = 0;
+    for await (const blob of container.listBlobsFlat())
+      if (/^[^/]+\/floors\/[^/]+\/imports\//.test(blob.name)) {
+        const at = (blob.properties.createdOn ?? blob.properties.lastModified).getTime();
+        if (
+          at < cutoff &&
+          (await container.getBlockBlobClient(blob.name).deleteIfExists()).succeeded
+        )
+          n++;
+      }
+    return n;
+  }
+
   /** Owner dashboard: how much is stored (floor plans, and imports waiting to be applied). */
   async usage() {
     const container = await this.client();

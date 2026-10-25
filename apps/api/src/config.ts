@@ -3,6 +3,13 @@ import { z } from 'zod';
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   APP_DATABASE_URL: z.string().min(1),
+  /**
+   * Database connections per process for queries (Prisma). The B1ms server allows 50 in all:
+   * 2 API copies × (this + JOB_POOL_SIZE) + the nightly job must stay well below that.
+   */
+  DB_POOL_SIZE: z.coerce.number().int().min(1).max(40).default(5),
+  /** connections per API process for the job queue (pg-boss) */
+  JOB_POOL_SIZE: z.coerce.number().int().min(1).max(20).default(3),
   PORT: z.coerce.number().int().default(3001),
   /** Azure Blob Storage. Locally: Azurite from infra/docker-compose.yml. */
   AZURE_STORAGE_CONNECTION_STRING: z.string().min(1).default('UseDevelopmentStorage=true'),

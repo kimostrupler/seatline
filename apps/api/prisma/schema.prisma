@@ -374,6 +374,16 @@ model EmailSignIn {
   @@ignore
 }
 
+/// Sessions someone signed out of (the cookie's sid), until the cookie would have expired.
+/// Used only through SQL functions (session_sign_out / session_signed_out).
+model SignedOutSession {
+  sid       String   @id
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(3)
+
+  @@map("signed_out_sessions")
+  @@ignore
+}
+
 /// Things to find one's way on a floor (kitchen, printer, exits…).
 model FloorMarker {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid

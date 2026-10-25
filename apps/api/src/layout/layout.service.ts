@@ -152,39 +152,42 @@ export class LayoutService {
           await log('marker.delete', 'floor', floorId, markerById.get(id));
         }
 
-        await this.assignRooms(tx, ctx, floorId);
+        await assignRooms(tx, ctx, floorId);
       },
       BIG_BATCH,
     );
   }
+}
 
-  /** Seats belong to the room they stand in (smallest one, if rooms overlap). */
-  private async assignRooms(tx: Tx, ctx: RequestContext, floorId: string) {
-    const [rooms, seats] = await Promise.all([
-      tx.room.findMany({
-        where: { tenantId: ctx.tenantId, floorId },
-        select: { id: true, polygon: true },
-      }),
-      tx.seat.findMany({
-        where: { tenantId: ctx.tenantId, floorId },
-        select: { id: true, x: true, y: true, roomId: true },
-      }),
-    ]);
-    const shapes = rooms.map((r) => ({ id: r.id, polygon: r.polygon as unknown as XY[] }));
-    for (const seat of seats) {
-      const roomId = roomForPoint(seat, shapes)?.id ?? null;
-      if (roomId === seat.roomId) continue;
-      await tx.seat.update({
-        where: { id: seat.id },
-        data: { roomId } satisfies Prisma.SeatUncheckedUpdateInput,
-      });
-      await audit(tx, ctx, {
-        action: 'layout.seat.room',
-        entityType: 'seat',
-        entityId: seat.id,
-        before: { roomId: seat.roomId },
-        after: { roomId },
-      });
-    }
+/**
+ * Seats belong to the room they stand in (smallest one, if rooms overlap). Called after every
+ * change to a floor's rooms or seats (layout batch, the single room and seat routes).
+ */
+export async function assignRooms(tx: Tx, ctx: RequestContext, floorId: string) {
+  const [rooms, seats] = await Promise.all([
+    tx.room.findMany({
+      where: { tenantId: ctx.tenantId, floorId },
+      select: { id: true, polygon: true },
+    }),
+    tx.seat.findMany({
+      where: { tenantId: ctx.tenantId, floorId },
+      select: { id: true, x: true, y: true, roomId: true },
+    }),
+  ]);
+  const shapes = rooms.map((r) => ({ id: r.id, polygon: r.polygon as unknown as XY[] }));
+  for (const seat of seats) {
+    const roomId = roomForPoint(seat, shapes)?.id ?? null;
+    if (roomId === seat.roomId) continue;
+    await tx.seat.update({
+      where: { id: seat.id },
+      data: { roomId } satisfies Prisma.SeatUncheckedUpdateInput,
+    });
+    await audit(tx, ctx, {
+      action: 'layout.seat.room',
+      entityType: 'seat',
+      entityId: seat.id,
+      before: { roomId: seat.roomId },
+      after: { roomId },
+    });
   }
 }

@@ -1,6 +1,11 @@
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
-import type { CreateSeatInput, UpdateSeatInput } from '@seatline/shared';
+import {
+  roomForPoint,
+  type CreateSeatInput,
+  type UpdateSeatInput,
+  type XY,
+} from '@seatline/shared';
 import type { RequestContext } from '../auth/request-context';
 import { audit } from '../common/audit';
 import { orNotFound } from '../common/errors';
@@ -57,8 +62,8 @@ export class SeatsService {
         await tx.floor.findFirst({ where: { id: input.floorId, tenantId: ctx.tenantId } }),
         'Floor',
       );
-      if (input.roomId) await this.assertRoomOnFloor(tx, ctx, input.roomId, input.floorId);
-      const seat = await tx.seat.create({ data: { ...input, tenantId: ctx.tenantId } });
+      const roomId = await this.roomAt(tx, ctx, input.floorId, input);
+      const seat = await tx.seat.create({ data: { ...input, roomId, tenantId: ctx.tenantId } });
       await audit(tx, ctx, {
         action: 'seat.create',
         entityType: 'seat',
@@ -75,11 +80,17 @@ export class SeatsService {
         await tx.seat.findFirst({ where: { id, tenantId: ctx.tenantId }, include: withCurrent }),
         'Seat',
       );
-      if (input.roomId) await this.assertRoomOnFloor(tx, ctx, input.roomId, before.floorId);
       if (input.status === 'blocked' && before.assignments.length > 0) {
         throw new ConflictException('Free the seat before blocking it');
       }
-      const after = await tx.seat.update({ where: { id }, data: input });
+      const moved = input.x !== undefined || input.y !== undefined;
+      const roomId = moved
+        ? await this.roomAt(tx, ctx, before.floorId, {
+            x: input.x ?? before.x,
+            y: input.y ?? before.y,
+          })
+        : before.roomId;
+      const after = await tx.seat.update({ where: { id }, data: { ...input, roomId } });
       const { assignments: _, ...beforeSeat } = before;
       await audit(tx, ctx, {
         action: 'seat.update',
@@ -117,10 +128,13 @@ export class SeatsService {
     });
   }
 
-  private async assertRoomOnFloor(tx: Tx, ctx: RequestContext, roomId: string, floorId: string) {
-    const room = await tx.room.findFirst({ where: { id: roomId, tenantId: ctx.tenantId } });
-    if (!room || room.floorId !== floorId) {
-      throw new BadRequestException('The room must be on the same floor as the seat');
-    }
+  /** The room a point stands in on this floor (smallest, if rooms overlap) — like the editor. */
+  private async roomAt(tx: Tx, ctx: RequestContext, floorId: string, point: XY) {
+    const rooms = await tx.room.findMany({
+      where: { tenantId: ctx.tenantId, floorId },
+      select: { id: true, polygon: true },
+    });
+    const shapes = rooms.map((r) => ({ id: r.id, polygon: r.polygon as unknown as XY[] }));
+    return roomForPoint(point, shapes)?.id ?? null;
   }
 }

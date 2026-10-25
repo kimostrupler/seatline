@@ -35,7 +35,8 @@ Target customers: Swiss/EU companies using Microsoft 365. Data must stay in Swit
 ## Hosting (Plan A — lean Azure, ~CHF 20–30/month)
 
 - Azure Switzerland North only.
-- Postgres Flexible Server **B1ms**, Azure Container Apps (scale to zero), Blob Storage.
+- Postgres Flexible Server **B1ms** (50 connections: each API instance uses `DB_POOL_SIZE` 5 +
+  pg-boss `JOB_POOL_SIZE` 3; raise them only with a bigger SKU), Azure Container Apps (scale to zero), Blob Storage.
 - **No Redis**: background jobs use pg-boss in Postgres. Keep job code behind a small
   interface so moving to Redis/BullMQ later only touches that module.
 - Scaling up = bigger SKUs, not code changes.
@@ -143,7 +144,8 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   creates the UUIDs so undo/redo refer to the same rows. `useLayoutEditor` shows changes
   instantly and sends batches one at a time, in order.
 - A seat's room is **derived on the server** from its position (smallest containing room,
-  `roomForPoint` in `packages/shared`). Don't let clients set `roomId` in the editor.
+  `roomForPoint` in `packages/shared`). Clients never set `roomId`: the layout batch and the
+  plain `/seats` + `/rooms` routes all use `assignRooms` (`layout.service.ts`).
 - Desk size: real size once the floor has a scale (`floors.desk_width/depth`, default 1.6 × 0.8 m),
   else 64 × 44 units. `seatSize(floor)` + `SeatSizeContext` feed the shapes, hit tests and bounds.
 - Numbering per floor (`seat_numbering`): `floor` = 1.01…, `room` = room number + A, B… (`roomNumber`,
@@ -198,6 +200,10 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   personal data; cleared on sign-out) because seatline.ch can't read the app's session cookie:
   `looksSignedIn()` makes the website/help headers show **Open Seatline** instead of Sign in.
   It's listed in the privacy policy's cookie section.
+- Each session cookie carries a random `sid` (also in the internal token). Sign-out calls
+  `POST /auth/signout`, which stores it in `signed_out_sessions` (SECURITY DEFINER
+  `session_sign_out` / `session_signed_out`, kept 31 days); the guard then refuses that sid
+  (401 `signed_out`), so copies of the cookie (another browser, a home-screen app) end too.
 - ID tokens: issuer must equal `<login>/<tid>/v2.0` of the token's own `tid` (multi-tenant), plus
   audience, nonce, signature. Covered by `lib/server/oidc.test.ts`.
 - Workspace lookup before the tenant is known uses SECURITY DEFINER SQL functions
@@ -469,7 +475,8 @@ folded`) so the person and the actions stand out.
 - Output = draft in the new image's pixels (`planDraftSchema` in packages/shared, validated by the
   API). Known scale → 40 px/m so desks match `SEAT_W`. Keep detection logic in `geometry.py`.
 - API: `PlanImportService` stores the image under `<tenant>/floors/<id>/imports/<uuid>.png` until
-  apply (→ normal plan upload, audit `floor.plan.import`) or discard. Rooms/desks are created by
+  apply (→ normal plan upload, audit `floor.plan.import`) or discard; the nightly job deletes
+  imports nobody finished after 7 days (`StorageService.deleteOldImports`). Rooms/desks are created by
   the web as ONE editor batch (`lib/editor/plan-import.ts`), so undo works like any edit.
 - Tests: pytest on `samples/make_samples.py` plans; API tests use a fake engine; e2e runs the real
   engine (`scripts/py.sh`: `.venv` locally, `python3` in CI).

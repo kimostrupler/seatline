@@ -4,6 +4,7 @@ import type { RequestContext } from '../auth/request-context';
 import { audit } from '../common/audit';
 import { orNotFound } from '../common/errors';
 import { TenantDb } from '../db/tenant-db.service';
+import { assignRooms } from '../layout/layout.service';
 
 @Injectable()
 export class RoomsService {
@@ -34,6 +35,7 @@ export class RoomsService {
         entityId: room.id,
         after: room,
       });
+      await assignRooms(tx, ctx, room.floorId); // seats standing in it now belong to it
       return room;
     });
   }
@@ -52,6 +54,7 @@ export class RoomsService {
         before,
         after,
       });
+      if (input.polygon) await assignRooms(tx, ctx, after.floorId);
       return after;
     });
   }
@@ -78,6 +81,7 @@ export class RoomsService {
         entityId: id,
         before: { ...before, unlinkedSeatIds: seats.map((s) => s.id) },
       });
+      await assignRooms(tx, ctx, before.floorId); // a bigger room around it takes them in
     });
   }
 }

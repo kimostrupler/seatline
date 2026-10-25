@@ -136,6 +136,7 @@ test('another organisation never sees the first one’s workspace', async ({ pag
 
 test('sign out, and the API refuses requests without a session (dev headers are ignored)', async ({
   page,
+  browser,
 }) => {
   await signInAs(page, 'first@newco.example');
   await page.getByLabel('Organisation name').fill('NewCo AG');
@@ -146,9 +147,18 @@ test('sign out, and the API refuses requests without a session (dev headers are 
   await page.goto('/help/en');
   await expect(page.getByRole('link', { name: 'Open Seatline' })).toBeVisible();
   await page.goto('/');
+  // a copy of this browser's sign-in (another browser, a stolen cookie)
+  const copy = await browser.newContext({ storageState: await page.context().storageState() });
+  const other = await copy.newPage();
+  await other.goto('/');
+  await expect(other.getByTestId('account-menu')).toBeVisible();
   await page.getByTestId('account-menu').click();
   await page.getByRole('menuitem', { name: 'Sign out' }).click();
   await expect(page).toHaveURL(/\/signin\?signedOut=1$/);
+  // signing out ended that copy too
+  await other.goto('/');
+  await expect(other).toHaveURL(/\/signin\?signedOut=1$/);
+  await copy.close();
   await page.goto('/welcome');
   await expect(page.getByRole('link', { name: 'Sign in', exact: true }).first()).toBeVisible();
   await page.goto('/');

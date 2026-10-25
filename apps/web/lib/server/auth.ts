@@ -1,5 +1,6 @@
 import 'server-only';
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import type { NextResponse } from 'next/server';
 import { siteHosts } from '../site';
 import { webConfig } from './config';
@@ -47,6 +48,8 @@ export async function apiAsUser<T>(
 
 export async function session(user: SessionUser): Promise<Session> {
   const res = await apiAsUser<Session>(user, '/auth/session', { method: 'POST' });
+  // this sign-in was ended (signed out elsewhere with this cookie): sign in again
+  if (res.status === 401) redirect('/signin?signedOut=1');
   if (res.status !== 200) throw new Error(`Session check failed (${res.status})`);
   return res.body;
 }

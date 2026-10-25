@@ -107,7 +107,7 @@ export function api(app: INestApplication) {
 
 /** What the web app sends after Microsoft sign-in: a short-lived signed identity token. */
 export async function msToken(
-  identity: { tid: string; oid: string; name?: string; email?: string },
+  identity: { tid: string; oid: string; name?: string; email?: string; sid?: string },
   options: { secret?: string; expiresIn?: string; audience?: string } = {},
 ) {
   const token = await new SignJWT({
@@ -115,6 +115,7 @@ export async function msToken(
     oid: identity.oid,
     name: identity.name ?? 'Test Person',
     email: identity.email ?? `${identity.oid.slice(0, 8)}@example.com`,
+    ...(identity.sid && { sid: identity.sid }),
   })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuer('seatline-web')
