@@ -2,9 +2,11 @@ import { Body, Controller, Get, HttpCode, Post } from '@nestjs/common';
 import {
   demoStartSchema,
   type DemoStartInput,
+  emailSignInCodeSchema,
   emailSignInStartSchema,
   emailSignInVerifySchema,
   onboardingSchema,
+  type EmailSignInCodeInput,
   type EmailSignInStartInput,
   type EmailSignInVerifyInput,
   type OnboardingInput,
@@ -56,6 +58,14 @@ export class AuthController {
   @HttpCode(200)
   verifyEmail(@Body(new ZodPipe(emailSignInVerifySchema)) body: EmailSignInVerifyInput) {
     return this.emailSignIn.verify(body.token);
+  }
+
+  /** Use the code from the sign-in e-mail instead (typed in, e.g. in a home-screen app). */
+  @Public()
+  @Post('auth/email/code')
+  @HttpCode(200)
+  verifyEmailCode(@Body(new ZodPipe(emailSignInCodeSchema)) body: EmailSignInCodeInput) {
+    return this.emailSignIn.verifyCode(body.email, body.code);
   }
 
   /**

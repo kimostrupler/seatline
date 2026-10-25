@@ -362,7 +362,9 @@
       "failed": "Sign-in didn’t work. Please try again.",
       "link_invalid": "That sign-in link has expired or was already used. Ask for a new one.",
       "too_many": "Too many sign-in links were asked for. Please wait a few minutes.",
-      "bad_email": "Please enter a valid e-mail address."
+      "bad_email": "Please enter a valid e-mail address.",
+      "code_invalid": "That code is wrong, has expired or was already used. Check the latest e-mail, or ask for a new link.",
+      "too_many_codes": "Too many codes were tried. Please wait a few minutes."
     },
     "signOut": "Sign out",
     "onboardingTitle": "Set up Seatline for your organisation",
@@ -383,7 +385,10 @@
     "linkBody": "You opened your sign-in link. Continue to sign in on this device.",
     "linkButton": "Continue",
     "checkTitle": "Check your inbox",
-    "checkBody": "If {email} can use Seatline, a sign-in link is on its way. It works once, for 15 minutes.",
+    "checkBody": "If {email} can use Seatline, an e-mail with a sign-in link and a code is on its way. Both work once, for 15 minutes.",
+    "codeHint": "Using Seatline from your phone’s home screen? The link opens in your browser — type the code here instead.",
+    "codeButton": "Sign in with the code",
+    "codeLabel": "Or type the code from the e-mail",
     "checkHint": "Nothing there after a minute? Look in the spam folder, or ask for a new link.",
     "checkOther": "Use a different e-mail address",
     "pickTitle": "Choose a workspace",

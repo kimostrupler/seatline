@@ -238,6 +238,16 @@ export const emailSignInVerifySchema = z.strictObject({
   token: z.string().regex(/^[A-Za-z0-9_-]{43}$/),
 });
 
+/** The 6-digit code from the same e-mail, with the address it was sent to (spaces allowed). */
+export const emailSignInCodeSchema = z.strictObject({
+  email,
+  code: z
+    .string()
+    .transform((c) => c.replace(/\s+/g, ''))
+    .pipe(z.string().regex(/^\d{6}$/)),
+});
+export type EmailSignInCodeInput = z.infer<typeof emailSignInCodeSchema>;
+
 /** What e-mail notices are about (workspace setting). */
 export const NOTIFY_EVENTS = ['left', 'joined', 'team', 'moves'] as const;
 

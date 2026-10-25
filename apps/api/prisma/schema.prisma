@@ -365,6 +365,9 @@ model EmailSignIn {
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   expiresAt DateTime  @map("expires_at") @db.Timestamptz(3)
   usedAt    DateTime? @map("used_at") @db.Timestamptz(3)
+  /// the 6-digit code in the same e-mail (its hash), for typing in instead of opening the link
+  codeHash    String? @map("code_hash")
+  failedCodes Int     @default(0) @map("failed_codes")
 
   @@index([email, createdAt])
   @@map("email_sign_ins")

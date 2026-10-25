@@ -398,6 +398,10 @@ export const FR: HelpContent = {
       a: 'Regardez dans vos courriers indésirables et attendez une minute. Le lien fonctionne une fois, pendant 15 minutes ; demandez-en un nouveau s’il a expiré. Si votre entreprise utilise Microsoft 365, connectez-vous avec Microsoft.',
     },
     {
+      q: 'Seatline sur l’écran d’accueil de mon téléphone me redemande sans cesse de me connecter.',
+      a: 'Une app sur l’écran d’accueil a sa propre connexion, et le lien de l’e-mail s’ouvre toujours dans le navigateur. Dans l’app, demandez donc un lien comme d’habitude, puis saisissez le code de cet e-mail sur « Consultez votre boîte de réception ». L’app reste ensuite connectée pendant 30 jours.',
+    },
+    {
       q: 'Pourquoi ne puis-je rien modifier ?',
       a: 'Soit votre rôle est Lecteur (un admin peut vous rendre éditeur), soit l’espace est en lecture seule parce que l’essai s’est terminé sans abonnement — un admin peut s’abonner sous Facturation.',
     },

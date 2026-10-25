@@ -399,6 +399,10 @@ export const DE: HelpContent = {
       a: 'Schauen Sie im Spam- oder Junk-Ordner nach und warten Sie eine Minute. Der Link funktioniert einmal und 15 Minuten lang; fordern Sie sonst einen neuen an. Nutzt Ihre Firma Microsoft 365, melden Sie sich mit Microsoft an.',
     },
     {
+      q: 'Seatline auf dem Home-Bildschirm meines Telefons fragt immer wieder nach der Anmeldung.',
+      a: 'Eine App auf dem Home-Bildschirm hat ihre eigene Anmeldung, und der Link in der E-Mail öffnet sich immer im Browser. Fordern Sie in der App also wie gewohnt einen Link an und geben Sie dann bei „Schauen Sie in Ihr Postfach“ den Code aus dieser E-Mail ein. Danach bleibt die App 30 Tage angemeldet.',
+    },
+    {
       q: 'Warum kann ich nichts ändern?',
       a: 'Entweder ist Ihre Rolle Betrachter (ein Admin kann Sie zum Bearbeiter machen), oder der Arbeitsbereich ist schreibgeschützt, weil der Test ohne Abo endete – ein Admin kann unter Abrechnung abonnieren.',
     },
