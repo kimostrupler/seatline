@@ -320,7 +320,8 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   (`lib/csp.ts`, tested): self only, `blob:` images, `frame-ancestors 'none'`, and scripts only
   with that request's nonce + `'strict-dynamic'` (no `'unsafe-inline'` scripts; Next.js stamps its
   own scripts with the nonce). JSON-LD `<script type="application/ld+json">` blocks are data and
-  need none. `e2e/pages.spec.ts` fails on any CSP console error. A new outside host (script, font,
+  need none. `e2e/pages.spec.ts` fails on any CSP console error. There are no server actions:
+  the middleware answers any `Next-Action` request (bot probes) with 404 before Next.js logs it. A new outside host (script, font,
   image, API) must be added to the CSP or it's blocked.
 - **Per-address limits** (`lib/server/rate-limit.ts`, in memory per instance) key on `clientIp()`: the
   LAST `X-Forwarded-For` entry (added by Azure's ingress); the first one is the caller's and can be faked.
@@ -465,7 +466,9 @@ folded`) so the person and the actions stand out.
   custom domain, set in the Stripe dashboard + a DNS record). The web app just opens the URL the
   API gets from Stripe (`window.location.assign`), so nothing in code or the CSP depends on the
   domain. Don't hard-code Stripe hosts.
-- Seat count = active seats; the nightly job syncs it (`list_billed_tenants`). Tests use
+- Seat count = active seats; the nightly job syncs it (`list_billed_tenants`). A subscription
+  Stripe doesn't know (`resource_missing`, e.g. made with test keys) is marked ended, like a
+  cancelled one, but only while our price is found (wrong keys must not end them all). Tests use
   `test/fake-stripe.ts` via `STRIPE_API_BASE`. Keys online: `infra/azure/stripe-setup.sh`.
 
 ## Plan import (Phase 5, C1/C2)
