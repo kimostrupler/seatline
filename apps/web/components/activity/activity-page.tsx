@@ -82,7 +82,9 @@ export function ActivityPage() {
     to: search.get('to') ?? undefined,
   };
   const setFilter = (key: keyof ActivityFilters, value: string | undefined) => {
-    const next = new URLSearchParams(search);
+    // the address as it is now, not as it was when this render ran: the search box calls this
+    // 300 ms after typing, and a filter cleared in between must stay cleared
+    const next = new URLSearchParams(window.location.search);
     if (value) next.set(key, value);
     else next.delete(key);
     router.replace(`${pathname}?${next.toString()}`);

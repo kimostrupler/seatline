@@ -56,6 +56,8 @@ test('activity lists every change in plain words, filters by person, links to th
   const searchBox = page.getByRole('searchbox', { name: 'Search activity' });
   await searchBox.fill('new HIRE');
   await expect(page).toHaveURL(/q=new\+HIRE/);
+  // the person filter cleared just before typing stays cleared
+  expect(page.url()).not.toContain('personId');
   await expect(list.getByRole('listitem')).toHaveCount(1);
   await searchBox.fill('nothing like this');
   await expect(page.getByText('No changes match these filters.')).toBeVisible();
