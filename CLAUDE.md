@@ -253,6 +253,12 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   15 min, plus a per-IP limit in the web route), 32 random bytes, only the SHA-256 is stored
   (`email_sign_ins`, no tenant, reachable only through SECURITY DEFINER functions), single use,
   15 minutes. `POST /auth/email/verify` returns the address.
+- The same e-mail carries a **6-digit code** (`randomInt`, only `hashCode(email, code)` stored in
+  the link's row, migration `20261101090000_email_sign_in_code`): typed on `/signin/check`
+  (POST `/auth/email/code` web route → API `POST /auth/email/code`), because an iPhone
+  home-screen app keeps its own cookies and e-mail links always open Safari. Link or code, the
+  row works once; after `MAX_FAILED_CODES` (5) wrong codes the address's open rows stop taking
+  codes (`email_sign_in_use_code`); the web route also limits tries per IP.
 - Web: `/auth/email?token=` is a page with a button (mail scanners open links and would burn
   the token); the POST routes check `Origin` (login CSRF). The session cookie is a union
   (`kind: 'microsoft' | 'email'`; old cookies = microsoft). Email identity = address + picked

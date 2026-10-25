@@ -3,19 +3,23 @@ import type { Mail } from './mail.service';
 
 // E-mail texts (en, Swiss German, French). Plain text: no tracking, no images.
 
-export function signInMail(to: string, link: string, language: MailLanguage): Mail {
+/** "482193" → "482 193" (easier to read and type) */
+const spacedCode = (code: string) => `${code.slice(0, 3)} ${code.slice(3)}`;
+
+export function signInMail(to: string, link: string, code: string, language: MailLanguage): Mail {
+  const c = spacedCode(code);
   const t = {
     en: {
       subject: 'Your Seatline sign-in link',
-      text: `Hello,\n\nUse this link to sign in to Seatline. It works once and for 15 minutes:\n\n${link}\n\nIf you didn't ask for it, just ignore this e-mail — nobody can sign in without it.\n\nSeatline`,
+      text: `Hello,\n\nUse this link to sign in to Seatline. It works once and for 15 minutes:\n\n${link}\n\nOr type this code where Seatline asks for it (e.g. in the app on your phone's home screen):\n\n${c}\n\nIf you didn't ask for it, just ignore this e-mail — nobody can sign in without it.\n\nSeatline`,
     },
     de: {
       subject: 'Ihr Anmeldelink für Seatline',
-      text: `Guten Tag\n\nMit diesem Link melden Sie sich bei Seatline an. Er funktioniert einmal und 15 Minuten lang:\n\n${link}\n\nFalls Sie ihn nicht angefordert haben, ignorieren Sie diese E-Mail einfach — ohne den Link kann sich niemand anmelden.\n\nSeatline`,
+      text: `Guten Tag\n\nMit diesem Link melden Sie sich bei Seatline an. Er funktioniert einmal und 15 Minuten lang:\n\n${link}\n\nOder geben Sie diesen Code dort ein, wo Seatline danach fragt (z. B. in der App auf dem Home-Bildschirm Ihres Telefons):\n\n${c}\n\nFalls Sie ihn nicht angefordert haben, ignorieren Sie diese E-Mail einfach — ohne Link oder Code kann sich niemand anmelden.\n\nSeatline`,
     },
     fr: {
       subject: 'Votre lien de connexion à Seatline',
-      text: `Bonjour,\n\nCe lien vous connecte à Seatline. Il fonctionne une seule fois, pendant 15 minutes :\n\n${link}\n\nSi vous ne l’avez pas demandé, ignorez simplement cet e-mail — personne ne peut se connecter sans ce lien.\n\nSeatline`,
+      text: `Bonjour,\n\nCe lien vous connecte à Seatline. Il fonctionne une seule fois, pendant 15 minutes :\n\n${link}\n\nOu saisissez ce code là où Seatline le demande (par ex. dans l’app sur l’écran d’accueil de votre téléphone) :\n\n${c}\n\nSi vous ne l’avez pas demandé, ignorez simplement cet e-mail — personne ne peut se connecter sans ce lien ou ce code.\n\nSeatline`,
     },
   }[language];
   return { to, ...t };

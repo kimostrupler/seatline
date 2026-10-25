@@ -10,6 +10,12 @@ export async function sentMails(): Promise<Array<{ to: string; subject: string; 
 
 export const clearMails = () => rm(process.env.MAIL_OUTBOX!, { recursive: true, force: true });
 
+/** The 6-digit code ("482 193") in the last sign-in e-mail sent to `to`. */
+export async function lastSignInCode(to: string) {
+  const mail = (await sentMails()).filter((m) => m.to === to).at(-1);
+  return mail && /\n(\d{3} \d{3})\n/.exec(mail.text)?.[1];
+}
+
 /** The token in the last sign-in link sent to `to`. */
 export async function lastLinkToken(to: string) {
   const mail = (await sentMails()).filter((m) => m.to === to).at(-1);

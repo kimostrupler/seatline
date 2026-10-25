@@ -362,7 +362,9 @@
       "failed": "La connexion n’a pas fonctionné. Veuillez réessayer.",
       "link_invalid": "Ce lien de connexion a expiré ou a déjà été utilisé. Demandez-en un nouveau.",
       "too_many": "Trop de liens de connexion ont été demandés. Veuillez patienter quelques minutes.",
-      "bad_email": "Veuillez saisir une adresse e-mail valide."
+      "bad_email": "Veuillez saisir une adresse e-mail valide.",
+      "code_invalid": "Ce code est faux, a expiré ou a déjà été utilisé. Regardez le dernier e-mail, ou demandez un nouveau lien.",
+      "too_many_codes": "Trop de codes ont été essayés. Veuillez patienter quelques minutes."
     },
     "signOut": "Se déconnecter",
     "onboardingTitle": "Configurer Seatline pour votre organisation",
@@ -383,7 +385,10 @@
     "linkBody": "Vous avez ouvert votre lien de connexion. Continuez pour vous connecter sur cet appareil.",
     "linkButton": "Continuer",
     "checkTitle": "Consultez votre boîte de réception",
-    "checkBody": "Si {email} peut utiliser Seatline, un lien de connexion est en route. Il fonctionne une seule fois, pendant 15 minutes.",
+    "checkBody": "Si {email} peut utiliser Seatline, un e-mail avec un lien de connexion et un code est en route. Les deux fonctionnent une seule fois, pendant 15 minutes.",
+    "codeHint": "Vous utilisez Seatline depuis l’écran d’accueil de votre téléphone ? Le lien s’ouvre dans le navigateur — saisissez plutôt le code ici.",
+    "codeButton": "Se connecter avec le code",
+    "codeLabel": "Ou saisissez le code de l’e-mail",
     "checkHint": "Toujours rien après une minute ? Regardez dans les spams, ou demandez un nouveau lien.",
     "checkOther": "Utiliser une autre adresse e-mail",
     "pickTitle": "Choisir un espace de travail",

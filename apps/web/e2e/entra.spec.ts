@@ -211,6 +211,29 @@ test('an e-mail link signs in once; admins add and invite people', async ({ page
   await nora.close();
 });
 
+test('the code from the e-mail signs in too (e.g. in a home-screen app)', async ({ page }) => {
+  const email = 'admin@alpenblick.example';
+  await page.goto('/signin');
+  await page.getByLabel('Work e-mail').fill(email);
+  await page.getByRole('button', { name: 'E-mail me a sign-in link' }).click();
+  await expect(page.getByRole('heading', { name: 'Check your inbox' })).toBeVisible();
+  const code = /\n(\d{3} \d{3})\n/.exec(mailsTo(email).at(-1)!.text)![1]!;
+  // a wrong code says so and stays on the page
+  const field = page.getByLabel('Or type the code from the e-mail');
+  await field.fill(code === '000 000' ? '111 111' : '000 000');
+  await page.getByRole('button', { name: 'Sign in with the code' }).click();
+  await expect(page.getByRole('alert').filter({ hasText: 'That code is wrong' })).toBeVisible();
+  // the right one signs in, typed with or without the space
+  await field.fill(code.replace(' ', ''));
+  await page.getByRole('button', { name: 'Sign in with the code' }).click();
+  await expect(page.getByTestId('account-menu')).toContainText('Alpenblick AG');
+  // and the link in that e-mail is used up now (one sign-in per e-mail)
+  await page.context().clearCookies();
+  await page.goto(lastLink(email)!);
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await expect(page.getByText(/expired or was already used/)).toBeVisible();
+});
+
 test('a new company signs up with an e-mail link', async ({ page }) => {
   await emailSignIn(page, 'founder@small.example');
   await expect(page.getByText('Create your company’s workspace')).toBeVisible();

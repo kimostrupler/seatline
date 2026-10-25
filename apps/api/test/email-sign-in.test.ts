@@ -11,7 +11,7 @@ import {
   resetDb,
   type Fixture,
 } from './helpers';
-import { clearMails, lastLinkToken, sentMails } from './mail';
+import { clearMails, lastLinkToken, lastSignInCode, sentMails } from './mail';
 
 let app: INestApplication;
 let a: Fixture;
@@ -64,6 +64,53 @@ describe('sign-in with an e-mail link', () => {
       { token_hash: string }[]
     >`SELECT token_hash FROM email_sign_ins`;
     expect(rows[0]!.token_hash).not.toContain(token);
+  });
+
+  it('the same e-mail has a code to type in instead (once, only for that address)', async () => {
+    const byCode = (email: string, code: string) =>
+      api(app).post('/auth/email/code').send({ email, code });
+    await start('admin@alpha.example').expect(200);
+    const code = (await lastSignInCode('admin@alpha.example'))!;
+    expect(code).toMatch(/^\d{3} \d{3}$/);
+    // not for another address, nor a made-up code; spaces and capitals don't matter
+    await byCode('viewer@alpha.example', code).expect(400);
+    expect((await byCode('admin@alpha.example', '000000').expect(400)).body.code).toBe(
+      'code_invalid',
+    );
+    await byCode('admin@alpha.example', 'abc').expect(400);
+    expect((await byCode('Admin@Alpha.example', code).expect(200)).body).toEqual({
+      email: 'admin@alpha.example',
+    });
+    // once only — and then the link is used up too (one sign-in per e-mail)
+    await byCode('admin@alpha.example', code).expect(400);
+    await verify((await lastLinkToken('admin@alpha.example'))!).expect(400);
+    // only hashes are stored
+    const rows = await owner.$queryRaw<
+      { code_hash: string }[]
+    >`SELECT code_hash FROM email_sign_ins`;
+    expect(rows[0]!.code_hash).not.toContain(code.replace(' ', ''));
+  });
+
+  it('a code can’t be guessed: 5 wrong tries and it stops working', async () => {
+    const byCode = (code: string) =>
+      api(app).post('/auth/email/code').send({ email: 'admin@alpha.example', code });
+    await start('admin@alpha.example').expect(200);
+    await start('admin@alpha.example').expect(200); // a second e-mail doesn't add tries
+    const code = (await lastSignInCode('admin@alpha.example'))!.replace(' ', '');
+    const wrong = code === '123456' ? '654321' : '123456';
+    for (let i = 0; i < 5; i++) await byCode(wrong).expect(400);
+    await byCode(code).expect(400);
+    // the link in the e-mail still works
+    await verify((await lastLinkToken('admin@alpha.example'))!).expect(200);
+  });
+
+  it('codes expire with their link', async () => {
+    await start('admin@alpha.example').expect(200);
+    await owner.$executeRaw`UPDATE email_sign_ins SET expires_at = now() - interval '1 second'`;
+    await api(app)
+      .post('/auth/email/code')
+      .send({ email: 'admin@alpha.example', code: (await lastSignInCode('admin@alpha.example'))! })
+      .expect(400);
   });
 
   it('links expire', async () => {

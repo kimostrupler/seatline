@@ -393,6 +393,10 @@ export const EN: HelpContent = {
       a: 'Check your spam or junk folder and wait a minute. The link works once and for 15 minutes; ask for a new one if it expired. If your company uses Microsoft 365, sign in with Microsoft instead.',
     },
     {
+      q: 'Seatline on my phone’s home screen keeps asking me to sign in.',
+      a: 'An app on the home screen keeps its own sign-in, and the link in the e-mail always opens in your browser. So in the app, ask for a link as usual, then type the code from that e-mail on “Check your inbox”. The app then stays signed in for 30 days.',
+    },
+    {
       q: 'Why can’t I change anything?',
       a: 'Either your role is Viewer (ask an admin to make you an editor), or the workspace is read-only because the trial ended without a subscription — an admin can subscribe under Billing.',
     },

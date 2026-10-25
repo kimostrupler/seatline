@@ -31,10 +31,23 @@ export class TenantDb {
   }
 
   /** Stores a sign-in link's hash; false when this address asked for too many links lately. */
-  async createEmailSignIn(email: string, tokenHash: string, minutes: number, maxRecent: number) {
+  async createEmailSignIn(
+    email: string,
+    tokenHash: string,
+    codeHash: string,
+    minutes: number,
+    maxRecent: number,
+  ) {
     const rows = await this.prisma.$queryRaw<{ ok: boolean }[]>`
-      SELECT email_sign_in_create(${email}, ${tokenHash}, make_interval(mins => ${minutes}::int), ${maxRecent}::int) AS ok`;
+      SELECT email_sign_in_create(${email}, ${tokenHash}, ${codeHash}, make_interval(mins => ${minutes}::int), ${maxRecent}::int) AS ok`;
     return rows[0]?.ok === true;
+  }
+
+  /** Uses a sign-in code once: the address while valid (and not guessed at too often), else null. */
+  async useEmailSignInCode(email: string, codeHash: string, maxFailed: number) {
+    const rows = await this.prisma.$queryRaw<{ email: string | null }[]>`
+      SELECT email_sign_in_use_code(${email}, ${codeHash}, ${maxFailed}::int) AS email`;
+    return rows[0]?.email ?? null;
   }
 
   /** Uses a sign-in link once: its e-mail address while valid, else null. */

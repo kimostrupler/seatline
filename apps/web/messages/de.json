@@ -362,7 +362,9 @@
       "failed": "Die Anmeldung hat nicht funktioniert. Bitte versuchen Sie es erneut.",
       "link_invalid": "Dieser Anmeldelink ist abgelaufen oder wurde schon verwendet. Fordern Sie einen neuen an.",
       "too_many": "Es wurden zu viele Anmeldelinks angefordert. Bitte warten Sie ein paar Minuten.",
-      "bad_email": "Bitte geben Sie eine gültige E-Mail-Adresse ein."
+      "bad_email": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+      "code_invalid": "Dieser Code ist falsch, abgelaufen oder wurde schon verwendet. Schauen Sie in die neueste E-Mail oder fordern Sie einen neuen Link an.",
+      "too_many_codes": "Es wurden zu viele Codes ausprobiert. Bitte warten Sie ein paar Minuten."
     },
     "signOut": "Abmelden",
     "onboardingTitle": "Seatline für Ihre Organisation einrichten",
@@ -383,7 +385,10 @@
     "linkBody": "Sie haben Ihren Anmeldelink geöffnet. Fahren Sie fort, um sich auf diesem Gerät anzumelden.",
     "linkButton": "Weiter",
     "checkTitle": "Schauen Sie in Ihr Postfach",
-    "checkBody": "Falls {email} Seatline nutzen kann, ist ein Anmeldelink unterwegs. Er funktioniert einmal und 15 Minuten lang.",
+    "checkBody": "Falls {email} Seatline nutzen kann, ist eine E-Mail mit einem Anmeldelink und einem Code unterwegs. Beide funktionieren einmal und 15 Minuten lang.",
+    "codeHint": "Nutzen Sie Seatline vom Home-Bildschirm Ihres Telefons? Der Link öffnet sich im Browser — geben Sie stattdessen hier den Code ein.",
+    "codeButton": "Mit dem Code anmelden",
+    "codeLabel": "Oder geben Sie den Code aus der E-Mail ein",
     "checkHint": "Nach einer Minute noch nichts da? Schauen Sie im Spam-Ordner nach oder fordern Sie einen neuen Link an.",
     "checkOther": "Andere E-Mail-Adresse verwenden",
     "pickTitle": "Arbeitsbereich wählen",
