@@ -58,6 +58,42 @@ describe('outreach (owner leads)', () => {
     });
   });
 
+  it('imports researched leads at once, skipping companies and addresses already there', async () => {
+    await newLead();
+    const res = await api(app)
+      .post('/owner/leads/import')
+      .set(a.headers)
+      .send({
+        leads: [
+          { company: 'Muster AG', contactEmail: 'Info@Muster.ch', whyNow: 'Ich habe gelesen …' },
+          { company: ' livingdocs ' }, // already a lead
+          { company: 'Other GmbH', contactEmail: 'contact@livingdocs.io' }, // same address
+          { company: 'muster ag' }, // twice in the file
+        ],
+      })
+      .expect(201);
+    expect(res.body).toEqual({
+      added: 1,
+      skipped: ['livingdocs', 'Other GmbH', 'muster ag'],
+    });
+    const list = (await api(app).get('/owner/leads').set(a.headers).expect(200)).body.leads;
+    expect(list.find((l: { company: string }) => l.company === 'Muster AG')).toMatchObject({
+      contactEmail: 'info@muster.ch',
+      status: 'research',
+    });
+    // only the operator; a status can't be imported (they all start as "research")
+    await api(app)
+      .post('/owner/leads/import')
+      .set(b.headers)
+      .send({ leads: [{ company: 'X' }] })
+      .expect(404);
+    await api(app)
+      .post('/owner/leads/import')
+      .set(a.headers)
+      .send({ leads: [{ company: 'X', status: 'sent' }] })
+      .expect(400);
+  });
+
   it('only schedules a personal, short e-mail; sends it in the morning; follows up; stops on a reply', async () => {
     const id = await newLead();
     const draft = await api(app)

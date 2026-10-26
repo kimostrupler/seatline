@@ -1,9 +1,11 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query } from '@nestjs/common';
 import {
   leadCreateSchema,
+  leadImportSchema,
   leadMessageSchema,
   leadUpdateSchema,
   LEAD_MESSAGE_KINDS,
+  type LeadImportInput,
   type LeadInput,
   type LeadMessageKind,
 } from '@seatline/shared/dist/outreach';
@@ -73,6 +75,16 @@ export class OwnerController {
   ) {
     await this.owner.assertOwner(ctx, '/owner/leads');
     return this.leads.create(ctx, body);
+  }
+
+  /** Researched leads from a file; ones already there (same company or e-mail) are skipped. */
+  @Post('leads/import')
+  async importLeads(
+    @Ctx() ctx: RequestContext,
+    @Body(new ZodPipe(leadImportSchema)) body: LeadImportInput,
+  ) {
+    await this.owner.assertOwner(ctx, '/owner/leads/import');
+    return this.leads.import(ctx, body.leads);
   }
 
   @Get('leads/:id')

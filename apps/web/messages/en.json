@@ -1709,7 +1709,11 @@
       "scheduledFor": "Goes out {when}",
       "canceledMsg": "Not sent (cancelled)",
       "failed": "That didn’t work: {message}",
-      "keep": "Keep"
+      "keep": "Keep",
+      "import": "Import",
+      "imported": "{count, plural, one {# lead added} other {# leads added}}",
+      "importSkipped": "Already there, skipped: {names}",
+      "importInvalid": "That file isn’t a list of leads (JSON)."
     }
   },
   "loading": {

@@ -78,3 +78,30 @@ test('outreach leads: one personal e-mail, at most 100 words, scheduled for the 
   await page.goto('/owner/leads');
   await expect(page.getByText('This page could not be found.')).toBeVisible();
 });
+
+test('researched leads come in from a file and wait under To do', async ({ page }) => {
+  await page.goto('/owner/leads');
+  const leads = [
+    {
+      company: 'Muster AG',
+      contactEmail: 'info@muster.example',
+      whyNow: 'Ich habe gelesen, dass Sie umziehen.',
+      status: 'ready', // ignored: imported leads start as "Research"
+    },
+  ];
+  await page.locator('input[type=file]').setInputFiles({
+    name: 'leads.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(leads)),
+  });
+  await expect(page.getByText('1 lead added')).toBeVisible();
+  await expect(page.getByRole('main')).toContainText('Muster AG');
+  // the same file again: nothing new
+  await page.locator('input[type=file]').setInputFiles({
+    name: 'leads.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(leads)),
+  });
+  await expect(page.getByText('0 leads added')).toBeVisible();
+  await expect(page.getByText('Already there, skipped: Muster AG')).toBeVisible();
+});
