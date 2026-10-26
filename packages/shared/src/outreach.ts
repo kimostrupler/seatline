@@ -59,6 +59,14 @@ const leadFields = {
 export const leadUpdateSchema = z.strictObject(leadFields).partial();
 export const leadCreateSchema = leadUpdateSchema.required({ company: true });
 export type LeadInput = z.infer<typeof leadUpdateSchema>;
+/** Many researched leads at once (a JSON file on the Leads page); they start as "research". */
+export const leadImportSchema = z.strictObject({
+  leads: z
+    .array(leadCreateSchema.omit({ status: true }))
+    .min(1)
+    .max(500),
+});
+export type LeadImportInput = z.infer<typeof leadImportSchema>;
 
 /** Empty texts become null, e-mail addresses lower case. */
 export function cleanLead<T extends LeadInput>(input: T): T {

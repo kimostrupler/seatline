@@ -1709,7 +1709,11 @@
       "scheduledFor": "Part {when}",
       "canceledMsg": "Pas envoyé (annulé)",
       "failed": "Cela n’a pas fonctionné : {message}",
-      "keep": "Garder"
+      "keep": "Garder",
+      "import": "Importer",
+      "imported": "{count, plural, one {# lead ajouté} other {# leads ajoutés}}",
+      "importSkipped": "Déjà présents, ignorés : {names}",
+      "importInvalid": "Ce fichier n’est pas une liste de leads (JSON)."
     }
   },
   "loading": {

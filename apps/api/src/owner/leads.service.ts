@@ -30,7 +30,7 @@ import { randomUUID } from 'node:crypto';
 import type { RequestContext } from '../auth/request-context';
 import { audit } from '../common/audit';
 import { loadConfig } from '../config';
-import { TenantDb, type Tx } from '../db/tenant-db.service';
+import { BIG_BATCH, TenantDb, type Tx } from '../db/tenant-db.service';
 import { InboxService } from '../mail/inbox.service';
 import { MailService } from '../mail/mail.service';
 import { outreachReminderMail } from '../mail/texts';
@@ -93,6 +93,9 @@ export function replyKey(email: string): { domain: string; exact: string | null 
   const domain = email.split('@')[1]?.toLowerCase() ?? '';
   return { domain, exact: FREE_MAIL.has(domain) ? email.toLowerCase() : null };
 }
+
+/** Same company, however it's written ("Muster AG" = "muster ag "). */
+const key = (company: string) => company.trim().toLowerCase().replace(/\s+/g, ' ');
 
 /**
  * The operator's outreach (Leads page): possible customers, one personal e-mail at a time.
@@ -167,6 +170,48 @@ export class LeadsService {
       });
       return lead;
     });
+  }
+
+  /**
+   * Adds researched leads in one go. A company or e-mail address that's already a lead (in any
+   * status, "no" included) is skipped, so nobody is written to twice.
+   */
+  async import(ctx: RequestContext, input: Array<LeadInput & { company: string }>) {
+    return this.db.run(
+      ctx.tenantId,
+      async (tx) => {
+        const existing = await tx.lead.findMany({
+          where: { tenantId: ctx.tenantId },
+          select: { company: true, contactEmail: true },
+        });
+        const seen = new Set(
+          existing.flatMap((l) => [key(l.company), l.contactEmail ?? '']).filter(Boolean),
+        );
+        const added: string[] = [];
+        const skipped: string[] = [];
+        for (const row of input) {
+          const data = cleanLead(row);
+          const keys = [key(data.company), data.contactEmail ?? ''].filter(Boolean);
+          if (keys.some((k) => seen.has(k))) {
+            skipped.push(data.company);
+            continue;
+          }
+          keys.forEach((k) => seen.add(k));
+          const lead = await tx.lead.create({
+            data: { ...data, status: 'research', tenantId: ctx.tenantId },
+          });
+          await audit(tx, ctx, {
+            action: 'owner.lead.create',
+            entityType: 'lead',
+            entityId: lead.id,
+            after: { company: lead.company, imported: true },
+          });
+          added.push(lead.company);
+        }
+        return { added: added.length, skipped };
+      },
+      BIG_BATCH,
+    );
   }
 
   async update(ctx: RequestContext, id: string, input: LeadInput) {

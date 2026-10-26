@@ -12,10 +12,10 @@ import {
   type LeadMessageKind,
   type NextStep,
 } from '@seatline/shared/dist/outreach';
-import { Copy, Plus, Send, Trash2 } from 'lucide-react';
+import { Copy, Plus, Send, Trash2, Upload } from 'lucide-react';
 import { notFound, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { PageFrame } from '@/components/common/page-frame';
 import {
@@ -110,9 +110,12 @@ export function LeadsPage({ initial }: { initial: LeadList | null }) {
       title={t('title')}
       wide
       actions={
-        <Button onClick={() => open('new')}>
-          <Plus aria-hidden /> {t('add')}
-        </Button>
+        <>
+          <ImportLeads />
+          <Button onClick={() => open('new')}>
+            <Plus aria-hidden /> {t('add')}
+          </Button>
+        </>
       }
     >
       <OwnerNav current="leads" />
@@ -684,6 +687,79 @@ function SendNowButton({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </>
+  );
+}
+
+/** The fields a lead file may carry (anything else, e.g. a status, is left out). */
+const IMPORT_FIELDS = [
+  'company',
+  'website',
+  'address',
+  'whyNow',
+  'sourceUrl',
+  'contactName',
+  'greeting',
+  'contactRole',
+  'channel',
+  'contactEmail',
+  'linkedinUrl',
+  'language',
+  'notes',
+] as const;
+
+/** Researched leads from a JSON file (a list, or { leads: [...] }); they start as "Research". */
+function ImportLeads() {
+  const t = useTranslations('owner.leads');
+  const client = useQueryClient();
+  const input = useRef<HTMLInputElement>(null);
+  const upload = useMutation({
+    mutationFn: async (file: File) => {
+      let rows: unknown;
+      try {
+        const parsed: unknown = JSON.parse(await file.text());
+        rows = Array.isArray(parsed) ? parsed : (parsed as { leads?: unknown }).leads;
+      } catch {
+        rows = null;
+      }
+      if (!Array.isArray(rows)) throw new Error(t('importInvalid'));
+      const leads = rows.map((row: Record<string, unknown>) =>
+        Object.fromEntries(IMPORT_FIELDS.filter((k) => row[k] != null).map((k) => [k, row[k]])),
+      );
+      return api<{ added: number; skipped: string[] }>('/owner/leads/import', {
+        method: 'POST',
+        body: { leads },
+      });
+    },
+    onSuccess: (r) => {
+      void client.invalidateQueries({ queryKey: ['owner', 'leads'] });
+      toast.success(t('imported', { count: r.added }), {
+        description: r.skipped.length
+          ? t('importSkipped', { count: r.skipped.length, names: r.skipped.join(', ') })
+          : undefined,
+      });
+    },
+    onError: (e) =>
+      toast.error(e instanceof ApiError && e.status === 400 ? t('importInvalid') : e.message),
+  });
+  return (
+    <>
+      <input
+        ref={input}
+        type="file"
+        accept=".json,application/json"
+        className="sr-only"
+        tabIndex={-1}
+        aria-hidden
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          e.target.value = '';
+          if (file) upload.mutate(file);
+        }}
+      />
+      <Button variant="outline" disabled={upload.isPending} onClick={() => input.current?.click()}>
+        <Upload aria-hidden /> {t('import')}
+      </Button>
     </>
   );
 }
