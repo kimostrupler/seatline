@@ -617,7 +617,9 @@ test update-screenshots --project chromium`; `updates.test.ts` checks). **Add a 
   count is only shown). Page: one tab per next step (`STEPS`, colour per step `TONE`; green = sends,
   blue = writes, red = don't send) and two **send all** buttons (`POST /owner/leads/send-scheduled`:
   scheduled ones now; `/send-ready`: the filled-in template to every e-mail lead at "write first",
-  incomplete templates skipped), each with one confirmation, at most `SEND_ALL_MAX` (25) per click, a "why now" sentence and no `[placeholder]` left (`messageProblem`). Schedule
+  incomplete templates skipped), each with one confirmation, at most `SEND_ALL_MAX` (25) per click;
+  **Write all one by one** (`WriteAll`) opens each ready lead's draft in turn (Schedule = next, Skip),
+  plus "schedule the rest as they are" (`POST /owner/leads/schedule-ready`, no cap: no SMTP); a "why now" sentence and no `[placeholder]` left (`messageProblem`). Schedule
   = the next Tue–Thu 8 am Zurich (`nextSendSlot`), or **Send now** (after one confirmation;
   `sendNow` on schedule, or `POST …/messages/:id/send` for a scheduled one; a failed send waits
   for the next slot); the `nightly-sync` job now runs at 01:00 and

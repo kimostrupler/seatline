@@ -1762,6 +1762,16 @@
         "more": "Au maximum {max} par clic : cliquez à nouveau pour le reste.",
         "done": "{count, plural, =0 {Rien envoyé} one {# e-mail envoyé} other {# e-mails envoyés}}",
         "failed": "Non envoyés : {names}"
+      },
+      "writeAll": {
+        "open": "Tout écrire l’un après l’autre ({count})",
+        "title": "Écrire tous les e-mails",
+        "progress": "{n} sur {total}",
+        "skip": "Passer",
+        "scheduleRest": "Planifier le reste tel quel ({count})",
+        "scheduleRestConfirm": "Planifier l’e-mail rempli pour chaque lead prêt que vous n’avez pas encore écrit ({count}), sans les lire un par un ? Les leads dont le modèle est incomplet sont ignorés. Ils partent {when} ; d’ici là, vous pouvez encore modifier ou arrêter chacun.",
+        "scheduled": "{count, plural, =0 {Rien planifié} one {# e-mail planifié} other {# e-mails planifiés}}",
+        "done": "Tout est écrit. Ils partent {when} ; d’ici là, vous pouvez encore modifier ou arrêter chacun."
       }
     }
   },

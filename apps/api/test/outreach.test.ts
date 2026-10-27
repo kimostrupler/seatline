@@ -306,12 +306,12 @@ describe('outreach (owner leads)', () => {
       .expect(201);
     await send('send-ready', b.headers).expect(404);
     const res = await send('send-ready').expect(201);
-    expect(res.body).toEqual({ sent: 2, failed: [] });
+    expect(res.body).toEqual({ done: 2, failed: [] });
     const mails = (await sentMails()) as Array<Record<string, string>>;
     expect(mails.map((m) => m.to).sort()).toEqual(['contact@livingdocs.io', 'it@second.ch']);
     expect((await api(app).get(`/owner/leads/${ready}`).set(a.headers)).body.status).toBe('sent');
     // nothing left to send: a second click sends nothing again
-    expect((await send('send-ready').expect(201)).body).toEqual({ sent: 0, failed: [] });
+    expect((await send('send-ready').expect(201)).body).toEqual({ done: 0, failed: [] });
 
     // scheduled follow-ups go out at once, one per lead
     const leads = app.get(LeadsService);
@@ -319,10 +319,23 @@ describe('outreach (owner leads)', () => {
     const fu = await leads.draft(ctx, ready, 'follow_up');
     await leads.schedule(ctx, ready, { kind: 'follow_up', ...fu });
     await send('send-scheduled', b.headers).expect(404);
-    expect((await send('send-scheduled').expect(201)).body).toEqual({ sent: 1, failed: [] });
+    expect((await send('send-scheduled').expect(201)).body).toEqual({ done: 1, failed: [] });
     expect(await sentMails()).toHaveLength(3);
     expect((await api(app).get(`/owner/leads/${ready}`).set(a.headers)).body.status).toBe(
       'followed_up',
     );
+  });
+
+  it('"schedule all ready": every ready lead gets its filled-in first e-mail for the next slot', async () => {
+    const id = await newLead();
+    await api(app).post('/owner/leads/schedule-ready').set(b.headers).expect(404);
+    const res = await api(app).post('/owner/leads/schedule-ready').set(a.headers).expect(201);
+    expect(res.body).toEqual({ done: 1, failed: [] });
+    expect(await sentMails()).toHaveLength(0);
+    const list = (await api(app).get('/owner/leads').set(a.headers)).body.leads;
+    expect(list.find((l: { id: string }) => l.id === id)).toMatchObject({
+      nextStep: 'scheduled',
+      status: 'ready',
+    });
   });
 });

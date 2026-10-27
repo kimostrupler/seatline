@@ -263,10 +263,10 @@ function SendAll({ leads, mailReady }: { leads: LeadRow[]; mailReady: boolean })
   };
   const send = useMutation({
     mutationFn: (what: 'scheduled' | 'ready') =>
-      api<{ sent: number; failed: string[] }>(`/owner/leads/send-${what}`, { method: 'POST' }),
+      api<{ done: number; failed: string[] }>(`/owner/leads/send-${what}`, { method: 'POST' }),
     onSuccess: (r) => {
       void qc.invalidateQueries({ queryKey: ['owner'] });
-      toast.success(t('sendAll.done', { count: r.sent }), {
+      toast.success(t('sendAll.done', { count: r.done }), {
         description: r.failed.length
           ? t('sendAll.failed', { names: r.failed.join(', ') })
           : undefined,
@@ -277,6 +277,7 @@ function SendAll({ leads, mailReady }: { leads: LeadRow[]; mailReady: boolean })
   if (!counts.scheduled && !counts.ready) return null;
   return (
     <div className="flex flex-wrap items-center gap-2">
+      {counts.ready > 0 && <WriteAll leads={leads} />}
       {(['scheduled', 'ready'] as const).map(
         (what) =>
           counts[what] > 0 && (
@@ -308,6 +309,131 @@ function SendAll({ leads, mailReady }: { leads: LeadRow[]; mailReady: boolean })
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+}
+
+/**
+ * "Write all": every lead waiting for its first e-mail, one after the other, its draft open to
+ * read and change; Schedule moves on to the next. The rest can be scheduled as they are.
+ */
+function WriteAll({ leads }: { leads: LeadRow[] }) {
+  const t = useTranslations('owner.leads');
+  const when = useWhen();
+  const qc = useQueryClient();
+  const [queue, setQueue] = useState<LeadRow[] | null>(null);
+  const [at, setAt] = useState(0);
+  const [ask, setAsk] = useState(false);
+  const ready = leads.filter((l) => l.nextStep === 'write_first' && l.channel === 'email');
+  const current = queue?.[at];
+  const lead = useQuery({
+    queryKey: ['owner', 'lead', current?.id],
+    queryFn: () => api<LeadDetail>(`/owner/leads/${current!.id}`),
+    enabled: !!current,
+  });
+  const next = () => {
+    void qc.invalidateQueries({ queryKey: ['owner', 'leads'] });
+    setAt((i) => i + 1);
+  };
+  const scheduleRest = useMutation({
+    mutationFn: () =>
+      api<{ done: number; failed: string[] }>('/owner/leads/schedule-ready', { method: 'POST' }),
+    onSuccess: (r) => {
+      void qc.invalidateQueries({ queryKey: ['owner'] });
+      toast.success(t('writeAll.scheduled', { count: r.done }), {
+        description: r.failed.length
+          ? t('sendAll.failed', { names: r.failed.join(', ') })
+          : undefined,
+      });
+      setQueue(null);
+    },
+    onError: (error) => toast.error(t('failed', { message: failedMessage(error) })),
+  });
+  // what the server schedules: every lead still waiting for its first e-mail (skipped ones too)
+  const rest = ready.length;
+  return (
+    <>
+      <Button
+        onClick={() => {
+          setQueue(ready);
+          setAt(0);
+        }}
+      >
+        <Send aria-hidden /> {t('writeAll.open', { count: ready.length })}
+      </Button>
+      <Sheet open={!!queue} onOpenChange={(o) => !o && setQueue(null)}>
+        <SheetContent side="right" className="w-full overflow-y-auto p-0 sm:max-w-2xl">
+          <div className="grid gap-4 p-6 pt-12">
+            <SheetTitle>{t('writeAll.title')}</SheetTitle>
+            {queue && current ? (
+              <>
+                <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+                  <span className="text-muted-foreground tabular-nums">
+                    {t('writeAll.progress', { n: at + 1, total: queue.length })}
+                  </span>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="ghost" onClick={() => setAt((i) => i + 1)}>
+                      {t('writeAll.skip')}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={scheduleRest.isPending}
+                      onClick={() => setAsk(true)}
+                    >
+                      {t('writeAll.scheduleRest', { count: rest })}
+                    </Button>
+                  </div>
+                </div>
+                <div className="h-1.5 overflow-hidden rounded-full bg-muted" aria-hidden>
+                  <div
+                    className="h-full bg-primary transition-[width] duration-300"
+                    style={{ width: `${(at / queue.length) * 100}%` }}
+                  />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">{current.company}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {current.contactName ?? current.greeting} · {current.contactEmail}
+                  </p>
+                </div>
+                {lead.data?.id === current.id ? (
+                  <Composer
+                    key={current.id}
+                    lead={lead.data}
+                    kind="first"
+                    autoStart
+                    onScheduled={next}
+                  />
+                ) : (
+                  <Skeleton className="h-96" />
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                {t('writeAll.done', { when: when(nextSendSlot(new Date())) })}
+              </p>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
+      <AlertDialog open={ask} onOpenChange={setAsk}>
+        <AlertDialogContent>
+          <AlertDialogTitle>{t('writeAll.scheduleRest', { count: rest })}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {t('writeAll.scheduleRestConfirm', {
+              count: rest,
+              when: when(nextSendSlot(new Date())),
+            })}
+          </AlertDialogDescription>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('keep')}</AlertDialogCancel>
+            <AlertDialogAction onClick={() => scheduleRest.mutate()}>
+              {t('compose.schedule')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 
@@ -630,14 +756,17 @@ function Composer({
   lead,
   kind,
   onScheduled,
+  autoStart = false,
 }: {
   lead: LeadDetail;
   kind: LeadMessageKind;
   onScheduled: () => void;
+  /** open the draft right away ("Write all", one lead after the other) */
+  autoStart?: boolean;
 }) {
   const t = useTranslations('owner.leads');
   const when = useWhen();
-  const [writing, setWriting] = useState(false);
+  const [writing, setWriting] = useState(autoStart);
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
   const draft = useQuery({
