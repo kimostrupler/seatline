@@ -494,39 +494,45 @@ export default async function Welcome() {
         </section>
 
         {/* pricing */}
+        {/* price card and calculator: side by side on wide screens, stacked below */}
         <section id="pricing" className="scroll-mt-20 px-4 py-20 sm:px-6 sm:py-28">
-          <div
-            className="mx-auto grid max-w-xl justify-items-center gap-6 rounded-3xl border bg-card p-8 text-center shadow-xl shadow-black/5 sm:p-12"
-            data-reveal
-          >
-            <h2 className="text-2xl font-semibold tracking-tight">{t('priceTitle')}</h2>
-            <p className="grid gap-1">
-              <span className="text-6xl font-semibold tracking-tight sm:text-7xl">
-                {t('priceFigure')}
-              </span>
-              <span className="text-muted-foreground">{t('perDesk')}</span>
-              <span className="text-sm font-medium">{t('priceVolume')}</span>
-            </p>
-            <p className="flex gap-2.5 text-left text-muted-foreground">
-              <Check className="mt-1 size-4 shrink-0 text-[var(--seat-free-stroke)]" aria-hidden />
-              {t('priceBody')}
-            </p>
-            <Button asChild size="lg" className="h-12 w-full text-base">
-              <a href={signInUrl()} data-track="cta-trial">
-                {t('ctaTrial')} <ArrowRight />
-              </a>
-            </Button>
-            <a
-              href={demoUrl()}
-              data-track="cta-demo"
-              className="text-sm font-medium text-primary hover:underline"
+          <div className="mx-auto grid max-w-xl gap-6 lg:max-w-5xl lg:grid-cols-2">
+            <div
+              className="grid justify-items-center gap-6 rounded-3xl border bg-card p-8 text-center shadow-xl shadow-black/5 sm:p-12 lg:content-center"
+              data-reveal
             >
-              {t('priceDemo')}
-            </a>
+              <h2 className="text-2xl font-semibold tracking-tight">{t('priceTitle')}</h2>
+              <p className="grid gap-1">
+                <span className="text-6xl font-semibold tracking-tight sm:text-7xl">
+                  {t('priceFigure')}
+                </span>
+                <span className="text-muted-foreground">{t('perDesk')}</span>
+                <span className="text-sm font-medium">{t('priceVolume')}</span>
+              </p>
+              <p className="flex gap-2.5 text-left text-muted-foreground">
+                <Check
+                  className="mt-1 size-4 shrink-0 text-[var(--seat-free-stroke)]"
+                  aria-hidden
+                />
+                {t('priceBody')}
+              </p>
+              <Button asChild size="lg" className="h-12 w-full text-base">
+                <a href={signInUrl()} data-track="cta-trial">
+                  {t('ctaTrial')} <ArrowRight />
+                </a>
+              </Button>
+              <a
+                href={demoUrl()}
+                data-track="cta-demo"
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                {t('priceDemo')}
+              </a>
+            </div>
+            <NextIntlClientProvider messages={liveMessages}>
+              <PriceCalculator />
+            </NextIntlClientProvider>
           </div>
-          <NextIntlClientProvider messages={liveMessages}>
-            <PriceCalculator />
-          </NextIntlClientProvider>
         </section>
 
         {/* questions, one open at a time if you like */}

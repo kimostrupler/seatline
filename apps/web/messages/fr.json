@@ -1422,7 +1422,11 @@
       "restHint": "Dès le {from}e poste : {price} chacun",
       "average": "par poste en moyenne",
       "perYear": "par an",
-      "saving": "{price} de moins chaque mois grâce au prix de volume"
+      "saving": "{price} de moins chaque mois grâce au prix de volume",
+      "othersTitle": "Outils de poste de travail courants",
+      "others": "environ {low}–{high} par mois pour {desks} postes",
+      "othersSaving": "Avec Seatline, au moins {price} de moins chaque mois",
+      "othersNote": "Prix catalogue publics d’outils courants de réservation et de gestion de postes (octobre 2026), souvent avec un minimum de 25 utilisateurs. Les offres réelles peuvent différer."
     },
     "navUpdates": "Nouveautés"
   },

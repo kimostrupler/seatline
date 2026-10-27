@@ -1422,7 +1422,11 @@
       "restHint": "From desk {from}: {price} each",
       "average": "per desk on average",
       "perYear": "per year",
-      "saving": "{price} less every month thanks to the volume price"
+      "saving": "{price} less every month thanks to the volume price",
+      "othersTitle": "Typical workplace tools",
+      "others": "about {low}–{high} per month for {desks} desks",
+      "othersSaving": "With Seatline at least {price} less every month",
+      "othersNote": "Public list prices of typical desk and workplace tools (October 2026), often with a 25-user minimum. Actual offers may differ."
     },
     "navUpdates": "What’s new"
   },
