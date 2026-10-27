@@ -144,6 +144,14 @@ export const DE: HelpContent = {
           ],
         },
         {
+          title: 'Einen geteilten Platz für einen Tag buchen',
+          text: [
+            'Ein Bearbeiter oder Admin macht einen Platz zum geteilten Platz: Plan bearbeiten, Platz anklicken, Geteilter Platz einschalten. Geteilte Plätze haben auf der Karte eine gepunktete Linie innen, und niemand sitzt fest dort.',
+            'Wählen Sie über der Karte den Tag (heute, morgen … bis 4 Wochen im Voraus). Klicken Sie auf einen grünen geteilten Platz und wählen Sie Buchen. Alle können für sich selbst buchen, auch Betrachter; ein Platz pro Person und Tag. Ihre Buchungen sehen Sie auch auf der Startseite unter Mein Platz.',
+            'Um den Platz zurückzugeben, klicken Sie ihn an und wählen Meine Buchung stornieren. Bearbeiter und Admins können für andere buchen und jede Buchung stornieren.',
+          ],
+        },
+        {
           title: 'Eine Person oder einen freien Platz finden',
           text: [
             'Geben Sie links in der Personensuche einen Namen ein und klicken Sie die Person an: Sie sehen ihren Platz und Verlauf. «Freien Platz finden» filtert freie Plätze nach Ausstattung – Stehpult, zwei Bildschirme, am Fenster.',
@@ -152,7 +160,7 @@ export const DE: HelpContent = {
         },
       ],
       tips: [
-        'Betrachter sehen alles, ändern aber keine Plätze; fragen Sie einen Bearbeiter oder Admin.',
+        'Betrachter sehen alles und können geteilte Plätze buchen, ändern aber keine Plätze; fragen Sie einen Bearbeiter oder Admin.',
         'Mitarbeitende können eine E-Mail zu ihrem neuen Platz erhalten (Personen & Zugang → Einstellungen → Mitteilungen).',
       ],
     },

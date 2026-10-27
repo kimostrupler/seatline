@@ -2,7 +2,7 @@ import type { HelpImage, HelpTopicId } from '../help/types';
 import type { Language } from '../locales';
 
 /** A picture: a help screenshot (public/help-img) or one of the updates' own (public/updates-img). */
-export type UpdateImage = { help: HelpImage } | { own: 'price-calculator' };
+export type UpdateImage = { help: HelpImage } | { own: 'price-calculator' | 'desk-booking' };
 
 export interface UpdateText {
   title: string;
@@ -30,6 +30,53 @@ export interface UpdatePost {
  * points in all three languages; lib/updates/updates.test.ts checks).
  */
 export const POSTS: UpdatePost[] = [
+  {
+    slug: 'desk-booking',
+    date: '2026-10-27',
+    image: { own: 'desk-booking' },
+    topic: 'seating',
+    text: {
+      en: {
+        title: 'Shared desks you book by the day',
+        summary:
+          'Hybrid offices can now mix fixed and shared desks. Make a desk shared, and everyone books it for a day on the map.',
+        points: [
+          'Turn on Shared desk in Edit layout; shared desks have a dotted inner line on the map.',
+          'Pick the day above the map (up to 4 weeks ahead) and book a green desk in one click, viewers too.',
+          'One desk per person per day; cancelling and Undo work like everywhere else.',
+          'Editors and admins can book for someone else; people who leave give their coming bookings back.',
+          'Your bookings show on Home under My seat; every booking is in the Activity log.',
+        ],
+        alt: 'The map with a shared desk booked for today and the booking on the right.',
+      },
+      de: {
+        title: 'Geteilte Plätze, tageweise gebucht',
+        summary:
+          'Hybride Büros können jetzt feste und geteilte Plätze mischen. Machen Sie einen Platz zum geteilten Platz, und alle buchen ihn für einen Tag auf der Karte.',
+        points: [
+          'Unter Plan bearbeiten Geteilter Platz einschalten; geteilte Plätze haben auf der Karte eine gepunktete Linie innen.',
+          'Über der Karte den Tag wählen (bis 4 Wochen im Voraus) und einen grünen Platz mit einem Klick buchen, auch als Betrachter.',
+          'Ein Platz pro Person und Tag; Stornieren und Rückgängig funktionieren wie überall.',
+          'Bearbeiter und Admins können für andere buchen; wer austritt, gibt seine kommenden Buchungen zurück.',
+          'Ihre Buchungen sehen Sie auf der Startseite unter Mein Platz; jede Buchung steht in der Aktivität.',
+        ],
+        alt: 'Die Karte mit einem für heute gebuchten geteilten Platz und der Buchung rechts.',
+      },
+      fr: {
+        title: 'Des postes partagés réservés à la journée',
+        summary:
+          'Les bureaux hybrides peuvent désormais mêler postes fixes et postes partagés. Rendez un poste partagé, et chacun le réserve pour une journée sur le plan.',
+        points: [
+          'Activez Poste partagé dans Modifier le plan ; les postes partagés ont une ligne pointillée intérieure sur le plan.',
+          'Choisissez le jour au-dessus du plan (jusqu’à 4 semaines à l’avance) et réservez un poste vert en un clic, lecteurs compris.',
+          'Un poste par personne et par jour ; annuler une réservation ou revenir en arrière fonctionne comme partout.',
+          'Les éditeurs et admins peuvent réserver pour quelqu’un d’autre ; les personnes qui partent rendent leurs réservations à venir.',
+          'Vos réservations apparaissent sur l’Accueil sous Ma place ; chaque réservation figure dans l’Activité.',
+        ],
+        alt: 'Le plan avec un poste partagé réservé pour aujourd’hui et la réservation à droite.',
+      },
+    },
+  },
   {
     slug: 'volume-price',
     date: '2026-10-27',

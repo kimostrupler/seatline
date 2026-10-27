@@ -25,6 +25,8 @@ import { NotifyService } from './mail/notify.service';
 import { DeskMailService } from './mail/desk-mail.service';
 import { OnboardingService } from './mail/onboarding.service';
 import { DemoService } from './demo/demo.service';
+import { BookingsController } from './bookings/bookings.controller';
+import { BookingsService } from './bookings/bookings.service';
 import { PlanningController } from './planning/planning.controller';
 import { OwnerController } from './owner/owner.controller';
 import { OwnerService } from './owner/owner.service';
@@ -77,6 +79,7 @@ import { PeopleSyncService } from './sync/people-sync.service';
     DpaController,
     BillingController,
     PlanningController,
+    BookingsController,
     OwnerController,
   ],
   providers: [
@@ -105,6 +108,7 @@ import { PeopleSyncService } from './sync/people-sync.service';
     OnboardingService,
     DemoService,
     PlanningService,
+    BookingsService,
     OwnerService,
     LeadsService,
     InboxService,

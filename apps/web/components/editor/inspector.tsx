@@ -215,6 +215,7 @@ function SeatForm({
         />
       </Field>
       <BlockSwitch editor={editor} seats={[seat]} />
+      <SharedSwitch editor={editor} seats={[seat]} />
       <Field label={t('features')} hint={t('featuresHint')}>
         <ChipToggles
           options={SEAT_FEATURES}
@@ -465,6 +466,7 @@ function MultiForm({
             <RotateButtons editor={editor} seatIds={seats.map((s) => s.id)} />
           </Field>
           <BlockSwitch editor={editor} seats={seats} />
+          <SharedSwitch editor={editor} seats={seats} />
         </>
       )}
     </div>
@@ -533,6 +535,34 @@ function BlockSwitch({ editor, seats }: { editor: LayoutEditorState; seats: Seat
         />
       </div>
       <p className="text-xs text-muted-foreground">{occupied ? t('occupied') : t('blockedHint')}</p>
+    </div>
+  );
+}
+
+/** Shared desks have no permanent person: people book them by the day on the map. */
+function SharedSwitch({ editor, seats }: { editor: LayoutEditorState; seats: Seat[] }) {
+  const t = useTranslations('inspector');
+  const id = useId();
+  const occupied = seats.some((s) => s.currentAssignment);
+  const shared = seats.every((s) => s.shared);
+  return (
+    <div className="grid gap-1.5">
+      <div className="flex items-center justify-between gap-2">
+        <Label htmlFor={id}>{t('shared')}</Label>
+        <Switch
+          id={id}
+          checked={shared}
+          disabled={occupied && !shared}
+          onCheckedChange={(on) =>
+            editor.commit(
+              changes({ seats: { update: seats.map((s) => ({ id: s.id, shared: on })) } }),
+            )
+          }
+        />
+      </div>
+      <p className="text-xs text-muted-foreground">
+        {occupied && !shared ? t('sharedOccupied') : t('sharedHint')}
+      </p>
     </div>
   );
 }

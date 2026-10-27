@@ -151,8 +151,9 @@ export function FloorMap({
     if (!rect) return undefined;
     return seatAt(map.seats, toPlan(view, { x: clientX - rect.left, y: clientY - rect.top }), size);
   };
+  // shared desks are booked by the day, never given to someone by drag and drop
   const accepts = (seat: Seat | undefined) =>
-    !!seat && seat.status === 'active' && seat.occupancy !== 'taken';
+    !!seat && seat.status === 'active' && !seat.shared && seat.occupancy !== 'taken';
 
   const onDragOver = (e: React.DragEvent) => {
     if (!canEdit || !e.dataTransfer.types.includes(PERSON_DRAG_TYPE)) return;
@@ -191,6 +192,10 @@ export function FloorMap({
   };
 
   const seatName = (seat: Seat) => {
+    const name = seatTitle(seat);
+    return seat.shared ? `${name} ${t('sharedSuffix')}` : name;
+  };
+  const seatTitle = (seat: Seat) => {
     const a = seat.currentAssignment;
     if (seat.occupancy === 'taken' && a?.person)
       return byTeam
@@ -269,7 +274,7 @@ export function FloorMap({
                   }
                   dropTarget={seat.id === dropTargetId}
                   dragging={seat.id === draggingSeatId}
-                  canDrag={canEdit && seat.occupancy === 'taken'}
+                  canDrag={canEdit && !seat.shared && seat.occupancy === 'taken'}
                   onSelect={() => onSelectSeat(seat.id)}
                   onDragStart={() => setDraggingSeatId(seat.id)}
                   onDragMove={() => onTokenDragMove(seat)}

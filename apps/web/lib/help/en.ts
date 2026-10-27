@@ -142,6 +142,14 @@ export const EN: HelpContent = {
           ],
         },
         {
+          title: 'Book a shared desk for a day',
+          text: [
+            'An editor or admin makes a desk shared: Edit layout, click the desk, turn on Shared desk. Shared desks have a dotted inner line on the map and nobody sits there for good.',
+            'Above the map, pick the day (today, tomorrow … up to 4 weeks ahead). Click a green shared desk and choose Book. Everyone can book for themselves, viewers too; one desk per person per day. Your bookings also show on Home under My seat.',
+            'To give the desk back, click it and choose Cancel my booking. Editors and admins can book for someone else and cancel any booking.',
+          ],
+        },
+        {
           title: 'Find a person or a free desk',
           text: [
             'Type a name in the people search on the left and click the person: you see their desk and history. Find a free desk filters free desks by what they have — standing desk, two screens, by the window.',
@@ -150,7 +158,7 @@ export const EN: HelpContent = {
         },
       ],
       tips: [
-        'Viewers see everything but can’t change seats; ask an editor or admin.',
+        'Viewers see everything and can book shared desks, but can’t change seats; ask an editor or admin.',
         'People can get an e-mail about their new desk (People & access → Settings → Notices).',
       ],
     },

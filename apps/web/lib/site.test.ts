@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isPublicPath, siteHosts, siteUrl, videoLink } from './site';
+import { canonicalRedirect, isPublicPath, siteHosts, siteUrl, videoLink } from './site';
 
 describe('site domain', () => {
   it('is the parent of an app.* address', () => {
@@ -38,5 +38,34 @@ describe('video short links', () => {
     );
     expect(videoLink(app, '/videos', '')).toBeNull();
     expect(videoLink(app, '/it/video', '')).toBeNull();
+  });
+});
+
+describe('one address per page (no duplicates for search engines)', () => {
+  const app = 'https://app.seatline.ch';
+  const go = (host: string, path: string, search = '') =>
+    canonicalRedirect(app, host, path, search);
+  it('www goes to the bare domain, keeping the path', () => {
+    expect(go('www.seatline.ch', '/de', '?utm_source=x')).toBe(
+      'https://seatline.ch/de?utm_source=x',
+    );
+  });
+  it('/welcome on the site is the home page', () => {
+    expect(go('seatline.ch', '/welcome')).toBe('https://seatline.ch/');
+    expect(go('seatline.ch', '/help/de')).toBeNull();
+    expect(go('seatline.ch', '/')).toBeNull();
+  });
+  it('website pages on the app address move to the site; the app itself stays', () => {
+    expect(go('app.seatline.ch', '/help/en/moves')).toBe('https://seatline.ch/help/en/moves');
+    expect(go('app.seatline.ch', '/updates/fr')).toBe('https://seatline.ch/updates/fr');
+    expect(go('app.seatline.ch', '/legal/privacy')).toBe('https://seatline.ch/legal/privacy');
+    expect(go('app.seatline.ch', '/welcome')).toBe('https://seatline.ch/');
+    expect(go('app.seatline.ch', '/')).toBeNull();
+    expect(go('app.seatline.ch', '/map')).toBeNull();
+    expect(go('app.seatline.ch', '/help-img/en/home.jpg')).toBeNull();
+    expect(go('app.seatline.ch', '/helpdesk')).toBeNull();
+  });
+  it('local and Azure addresses never redirect', () => {
+    expect(canonicalRedirect('http://localhost:3000', 'localhost', '/help/en', '')).toBeNull();
   });
 });

@@ -10,6 +10,7 @@ import type { RequestContext } from '../auth/request-context';
 import { audit } from '../common/audit';
 import { orNotFound } from '../common/errors';
 import { TenantDb, type Tx } from '../db/tenant-db.service';
+import { guardBookings } from '../bookings/booking-guards';
 import { OPEN_PLANS } from '../moves/moves.service';
 import { seatOccupancy } from './occupancy';
 
@@ -83,6 +84,11 @@ export class SeatsService {
       if (input.status === 'blocked' && before.assignments.length > 0) {
         throw new ConflictException('Free the seat before blocking it');
       }
+      if (input.shared && before.assignments.length > 0) {
+        throw new ConflictException('Free the seat before sharing it');
+      }
+      if (input.shared === false || input.status === 'blocked')
+        await guardBookings(tx, ctx.tenantId, [], [id], () => before.label);
       const moved = input.x !== undefined || input.y !== undefined;
       const roomId = moved
         ? await this.roomAt(tx, ctx, before.floorId, {
@@ -116,6 +122,7 @@ export class SeatsService {
           'This seat has assignment history — block it instead of deleting',
         );
       }
+      await guardBookings(tx, ctx.tenantId, [id], [], () => before.label);
       const planned = await tx.movePlanItem.count({
         where: { tenantId: ctx.tenantId, toSeatId: id, plan: { status: { in: OPEN_PLANS } } },
       });

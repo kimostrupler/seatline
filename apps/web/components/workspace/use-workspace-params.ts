@@ -12,6 +12,8 @@ export interface WorkspaceParams {
   mode: string | null;
   /** a move plan being planned on the map */
   plan: string | null;
+  /** the day shared desks are shown for (YYYY-MM-DD; none = today) */
+  day: string | null;
 }
 
 /**
@@ -30,6 +32,7 @@ export function useWorkspaceParams() {
     person: search.get('person'),
     mode: search.get('mode'),
     plan: search.get('plan'),
+    day: search.get('day'),
   };
 
   const update = useCallback(

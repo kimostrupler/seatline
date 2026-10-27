@@ -5,6 +5,7 @@ import type { RequestContext } from '../auth/request-context';
 import { audit } from '../common/audit';
 import { orNotFound } from '../common/errors';
 import { BIG_BATCH, TenantDb, type Tx } from '../db/tenant-db.service';
+import { guardBookings } from '../bookings/booking-guards';
 import { OPEN_PLANS } from '../moves/moves.service';
 
 /**
@@ -89,7 +90,21 @@ export class LayoutService {
               `Free seat ${seatById.get(u.id)!.label} before blocking it`,
             );
           }
+          // a shared desk has no permanent person
+          if (u.shared && seatById.get(u.id)!.assignments.length) {
+            throw new ConflictException(`Free seat ${seatById.get(u.id)!.label} before sharing it`);
+          }
         }
+        // bookings are history too, and coming ones must still find their desk
+        await guardBookings(
+          tx,
+          tenantId,
+          changes.seats.delete,
+          changes.seats.update
+            .filter((u) => u.shared === false || u.status === 'blocked')
+            .map((u) => u.id),
+          (id) => seatById.get(id)?.label ?? id,
+        );
 
         const log = (
           action: string,

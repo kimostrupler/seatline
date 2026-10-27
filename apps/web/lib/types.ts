@@ -110,6 +110,8 @@ export interface Seat {
   status: SeatStatus;
   /** standing desk, two screens… (searchable on the map) */
   features?: SeatFeature[];
+  /** shared desk: no permanent person, booked by the day */
+  shared?: boolean;
   occupancy: SeatOccupancy;
   currentAssignment: (Assignment & { person: PersonRef | null }) | null;
 }
@@ -327,7 +329,7 @@ export interface MoveItem {
 }
 
 export interface PlanProblem {
-  code: 'seat_taken' | 'seat_blocked' | 'seat_double' | 'seat_missing' | 'no_moves';
+  code: 'seat_taken' | 'seat_blocked' | 'seat_shared' | 'seat_double' | 'seat_missing' | 'no_moves';
   personId?: string;
   seatId?: string;
   byPersonId?: string;

@@ -157,6 +157,11 @@ export class AssignmentsService {
       'Seat',
     );
     if (seat.status === 'blocked') throw new ConflictException('This seat is blocked');
+    if (seat.shared)
+      throw new ConflictException({
+        message: 'This desk is shared: people book it by the day',
+        code: 'shared_desk',
+      });
     return seat;
   }
 

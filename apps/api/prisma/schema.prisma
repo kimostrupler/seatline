@@ -104,6 +104,7 @@ model Tenant {
   floorMarkers FloorMarker[]
   teamPlans    TeamPlan[]
   leads        Lead[]
+  deskBookings DeskBooking[]
   leadMessages LeadMessage[]
 
   @@map("tenants")
@@ -132,6 +133,7 @@ model Person {
 
   tenant       Tenant            @relation(fields: [tenantId], references: [id])
   assignments  SeatAssignment[]  @relation("AssignmentPerson")
+  bookings     DeskBooking[]
   assignedByMe SeatAssignment[]  @relation("AssignmentAssignedBy")
   dashboard    DashboardLayout[]
   plansMade    MovePlan[]        @relation("MovePlanCreatedBy")
@@ -229,6 +231,8 @@ model Seat {
   status    SeatStatus @default(active)
   /// standing, two_screens, docking, window, quiet, accessible
   features  String[]   @default([])
+  /// a shared desk has no permanent person: people book it for a day (desk_bookings)
+  shared    Boolean    @default(false)
   createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
 
@@ -237,6 +241,7 @@ model Seat {
   room        Room?            @relation(fields: [tenantId, floorId, roomId], references: [tenantId, floorId, id], onDelete: Restrict)
   assignments SeatAssignment[]
   plannedFor  MovePlanItem[]
+  bookings    DeskBooking[]
 
   @@unique([tenantId, id])
   @@unique([floorId, label])
@@ -265,6 +270,29 @@ model SeatAssignment {
   @@index([tenantId, seatId, startAt])
   @@index([tenantId, personId, startAt])
   @@map("seat_assignments")
+}
+
+/// A shared desk booked for one day. Cancelling sets cancelled_at (kept); only the privacy
+/// functions remove old bookings. One per desk per day and one per person per day (partial
+/// unique indexes in the migration, cancelled ones excluded).
+model DeskBooking {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String    @map("tenant_id") @db.Uuid
+  seatId      String    @map("seat_id") @db.Uuid
+  personId    String    @map("person_id") @db.Uuid
+  day         DateTime  @db.Date
+  /// who made the booking (the person, or an editor for them); no FK, like audit actors
+  bookedById  String    @map("booked_by") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  cancelledAt DateTime? @map("cancelled_at") @db.Timestamptz(3)
+  cancelledBy String?   @map("cancelled_by") @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  seat   Seat   @relation(fields: [tenantId, seatId], references: [tenantId, id], onDelete: Restrict)
+  person Person @relation(fields: [tenantId, personId], references: [tenantId, id], onDelete: Restrict)
+
+  @@index([tenantId, day])
+  @@map("desk_bookings")
 }
 
 /// Append-only. Who changed what, with before/after snapshots.
@@ -360,14 +388,14 @@ model MovePlanItem {
 /// One-time sign-in links (only the token's hash). Used only through SQL functions
 /// (email_sign_in_create / email_sign_in_use), never by the app role directly.
 model EmailSignIn {
-  tokenHash String    @id @map("token_hash")
-  email     String
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  expiresAt DateTime  @map("expires_at") @db.Timestamptz(3)
-  usedAt    DateTime? @map("used_at") @db.Timestamptz(3)
+  tokenHash   String    @id @map("token_hash")
+  email       String
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  expiresAt   DateTime  @map("expires_at") @db.Timestamptz(3)
+  usedAt      DateTime? @map("used_at") @db.Timestamptz(3)
   /// the 6-digit code in the same e-mail (its hash), for typing in instead of opening the link
-  codeHash    String? @map("code_hash")
-  failedCodes Int     @default(0) @map("failed_codes")
+  codeHash    String?   @map("code_hash")
+  failedCodes Int       @default(0) @map("failed_codes")
 
   @@index([email, createdAt])
   @@map("email_sign_ins")

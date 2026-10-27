@@ -4,7 +4,9 @@ import { X } from 'lucide-react';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
 import { FEATURE_ICONS } from '@/components/map/markers';
 import { StatusDot } from '@/components/map/status-dot';
+import { BookingCard } from '@/components/booking/booking-card';
 import { Button } from '@/components/ui/button';
+import type { Booking } from '@/lib/bookings';
 import { useSeatHistory } from '@/lib/queries';
 import type { Room, Seat } from '@/lib/types';
 import { AssignPicker } from './assign-picker';
@@ -19,6 +21,7 @@ export function SeatPanel({
   actions,
   onClose,
   onSelectPerson,
+  booking,
 }: {
   seat: Seat;
   room: Room | undefined;
@@ -26,6 +29,8 @@ export function SeatPanel({
   actions: ReturnType<typeof useSeatActions>;
   onClose: () => void;
   onSelectPerson: (personId: string) => void;
+  /** shared desks: the day the map shows, and who booked the desk then */
+  booking?: { day: string; today: string; current: Booking | undefined; meId: string | undefined };
 }) {
   const t = useTranslations('seat');
   const ts = useTranslations('status');
@@ -36,6 +41,7 @@ export function SeatPanel({
   const current = seat.currentAssignment;
   const ti = useTranslations('inspector');
   const tz = useTranslations('map');
+  const tb = useTranslations('booking');
 
   return (
     <div className="grid gap-4" data-testid="seat-panel">
@@ -46,6 +52,9 @@ export function SeatPanel({
             {room ? t('room', { room: room.name }) : t('noRoom')}
             {room?.team && ` · ${tz('zone', { team: room.team })}`}
           </p>
+          {seat.shared && (
+            <p className="mt-1 text-sm font-medium text-primary">{tb('sharedDesk')}</p>
+          )}
           {!!seat.features?.length && (
             <ul className="mt-2 flex flex-wrap gap-1.5" aria-label={ti('features')}>
               {seat.features.map((f) => {
@@ -74,100 +83,112 @@ export function SeatPanel({
         </Button>
       </header>
 
-      <div className="grid gap-3 rounded-lg border p-3">
-        <p className="flex items-center gap-2 text-sm font-medium" data-testid="seat-status">
-          <StatusDot status={seat.occupancy} />
-          {ts(seat.occupancy)}
-        </p>
-        {current?.person && (
-          <div className="flex items-center gap-3">
-            <span
-              aria-hidden
-              className="grid size-10 shrink-0 place-items-center rounded-full bg-muted text-sm font-medium"
-            >
-              {current.person.displayName
-                .split(/\s+/)
-                .map((w) => w[0])
-                .slice(0, 2)
-                .join('')}
-            </span>
-            <div className="min-w-0">
-              <button
-                type="button"
-                className="text-base font-medium hover:underline focus-visible:underline focus-visible:outline-none"
-                onClick={() => onSelectPerson(current.person!.id)}
+      {seat.shared && booking ? (
+        <BookingCard
+          seat={seat}
+          day={booking.day}
+          today={booking.today}
+          booking={booking.current}
+          meId={booking.meId}
+          canManage={canEdit}
+          onSelectPerson={onSelectPerson}
+        />
+      ) : (
+        <div className="grid gap-3 rounded-lg border p-3">
+          <p className="flex items-center gap-2 text-sm font-medium" data-testid="seat-status">
+            <StatusDot status={seat.occupancy} />
+            {ts(seat.occupancy)}
+          </p>
+          {current?.person && (
+            <div className="flex items-center gap-3">
+              <span
+                aria-hidden
+                className="grid size-10 shrink-0 place-items-center rounded-full bg-muted text-sm font-medium"
               >
-                {current.person.displayName}
-              </button>
-              {current.person.department && (
-                <p className="text-sm text-muted-foreground">{current.person.department}</p>
-              )}
+                {current.person.displayName
+                  .split(/\s+/)
+                  .map((w) => w[0])
+                  .slice(0, 2)
+                  .join('')}
+              </span>
+              <div className="min-w-0">
+                <button
+                  type="button"
+                  className="text-base font-medium hover:underline focus-visible:underline focus-visible:outline-none"
+                  onClick={() => onSelectPerson(current.person!.id)}
+                >
+                  {current.person.displayName}
+                </button>
+                {current.person.department && (
+                  <p className="text-sm text-muted-foreground">{current.person.department}</p>
+                )}
+              </div>
             </div>
-          </div>
-        )}
-        {current?.kind === 'reserved' && (
-          <p className="text-base font-medium">
-            {t('reservedFor', { name: current.reservedFor ?? '' })}
-          </p>
-        )}
-        {current && (
-          <p className="text-xs text-muted-foreground">
-            {t('sinceFor', {
-              date: format.dateTime(new Date(current.startAt), { dateStyle: 'medium' }),
-              duration: format.relativeTime(new Date(current.startAt), now),
-            })}
-          </p>
-        )}
-        {seat.status === 'blocked' && (
-          <p className="text-sm text-muted-foreground">{t('blockedInfo')}</p>
-        )}
+          )}
+          {current?.kind === 'reserved' && (
+            <p className="text-base font-medium">
+              {t('reservedFor', { name: current.reservedFor ?? '' })}
+            </p>
+          )}
+          {current && (
+            <p className="text-xs text-muted-foreground">
+              {t('sinceFor', {
+                date: format.dateTime(new Date(current.startAt), { dateStyle: 'medium' }),
+                duration: format.relativeTime(new Date(current.startAt), now),
+              })}
+            </p>
+          )}
+          {seat.status === 'blocked' && (
+            <p className="text-sm text-muted-foreground">{t('blockedInfo')}</p>
+          )}
 
-        {canEdit && seat.status === 'active' && (
-          <div className="flex flex-wrap gap-2">
-            {seat.occupancy === 'free' && (
-              <>
-                <AssignPicker
-                  seatId={seat.id}
-                  label={t('assign')}
-                  disabled={actions.busy}
-                  onPick={(person) => actions.assign(seat.id, person)}
-                />
-                <ReserveForm
-                  disabled={actions.busy}
-                  onReserve={(name) => actions.reserve(seat.id, name)}
-                />
-              </>
-            )}
-            {seat.occupancy === 'reserved' && current && (
-              <>
-                <AssignPicker
-                  seatId={seat.id}
-                  label={t('assign')}
-                  disabled={actions.busy}
-                  onPick={(person) => actions.assign(seat.id, person)}
-                />
+          {canEdit && seat.status === 'active' && (
+            <div className="flex flex-wrap gap-2">
+              {seat.occupancy === 'free' && (
+                <>
+                  <AssignPicker
+                    seatId={seat.id}
+                    label={t('assign')}
+                    disabled={actions.busy}
+                    onPick={(person) => actions.assign(seat.id, person)}
+                  />
+                  <ReserveForm
+                    disabled={actions.busy}
+                    onReserve={(name) => actions.reserve(seat.id, name)}
+                  />
+                </>
+              )}
+              {seat.occupancy === 'reserved' && current && (
+                <>
+                  <AssignPicker
+                    seatId={seat.id}
+                    label={t('assign')}
+                    disabled={actions.busy}
+                    onPick={(person) => actions.assign(seat.id, person)}
+                  />
+                  <Button
+                    variant="outline"
+                    disabled={actions.busy}
+                    onClick={() => actions.free(current)}
+                  >
+                    {t('cancelReservation')}
+                  </Button>
+                </>
+              )}
+              {seat.occupancy === 'taken' && current && (
                 <Button
                   variant="outline"
                   disabled={actions.busy}
                   onClick={() => actions.free(current)}
                 >
-                  {t('cancelReservation')}
+                  {t('free')}
                 </Button>
-              </>
-            )}
-            {seat.occupancy === 'taken' && current && (
-              <Button
-                variant="outline"
-                disabled={actions.busy}
-                onClick={() => actions.free(current)}
-              >
-                {t('free')}
-              </Button>
-            )}
-          </div>
-        )}
-        {!canEdit && <p className="text-xs text-muted-foreground">{t('viewOnly')}</p>}
-      </div>
+              )}
+            </div>
+          )}
+          {!canEdit && <p className="text-xs text-muted-foreground">{t('viewOnly')}</p>}
+        </div>
+      )}
 
       <HistoryList
         entries={history.data}

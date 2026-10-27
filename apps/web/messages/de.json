@@ -101,7 +101,8 @@
         "title": "Es kann nichts schiefgehen",
         "body": "Jede Änderung zeigt eine Meldung mit «Rückgängig». Mehrere Umzüge auf einmal? Nutzen Sie «Umzüge» im Menü."
       }
-    }
+    },
+    "sharedSuffix": "(geteilter Platz)"
   },
   "seat": {
     "title": "Platz {label}",
@@ -348,7 +349,10 @@
     "markerKind": "Was ist es?",
     "markerLabel": "Name (optional)",
     "markerLabelHint": "z. B. Cafeteria, Drucker 2. OG",
-    "deleteMarker": "Markierung löschen"
+    "deleteMarker": "Markierung löschen",
+    "shared": "Geteilter Platz",
+    "sharedHint": "Wird tageweise auf der Karte gebucht; niemand sitzt fest hier.",
+    "sharedOccupied": "Zuerst den Platz freigeben: ein geteilter Platz hat keine feste Person."
   },
   "auth": {
     "signInTitle": "Bei Seatline anmelden",
@@ -818,7 +822,12 @@
       "teamRenamed": "hat das Team {old} in {team} umbenannt",
       "teamDeleted": "hat das Team {team} entfernt",
       "teamPlanSet": "erwartet {count} Personen im Team {team}",
-      "teamPlanRemoved": "hat die Personalplanung für {team} entfernt"
+      "teamPlanRemoved": "hat die Personalplanung für {team} entfernt",
+      "seatShared": "hat Platz {seat} zu einem geteilten Platz gemacht",
+      "seatUnshared": "hat Platz {seat} wieder zu einem festen Platz gemacht",
+      "deskBooked": "hat Platz {seat} für {person} am {day} gebucht",
+      "bookingCancelled": "hat die Buchung von Platz {seat} für {person} am {day} storniert",
+      "bookingCancelledLeft": "hat die Buchung von Platz {seat} für {person} am {day} storniert (hat die Organisation verlassen)"
     },
     "showPlan": "Plan öffnen",
     "search": "Aktivität durchsuchen",
@@ -1045,7 +1054,8 @@
       "seat_blocked": "{person} → {seat}: Der Platz ist gesperrt.",
       "seat_double": "{person} → {seat}: Für diesen Platz ist mehr als eine Person geplant.",
       "seat_missing": "{person}: Der geplante Platz wurde gelöscht.",
-      "no_moves": "Der Plan enthält keine Umzüge mehr."
+      "no_moves": "Der Plan enthält keine Umzüge mehr.",
+      "seat_shared": "{person} → {seat}: der Platz ist geteilt (wird tageweise gebucht)."
     },
     "notes": {
       "person_left": "{person} hat die Organisation verlassen – dieser Umzug entfällt.",
@@ -1337,7 +1347,7 @@
       },
       "seat": {
         "title": "Plätze vergeben",
-        "body": "Einen Namen auf einen grünen Platz ziehen."
+        "body": "Einen Namen auf einen grünen Platz ziehen oder geteilte Plätze tageweise buchen lassen."
       },
       "moves": {
         "title": "Umzüge planen",
@@ -1390,7 +1400,7 @@
         "focus": {
           "label": "Gemacht für",
           "usual": "Desk-Sharing-Buchungen",
-          "us": "Wissen, wer wo sitzt"
+          "us": "Wer wo sitzt, und geteilte Plätze tageweise gebucht"
         },
         "data": {
           "label": "Ihre Daten",
@@ -1787,5 +1797,32 @@
     "microsoftHint": "Bitten Sie Ihre IT, Seatline freizugeben (Personen › Einstellungen).",
     "template": "Noch keine Liste? Nutzen Sie unsere <link>gratis Excel-Vorlage</link>.",
     "later": "Zuerst den Plan ansehen"
+  },
+  "booking": {
+    "today": "Heute",
+    "tomorrow": "Morgen",
+    "todayLower": "heute",
+    "tomorrowLower": "morgen",
+    "dayLabel": "Geteilte Plätze anzeigen für",
+    "sharedDesk": "Geteilter Platz · tageweise buchbar",
+    "sharedOn": "Geteilter Platz · {day}",
+    "free": "Frei",
+    "bookedBy": "Gebucht von",
+    "you": "{name} (Sie)",
+    "book": "Für {day} buchen",
+    "bookFor": "Für jemanden buchen",
+    "cancelMine": "Meine Buchung stornieren",
+    "cancel": "Buchung stornieren",
+    "booked": "Platz {label} für Sie gebucht · {day}",
+    "bookedFor": "Platz {label} für {name} gebucht · {day}",
+    "cancelled": "Buchung von Platz {label} storniert · {day}",
+    "error": {
+      "desk_booked": "Jemand anderes hat diesen Platz gerade gebucht.",
+      "already_booked": "Sie haben an diesem Tag schon einen Platz.",
+      "day_out_of_range": "Plätze können bis 4 Wochen im Voraus gebucht werden.",
+      "not_bookable": "Dieser Platz kann nicht gebucht werden."
+    },
+    "myTitle": "Meine Buchungen",
+    "none": "Kein Platz gebucht."
   }
 }

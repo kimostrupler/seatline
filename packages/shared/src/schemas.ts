@@ -77,6 +77,8 @@ export const createSeatSchema = z.strictObject({
   rotation: z.number().min(0).lt(360).default(0),
   type: z.enum(SEAT_TYPES).default('desk'),
   status: z.enum(SEAT_STATUSES).default('active'),
+  /** shared desk: no permanent person, booked by the day */
+  shared: z.boolean().default(false),
 });
 export const updateSeatSchema = createSeatSchema.omit({ floorId: true }).partial();
 export const listSeatsQuerySchema = z.strictObject({ floorId: id });
@@ -108,6 +110,8 @@ const layoutSeat = z.strictObject({
   type: z.enum(SEAT_TYPES),
   status: z.enum(SEAT_STATUSES),
   features: z.array(z.enum(SEAT_FEATURES)).max(SEAT_FEATURES.length).optional(),
+  /** shared desk: no permanent person, booked by the day */
+  shared: z.boolean().optional(),
 });
 const layoutMarker = z.strictObject({
   id,
@@ -502,3 +506,17 @@ export const setTeamPlanSchema = z.strictObject({
   byDate: calendarDay.nullish(),
 });
 export type SetTeamPlanInput = z.infer<typeof setTeamPlanSchema>;
+
+// ---- Desk booking ------------------------------------------------------------
+
+export { BOOKING_DAYS_AHEAD } from './booking';
+
+export const createBookingSchema = z.strictObject({
+  seatId: id,
+  day: calendarDay,
+  /** someone else (editors and admins only); default: the caller */
+  personId: id.optional(),
+});
+export const bookingsQuerySchema = z.strictObject({ floorId: id, day: calendarDay });
+export type CreateBookingInput = z.infer<typeof createBookingSchema>;
+export type BookingsQuery = z.infer<typeof bookingsQuerySchema>;
