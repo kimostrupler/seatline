@@ -2,7 +2,6 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  MAX_WORDS,
   messageProblem,
   nextSendSlot,
   wordCount,
@@ -602,14 +601,8 @@ function Composer({
           value={body}
           onChange={(e) => setBody(e.target.value)}
         />
-        <p
-          className={cn(
-            'text-xs tabular-nums',
-            words > MAX_WORDS ? 'font-medium text-destructive' : 'text-muted-foreground',
-          )}
-          data-testid="word-count"
-        >
-          {t('compose.words', { count: String(words), max: String(MAX_WORDS) })}
+        <p className="text-xs text-muted-foreground tabular-nums" data-testid="word-count">
+          {t('compose.words', { count: words })}
         </p>
       </div>
       {manual ? (
@@ -633,7 +626,7 @@ function Composer({
         <>
           {problem && (
             <p className="text-sm text-destructive" role="status">
-              {t(`problems.${problem}`, { max: String(MAX_WORDS) })}
+              {t(`problems.${problem}`)}
             </p>
           )}
           <div className="flex flex-wrap items-center gap-3">

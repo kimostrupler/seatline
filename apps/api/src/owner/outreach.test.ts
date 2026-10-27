@@ -61,7 +61,8 @@ describe('outreach rules', () => {
     expect(messageProblem({ ...ok, contactEmail: null }, body)).toBe('no_email');
     expect(messageProblem({ ...ok, channel: 'form' }, body)).toBe('no_email');
     expect(messageProblem(ok, `${body} [Name]`)).toBe('placeholder');
-    expect(messageProblem(ok, 'word '.repeat(101))).toBe('too_long');
+    // no word limit: a long personal e-mail is fine
+    expect(messageProblem(ok, 'word '.repeat(300))).toBeNull();
   });
 
   it('knows the next step and when nobody answered', () => {

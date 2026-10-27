@@ -3,7 +3,7 @@ import { OPERATOR } from './legal';
 
 /**
  * Personal outreach to possible customers (the operator's Leads page under /owner). One person,
- * one personal e-mail: no bulk sending, at most MAX_WORDS words, sent at a good time
+ * one personal e-mail: no bulk sending, sent at a good time
  * (Tuesday to Thursday, 8 am Zurich), one follow-up after FOLLOW_UP_DAYS days.
  */
 export const LEAD_STATUSES = [
@@ -25,7 +25,6 @@ export type LeadLanguage = (typeof LEAD_LANGUAGES)[number];
 export const LEAD_MESSAGE_KINDS = ['first', 'follow_up'] as const;
 export type LeadMessageKind = (typeof LEAD_MESSAGE_KINDS)[number];
 
-export const MAX_WORDS = 100;
 export const FOLLOW_UP_DAYS = 7;
 /** no reply this many days after the follow-up: the lead is "no answer" */
 export const NO_ANSWER_DAYS = 14;
@@ -92,11 +91,10 @@ export const wordCount = (body: string) =>
 export function messageProblem(
   lead: { whyNow: string | null; contactEmail: string | null; channel: LeadChannel },
   body: string,
-): 'no_email' | 'no_reason' | 'too_long' | 'placeholder' | null {
+): 'no_email' | 'no_reason' | 'placeholder' | null {
   if (lead.channel !== 'email' || !lead.contactEmail) return 'no_email';
   if (!lead.whyNow) return 'no_reason';
   if (/\[[^\]]*\]/.test(body)) return 'placeholder';
-  if (wordCount(body) > MAX_WORDS) return 'too_long';
   return null;
 }
 

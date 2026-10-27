@@ -21,9 +21,7 @@ test('the owner dashboard: only for the operator, linked nowhere', async ({ page
   await expect(page.getByText('Business overview')).toHaveCount(0);
 });
 
-test('outreach leads: one personal e-mail, at most 100 words, scheduled for the morning', async ({
-  page,
-}) => {
+test('outreach leads: one personal e-mail, scheduled for the morning', async ({ page }) => {
   await page.goto('/owner');
   await page.getByRole('link', { name: 'Leads' }).click();
   await expect(page.getByRole('heading', { name: 'Leads' })).toBeVisible();
@@ -48,12 +46,11 @@ test('outreach leads: one personal e-mail, at most 100 words, scheduled for the 
   await panel.getByRole('button', { name: 'Save' }).click();
   // the draft follows the saved lead
   await expect(body).toHaveValue(/Ich habe gesehen, dass Livingdocs weiter wächst\./);
-  await expect(panel.getByTestId('word-count')).toHaveText(/^\d+ \/ 100 words$/);
-  // too long: refused until it's short again
+  // a word count only as a guide: a longer e-mail can still go out
   const text = await body.inputValue();
   await body.fill(`${text}\n${'Wort '.repeat(40)}`);
-  await expect(panel.getByText('Over 100 words: shorten it.')).toBeVisible();
-  await expect(panel.getByRole('button', { name: 'Schedule' })).toBeDisabled();
+  await expect(panel.getByTestId('word-count')).toHaveText(/^\d+ words$/);
+  await expect(panel.getByRole('button', { name: 'Schedule' })).toBeEnabled();
   await body.fill(text);
   await panel.getByRole('button', { name: 'Schedule' }).click();
   await expect(page.getByText(/E-mail scheduled for/)).toBeVisible();

@@ -580,8 +580,8 @@ chromium` (re-run after UI changes). In the app: **Help** in the top bar, a dism
   workspace (normal tenant RLS) and only owner-checked endpoints (`/owner/leads…`,
   `LeadsService`) use them. Rules and templates en/de/fr are pure in
   `packages/shared/src/outreach.ts` (imported as `@seatline/shared/dist/outreach`, unit-tested in
-  `apps/api/src/owner/outreach.test.ts`): one e-mail per lead at a time, never in bulk, at most
-  `MAX_WORDS` (100), a "why now" sentence and no `[placeholder]` left (`messageProblem`). Schedule
+  `apps/api/src/owner/outreach.test.ts`): one e-mail per lead at a time, never in bulk (no word limit, the
+  count is only shown), a "why now" sentence and no `[placeholder]` left (`messageProblem`). Schedule
   = the next Tue–Thu 8 am Zurich (`nextSendSlot`), or **Send now** (after one confirmation;
   `sendNow` on schedule, or `POST …/messages/:id/send` for a scheduled one; a failed send waits
   for the next slot); the `nightly-sync` job now runs at 01:00 and

@@ -101,13 +101,7 @@ describe('outreach (owner leads)', () => {
       .set(a.headers)
       .expect(200);
     expect(draft.body.body).toContain('Ich habe gesehen, dass Livingdocs weiter wächst.');
-    // too long, or a placeholder left: refused
-    await api(app)
-      .post(`/owner/leads/${id}/messages`)
-      .set(a.headers)
-      .send({ kind: 'first', subject: 'x', body: 'word '.repeat(101) })
-      .expect(400)
-      .expect((r) => expect(r.body.code).toBe('too_long'));
+    // a placeholder left: refused
     await api(app)
       .post(`/owner/leads/${id}/messages`)
       .set(a.headers)

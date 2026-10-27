@@ -1654,7 +1654,7 @@
       },
       "mailOff": "E-Mail ist auf dem Server nicht eingerichtet, darum kann noch nichts gesendet werden.",
       "repliesOff": "Antworten werden nicht automatisch erkannt (IMAP ist nicht eingerichtet): Markieren Sie Antworten selbst.",
-      "rules": "Eine Person, eine persönliche E-Mail. Höchstens 100 Wörter. E-Mails gehen Dienstag bis Donnerstag um 8 Uhr raus, und eine Antwort stoppt alles, was noch geplant ist.",
+      "rules": "Eine Person, eine persönliche E-Mail. E-Mails gehen Dienstag bis Donnerstag um 8 Uhr raus, und eine Antwort stoppt alles, was noch geplant ist.",
       "fields": {
         "company": "Firma",
         "website": "Website",
@@ -1697,7 +1697,7 @@
         "follow_up": "Nachfass-E-Mail schreiben",
         "subject": "Betreff",
         "body": "Nachricht",
-        "words": "{count} / {max} Wörter",
+        "words": "{count, plural, one {# Wort} other {# Wörter}}",
         "schedule": "Planen",
         "scheduleHint": "Geht {when} raus.",
         "scheduled": "E-Mail geplant für {when}",
@@ -1713,7 +1713,6 @@
       "problems": {
         "no_email": "Erfassen Sie zuerst eine veröffentlichte E-Mail-Adresse (Kanal: E-Mail).",
         "no_reason": "Schreiben Sie zuerst den «Warum jetzt»-Satz: Er macht die E-Mail persönlich.",
-        "too_long": "Mehr als {max} Wörter: Kürzen Sie sie.",
         "placeholder": "Füllen Sie alles in [Klammern] aus."
       },
       "messages": "E-Mails",
