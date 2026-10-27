@@ -8,14 +8,15 @@ import type { Mail } from './mail.service';
 
 /**
  * A reply that came in: who wrote (the address only), when, which e-mails it answers
- * (In-Reply-To + References Message-IDs) and whether a machine sent it (Auto-Submitted:
- * out-of-office, bounces). Nothing else is read.
+ * (In-Reply-To + References Message-IDs), its subject and whether a machine sent it
+ * (out-of-office, bounces). Nothing else is read.
  */
 export interface Reply {
   from: string;
   date: Date;
   answers: string[];
   auto: boolean;
+  subject: string;
 }
 
 /** Message-IDs from an In-Reply-To or References header value. */
@@ -31,6 +32,24 @@ export function headerValue(raw: string, name: string): string | undefined {
 /** "Auto-Submitted: no" is a person; anything else there (auto-replied, auto-generated) isn't. */
 export const isAutoSubmitted = (value: string | undefined) =>
   !!value && !/^no(\s|;|$)/i.test(value.trim());
+
+/** Subjects mail programs give automatic answers, in English, German and French. */
+const AUTO_SUBJECT =
+  /^\s*(automatic reply|auto[- ]?reply|autoreply|automatische antwort|abwesenheit|out of (the )?office|r[ée]ponse automatique|absence)/i;
+
+/**
+ * Sent by a machine, not a person: an Auto-Submitted header (RFC 3834), the older Precedence /
+ * X-Autoreply / X-Autorespond headers, or an out-of-office subject (some programs set no header).
+ */
+export function isAutomatic(raw: string, subject = ''): boolean {
+  return (
+    isAutoSubmitted(headerValue(raw, 'Auto-Submitted')) ||
+    /^(auto_reply|bulk|junk|list)$/i.test(headerValue(raw, 'Precedence') ?? '') ||
+    !!headerValue(raw, 'X-Autoreply') ||
+    !!headerValue(raw, 'X-Autorespond') ||
+    AUTO_SUBJECT.test(subject)
+  );
+}
 
 /**
  * The hello@ mailbox over IMAP, for outreach only: files each sent outreach e-mail in the Sent
@@ -75,6 +94,7 @@ export class InboxService {
               date: string;
               inReplyTo?: string;
               autoSubmitted?: string;
+              subject?: string;
             },
         ),
       );
@@ -83,7 +103,8 @@ export class InboxService {
           from: m.from.toLowerCase(),
           date: new Date(m.date),
           answers: messageIds(m.inReplyTo),
-          auto: isAutoSubmitted(m.autoSubmitted),
+          auto: isAutomatic(m.autoSubmitted ? `Auto-Submitted: ${m.autoSubmitted}` : '', m.subject),
+          subject: m.subject ?? '',
         }))
         .filter((m) => m.date >= since && domains.includes(m.from.split('@')[1] ?? ''));
     }
@@ -94,7 +115,10 @@ export class InboxService {
         for (const domain of domains) {
           const uids = await client.search({ since, from: `@${domain}` }, { uid: true });
           if (!uids || !uids.length) continue;
-          const want = { envelope: true, headers: ['references', 'auto-submitted'] };
+          const want = {
+            envelope: true,
+            headers: ['references', 'auto-submitted', 'precedence', 'x-autoreply', 'x-autorespond'],
+          };
           for await (const m of client.fetch(uids, want, { uid: true })) {
             const from = m.envelope?.from?.[0]?.address?.toLowerCase();
             // IMAP's FROM search matches anywhere in the header: check the domain exactly
@@ -107,7 +131,8 @@ export class InboxService {
                 ...messageIds(m.envelope?.inReplyTo),
                 ...messageIds(headerValue(raw, 'References')),
               ],
-              auto: isAutoSubmitted(headerValue(raw, 'Auto-Submitted')),
+              auto: isAutomatic(raw, m.envelope?.subject),
+              subject: m.envelope?.subject ?? '',
             });
           }
         }

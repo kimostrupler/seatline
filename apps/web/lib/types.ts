@@ -489,6 +489,9 @@ export interface Lead {
   firstSentAt: string | null;
   followUpSentAt: string | null;
   repliedAt: string | null;
+  /** the latest automatic answer (out-of-office…); never counts as a reply */
+  autoReplyAt: string | null;
+  autoReplySubject: string | null;
   notes: string | null;
   updatedAt: string;
 }

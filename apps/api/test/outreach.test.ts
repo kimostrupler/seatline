@@ -338,4 +338,43 @@ describe('outreach (owner leads)', () => {
       status: 'ready',
     });
   });
+
+  it('automatic answers (out-of-office) show on the lead, even without a header, and never count as a reply', async () => {
+    const id = await newLead();
+    const draft = await api(app).get(`/owner/leads/${id}/draft?kind=first`).set(a.headers);
+    await api(app)
+      .post(`/owner/leads/${id}/messages`)
+      .set(a.headers)
+      .send({ kind: 'first', ...draft.body, sendNow: true })
+      .expect(201);
+    const sentAt = new Date();
+    await mkdir(inbox(), { recursive: true });
+    // from the contact, no Auto-Submitted header: the subject alone gives it away
+    await writeFile(
+      join(inbox(), 'ooo.json'),
+      JSON.stringify({
+        from: 'contact@livingdocs.io',
+        date: new Date(sentAt.getTime() + 60_000).toISOString(),
+        subject: 'Automatische Antwort: Wer sitzt wo bei Livingdocs?',
+      }),
+    );
+    // the page asks on opening; only the operator may
+    await api(app).post('/owner/leads/check-replies').set(b.headers).expect(404);
+    const res = await api(app).post('/owner/leads/check-replies').set(a.headers).expect(201);
+    expect(res.body).toEqual({ replied: 0, autoReplies: 1 });
+    const got = (await api(app).get(`/owner/leads/${id}`).set(a.headers)).body;
+    expect(got).toMatchObject({
+      status: 'sent',
+      autoReplySubject: 'Automatische Antwort: Wer sitzt wo bei Livingdocs?',
+    });
+    expect(got.autoReplyAt).not.toBeNull();
+    // the same answer again: nothing new (and at most one look a minute)
+    const leads = app.get(LeadsService);
+    expect(await leads.runOutreach(a.tenantId, new Date(sentAt.getTime() + 120_000))).toMatchObject(
+      {
+        replied: 0,
+        autoReplies: 0,
+      },
+    );
+  });
 });

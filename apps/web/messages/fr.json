@@ -843,7 +843,8 @@
     "leadScheduled": "a planifié un e-mail à « {name} »",
     "leadCanceled": "a annulé un e-mail à « {name} »",
     "leadSent": "a envoyé l’e-mail à « {name} »",
-    "leadReplied": "a détecté une réponse de « {name} »"
+    "leadReplied": "a détecté une réponse de « {name} »",
+    "leadAutoReply": "a détecté une réponse automatique (absence) de « {name} »"
   },
   "dashboard": {
     "title": "Accueil",
@@ -1772,6 +1773,10 @@
         "scheduleRestConfirm": "Planifier l’e-mail rempli pour chaque lead prêt que vous n’avez pas encore écrit ({count}), sans les lire un par un ? Les leads dont le modèle est incomplet sont ignorés. Ils partent {when} ; d’ici là, vous pouvez encore modifier ou arrêter chacun.",
         "scheduled": "{count, plural, =0 {Rien planifié} one {# e-mail planifié} other {# e-mails planifiés}}",
         "done": "Tout est écrit. Ils partent {when} ; d’ici là, vous pouvez encore modifier ou arrêter chacun."
+      },
+      "autoReply": {
+        "badge": "Réponse auto.",
+        "note": "Réponse automatique (p. ex. absence) le {when}. Elle ne compte pas comme réponse : la relance part quand même."
       }
     }
   },

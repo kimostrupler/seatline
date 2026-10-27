@@ -629,7 +629,11 @@ test update-screenshots --project chromium`; `updates.test.ts` checks). **Add a 
   reply (IMAP `InboxService`: envelopes + References/Auto-Submitted headers only; it counts
   when it answers one of our Message-IDs, or comes from the contact's own address and isn't
   auto-submitted — a colleague's out-of-office or a newsletter from the domain doesn't) or a
-  "no" cancels what's scheduled; a message is claimed (`sent_at`) before SMTP so it never goes
+  "no" cancels what's scheduled. Automatic answers (`isAutomatic`: Auto-Submitted / Precedence /
+  X-Autoreply headers or an out-of-office subject en/de/fr) to our e-mail or from the contact are
+  only noted on the lead (`auto_reply_at` + subject, badge "Auto-reply", audit `owner.lead.auto_reply`)
+  and the follow-up still goes out. The Leads page also checks on opening (`POST
+/owner/leads/check-replies`, at most once a minute); a message is claimed (`sent_at`) before SMTP so it never goes
   out twice; 14 days after the follow-up → `no_answer`;
   "no"/"no_answer" leads are deleted after 12 months. Sent mails: plain text + HTML with the
   video GIF (`outreachHtml`, no tracking), sender "Kimo Strupler · Seatline", Message-ID kept so

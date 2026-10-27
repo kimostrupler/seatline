@@ -87,6 +87,13 @@ export class OwnerController {
     return this.leads.import(ctx, body.leads);
   }
 
+  /** Look in the mailbox for replies and automatic answers now (the page asks on opening). */
+  @Post('leads/check-replies')
+  async checkReplies(@Ctx() ctx: RequestContext) {
+    await this.owner.assertOwner(ctx, '/owner/leads/check-replies');
+    return this.leads.checkRepliesNow(ctx);
+  }
+
   /** Every scheduled e-mail goes out now (one per lead). */
   @Post('leads/send-scheduled')
   async sendAllScheduled(@Ctx() ctx: RequestContext) {
