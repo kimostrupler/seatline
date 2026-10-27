@@ -1167,7 +1167,8 @@
       "pastDue": "Die letzte Zahlung für Seatline ist fehlgeschlagen.",
       "trialEnding": "{days, plural, =0 {Die Testphase endet heute.} one {Die Testphase endet in # Tag.} other {Die Testphase endet in # Tagen.}}",
       "open": "Abrechnung öffnen"
-    }
+    },
+    "volumeTier": "{price} ab dem {from}. Arbeitsplatz"
   },
   "legal": {
     "terms": "Nutzungsbedingungen",
@@ -1238,7 +1239,7 @@
     "copyright": "© {year} Seatline",
     "f11Title": "QR-Codes auf den Plätzen",
     "f11Body": "Für jeden Platz ein Etikett drucken. Scannen zeigt, wer dort sitzt.",
-    "heroLead": "Wer wo sitzt, geplante Umzüge und jede Änderung festgehalten. Für Schweizer Büros, CHF 2 pro Platz.",
+    "heroLead": "Wer wo sitzt, geplante Umzüge und jede Änderung festgehalten. Für Schweizer Büros, CHF 2 pro Platz, ab dem 51. CHF 0.99.",
     "navHelp": "Hilfe",
     "live": {
       "title": "Ausprobieren: tippen Sie auf einen grünen Platz",
@@ -1368,7 +1369,7 @@
         "price": {
           "label": "Preis",
           "usual": "«Kontaktieren Sie den Vertrieb»",
-          "us": "CHF 2 pro Platz und Monat, auf der Website"
+          "us": "CHF 2 pro Platz und Monat (ab dem 51. CHF 0.99), auf der Website"
         },
         "trial": {
           "label": "Ausprobieren",
@@ -1396,7 +1397,8 @@
           "us": "Bleiben in Zürich"
         }
       }
-    }
+    },
+    "priceVolume": "Ab dem 51. Platz: CHF 0.99"
   },
   "planImport": {
     "title": "Architektenplan importieren",

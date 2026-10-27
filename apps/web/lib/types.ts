@@ -1,4 +1,5 @@
 import type { LeadStatus, NextStep } from '@seatline/shared/dist/outreach';
+import type { PriceTier } from '@seatline/shared/dist/pricing';
 import type {
   AppRole,
   AssignmentKind,
@@ -35,7 +36,7 @@ export interface BillingOverview {
   /** active seats now (what the next bill counts) */
   seats: number;
   billedSeats: number | null;
-  price: { amount: number; currency: string; interval: string } | null;
+  price: { tiers: PriceTier[]; currency: string; interval: string } | null;
 }
 
 export interface Building {

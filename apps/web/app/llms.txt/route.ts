@@ -3,7 +3,7 @@ import { HELP, HELP_TOPICS, helpPath } from '@/lib/help';
 import { TEMPLATE, templatePath } from '@/lib/help/template';
 import { VIDEO, videoPath } from '@/lib/help/video';
 import { webConfig } from '@/lib/server/config';
-import { SITE_PRICE_CHF, siteUrl } from '@/lib/site';
+import { SITE_PRICE_CHF, SITE_VOLUME_PRICE_CHF, siteUrl } from '@/lib/site';
 
 /**
  * /llms.txt: a plain summary of Seatline for AI assistants and their crawlers (llmstxt.org),
@@ -24,7 +24,7 @@ export async function GET() {
 
 > ${t('metaDescription')}
 
-Seatline is web software for office seat management, made in Switzerland: companies draw or import their floor plans, give people a desk, plan moves and keep the history. Data is hosted in Switzerland (Microsoft Azure, Zurich). Available in German, French and English. Price: CHF ${SITE_PRICE_CHF} per active desk per month, 30 days free.
+Seatline is web software for office seat management, made in Switzerland: companies draw or import their floor plans, give people a desk, plan moves and keep the history. Data is hosted in Switzerland (Microsoft Azure, Zurich). Available in German, French and English. Price: CHF ${SITE_PRICE_CHF} per active desk per month for the first 50 desks, CHF ${SITE_VOLUME_PRICE_CHF} for every desk from the 51st; 30 days free.
 
 ## Features
 

@@ -1167,7 +1167,8 @@
       "pastDue": "The last payment for Seatline failed.",
       "trialEnding": "{days, plural, =0 {The free trial ends today.} one {The free trial ends in # day.} other {The free trial ends in # days.}}",
       "open": "Open billing"
-    }
+    },
+    "volumeTier": "{price} from desk {from}"
   },
   "legal": {
     "terms": "Terms of service",
@@ -1238,7 +1239,7 @@
     "copyright": "© {year} Seatline",
     "f11Title": "QR codes on desks",
     "f11Body": "Print a sticker for every desk. Scan it to see who sits there.",
-    "heroLead": "Who sits where, planned moves and every change kept. Made for Swiss offices, CHF 2 per desk.",
+    "heroLead": "Who sits where, planned moves and every change kept. Made for Swiss offices, CHF 2 per desk, CHF 0.99 from the 51st.",
     "navHelp": "Help",
     "live": {
       "title": "Try it: tap a green desk",
@@ -1368,7 +1369,7 @@
         "price": {
           "label": "Price",
           "usual": "“Talk to sales”",
-          "us": "CHF 2 per desk per month, on the website"
+          "us": "CHF 2 per desk per month (CHF 0.99 from the 51st), on the website"
         },
         "trial": {
           "label": "Trying it",
@@ -1396,7 +1397,8 @@
           "us": "Stays in Zurich"
         }
       }
-    }
+    },
+    "priceVolume": "From the 51st desk: CHF 0.99"
   },
   "planImport": {
     "title": "Import an architect plan",

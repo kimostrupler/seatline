@@ -1,3 +1,4 @@
+import { PRICE_TIERS } from '@seatline/shared/dist/pricing';
 /**
  * The public website (landing page + legal pages) lives on the app's parent domain:
  * app.seatline.ch → seatline.ch and www.seatline.ch. Other app addresses (localhost, the
@@ -57,7 +58,9 @@ export function isPublicPath(pathname: string): boolean {
 export const SITE_LANGUAGE_PATHS = { en: '/', de: '/de', fr: '/fr' } as const;
 
 /** Price per active seat per month, as shown on the website (the real price lives in Stripe). */
-export const SITE_PRICE_CHF = 2;
+export const SITE_PRICE_CHF = PRICE_TIERS[0]!.amount;
+/** … and for every seat from the 51st (PRICE_TIERS). */
+export const SITE_VOLUME_PRICE_CHF = PRICE_TIERS[1]!.amount;
 
 /** The landing page as seen from the app: the website's own domain, else /welcome on the app. */
 export function websiteHref(appUrl: string): string {

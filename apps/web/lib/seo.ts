@@ -1,4 +1,4 @@
-import { SITE_LANGUAGE_PATHS, SITE_PRICE_CHF } from './site';
+import { SITE_LANGUAGE_PATHS, SITE_PRICE_CHF, SITE_VOLUME_PRICE_CHF } from './site';
 import type { Language } from './locales';
 import { OPERATOR } from './legal/operator';
 
@@ -54,7 +54,31 @@ export function landingJsonLd(opts: {
           '@type': 'Offer',
           price: SITE_PRICE_CHF.toFixed(2),
           priceCurrency: 'CHF',
-          description: 'Per active desk per month. 30 days free.',
+          description: `Per active desk per month; CHF ${SITE_VOLUME_PRICE_CHF.toFixed(2)} for every desk from the 51st. 30 days free.`,
+          priceSpecification: [
+            {
+              '@type': 'UnitPriceSpecification',
+              price: SITE_PRICE_CHF.toFixed(2),
+              priceCurrency: 'CHF',
+              referenceQuantity: {
+                '@type': 'QuantitativeValue',
+                value: 1,
+                unitText: 'desk per month',
+              },
+              eligibleQuantity: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 50 },
+            },
+            {
+              '@type': 'UnitPriceSpecification',
+              price: SITE_VOLUME_PRICE_CHF.toFixed(2),
+              priceCurrency: 'CHF',
+              referenceQuantity: {
+                '@type': 'QuantitativeValue',
+                value: 1,
+                unitText: 'desk per month',
+              },
+              eligibleQuantity: { '@type': 'QuantitativeValue', minValue: 51 },
+            },
+          ],
         },
         publisher: { '@id': `${opts.base}/#organization` },
       },

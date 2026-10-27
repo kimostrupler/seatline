@@ -209,7 +209,7 @@ const FIRST: Record<LeadLanguage, { subject: string; body: string }> = {
 
 {whyNow} Genau dann wird "Wer sitzt wo?" schnell mühsam.
 
-Dafür habe ich Seatline gebaut: Sitzplan in einem Nachmittag, Personen per Drag & Drop platzieren, Team-Umzüge über Nacht. Daten in Zürich, CHF 2 pro Arbeitsplatz, 30 Tage gratis.
+Dafür habe ich Seatline gebaut: Sitzplan in einem Nachmittag, Personen per Drag & Drop platzieren, Team-Umzüge über Nacht. Daten in Zürich, CHF 2 pro Arbeitsplatz (ab dem 51. CHF 0.99), 30 Tage gratis.
 
 90-Sekunden-Video:
 {video}
@@ -224,7 +224,7 @@ PS: Kein Thema? Ein kurzes "Nein danke" genügt.`,
 
 {whyNow} C’est souvent là que « qui est assis où ? » devient pénible.
 
-C’est pour cela que j’ai créé Seatline : un plan de bureau en un après-midi, les personnes placées par glisser-déposer, les déménagements d’équipe pendant la nuit. Données à Zurich, CHF 2 par poste, 30 jours gratuits.
+C’est pour cela que j’ai créé Seatline : un plan de bureau en un après-midi, les personnes placées par glisser-déposer, les déménagements d’équipe pendant la nuit. Données à Zurich, CHF 2 par poste (CHF 0.99 dès le 51e), 30 jours gratuits.
 
 Vidéo de 90 secondes :
 {video}
@@ -239,7 +239,7 @@ PS : Pas pour vous ? Un simple « non merci » suffit.`,
 
 {whyNow} That’s exactly when “who sits where?” gets painful.
 
-So I built Seatline: a seating plan in an afternoon, people placed by drag and drop, team moves overnight. Data in Zurich, CHF 2 per desk, 30 days free.
+So I built Seatline: a seating plan in an afternoon, people placed by drag and drop, team moves overnight. Data in Zurich, CHF 2 per desk (CHF 0.99 from the 51st), 30 days free.
 
 90-second video:
 {video}

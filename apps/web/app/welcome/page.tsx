@@ -502,6 +502,7 @@ export default async function Welcome() {
                 {t('priceFigure')}
               </span>
               <span className="text-muted-foreground">{t('perDesk')}</span>
+              <span className="text-sm font-medium">{t('priceVolume')}</span>
             </p>
             <p className="flex gap-2.5 text-left text-muted-foreground">
               <Check className="mt-1 size-4 shrink-0 text-[var(--seat-free-stroke)]" aria-hidden />

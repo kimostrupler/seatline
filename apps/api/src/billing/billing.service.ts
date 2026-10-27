@@ -15,6 +15,7 @@ import { TenantDb } from '../db/tenant-db.service';
 import { MailService } from '../mail/mail.service';
 import { trialMail } from '../mail/texts';
 import type { MailLanguage } from '@seatline/shared';
+import { monthlyPrice, type PriceTier } from '@seatline/shared/dist/pricing';
 import { billingState } from './billing-state';
 
 /** Whole calendar days (Zurich) from `now` to `date`: tomorrow = 1, today = 0. */
@@ -55,6 +56,13 @@ function checkReturnUrl(url: string) {
   if (!(parsed.protocol === 'https:' || local) || !parsed.pathname.startsWith('/billing'))
     throw new BadRequestException('Invalid return address');
   return parsed.toString();
+}
+
+/** A Stripe price as tiers in francs (a flat per-desk price is one tier). */
+export function priceTiers(price: Stripe.Price): PriceTier[] {
+  if (price.billing_scheme !== 'tiered' || !price.tiers?.length)
+    return [{ upTo: null, amount: (price.unit_amount ?? 0) / 100 }];
+  return price.tiers.map((t) => ({ upTo: t.up_to, amount: (t.unit_amount ?? 0) / 100 }));
 }
 
 /**
@@ -126,7 +134,11 @@ export class BillingService {
     const stripe = this.stripe();
     const since = Math.floor(Date.now() / 1000) - 30 * 86_400;
     const [subs, balance, invoices] = await Promise.all([
-      stripe.subscriptions.list({ status: 'all', limit: 100 }),
+      stripe.subscriptions.list({
+        status: 'all',
+        limit: 100,
+        expand: ['data.items.data.price.tiers'],
+      }),
       stripe.balance.retrieve(),
       stripe.invoices.list({ status: 'paid', created: { gte: since }, limit: 100 }),
     ]);
@@ -145,7 +157,11 @@ export class BillingService {
             : price.recurring?.interval === 'week'
               ? 0.25
               : 1;
-        mrr += ((price.unit_amount ?? 0) * (item.quantity ?? 1)) / months;
+        const tiers = price.tiers ? priceTiers(price) : null;
+        mrr +=
+          (tiers
+            ? monthlyPrice(item.quantity ?? 1, tiers) * 100
+            : (price.unit_amount ?? 0) * (item.quantity ?? 1)) / months;
       }
     }
     const sum = (list: Array<{ amount: number; currency: string }>) =>
@@ -194,11 +210,13 @@ export class BillingService {
   /** The per-seat price, as shown to admins (fetched once from Stripe). */
   private async priceInfo() {
     if (!this.configured) return null;
-    this.price ??= this.stripe().prices.retrieve(this.config.STRIPE_PRICE_ID!);
+    this.price ??= this.stripe().prices.retrieve(this.config.STRIPE_PRICE_ID!, {
+      expand: ['tiers'],
+    });
     try {
       const p = await this.price;
       return {
-        amount: (p.unit_amount ?? 0) / 100,
+        tiers: priceTiers(p),
         currency: p.currency,
         interval: p.recurring?.interval ?? 'month',
       };
@@ -409,8 +427,7 @@ export class BillingService {
       tenant: await tx.tenant.findFirst({ where: { id: tenantId }, select: billingSelect }),
       seats: Math.max(1, await tx.seat.count({ where: { tenantId, status: 'active' } })),
     }));
-    if (!tenant?.stripeSubscriptionId || tenant.billedSeats === seats)
-      return { changed: false, seats };
+    if (!tenant?.stripeSubscriptionId) return { changed: false, seats };
     const stripe = this.stripe();
     let sub: Stripe.Subscription;
     try {
@@ -425,10 +442,21 @@ export class BillingService {
     }
     const item = sub.items.data[0];
     if (!item) return { changed: false, seats };
+    // a new price in Stripe (e.g. the volume price): existing subscriptions move to it too
+    const price = this.config.STRIPE_PRICE_ID!;
+    if (item.quantity === seats && item.price.id === price) {
+      if (tenant.billedSeats !== seats) await this.recordSeats(tenantId, tenant.billedSeats, seats);
+      return { changed: false, seats };
+    }
     await stripe.subscriptions.update(sub.id, {
-      items: [{ id: item.id, quantity: seats }],
+      items: [{ id: item.id, quantity: seats, price }],
       proration_behavior: 'create_prorations',
     });
+    await this.recordSeats(tenantId, tenant.billedSeats, seats);
+    return { changed: true, seats };
+  }
+
+  private async recordSeats(tenantId: string, before: number | null, seats: number) {
     await this.db.run(tenantId, async (tx) => {
       await tx.tenant.update({ where: { id: tenantId }, data: { billedSeats: seats } });
       await audit(
@@ -438,12 +466,11 @@ export class BillingService {
           action: 'billing.seats',
           entityType: 'tenant',
           entityId: tenantId,
-          before: { seats: tenant.billedSeats },
+          before: { seats: before },
           after: { seats },
         },
       );
     });
-    return { changed: true, seats };
   }
 
   /** A subscription Stripe no longer has: treated like a cancelled one (as the webhook would). */

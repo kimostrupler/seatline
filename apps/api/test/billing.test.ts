@@ -145,7 +145,14 @@ describe('billing', () => {
       subscribed: true,
       seats: 3,
       billedSeats: 3,
-      price: { amount: 2, currency: 'chf', interval: 'month' },
+      price: {
+        tiers: [
+          { upTo: 50, amount: 2 },
+          { upTo: null, amount: 0.99 },
+        ],
+        currency: 'chf',
+        interval: 'month',
+      },
     });
 
     // a second checkout would start a second subscription: the portal is the place now
@@ -200,9 +207,25 @@ describe('billing', () => {
     );
     expect(update?.body).toMatchObject({
       'items[0][quantity]': '4',
+      'items[0][price]': 'price_seat',
       proration_behavior: 'create_prorations',
     });
     expect((await app.get(BillingService).syncSeats(a.tenantId)).changed).toBe(false);
+  });
+
+  it('a subscription on an old price moves to the current one (the volume price)', async () => {
+    await webhook(subscription(a, 'active')).expect(200);
+    stripe.prices.set('sub_1', 'price_old_flat');
+    const seats = await owner.seat.count({ where: { tenantId: a.tenantId, status: 'active' } });
+    stripe.calls.length = 0;
+    // same number of seats, but not the current price: moved
+    expect(await app.get(BillingService).syncSeats(a.tenantId)).toEqual({ changed: true, seats });
+    const update = stripe.calls.find((c) => c.method === 'POST');
+    expect(update?.body).toMatchObject({ 'items[0][price]': 'price_seat' });
+    // and then left alone
+    stripe.calls.length = 0;
+    expect((await app.get(BillingService).syncSeats(a.tenantId)).changed).toBe(false);
+    expect(stripe.calls.filter((c) => c.method === 'POST')).toEqual([]);
   });
 
   it('a subscription Stripe doesn’t know any more counts as ended (no error every night)', async () => {

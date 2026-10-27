@@ -387,7 +387,7 @@ export const DE: HelpContent = {
         {
           title: 'Abo',
           text: [
-            'Die ersten 30 Tage sind gratis. Admins abonnieren unter Abrechnung (CHF 2 pro aktivem Platz und Monat); die restlichen Testtage bleiben gratis. Ohne Abo wird der Arbeitsbereich nach dem Test schreibgeschützt – nichts wird gelöscht.',
+            'Die ersten 30 Tage sind gratis. Admins abonnieren unter Abrechnung (CHF 2 pro aktivem Platz und Monat, ab dem 51. Platz CHF 0.99); die restlichen Testtage bleiben gratis. Ohne Abo wird der Arbeitsbereich nach dem Test schreibgeschützt – nichts wird gelöscht.',
           ],
         },
       ],
@@ -452,7 +452,7 @@ export const DE: HelpContent = {
     },
     {
       q: 'Was kostet Seatline?',
-      a: 'CHF 2 pro aktivem Platz und Monat. Gesperrte Plätze sind gratis, die ersten 30 Tage auch, und Sie können jeden Monat kündigen.',
+      a: 'CHF 2 pro aktivem Platz und Monat, und CHF 0.99 für jeden Platz ab dem 51. Gesperrte Plätze sind gratis, die ersten 30 Tage auch, und Sie können jeden Monat kündigen.',
     },
     {
       q: 'Was passiert nach dem Test?',

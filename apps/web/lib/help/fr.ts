@@ -386,7 +386,7 @@ export const FR: HelpContent = {
         {
           title: 'Abonnement',
           text: [
-            'Les 30 premiers jours sont gratuits. Les admins s’abonnent sous Facturation (CHF 2 par poste actif et par mois) ; les jours d’essai restants restent gratuits. Sans abonnement, l’espace passe en lecture seule après l’essai — rien n’est supprimé.',
+            'Les 30 premiers jours sont gratuits. Les admins s’abonnent sous Facturation (CHF 2 par poste actif et par mois, CHF 0.99 dès le 51e poste) ; les jours d’essai restants restent gratuits. Sans abonnement, l’espace passe en lecture seule après l’essai — rien n’est supprimé.',
           ],
         },
       ],
@@ -451,7 +451,7 @@ export const FR: HelpContent = {
     },
     {
       q: 'Combien coûte Seatline ?',
-      a: 'CHF 2 par poste actif et par mois. Les postes bloqués sont gratuits, les 30 premiers jours aussi, et vous pouvez résilier chaque mois.',
+      a: 'CHF 2 par poste actif et par mois, et CHF 0.99 pour chaque poste dès le 51e. Les postes bloqués sont gratuits, les 30 premiers jours aussi, et vous pouvez résilier chaque mois.',
     },
     {
       q: 'Que se passe-t-il après l’essai ?',

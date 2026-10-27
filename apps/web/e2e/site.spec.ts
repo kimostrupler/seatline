@@ -4,6 +4,7 @@ test('the landing page links to sign-in, help and the legal pages', async ({ pag
   await page.goto('/welcome');
   await expect(page.getByRole('heading', { level: 1, name: 'Know who sits where.' })).toBeVisible();
   await expect(page.getByText('CHF 2', { exact: true })).toBeVisible();
+  await expect(page.getByText('From the 51st desk: CHF 0.99')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Ready in an afternoon' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Everyone in the loop' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Try it free for 30 days' }).first()).toHaveAttribute(
@@ -142,7 +143,9 @@ test('the promo video with subtitles and the comparison; the short video moved t
   await expect(promo.locator('track[default]')).toHaveAttribute('srclang', 'de');
   const compare = page.getByTestId('compare');
   await expect(compare.getByRole('row')).toHaveCount(7);
-  await expect(compare).toContainText('CHF 2 pro Platz und Monat, auf der Website');
+  await expect(compare).toContainText(
+    'CHF 2 pro Platz und Monat (ab dem 51. CHF 0.99), auf der Website',
+  );
   for (const l of ['en', 'de', 'fr']) {
     const vtt = await request.get(`/site-video/seatline-promo-2.${l}.vtt`);
     expect(vtt.ok()).toBe(true);

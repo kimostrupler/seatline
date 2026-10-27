@@ -381,7 +381,7 @@ export const EN: HelpContent = {
         {
           title: 'Subscription',
           text: [
-            'The first 30 days are free. Admins subscribe under Billing (CHF 2 per active desk per month); the remaining trial days stay free. Without a subscription the workspace becomes read-only after the trial — nothing is deleted.',
+            'The first 30 days are free. Admins subscribe under Billing (CHF 2 per active desk per month, CHF 0.99 from the 51st desk); the remaining trial days stay free. Without a subscription the workspace becomes read-only after the trial — nothing is deleted.',
           ],
         },
       ],
@@ -446,7 +446,7 @@ export const EN: HelpContent = {
     },
     {
       q: 'How much does Seatline cost?',
-      a: 'CHF 2 per active desk per month. Blocked desks are free, the first 30 days too, and you can cancel any month.',
+      a: 'CHF 2 per active desk per month, and CHF 0.99 for every desk from the 51st. Blocked desks are free, the first 30 days too, and you can cancel any month.',
     },
     {
       q: 'What happens after the trial?',

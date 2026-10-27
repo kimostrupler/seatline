@@ -466,6 +466,11 @@ folded`) so the person and the actions stand out.
   custom domain, set in the Stripe dashboard + a DNS record). The web app just opens the URL the
   API gets from Stripe (`window.location.assign`), so nothing in code or the CSP depends on the
   domain. Don't hard-code Stripe hosts.
+- Price (`packages/shared/src/pricing.ts`, `PRICE_TIERS`/`monthlyPrice`): graduated, CHF 2 per
+  seat for seats 1–50, CHF 0.99 from the 51st. Stripe holds it as a tiered price (lookup key
+  `seatline_seat_monthly_volume`, made by stripe-setup.sh); `/billing` returns its tiers. The
+  nightly seat sync also moves subscriptions still on an older price to `STRIPE_PRICE_ID`.
+  Website, help, llms.txt, JSON-LD and outreach texts quote the same numbers: keep them in step.
 - Seat count = active seats; the nightly job syncs it (`list_billed_tenants`). A subscription
   Stripe doesn't know (`resource_missing`, e.g. made with test keys) is marked ended, like a
   cancelled one, but only while our price is found (wrong keys must not end them all). Tests use
