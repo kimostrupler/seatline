@@ -1,6 +1,6 @@
 'use client';
 
-import { CircleHelp, Ellipsis, Sparkles } from 'lucide-react';
+import { CircleHelp, CirclePlay, Ellipsis, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { helpPath, helpTopicFor } from '@/lib/help';
 import { updatesPath } from '@/lib/updates/path';
+import { videoPath } from '@/lib/help/video-path';
 import type { Language } from '@/lib/locales';
 import { cn } from '@/lib/utils';
 import { isCurrent, useNavLinks } from './nav-links';
@@ -92,6 +93,11 @@ export function MobileTabBar() {
               rel="noopener"
             >
               <CircleHelp /> {t('help')}
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild className="rounded-xl py-2.5">
+            <Link href={videoPath(language)} target="_blank" rel="noopener">
+              <CirclePlay /> {t('videoTour')}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild className="rounded-xl py-2.5">

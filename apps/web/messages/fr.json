@@ -703,7 +703,9 @@
     "help": "Aide",
     "more": "Plus",
     "people": "Personnes",
-    "updates": "Nouveautés"
+    "updates": "Nouveautés",
+    "helpPage": "Aide pour cette page",
+    "videoTour": "Visite vidéo"
   },
   "overview": {
     "title": "Vue d’ensemble",
@@ -1428,7 +1430,8 @@
       "othersSaving": "Avec Seatline, au moins {price} de moins chaque mois",
       "othersNote": "Prix catalogue publics d’outils courants de réservation et de gestion de postes (octobre 2026), souvent avec un minimum de 25 utilisateurs. Les offres réelles peuvent différer."
     },
-    "navUpdates": "Nouveautés"
+    "navUpdates": "Nouveautés",
+    "navHelpCenter": "Centre d’aide"
   },
   "planImport": {
     "title": "Importer un plan d’architecte",

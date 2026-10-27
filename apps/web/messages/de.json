@@ -703,7 +703,9 @@
     "help": "Hilfe",
     "more": "Mehr",
     "people": "Personen",
-    "updates": "Neuigkeiten"
+    "updates": "Neuigkeiten",
+    "helpPage": "Hilfe zu dieser Seite",
+    "videoTour": "Video-Tour"
   },
   "overview": {
     "title": "Übersicht",
@@ -1428,7 +1430,8 @@
       "othersSaving": "Mit Seatline jeden Monat mindestens {price} weniger",
       "othersNote": "Öffentliche Listenpreise üblicher Arbeitsplatz- und Desk-Tools (Oktober 2026), oft mit mindestens 25 Benutzern. Tatsächliche Angebote können abweichen."
     },
-    "navUpdates": "Neuigkeiten"
+    "navUpdates": "Neuigkeiten",
+    "navHelpCenter": "Hilfe-Center"
   },
   "planImport": {
     "title": "Architektenplan importieren",

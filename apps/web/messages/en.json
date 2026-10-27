@@ -703,7 +703,9 @@
     "help": "Help",
     "more": "More",
     "people": "People",
-    "updates": "What’s new"
+    "updates": "What’s new",
+    "helpPage": "Help for this page",
+    "videoTour": "Video tour"
   },
   "overview": {
     "title": "Overview",
@@ -1428,7 +1430,8 @@
       "othersSaving": "With Seatline at least {price} less every month",
       "othersNote": "Public list prices of typical desk and workplace tools (October 2026), often with a 25-user minimum. Actual offers may differ."
     },
-    "navUpdates": "What’s new"
+    "navUpdates": "What’s new",
+    "navHelpCenter": "Help center"
   },
   "planImport": {
     "title": "Import an architect plan",
