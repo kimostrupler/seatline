@@ -8,10 +8,11 @@ import {
   LEAD_CHANNELS,
   LEAD_LANGUAGES,
   LEAD_STATUSES,
+  SEND_ALL_MAX,
   type LeadMessageKind,
   type NextStep,
 } from '@seatline/shared/dist/outreach';
-import { Copy, Plus, Send, Trash2, Upload } from 'lucide-react';
+import { Copy, Plus, Send, SendHorizontal, Trash2, Upload } from 'lucide-react';
 import { notFound, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
@@ -38,13 +39,30 @@ import { cn } from '@/lib/utils';
 import { OwnerNav } from './owner-nav';
 
 type LeadDetail = Lead & { messages: LeadMessage[] };
-type Filter = 'todo' | 'waiting' | 'done' | 'all';
-const FILTERS: Record<Filter, NextStep[] | null> = {
-  todo: ['research', 'write_first', 'follow_up_due', 'talk'],
-  waiting: ['scheduled', 'waiting'],
-  done: ['done'],
-  all: null,
+/** One tab per step, in the order a lead goes through them. */
+const STEPS: NextStep[] = [
+  'research',
+  'write_first',
+  'scheduled',
+  'waiting',
+  'follow_up_due',
+  'talk',
+  'done',
+];
+type Tab = NextStep | 'all';
+/** Each step's colour (dot, badge, tab), from the app's tokens. */
+const TONE: Record<NextStep, string> = {
+  research: 'var(--seat-taken-stroke)',
+  write_first: 'var(--primary)',
+  scheduled: 'var(--team-3)',
+  waiting: 'var(--seat-reserved-stroke)',
+  follow_up_due: 'var(--destructive)',
+  talk: 'var(--seat-free-stroke)',
+  done: 'var(--muted-foreground)',
 };
+/** "Send now" and the send-all buttons: green, so sending stands apart from scheduling. */
+const sendClass =
+  'border-transparent bg-[var(--seat-free-fill)] text-[var(--seat-free-text)] hover:bg-[color-mix(in_oklab,var(--seat-free-fill),var(--seat-free-stroke)_20%)]';
 const TEXT_FIELDS = [
   'company',
   'whyNow',
@@ -91,7 +109,7 @@ export function LeadsPage({ initial }: { initial: LeadList | null }) {
   const pathname = usePathname();
   const params = useSearchParams();
   const selected = params.get('lead');
-  const [filter, setFilter] = useState<Filter>('todo');
+  const [tab, setTab] = useState<Tab>('all');
   const query = useQuery({
     queryKey: ['owner', 'leads'],
     queryFn: () => api<LeadList>('/owner/leads'),
@@ -102,7 +120,8 @@ export function LeadsPage({ initial }: { initial: LeadList | null }) {
   const open = (id: string | null) =>
     router.replace(id ? `${pathname}?lead=${id}` : pathname, { scroll: false });
   const data = query.data;
-  const shown = data?.leads.filter((l) => !FILTERS[filter] || FILTERS[filter].includes(l.nextStep));
+  const inTab = (l: LeadRow, t: Tab) => t === 'all' || l.nextStep === t;
+  const shown = data?.leads.filter((l) => inTab(l, tab));
 
   return (
     <PageFrame
@@ -123,28 +142,34 @@ export function LeadsPage({ initial }: { initial: LeadList | null }) {
         {data && !data.mailReady && <p className="text-destructive">{t('mailOff')}</p>}
         {data && !data.repliesChecked && <p>{t('repliesOff')}</p>}
       </div>
-      <div className="flex flex-wrap gap-1" role="group" aria-label={t('columns.status')}>
-        {(Object.keys(FILTERS) as Filter[]).map((f) => (
-          <Button
-            key={f}
-            size="sm"
-            variant={f === filter ? 'secondary' : 'ghost'}
-            aria-pressed={f === filter}
-            onClick={() => setFilter(f)}
-          >
-            {t(`filters.${f}`)}
-            {data && (
-              <span className="text-muted-foreground tabular-nums">
-                {data.leads.filter((l) => !FILTERS[f] || FILTERS[f].includes(l.nextStep)).length}
-              </span>
-            )}
-          </Button>
-        ))}
+      {data && <SendAll leads={data.leads} mailReady={data.mailReady} />}
+      <div className="flex flex-wrap gap-1 border-b pb-2" role="group" aria-label={t('tabs.label')}>
+        {(['all', ...STEPS] as Tab[]).map((f) => {
+          const count = data?.leads.filter((l) => inTab(l, f)).length;
+          return (
+            <Button
+              key={f}
+              size="sm"
+              variant={f === tab ? 'secondary' : 'ghost'}
+              aria-pressed={f === tab}
+              onClick={() => setTab(f)}
+              className={cn(f !== tab && !count && 'opacity-60')}
+            >
+              {f !== 'all' && (
+                <span className="size-2 rounded-full" style={{ background: TONE[f] }} aria-hidden />
+              )}
+              {t(`tabs.${f}`)}
+              {data && <span className="text-muted-foreground tabular-nums">{count}</span>}
+            </Button>
+          );
+        })}
       </div>
       {!shown ? (
         <Skeleton className="h-64" />
       ) : !data?.leads.length ? (
         <p className="rounded-xl border p-6 text-sm text-muted-foreground">{t('empty')}</p>
+      ) : !shown.length ? (
+        <p className="rounded-xl border p-6 text-sm text-muted-foreground">{t('tabs.empty')}</p>
       ) : (
         <div className="overflow-x-auto rounded-xl border">
           <table className="w-full text-left text-sm" data-testid="leads">
@@ -212,11 +237,77 @@ export function LeadsPage({ initial }: { initial: LeadList | null }) {
 
 function NextStepLabel({ lead, when }: { lead: LeadRow; when: (d: string) => string }) {
   const t = useTranslations('owner.leads');
-  const due = lead.nextStep === 'follow_up_due';
+  const tone = TONE[lead.nextStep];
   return (
-    <span className={cn(due && 'font-medium text-destructive')}>
+    <span
+      className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium"
+      style={{ background: `color-mix(in oklab, ${tone} 14%, transparent)` }}
+    >
+      <span className="size-2 shrink-0 rounded-full" style={{ background: tone }} aria-hidden />
       {t(`next.${lead.nextStep}`, { when: lead.scheduledFor ? when(lead.scheduledFor) : '' })}
     </span>
+  );
+}
+
+/**
+ * "Send all": the scheduled e-mails now, or the filled-in first e-mail to every ready lead.
+ * Still one e-mail per lead; each asks once, naming how many go out.
+ */
+function SendAll({ leads, mailReady }: { leads: LeadRow[]; mailReady: boolean }) {
+  const t = useTranslations('owner.leads');
+  const qc = useQueryClient();
+  const [ask, setAsk] = useState<'scheduled' | 'ready' | null>(null);
+  const counts = {
+    scheduled: leads.filter((l) => l.nextStep === 'scheduled').length,
+    ready: leads.filter((l) => l.nextStep === 'write_first' && l.channel === 'email').length,
+  };
+  const send = useMutation({
+    mutationFn: (what: 'scheduled' | 'ready') =>
+      api<{ sent: number; failed: string[] }>(`/owner/leads/send-${what}`, { method: 'POST' }),
+    onSuccess: (r) => {
+      void qc.invalidateQueries({ queryKey: ['owner'] });
+      toast.success(t('sendAll.done', { count: r.sent }), {
+        description: r.failed.length
+          ? t('sendAll.failed', { names: r.failed.join(', ') })
+          : undefined,
+      });
+    },
+    onError: (error) => toast.error(t('failed', { message: failedMessage(error) })),
+  });
+  if (!counts.scheduled && !counts.ready) return null;
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      {(['scheduled', 'ready'] as const).map(
+        (what) =>
+          counts[what] > 0 && (
+            <Button
+              key={what}
+              // ready = write + send (blue, like writing); scheduled = only sending (green)
+              variant={what === 'ready' ? 'default' : 'outline'}
+              className={what === 'scheduled' ? sendClass : undefined}
+              disabled={!mailReady || send.isPending}
+              onClick={() => setAsk(what)}
+            >
+              <SendHorizontal aria-hidden /> {t(`sendAll.${what}`, { count: counts[what] })}
+            </Button>
+          ),
+      )}
+      <AlertDialog open={!!ask} onOpenChange={(o) => !o && setAsk(null)}>
+        <AlertDialogContent>
+          <AlertDialogTitle>{ask && t(`sendAll.${ask}`, { count: counts[ask] })}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {ask && t(`sendAll.${ask}Confirm`, { count: Math.min(counts[ask], SEND_ALL_MAX) })}
+            {ask && counts[ask] > SEND_ALL_MAX && ` ${t('sendAll.more', { max: SEND_ALL_MAX })}`}
+          </AlertDialogDescription>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('keep')}</AlertDialogCancel>
+            <AlertDialogAction className={sendClass} onClick={() => ask && send.mutate(ask)}>
+              {t('compose.sendNow')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 }
 
@@ -464,7 +555,12 @@ function LeadPanel({ id, onDeleted }: { id: string; onDeleted: () => void }) {
               disabled={sendNow.isPending}
               onConfirm={() => sendNow.mutate(pending.id)}
             />
-            <Button size="sm" variant="outline" onClick={() => cancel.mutate(pending.id)}>
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => cancel.mutate(pending.id)}
+            >
               {t('compose.cancel')}
             </Button>
           </div>
@@ -667,7 +763,13 @@ function SendNowButton({
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button variant="outline" size={size} disabled={disabled} onClick={() => setOpen(true)}>
+      <Button
+        variant="outline"
+        size={size}
+        className={sendClass}
+        disabled={disabled}
+        onClick={() => setOpen(true)}
+      >
         {t('compose.sendNow')}
       </Button>
       <AlertDialog open={open} onOpenChange={setOpen}>
@@ -676,7 +778,9 @@ function SendNowButton({
           <AlertDialogDescription>{t('compose.sendNowConfirm', { to })}</AlertDialogDescription>
           <AlertDialogFooter>
             <AlertDialogCancel>{t('keep')}</AlertDialogCancel>
-            <AlertDialogAction onClick={onConfirm}>{t('compose.sendNow')}</AlertDialogAction>
+            <AlertDialogAction className={sendClass} onClick={onConfirm}>
+              {t('compose.sendNow')}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

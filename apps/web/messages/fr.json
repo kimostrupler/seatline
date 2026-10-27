@@ -1635,12 +1635,6 @@
       "title": "Prospects",
       "add": "Nouveau prospect",
       "empty": "Pas encore de prospects. Ajoutez la première entreprise à qui vous voulez écrire.",
-      "filters": {
-        "todo": "À faire",
-        "all": "Tous",
-        "waiting": "En attente",
-        "done": "Terminés"
-      },
       "columns": {
         "company": "Entreprise",
         "why": "Pourquoi maintenant",
@@ -1744,7 +1738,28 @@
       "import": "Importer",
       "imported": "{count, plural, one {# lead ajouté} other {# leads ajoutés}}",
       "importSkipped": "Déjà présents, ignorés : {names}",
-      "importInvalid": "Ce fichier n’est pas une liste de leads (JSON)."
+      "importInvalid": "Ce fichier n’est pas une liste de leads (JSON).",
+      "tabs": {
+        "label": "Où en est chaque lead",
+        "all": "Tous",
+        "research": "Recherche",
+        "write_first": "À écrire",
+        "scheduled": "Planifiés",
+        "waiting": "En attente de réponse",
+        "follow_up_due": "Relance à faire",
+        "talk": "Ont répondu",
+        "done": "Terminés",
+        "empty": "Aucun lead à cette étape."
+      },
+      "sendAll": {
+        "scheduled": "Envoyer tous les planifiés ({count})",
+        "scheduledConfirm": "Envoyer {count, plural, one {l’e-mail planifié} other {les # e-mails planifiés}} maintenant plutôt qu’à l’heure prévue ? Chaque lead reçoit son propre e-mail. C’est irréversible.",
+        "ready": "Écrire et envoyer à tous les prêts ({count})",
+        "readyConfirm": "Envoyer maintenant le premier e-mail, rempli à partir du modèle, à {count, plural, one {# lead} other {# leads}}, sans que vous les lisiez un par un ? Les leads dont le modèle est incomplet sont ignorés. C’est irréversible.",
+        "more": "Au maximum {max} par clic : cliquez à nouveau pour le reste.",
+        "done": "{count, plural, =0 {Rien envoyé} one {# e-mail envoyé} other {# e-mails envoyés}}",
+        "failed": "Non envoyés : {names}"
+      }
     }
   },
   "loading": {

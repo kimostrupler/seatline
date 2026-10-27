@@ -1635,12 +1635,6 @@
       "title": "Leads",
       "add": "New lead",
       "empty": "No leads yet. Add the first company you want to write to.",
-      "filters": {
-        "todo": "To do",
-        "all": "All",
-        "waiting": "Waiting",
-        "done": "Done"
-      },
       "columns": {
         "company": "Company",
         "why": "Why now",
@@ -1744,7 +1738,28 @@
       "import": "Import",
       "imported": "{count, plural, one {# lead added} other {# leads added}}",
       "importSkipped": "Already there, skipped: {names}",
-      "importInvalid": "That file isn’t a list of leads (JSON)."
+      "importInvalid": "That file isn’t a list of leads (JSON).",
+      "tabs": {
+        "label": "Where each lead is",
+        "all": "All",
+        "research": "Research",
+        "write_first": "To write",
+        "scheduled": "Scheduled",
+        "waiting": "Waiting for an answer",
+        "follow_up_due": "Follow-up due",
+        "talk": "They replied",
+        "done": "Done",
+        "empty": "No leads at this step."
+      },
+      "sendAll": {
+        "scheduled": "Send all scheduled ({count})",
+        "scheduledConfirm": "Send {count, plural, one {the scheduled e-mail} other {the # scheduled e-mails}} right now instead of at their time? Each lead gets its own e-mail. This can’t be undone.",
+        "ready": "Write and send to all ready ({count})",
+        "readyConfirm": "Send the first e-mail, filled in from the template, to {count, plural, one {# lead} other {# leads}} now, without you reading each one? Leads whose template isn’t complete are skipped. This can’t be undone.",
+        "more": "At most {max} per click: click again for the rest.",
+        "done": "{count, plural, =0 {Nothing sent} one {# e-mail sent} other {# e-mails sent}}",
+        "failed": "Not sent: {names}"
+      }
     }
   },
   "loading": {

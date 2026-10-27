@@ -282,4 +282,47 @@ describe('outreach (owner leads)', () => {
     got = await api(app).get(`/owner/leads/${id}`).set(a.headers).expect(200);
     expect(got.body.status).toBe('followed_up');
   });
+
+  it('"send all": the filled-in first e-mail to every ready lead, then every scheduled one', async () => {
+    const ready = await newLead();
+    const send = (path: string, headers = a.headers) =>
+      api(app).post(`/owner/leads/${path}`).set(headers);
+    // not ready: no reason yet, or reached by hand (a form)
+    await api(app)
+      .post('/owner/leads/import')
+      .set(a.headers)
+      .send({
+        leads: [
+          { company: 'NoReason AG', contactEmail: 'info@noreason.ch' },
+          { company: 'Form AG', whyNow: 'Neues Büro.', channel: 'form' },
+          {
+            company: 'Second AG',
+            greeting: 'Frau Muster',
+            whyNow: 'Sie ziehen um.',
+            contactEmail: 'it@second.ch',
+          },
+        ],
+      })
+      .expect(201);
+    await send('send-ready', b.headers).expect(404);
+    const res = await send('send-ready').expect(201);
+    expect(res.body).toEqual({ sent: 2, failed: [] });
+    const mails = (await sentMails()) as Array<Record<string, string>>;
+    expect(mails.map((m) => m.to).sort()).toEqual(['contact@livingdocs.io', 'it@second.ch']);
+    expect((await api(app).get(`/owner/leads/${ready}`).set(a.headers)).body.status).toBe('sent');
+    // nothing left to send: a second click sends nothing again
+    expect((await send('send-ready').expect(201)).body).toEqual({ sent: 0, failed: [] });
+
+    // scheduled follow-ups go out at once, one per lead
+    const leads = app.get(LeadsService);
+    const ctx = { tenantId: a.tenantId, actorId: a.adminId } as never;
+    const fu = await leads.draft(ctx, ready, 'follow_up');
+    await leads.schedule(ctx, ready, { kind: 'follow_up', ...fu });
+    await send('send-scheduled', b.headers).expect(404);
+    expect((await send('send-scheduled').expect(201)).body).toEqual({ sent: 1, failed: [] });
+    expect(await sentMails()).toHaveLength(3);
+    expect((await api(app).get(`/owner/leads/${ready}`).set(a.headers)).body.status).toBe(
+      'followed_up',
+    );
+  });
 });

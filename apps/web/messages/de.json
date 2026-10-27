@@ -1635,12 +1635,6 @@
       "title": "Leads",
       "add": "Neuer Lead",
       "empty": "Noch keine Leads. Erfassen Sie die erste Firma, der Sie schreiben möchten.",
-      "filters": {
-        "todo": "Zu tun",
-        "all": "Alle",
-        "waiting": "Warten",
-        "done": "Erledigt"
-      },
       "columns": {
         "company": "Firma",
         "why": "Warum jetzt",
@@ -1744,7 +1738,28 @@
       "import": "Importieren",
       "imported": "{count, plural, one {# Lead hinzugefügt} other {# Leads hinzugefügt}}",
       "importSkipped": "Schon vorhanden, übersprungen: {names}",
-      "importInvalid": "Diese Datei ist keine Liste von Leads (JSON)."
+      "importInvalid": "Diese Datei ist keine Liste von Leads (JSON).",
+      "tabs": {
+        "label": "Wo jeder Lead steht",
+        "all": "Alle",
+        "research": "Recherche",
+        "write_first": "Zu schreiben",
+        "scheduled": "Geplant",
+        "waiting": "Warten auf Antwort",
+        "follow_up_due": "Nachfassen fällig",
+        "talk": "Hat geantwortet",
+        "done": "Erledigt",
+        "empty": "Keine Leads in diesem Schritt."
+      },
+      "sendAll": {
+        "scheduled": "Alle geplanten senden ({count})",
+        "scheduledConfirm": "{count, plural, one {Die geplante E-Mail} other {Die # geplanten E-Mails}} jetzt statt zur geplanten Zeit senden? Jeder Lead erhält seine eigene E-Mail. Das lässt sich nicht rückgängig machen.",
+        "ready": "An alle bereiten schreiben und senden ({count})",
+        "readyConfirm": "Die erste E-Mail, aus der Vorlage ausgefüllt, jetzt an {count, plural, one {# Lead} other {# Leads}} senden, ohne dass Sie jede lesen? Leads mit unvollständiger Vorlage werden übersprungen. Das lässt sich nicht rückgängig machen.",
+        "more": "Höchstens {max} pro Klick: für den Rest nochmals klicken.",
+        "done": "{count, plural, =0 {Nichts gesendet} one {# E-Mail gesendet} other {# E-Mails gesendet}}",
+        "failed": "Nicht gesendet: {names}"
+      }
     }
   },
   "loading": {
