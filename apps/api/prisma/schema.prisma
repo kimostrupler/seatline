@@ -470,6 +470,9 @@ model Lead {
   firstSentAt    DateTime? @map("first_sent_at") @db.Timestamptz(3)
   followUpSentAt DateTime? @map("follow_up_sent_at") @db.Timestamptz(3)
   repliedAt      DateTime? @map("replied_at") @db.Timestamptz(3)
+  /// the latest automatic answer (out-of-office…): shown on the lead, never counts as a reply
+  autoReplyAt      DateTime? @map("auto_reply_at") @db.Timestamptz(3)
+  autoReplySubject String?   @map("auto_reply_subject")
   notes          String?
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)

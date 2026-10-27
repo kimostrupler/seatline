@@ -120,6 +120,18 @@ export function LeadsPage({ initial }: { initial: LeadList | null }) {
   const open = (id: string | null) =>
     router.replace(id ? `${pathname}?lead=${id}` : pathname, { scroll: false });
   const data = query.data;
+  // look in the mailbox for replies and out-of-office answers each time the page opens
+  const qc = useQueryClient();
+  useEffect(() => {
+    if (!data?.repliesChecked) return;
+    void api<{ replied: number; autoReplies: number }>('/owner/leads/check-replies', {
+      method: 'POST',
+    })
+      .then((r) => {
+        if (r.replied || r.autoReplies) void qc.invalidateQueries({ queryKey: ['owner'] });
+      })
+      .catch(() => undefined);
+  }, [data?.repliesChecked, qc]);
   const inTab = (l: LeadRow, t: Tab) => t === 'all' || l.nextStep === t;
   const shown = data?.leads.filter((l) => inTab(l, tab));
 
@@ -197,6 +209,15 @@ export function LeadsPage({ initial }: { initial: LeadList | null }) {
                     >
                       {lead.company}
                     </button>
+                    {lead.autoReplyAt && (
+                      <Badge
+                        variant="outline"
+                        className="ml-2 font-normal"
+                        title={lead.autoReplySubject ?? undefined}
+                      >
+                        {t('autoReply.badge')}
+                      </Badge>
+                    )}
                   </td>
                   <td className="max-w-xs px-3 py-2 text-muted-foreground">
                     <span className="line-clamp-2">{lead.whyNow}</span>
@@ -669,6 +690,14 @@ function LeadPanel({ id, onDeleted }: { id: string; onDeleted: () => void }) {
         </div>
       </div>
 
+      {lead.autoReplyAt && (
+        <p className="rounded-lg border bg-muted/40 p-3 text-sm">
+          {t('autoReply.note', { when: when(lead.autoReplyAt) })}
+          {lead.autoReplySubject && (
+            <span className="mt-1 block text-muted-foreground">“{lead.autoReplySubject}”</span>
+          )}
+        </p>
+      )}
       {pending && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/40 bg-primary/5 p-3 text-sm">
           <span>

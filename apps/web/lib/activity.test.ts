@@ -162,6 +162,7 @@ group('activity sentences', () => {
       values: { name: 'Livingdocs' },
     });
     expect(lead('owner.lead.replied').key).toBe('leadReplied');
+    expect(lead('owner.lead.auto_reply').key).toBe('leadAutoReply');
     expect(
       describe(
         entry({ action: 'owner.lead.delete', entityType: 'lead', before: { company: 'X' } }),

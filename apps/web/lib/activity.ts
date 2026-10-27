@@ -362,7 +362,8 @@ export function describe(e: ActivityEntry, refs: ActivityRefs, unknownName: stri
     case 'owner.lead.schedule':
     case 'owner.lead.cancel':
     case 'owner.lead.sent':
-    case 'owner.lead.replied': {
+    case 'owner.lead.replied':
+    case 'owner.lead.auto_reply': {
       const key = {
         create: 'leadCreated',
         update: 'leadUpdated',
@@ -371,6 +372,7 @@ export function describe(e: ActivityEntry, refs: ActivityRefs, unknownName: stri
         cancel: 'leadCanceled',
         sent: 'leadSent',
         replied: 'leadReplied',
+        auto_reply: 'leadAutoReply',
       }[e.action.slice('owner.lead.'.length)]!;
       return { key, values: { name: pick('company') ?? '' } };
     }

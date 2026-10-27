@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { headerValue, isAutoSubmitted, messageIds } from './inbox.service';
+import { headerValue, isAutomatic, isAutoSubmitted, messageIds } from './inbox.service';
 
 describe('reading reply headers', () => {
   it('finds Message-IDs in In-Reply-To and References', () => {
@@ -23,5 +23,19 @@ describe('reading reply headers', () => {
     expect(isAutoSubmitted('No (by hand)')).toBe(false);
     expect(isAutoSubmitted('auto-replied')).toBe(true);
     expect(isAutoSubmitted('auto-generated; owner-email')).toBe(true);
+  });
+
+  it('spots out-of-office answers by header or by subject, in three languages', () => {
+    expect(isAutomatic('Auto-Submitted: auto-replied\r\n')).toBe(true);
+    expect(isAutomatic('Precedence: auto_reply\r\n')).toBe(true);
+    expect(isAutomatic('X-Autoreply: yes\r\n')).toBe(true);
+    expect(isAutomatic('', 'Automatic reply: Who sits where?')).toBe(true);
+    expect(isAutomatic('', 'Automatische Antwort: Wer sitzt wo?')).toBe(true);
+    expect(isAutomatic('', 'Abwesenheitsnotiz: Wer sitzt wo?')).toBe(true);
+    expect(isAutomatic('', 'Réponse automatique : Qui est assis où ?')).toBe(true);
+    expect(isAutomatic('', 'Out of Office')).toBe(true);
+    // a person
+    expect(isAutomatic('Auto-Submitted: no\r\n', 'Re: Wer sitzt wo?')).toBe(false);
+    expect(isAutomatic('', 'AW: Wer sitzt wo bei uns? Abwesenheit wäre kein Problem')).toBe(false);
   });
 });

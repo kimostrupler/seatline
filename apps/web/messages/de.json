@@ -843,7 +843,8 @@
     "leadScheduled": "hat eine E-Mail an «{name}» geplant",
     "leadCanceled": "hat eine E-Mail an «{name}» abgebrochen",
     "leadSent": "hat die E-Mail an «{name}» gesendet",
-    "leadReplied": "hat eine Antwort von «{name}» erkannt"
+    "leadReplied": "hat eine Antwort von «{name}» erkannt",
+    "leadAutoReply": "hat eine automatische Antwort (Abwesenheit) von «{name}» erkannt"
   },
   "dashboard": {
     "title": "Start",
@@ -1772,6 +1773,10 @@
         "scheduleRestConfirm": "Die ausgefüllte E-Mail für jeden bereiten Lead, den Sie noch nicht geschrieben haben ({count}), planen, ohne jede zu lesen? Leads mit unvollständiger Vorlage werden übersprungen. Sie gehen {when} raus; bis dahin können Sie jede noch ändern oder stoppen.",
         "scheduled": "{count, plural, =0 {Nichts geplant} one {# E-Mail geplant} other {# E-Mails geplant}}",
         "done": "Alle geschrieben. Sie gehen {when} raus; bis dahin können Sie jede noch ändern oder stoppen."
+      },
+      "autoReply": {
+        "badge": "Autom. Antwort",
+        "note": "Automatische Antwort (z. B. Abwesenheit) am {when}. Sie zählt nicht als Antwort: das Nachfassen geht trotzdem raus."
       }
     }
   },

@@ -430,7 +430,7 @@ export class LeadsService {
    */
   async runOutreach(tenantId: string, now = new Date()) {
     const system: System = { tenantId, actorId: null };
-    const replied = await this.checkReplies(system);
+    const { replied, autoReplies } = await this.checkReplies(system);
     const morning = isSendingHour(now);
     const sent = morning ? await this.sendDue(system, now) : 0;
     const reminded = morning ? await this.remindFollowUps(system, now) : 0;
@@ -460,16 +460,35 @@ export class LeadsService {
       }),
     );
     for (const lead of expired) await this.remove(system, lead.id);
-    return { replied, sent, reminded, closed, deleted: expired.length };
+    return { replied, autoReplies, sent, reminded, closed, deleted: expired.length };
   }
 
-  private async checkReplies(system: System): Promise<number> {
+  private readonly lastCheck = new Map<string, number>();
+
+  /**
+   * The Leads page asks on opening (besides the two daily runs), so replies and out-of-office
+   * answers show up without waiting for the morning. At most once a minute per workspace.
+   */
+  async checkRepliesNow(ctx: RequestContext, now = Date.now()) {
+    if (now - (this.lastCheck.get(ctx.tenantId) ?? 0) < 60_000)
+      return { replied: 0, autoReplies: 0 };
+    this.lastCheck.set(ctx.tenantId, now);
+    return this.checkReplies({ tenantId: ctx.tenantId, actorId: null });
+  }
+
+  /**
+   * Replies and automatic answers since our e-mails went out. A person's reply closes the lead
+   * ("replied", what's scheduled is cancelled); an automatic one (out-of-office…) is only noted
+   * on the lead, so the follow-up still goes out.
+   */
+  private async checkReplies(system: System): Promise<{ replied: number; autoReplies: number }> {
     const waiting = await this.db.run(system.tenantId, (tx) =>
       tx.lead.findMany({
         where: { tenantId: system.tenantId, status: { in: WAITING }, contactEmail: { not: null } },
       }),
     );
-    if (!waiting.length || !this.inbox.configured) return 0;
+    const none = { replied: 0, autoReplies: 0 };
+    if (!waiting.length || !this.inbox.configured) return none;
     const since = new Date(
       Math.min(...waiting.map((l) => (l.firstSentAt ?? new Date()).getTime())),
     );
@@ -481,7 +500,7 @@ export class LeadsService {
       );
     } catch (error) {
       this.logger.warn(`Checking for outreach replies failed: ${(error as Error).message}`);
-      return 0;
+      return none;
     }
     const ours = await this.db.run(system.tenantId, (tx) =>
       tx.leadMessage.findMany({
@@ -490,9 +509,36 @@ export class LeadsService {
       }),
     );
     let n = 0;
+    let autoReplies = 0;
     for (const lead of waiting) {
       const key = replyKey(lead.contactEmail!);
       const sent = ours.filter((m) => m.leadId === lead.id).map((m) => m.messageId);
+      // an automatic answer to our e-mail, or from the contact: noted, newest first
+      const auto = replies
+        .filter(
+          (r) =>
+            lead.firstSentAt &&
+            r.date >= lead.firstSentAt &&
+            r.auto &&
+            (r.answers.some((id) => sent.includes(id)) ||
+              r.from === (key.exact ?? lead.contactEmail!.toLowerCase())),
+        )
+        .sort((x, y) => y.date.getTime() - x.date.getTime())[0];
+      if (auto && (!lead.autoReplyAt || auto.date > lead.autoReplyAt)) {
+        autoReplies++;
+        await this.db.run(system.tenantId, async (tx) => {
+          await tx.lead.update({
+            where: { id: lead.id },
+            data: { autoReplyAt: auto.date, autoReplySubject: auto.subject.slice(0, 300) || null },
+          });
+          await audit(tx, system, {
+            action: 'owner.lead.auto_reply',
+            entityType: 'lead',
+            entityId: lead.id,
+            after: { company: lead.company },
+          });
+        });
+      }
       // a reply answers one of our e-mails (In-Reply-To / References), or comes from the contact
       // themselves and not from a machine. A colleague's out-of-office or a newsletter from
       // the same domain is neither, and must not cancel the follow-up.
@@ -520,7 +566,7 @@ export class LeadsService {
         });
       });
     }
-    return n;
+    return { replied: n, autoReplies };
   }
 
   private async sendDue(system: System, now: Date): Promise<number> {
