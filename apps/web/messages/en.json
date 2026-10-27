@@ -1777,6 +1777,11 @@
       "autoReply": {
         "badge": "Auto-reply",
         "note": "Automatic answer (e.g. out-of-office) on {when}. It doesn’t count as a reply: the follow-up still goes out."
+      },
+      "replies": {
+        "title": "Replies",
+        "none": "No reply yet.",
+        "failed": "The mailbox can’t be read just now."
       }
     }
   },

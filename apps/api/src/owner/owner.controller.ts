@@ -121,6 +121,13 @@ export class OwnerController {
     return this.leads.get(ctx, id);
   }
 
+  /** The lead's replies with their text, from the mailbox (read when asked, never stored). */
+  @Get('leads/:id/replies')
+  async leadReplies(@Ctx() ctx: RequestContext, @Param('id', IdPipe) id: string) {
+    await this.owner.assertOwner(ctx, `/owner/leads/${id}/replies`);
+    return this.leads.replies(ctx, id);
+  }
+
   @Patch('leads/:id')
   async updateLead(
     @Ctx() ctx: RequestContext,

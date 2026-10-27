@@ -1777,6 +1777,11 @@
       "autoReply": {
         "badge": "Autom. Antwort",
         "note": "Automatische Antwort (z. B. Abwesenheit) am {when}. Sie zählt nicht als Antwort: das Nachfassen geht trotzdem raus."
+      },
+      "replies": {
+        "title": "Antworten",
+        "none": "Noch keine Antwort.",
+        "failed": "Das Postfach kann gerade nicht gelesen werden."
       }
     }
   },

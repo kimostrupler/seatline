@@ -134,14 +134,19 @@ export class BillingService {
     const stripe = this.stripe();
     const since = Math.floor(Date.now() / 1000) - 30 * 86_400;
     const [subs, balance, invoices] = await Promise.all([
-      stripe.subscriptions.list({
-        status: 'all',
-        limit: 100,
-        expand: ['data.items.data.price.tiers'],
-      }),
+      // no expand of the tiers here: Stripe allows 4 levels, data.items.data.price.tiers is 5
+      stripe.subscriptions.list({ status: 'all', limit: 100 }),
       stripe.balance.retrieve(),
       stripe.invoices.list({ status: 'paid', created: { gte: since }, limit: 100 }),
     ]);
+    // a tiered price lists its tiers only when asked for it alone: once per price
+    const tiered = new Map<string, Promise<Stripe.Price>>();
+    const withTiers = (price: Stripe.Price) => {
+      if (price.billing_scheme !== 'tiered' || price.tiers) return Promise.resolve(price);
+      if (!tiered.has(price.id))
+        tiered.set(price.id, stripe.prices.retrieve(price.id, { expand: ['tiers'] }));
+      return tiered.get(price.id)!;
+    };
     const byStatus: Record<string, number> = {};
     let mrr = 0;
     let currency = 'chf';
@@ -149,7 +154,7 @@ export class BillingService {
       byStatus[sub.status] = (byStatus[sub.status] ?? 0) + 1;
       if (sub.status !== 'active' && sub.status !== 'past_due') continue;
       for (const item of sub.items.data) {
-        const price = item.price;
+        const price = await withTiers(item.price);
         currency = price.currency;
         const months =
           price.recurring?.interval === 'year'

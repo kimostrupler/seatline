@@ -633,7 +633,9 @@ test update-screenshots --project chromium`; `updates.test.ts` checks). **Add a 
   X-Autoreply headers or an out-of-office subject en/de/fr) to our e-mail or from the contact are
   only noted on the lead (`auto_reply_at` + subject, badge "Auto-reply", audit `owner.lead.auto_reply`)
   and the follow-up still goes out. The Leads page also checks on opening (`POST
-/owner/leads/check-replies`, at most once a minute); a message is claimed (`sent_at`) before SMTP so it never goes
+/owner/leads/check-replies`, at most once a minute); a lead's panel shows its **Replies** with their
+  text (`GET /owner/leads/:id/replies` → `InboxService.messagesFrom`: text/plain or HTML made plain,
+  the quoted e-mail cut off by `withoutQuote`; read on demand, never stored); a message is claimed (`sent_at`) before SMTP so it never goes
   out twice; 14 days after the follow-up → `no_answer`;
   "no"/"no_answer" leads are deleted after 12 months. Sent mails: plain text + HTML with the
   video GIF (`outreachHtml`, no tracking), sender "Kimo Strupler · Seatline", Message-ID kept so
