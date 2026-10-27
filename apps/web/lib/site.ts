@@ -11,6 +11,35 @@ export function siteHosts(appUrl: string): string[] {
   return [apex, `www.${apex}`];
 }
 
+/** Website pages (not files): on the app's address they're copies of the site's. */
+export const SITE_PAGE_PREFIXES = ['/welcome', '/help', '/updates', '/legal/'] as const;
+const isSitePage = (pathname: string) =>
+  SITE_PAGE_PREFIXES.some((p) =>
+    p.endsWith('/') ? pathname.startsWith(p) : pathname === p || pathname.startsWith(`${p}/`),
+  );
+
+/**
+ * One address per page, so search engines don't see duplicates: www.seatline.ch → seatline.ch,
+ * seatline.ch/welcome → seatline.ch/, and website pages opened on the app's address
+ * (app.seatline.ch/help/…) → the same page on seatline.ch. Null = serve it here. Without a site
+ * domain (local, e2e, the Azure address) nothing moves.
+ */
+export function canonicalRedirect(
+  appUrl: string,
+  host: string,
+  pathname: string,
+  search: string,
+): string | null {
+  const [apex, www] = siteHosts(appUrl);
+  if (!apex) return null;
+  const site = `https://${apex}`;
+  if (host === www) return `${site}${pathname}${search}`;
+  if (host === apex) return pathname === '/welcome' ? `${site}/${search}` : null;
+  if (host === new URL(appUrl).hostname && isSitePage(pathname))
+    return `${site}${pathname === '/welcome' ? '/' : pathname}${search}`;
+  return null;
+}
+
 /** Address of the public website, e.g. https://seatline.ch (falls back to the app). */
 export function siteUrl(appUrl: string): string {
   const apex = siteHosts(appUrl)[0];
