@@ -723,6 +723,8 @@ function LeadPanel({ id, onDeleted }: { id: string; onDeleted: () => void }) {
       )}
       {kind && <Composer lead={lead} kind={kind} onScheduled={refresh} />}
 
+      {lead.firstSentAt && <Replies leadId={lead.id} />}
+
       {lead.messages.length > 0 && (
         <section className="grid gap-2">
           <h3 className="font-medium">{t('messages')}</h3>
@@ -777,6 +779,57 @@ function LeadPanel({ id, onDeleted }: { id: string; onDeleted: () => void }) {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+}
+
+type InboxReply = { from: string; date: string; subject: string; auto: boolean; text: string };
+
+/** What the lead wrote back, read from the mailbox when the lead is opened (never stored). */
+function Replies({ leadId }: { leadId: string }) {
+  const t = useTranslations('owner.leads');
+  const when = useWhen();
+  const replies = useQuery({
+    queryKey: ['owner', 'lead', leadId, 'replies'],
+    queryFn: () => api<InboxReply[]>(`/owner/leads/${leadId}/replies`),
+    retry: false,
+  });
+  return (
+    <section className="grid gap-2" aria-label={t('replies.title')}>
+      <h3 className="font-medium">{t('replies.title')}</h3>
+      {replies.isPending ? (
+        <Skeleton className="h-20" />
+      ) : replies.isError ? (
+        <p className="text-sm text-muted-foreground">{t('replies.failed')}</p>
+      ) : !replies.data.length ? (
+        <p className="text-sm text-muted-foreground">{t('replies.none')}</p>
+      ) : (
+        <ol className="grid gap-2">
+          {replies.data.map((r) => (
+            <li
+              key={`${r.from}-${r.date}`}
+              className={cn(
+                'rounded-lg border p-3 text-sm',
+                !r.auto && 'border-[var(--seat-free-stroke)]/50 bg-[var(--seat-free-fill)]/40',
+              )}
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+                <span className="font-medium text-foreground">
+                  {r.from}
+                  {r.auto && (
+                    <Badge variant="outline" className="ml-2 font-normal">
+                      {t('autoReply.badge')}
+                    </Badge>
+                  )}
+                </span>
+                <span>{when(r.date)}</span>
+              </div>
+              {r.subject && <p className="mt-1 font-medium">{r.subject}</p>}
+              <p className="mt-1 whitespace-pre-line">{r.text || '—'}</p>
+            </li>
+          ))}
+        </ol>
+      )}
+    </section>
   );
 }
 

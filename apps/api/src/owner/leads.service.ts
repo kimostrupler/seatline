@@ -32,7 +32,7 @@ import type { RequestContext } from '../auth/request-context';
 import { audit } from '../common/audit';
 import { loadConfig } from '../config';
 import { BIG_BATCH, TenantDb, type Tx } from '../db/tenant-db.service';
-import { InboxService } from '../mail/inbox.service';
+import { InboxService, withoutQuote } from '../mail/inbox.service';
 import { MailService } from '../mail/mail.service';
 import { outreachReminderMail } from '../mail/texts';
 
@@ -461,6 +461,41 @@ export class LeadsService {
     );
     for (const lead of expired) await this.remove(system, lead.id);
     return { replied, autoReplies, sent, reminded, closed, deleted: expired.length };
+  }
+
+  /**
+   * The lead's replies and automatic answers with their text, read from the mailbox when the
+   * lead is opened (never stored): answers to our e-mails, or anything from the contact.
+   */
+  async replies(ctx: RequestContext, id: string) {
+    const lead = await this.get(ctx, id);
+    if (!lead.contactEmail || !lead.firstSentAt || !this.inbox.configured) return [];
+    const key = replyKey(lead.contactEmail);
+    const ours = lead.messages.map((m) => m.messageId);
+    let found;
+    try {
+      found = await this.inbox.messagesFrom(key.domain, lead.firstSentAt);
+    } catch (error) {
+      this.logger.warn(`Reading a lead's replies failed: ${(error as Error).message}`);
+      throw new ServiceUnavailableException({
+        message: 'The mailbox can’t be read just now',
+        code: 'inbox_off',
+      });
+    }
+    return found
+      .filter(
+        (m) =>
+          m.answers.some((a) => ours.includes(a)) ||
+          m.from === (key.exact ?? lead.contactEmail!.toLowerCase()),
+      )
+      .sort((x, y) => x.date.getTime() - y.date.getTime())
+      .map((m) => ({
+        from: m.from,
+        date: m.date,
+        subject: m.subject,
+        auto: m.auto,
+        text: withoutQuote(m.text).slice(0, 20_000),
+      }));
   }
 
   private readonly lastCheck = new Map<string, number>();

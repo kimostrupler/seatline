@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { headerValue, isAutomatic, isAutoSubmitted, messageIds } from './inbox.service';
+import {
+  headerValue,
+  htmlToText,
+  isAutomatic,
+  isAutoSubmitted,
+  messageIds,
+  textPart,
+  withoutQuote,
+} from './inbox.service';
 
 describe('reading reply headers', () => {
   it('finds Message-IDs in In-Reply-To and References', () => {
@@ -37,5 +45,40 @@ describe('reading reply headers', () => {
     // a person
     expect(isAutomatic('Auto-Submitted: no\r\n', 'Re: Wer sitzt wo?')).toBe(false);
     expect(isAutomatic('', 'AW: Wer sitzt wo bei uns? Abwesenheit wäre kein Problem')).toBe(false);
+  });
+
+  it('reads a reply: the text part, HTML made plain, the quoted e-mail cut off', () => {
+    expect(
+      textPart({
+        type: 'multipart/mixed',
+        childNodes: [
+          {
+            type: 'multipart/alternative',
+            childNodes: [
+              { type: 'text/html', part: '1.2' },
+              { type: 'text/plain', part: '1.1' },
+            ],
+          },
+          { type: 'text/plain', part: '2', disposition: 'attachment' },
+        ],
+      }),
+    ).toEqual({ part: '1.1', html: false });
+    expect(textPart({ type: 'text/html' })).toEqual({ part: '1', html: true });
+    expect(textPart({ type: 'image/png', part: '2' })).toBeNull();
+
+    expect(
+      htmlToText(
+        '<style>p{}</style><p>Guten Tag&nbsp;Herr&nbsp;Strupler</p><p>Gerne &amp; bald</p>',
+      ),
+    ).toBe('Guten Tag Herr Strupler\nGerne & bald');
+
+    expect(
+      withoutQuote(
+        'Gerne, rufen Sie mich an.\n\nAm 27.10.2026 um 08:00 schrieb Kimo:\n> Guten Tag',
+      ),
+    ).toBe('Gerne, rufen Sie mich an.');
+    expect(withoutQuote('Merci !\nDe : Kimo <hello@seatline.ch>\nObjet : …')).toBe('Merci !');
+    expect(withoutQuote('Thanks!\n-----Original Message-----\nFrom: x')).toBe('Thanks!');
+    expect(withoutQuote('> only quoted')).toBe('> only quoted');
   });
 });

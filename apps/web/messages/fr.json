@@ -1777,6 +1777,11 @@
       "autoReply": {
         "badge": "Réponse auto.",
         "note": "Réponse automatique (p. ex. absence) le {when}. Elle ne compte pas comme réponse : la relance part quand même."
+      },
+      "replies": {
+        "title": "Réponses",
+        "none": "Pas encore de réponse.",
+        "failed": "La boîte mail ne peut pas être lue pour le moment."
       }
     }
   },

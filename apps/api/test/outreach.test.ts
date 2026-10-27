@@ -377,4 +377,52 @@ describe('outreach (owner leads)', () => {
       },
     );
   });
+
+  it('shows a lead’s replies with their text, read from the mailbox', async () => {
+    const id = await newLead();
+    // nothing sent yet: nothing to show
+    expect(
+      (await api(app).get(`/owner/leads/${id}/replies`).set(a.headers).expect(200)).body,
+    ).toEqual([]);
+    const draft = await api(app).get(`/owner/leads/${id}/draft?kind=first`).set(a.headers);
+    const sent = await api(app)
+      .post(`/owner/leads/${id}/messages`)
+      .set(a.headers)
+      .send({ kind: 'first', ...draft.body, sendNow: true })
+      .expect(201);
+    const later = (min: number) => new Date(Date.now() + min * 60_000).toISOString();
+    await mkdir(inbox(), { recursive: true });
+    const mail = (name: string, m: object) => writeFile(join(inbox(), name), JSON.stringify(m));
+    await mail('reply.json', {
+      from: 'silvan@livingdocs.io',
+      date: later(2),
+      inReplyTo: sent.body.messageId,
+      subject: 'Re: Wer sitzt wo bei Livingdocs?',
+      text: 'Gerne, rufen Sie mich an.\n\nAm 27.10.2026 schrieb Kimo:\n> Guten Tag',
+    });
+    await mail('ooo.json', {
+      from: 'contact@livingdocs.io',
+      date: later(1),
+      subject: 'Automatische Antwort: Wer sitzt wo?',
+      text: 'Ich bin bis am 3. November abwesend.',
+    });
+    // a newsletter from the same company is no reply
+    await mail('news.json', { from: 'news@livingdocs.io', date: later(3), text: 'News' });
+
+    await api(app).get(`/owner/leads/${id}/replies`).set(b.headers).expect(404);
+    const res = await api(app).get(`/owner/leads/${id}/replies`).set(a.headers).expect(200);
+    expect(res.body).toEqual([
+      expect.objectContaining({
+        from: 'contact@livingdocs.io',
+        auto: true,
+        text: 'Ich bin bis am 3. November abwesend.',
+      }),
+      expect.objectContaining({
+        from: 'silvan@livingdocs.io',
+        auto: false,
+        subject: 'Re: Wer sitzt wo bei Livingdocs?',
+        text: 'Gerne, rufen Sie mich an.',
+      }),
+    ]);
+  });
 });

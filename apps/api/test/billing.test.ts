@@ -345,3 +345,11 @@ describe('billing', () => {
     expect(await billing.remindTrial(b.tenantId)).toBeNull();
   });
 });
+
+describe('owner dashboard: Stripe summary', () => {
+  it('counts monthly revenue on the volume price (tiers fetched per price, not 5 levels deep)', async () => {
+    const summary = await app.get(BillingService).ownerSummary();
+    // 100 desks: 50 × 2.00 + 50 × 0.99
+    expect(summary).toMatchObject({ mrr: 149.5, currency: 'CHF', subscriptions: { active: 1 } });
+  });
+});

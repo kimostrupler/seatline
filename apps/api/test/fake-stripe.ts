@@ -52,6 +52,44 @@ export async function startFakeStripe() {
           currency: 'chf',
           recurring: { interval: 'month' },
         });
+      // the owner dashboard: one active subscription of 100 desks on the volume price
+      if (path === '/v1/subscriptions') {
+        const query = decodeURIComponent(req.url ?? '');
+        // Stripe refuses to expand more than 4 levels of a property
+        if (/expand\[\d*\]=([^.&]+\.){4}/.test(query)) {
+          res.writeHead(400, { 'content-type': 'application/json' });
+          return res.end(
+            JSON.stringify({
+              error: { message: 'You cannot expand more than 4 levels of a property.' },
+            }),
+          );
+        }
+        return json({
+          object: 'list',
+          data: [
+            {
+              id: 'sub_list',
+              object: 'subscription',
+              status: 'active',
+              items: {
+                data: [
+                  {
+                    quantity: 100,
+                    price: {
+                      id: 'price_seat',
+                      billing_scheme: 'tiered',
+                      currency: 'chf',
+                      recurring: { interval: 'month' },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        });
+      }
+      if (path === '/v1/balance') return json({ object: 'balance', available: [], pending: [] });
+      if (path === '/v1/invoices') return json({ object: 'list', data: [] });
       if (path.startsWith('/v1/subscriptions/')) {
         const id = path.split('/').pop()!;
         if (missing.has(id)) {

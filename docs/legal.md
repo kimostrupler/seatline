@@ -27,8 +27,9 @@ sections — `docs.test.ts` checks it).
   only a hash of each link is stored, for at most a day.
 - **Outreach** (owner Leads page): one personal e-mail per person, to published business
   addresses only, never in bulk (UWG Art. 3 lit. o), with an easy "no thanks". Stored: company,
-  contact name/role, the published address, notes; replies are only checked for sender, date and
-  subject (the subject only to spot and show out-of-office answers)
+  contact name/role, the published address, notes; replies are checked for sender, date and subject
+  (out-of-office answers are noted); a lead's reply text is read from the mailbox only to show it
+  on the Leads page and never stored in Seatline
   (IMAP, Hostpoint). "No" / "no answer" leads are deleted after 12 months. The privacy policy
   (section 3) says so.
 - **Sub-processors**: Microsoft, Stripe, Hostpoint. A new one (e.g. an e-mail service) must be added to the privacy policy and
