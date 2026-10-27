@@ -1,6 +1,6 @@
 'use client';
 
-import { CircleHelp, Ellipsis } from 'lucide-react';
+import { CircleHelp, Ellipsis, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { helpPath, helpTopicFor } from '@/lib/help';
+import { updatesPath } from '@/lib/updates/path';
 import type { Language } from '@/lib/locales';
 import { cn } from '@/lib/utils';
 import { isCurrent, useNavLinks } from './nav-links';
@@ -91,6 +92,11 @@ export function MobileTabBar() {
               rel="noopener"
             >
               <CircleHelp /> {t('help')}
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild className="rounded-xl py-2.5">
+            <Link href={updatesPath(language)} target="_blank" rel="noopener">
+              <Sparkles /> {t('updates')}
             </Link>
           </DropdownMenuItem>
         </DropdownMenuContent>

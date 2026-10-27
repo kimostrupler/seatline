@@ -198,3 +198,25 @@ test('the price calculator adds up the two tiers', async ({ page }) => {
     await card.screenshot({ path: `${process.env.CALC_SHOTS}/calc-phone.png` });
   }
 });
+
+test('what’s new: every update with its picture, in each language, linked from the website', async ({
+  page,
+}) => {
+  await page.goto('/welcome');
+  await page.getByRole('link', { name: 'What’s new' }).first().click();
+  await expect(page).toHaveURL(/\/updates\/en$/);
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'What’s new in Seatline' }),
+  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Lower price for larger offices' })).toBeVisible();
+  for (const img of await page.locator('article img').all())
+    expect(await img.evaluate((i: HTMLImageElement) => i.complete || i.loading === 'lazy')).toBe(
+      true,
+    );
+  await page.goto('/updates/de');
+  await expect(page.getByRole('heading', { level: 1, name: 'Neu in Seatline' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Günstiger für grössere Büros' })).toBeVisible();
+  // /updates picks the visitor's language
+  await page.goto('/updates');
+  await expect(page).toHaveURL(/\/updates\/(en|de|fr)$/);
+});

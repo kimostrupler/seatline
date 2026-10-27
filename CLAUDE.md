@@ -549,6 +549,13 @@ chromium` (re-run after UI changes). In the app: **Help** in the top bar, a dism
   Linked from: a card on the help home, the help sidebar, "Watch this part" on topics with a
   chapter (`topic` in `CHAPTERS`), a button under the landing page's promo video, the footer,
   sitemap and llms.txt. A new video version = upload over the same blob, update the cues/chapters.
+- **What's new** (`/updates/<en|de|fr>`, public, blog style, `app/updates/[lang]/page.tsx`): posts in
+  `lib/updates/posts.ts` (newest first, same points in every language, a help screenshot or an
+  own picture in `public/updates-img/<lang>/` made by `UPDATE_SCREENSHOTS=1 pnpm exec playwright
+test update-screenshots --project chromium`; `updates.test.ts` checks). **Add a post with every
+  change customers notice.** Linked from the site header/footer, landing nav, help sidebar, the
+  app's account menu and phone "More" menu; in the sitemap, llms.txt and Blog JSON-LD.
+  Client code imports `updatesPath` from `lib/updates/path` (the posts stay server-side).
 - **Free Excel template** (`/help/<lang>/excel-template`, `lib/help/template.ts`; in the help
   sidebar, footers, sitemap, llms.txt): a seating-plan .xlsx per language in
   `apps/web/public/templates/`, made by `node apps/api/scripts/seating-template.mjs` (re-run after

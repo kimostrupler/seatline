@@ -698,7 +698,8 @@
     "planning": "Planning",
     "help": "Help",
     "more": "More",
-    "people": "People"
+    "people": "People",
+    "updates": "What’s new"
   },
   "overview": {
     "title": "Overview",
@@ -1412,7 +1413,8 @@
       "average": "per desk on average",
       "perYear": "per year",
       "saving": "{price} less every month thanks to the volume price"
-    }
+    },
+    "navUpdates": "What’s new"
   },
   "planImport": {
     "title": "Import an architect plan",

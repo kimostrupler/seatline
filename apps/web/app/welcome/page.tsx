@@ -27,6 +27,7 @@ import { Button } from '@/components/ui/button';
 import { helpPath, type HelpTopicId } from '@/lib/help';
 import { TEMPLATE, templatePath } from '@/lib/help/template';
 import { VIDEO, videoPath } from '@/lib/help/video';
+import { updatesPath } from '@/lib/updates';
 import { OPERATOR } from '@/lib/legal/operator';
 import { LANGUAGES, LANGUAGE_NAMES, LOCALES, type Language } from '@/lib/locales';
 import { webConfig } from '@/lib/server/config';
@@ -187,6 +188,7 @@ export default async function Welcome() {
                 ['#faq', t('navFaq')],
                 [helpPath(language), t('navHelp')],
                 [videoPath(language), VIDEO[language].short],
+                [updatesPath(language), t('navUpdates')],
               ] as const
             ).map(([href, label]) => (
               <Button
@@ -588,6 +590,7 @@ export default async function Welcome() {
                 [helpPath(language), t('navHelp')],
                 [videoPath(language), VIDEO[language].short],
                 [templatePath(language), TEMPLATE[language].title],
+                [updatesPath(language), t('navUpdates')],
                 [signInUrl(), t('signIn')],
               ] as const
             ).map(([href, label]) => (
