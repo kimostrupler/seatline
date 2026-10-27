@@ -397,8 +397,10 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
 - **Map tour** (`components/map/map-tour.tsx`): three tips over the view map on the first visit
   (colours, click a desk, undo), per browser (`useDismissed('seatline-map-tour-v1')`). e2e projects
   mark it seen via `storageState`; `e2e/map-tour.spec.ts` tests it in a fresh browser.
-- **Help button** (top bar + phone "More" menu) opens the topic for the current page
-  (`helpTopicFor` in `lib/help`, unit-tested). Help texts must be updated with every UI change.
+- **Help menu** (`components/common/help-menu.tsx`, one menu everywhere: website header, site
+  pages, app top bar; phone "More" menu has the same three): help (in the app: the topic for the
+  current page, `helpTopicFor` in `lib/help`, unit-tested), video tour, What's new. Don't add
+  them back as separate nav links; the footers keep plain links for crawlers. Help texts must be updated with every UI change.
 - **Getting started** (`components/dashboard/getting-started.tsx`, admins, not in demos): 4 steps
   ticked from `/overview` + `/people/directory` (`setupProgress`, `lib/getting-started.ts`);
   hidden per browser + workspace (`useDismissed`), and by itself once all are done.
@@ -577,8 +579,8 @@ chromium` (re-run after UI changes). In the app: **Help** in the top bar, a dism
   `lib/updates/posts.ts` (newest first, same points in every language, a help screenshot or an
   own picture in `public/updates-img/<lang>/` made by `UPDATE_SCREENSHOTS=1 pnpm exec playwright
 test update-screenshots --project chromium`; `updates.test.ts` checks). **Add a post with every
-  change customers notice.** Linked from the site header/footer, landing nav, help sidebar, the
-  app's account menu and phone "More" menu; in the sitemap, llms.txt and Blog JSON-LD.
+  change customers notice.** Linked from the Help menu (site + app), footers, help sidebar and
+  phone "More" menu; in the sitemap, llms.txt and Blog JSON-LD.
   Client code imports `updatesPath` from `lib/updates/path` (the posts stay server-side).
 - **Free Excel template** (`/help/<lang>/excel-template`, `lib/help/template.ts`; in the help
   sidebar, footers, sitemap, llms.txt): a seating-plan .xlsx per language in
@@ -611,8 +613,11 @@ test update-screenshots --project chromium`; `updates.test.ts` checks). **Add a 
   workspace (normal tenant RLS) and only owner-checked endpoints (`/owner/leads…`,
   `LeadsService`) use them. Rules and templates en/de/fr are pure in
   `packages/shared/src/outreach.ts` (imported as `@seatline/shared/dist/outreach`, unit-tested in
-  `apps/api/src/owner/outreach.test.ts`): one e-mail per lead at a time, never in bulk (no word limit, the
-  count is only shown), a "why now" sentence and no `[placeholder]` left (`messageProblem`). Schedule
+  `apps/api/src/owner/outreach.test.ts`): one e-mail per lead at a time, never one mail to many (no word limit, the
+  count is only shown). Page: one tab per next step (`STEPS`, colour per step `TONE`; green = sends,
+  blue = writes, red = don't send) and two **send all** buttons (`POST /owner/leads/send-scheduled`:
+  scheduled ones now; `/send-ready`: the filled-in template to every e-mail lead at "write first",
+  incomplete templates skipped), each with one confirmation, at most `SEND_ALL_MAX` (25) per click, a "why now" sentence and no `[placeholder]` left (`messageProblem`). Schedule
   = the next Tue–Thu 8 am Zurich (`nextSendSlot`), or **Send now** (after one confirmation;
   `sendNow` on schedule, or `POST …/messages/:id/send` for a scheduled one; a failed send waits
   for the next slot); the `nightly-sync` job now runs at 01:00 and

@@ -11,8 +11,7 @@ export const VIDEO_POSTER = '/site-video/seatline-tutorial.webp';
 export const VIDEO_SECONDS = 538;
 export const VIDEO_UPLOADED = '2026-10-24';
 
-export const videoPath = (language: Language, at?: number) =>
-  `${helpPath(language)}/video-tour${at ? `?t=${Math.floor(at)}` : ''}`;
+export { videoPath } from './video-path';
 export const subtitlesPath = (language: Language) => `${helpPath(language)}/video-tour/subtitles`;
 
 /** 1:05 */

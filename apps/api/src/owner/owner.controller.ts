@@ -60,7 +60,7 @@ export class OwnerController {
     return this.owner.overview();
   }
 
-  // --- outreach (Leads page): one personal e-mail at a time, never in bulk ---
+  // --- outreach (Leads page): one personal e-mail per lead ---
 
   @Get('leads')
   async listLeads(@Ctx() ctx: RequestContext) {
@@ -85,6 +85,20 @@ export class OwnerController {
   ) {
     await this.owner.assertOwner(ctx, '/owner/leads/import');
     return this.leads.import(ctx, body.leads);
+  }
+
+  /** Every scheduled e-mail goes out now (one per lead). */
+  @Post('leads/send-scheduled')
+  async sendAllScheduled(@Ctx() ctx: RequestContext) {
+    await this.owner.assertOwner(ctx, '/owner/leads/send-scheduled');
+    return this.leads.sendAllScheduled(ctx);
+  }
+
+  /** The filled-in first e-mail to every e-mail lead that is ready for one. */
+  @Post('leads/send-ready')
+  async sendAllReady(@Ctx() ctx: RequestContext) {
+    await this.owner.assertOwner(ctx, '/owner/leads/send-ready');
+    return this.leads.sendAllReady(ctx);
   }
 
   @Get('leads/:id')

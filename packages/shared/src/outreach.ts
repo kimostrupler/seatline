@@ -3,7 +3,7 @@ import { OPERATOR } from './legal';
 
 /**
  * Personal outreach to possible customers (the operator's Leads page under /owner). One person,
- * one personal e-mail: no bulk sending, sent at a good time
+ * one personal e-mail (never one mail to many; "send all" still sends one e-mail per lead), sent at a good time
  * (Tuesday to Thursday, 8 am Zurich), one follow-up after FOLLOW_UP_DAYS days.
  */
 export const LEAD_STATUSES = [
@@ -25,6 +25,8 @@ export type LeadLanguage = (typeof LEAD_LANGUAGES)[number];
 export const LEAD_MESSAGE_KINDS = ['first', 'follow_up'] as const;
 export type LeadMessageKind = (typeof LEAD_MESSAGE_KINDS)[number];
 
+/** at most this many e-mails per "send all" click (keeps the request short; click again) */
+export const SEND_ALL_MAX = 25;
 export const FOLLOW_UP_DAYS = 7;
 /** no reply this many days after the follow-up: the lead is "no answer" */
 export const NO_ANSWER_DAYS = 14;

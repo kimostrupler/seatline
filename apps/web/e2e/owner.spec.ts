@@ -102,3 +102,36 @@ test('researched leads come in from a file and wait under To do', async ({ page 
   await expect(page.getByText('0 leads added')).toBeVisible();
   await expect(page.getByText('Already there, skipped: Muster AG')).toBeVisible();
 });
+
+test('leads sit in one tab per step; "send all" writes and sends to every ready lead', async ({
+  page,
+}) => {
+  await page.goto('/owner/leads');
+  const leads = ['Alpha', 'Beta'].map((name) => ({
+    company: `${name} AG`,
+    greeting: 'Frau Muster',
+    contactEmail: `it@${name.toLowerCase()}.example`,
+    whyNow: 'Ich habe gelesen, dass Sie umziehen.',
+  }));
+  // wait for the page to be ready before handing it the file
+  await expect(page.getByRole('group', { name: 'Where each lead is' })).toBeVisible();
+  await page.locator('input[type=file]').setInputFiles({
+    name: 'leads.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify([...leads, { company: 'Gamma AG' }])),
+  });
+  await expect(page.getByText('3 leads added')).toBeVisible();
+  const tabs = page.getByRole('group', { name: 'Where each lead is' });
+  await tabs.getByRole('button', { name: /^To write/ }).click();
+  await expect(page.getByTestId('leads')).toContainText('Alpha AG');
+  await expect(page.getByTestId('leads')).not.toContainText('Gamma AG');
+
+  await page.getByRole('button', { name: 'Write and send to all ready (2)' }).click();
+  const confirm = page.getByRole('alertdialog');
+  await expect(confirm).toContainText('to 2 leads now');
+  await confirm.getByRole('button', { name: 'Send now' }).click();
+  await expect(page.getByText('2 e-mails sent')).toBeVisible();
+  await expect(page.getByText('No leads at this step.')).toBeVisible();
+  await tabs.getByRole('button', { name: /^Waiting for an answer/ }).click();
+  await expect(page.getByTestId('leads')).toContainText('Beta AG');
+});

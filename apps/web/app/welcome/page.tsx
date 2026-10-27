@@ -17,6 +17,7 @@ import { Logo } from '@/components/common/logo';
 import { LiveFloor } from '@/components/site/landing/live-floor';
 import { NoticeDemo } from '@/components/site/landing/notice-demo';
 import { PriceCalculator } from '@/components/site/landing/price-calculator';
+import { HelpMenu } from '@/components/common/help-menu';
 import { Reveal } from '@/components/site/landing/reveal';
 import { ZurichTime } from '@/components/site/landing/zurich-time';
 import '@/components/site/landing/landing.css';
@@ -186,9 +187,6 @@ export default async function Welcome() {
                 ['#features', t('navFeatures')],
                 ['#pricing', t('navPricing')],
                 ['#faq', t('navFaq')],
-                [helpPath(language), t('navHelp')],
-                [videoPath(language), VIDEO[language].short],
-                [updatesPath(language), t('navUpdates')],
               ] as const
             ).map(([href, label]) => (
               <Button
@@ -202,6 +200,14 @@ export default async function Welcome() {
               </Button>
             ))}
           </nav>
+          <HelpMenu
+            label={t('navHelp')}
+            items={[
+              { href: helpPath(language), label: t('navHelpCenter'), icon: 'help' },
+              { href: videoPath(language), label: VIDEO[language].short, icon: 'video' },
+              { href: updatesPath(language), label: t('navUpdates'), icon: 'updates' },
+            ]}
+          />
           <nav aria-label="Language" className="flex items-center text-xs font-medium">
             {LANGUAGES.map((l) => (
               <a
@@ -222,9 +228,6 @@ export default async function Welcome() {
               </a>
             ))}
           </nav>
-          <Button asChild variant="ghost" size="sm" className="md:hidden">
-            <a href={helpPath(language)}>{t('navHelp')}</a>
-          </Button>
           <Button asChild size="sm">
             {signedIn ? (
               <a href={appHomeUrl()}>{t('openApp')}</a>

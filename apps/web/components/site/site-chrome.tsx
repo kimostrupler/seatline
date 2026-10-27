@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { OPERATOR } from '@/lib/legal/operator';
 import { LANGUAGES, LANGUAGE_NAMES, type Language } from '@/lib/locales';
 import { helpPath } from '@/lib/help';
+import { VIDEO, videoPath } from '@/lib/help/video';
+import { HelpMenu } from '@/components/common/help-menu';
 import { TEMPLATE, templatePath } from '@/lib/help/template';
 import { updatesPath } from '@/lib/updates/path';
 import { SITE_LANGUAGE_PATHS } from '@/lib/site';
@@ -61,6 +63,7 @@ export async function SiteHeader({
   languagePaths?: Record<Language, string>;
 }) {
   const t = await getTranslations('site');
+  const language = (await getLocale()).slice(0, 2) as Language;
   return (
     <header className="sticky top-0 z-20 border-b bg-background/90 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-3 sm:px-6">
@@ -68,14 +71,14 @@ export async function SiteHeader({
           <Logo className="size-7" />
           Seatline
         </Link>
-        <Button asChild variant="ghost" size="sm" className="max-sm:hidden">
-          <Link href={updatesPath((await getLocale()).slice(0, 2) as Language)}>
-            {t('navUpdates')}
-          </Link>
-        </Button>
-        <Button asChild variant="ghost" size="sm">
-          <Link href={helpPath((await getLocale()).slice(0, 2) as Language)}>{t('navHelp')}</Link>
-        </Button>
+        <HelpMenu
+          label={t('navHelp')}
+          items={[
+            { href: helpPath(language), label: t('navHelpCenter'), icon: 'help' },
+            { href: videoPath(language), label: VIDEO[language].short, icon: 'video' },
+            { href: updatesPath(language), label: t('navUpdates'), icon: 'updates' },
+          ]}
+        />
         {languagePaths ? <LanguageLinks paths={languagePaths} /> : <LanguageSelect compact />}
         {(await looksSignedIn()) ? (
           <Button asChild size="sm">
@@ -106,6 +109,12 @@ export async function SiteFooter() {
         </a>
         <a className="hover:text-foreground" href={templatePath(language)}>
           {TEMPLATE[language].title}
+        </a>
+        <a className="hover:text-foreground" href={helpPath(language)}>
+          {t('site.navHelpCenter')}
+        </a>
+        <a className="hover:text-foreground" href={videoPath(language)}>
+          {VIDEO[language].short}
         </a>
         <a className="hover:text-foreground" href={updatesPath(language)}>
           {t('site.navUpdates')}

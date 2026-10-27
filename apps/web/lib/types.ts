@@ -417,7 +417,7 @@ export interface OwnerOverview {
   }>;
   stripe:
     | null
-    | { error: 'unavailable' }
+    | { error: 'unavailable'; detail?: string }
     | {
         currency: string;
         mrr: number;

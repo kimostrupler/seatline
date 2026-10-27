@@ -16,6 +16,7 @@ import {
   isSendingHour,
   LEAD_RETENTION_MONTHS,
   messageProblem,
+  SEND_ALL_MAX,
   nextSendSlot,
   nextStep,
   videoLink,
@@ -344,6 +345,57 @@ export class LeadsService {
       throw new ServiceUnavailableException({ message: 'E-mail is not set up', code: 'mail_off' });
     await this.deliver(ctx, message, now, true);
     return { ...message, lead: undefined, sentAt: now };
+  }
+
+  /**
+   * "Send all scheduled": every e-mail already written and scheduled goes out now instead of at
+   * its slot. Still one e-mail per lead; ones that fail stay scheduled.
+   */
+  async sendAllScheduled(ctx: RequestContext, now = new Date()) {
+    this.assertMail();
+    const waiting = await this.db.run(ctx.tenantId, (tx) =>
+      tx.leadMessage.findMany({
+        where: { tenantId: ctx.tenantId, sentAt: null, canceledAt: null },
+        orderBy: { scheduledFor: 'asc' },
+        take: SEND_ALL_MAX,
+        include: { lead: { include: { messages: { where: { kind: 'first' } } } } },
+      }),
+    );
+    let sent = 0;
+    const failed: string[] = [];
+    for (const message of waiting)
+      if (await this.deliver(ctx, message, now)) sent++;
+      else failed.push(message.lead.company);
+    return { sent, failed };
+  }
+
+  /**
+   * "Write and send to all ready": the filled-in template goes to every e-mail lead still
+   * waiting for its first e-mail. Leads whose template isn't complete (a placeholder, no
+   * reason) are skipped, so nothing half-written goes out.
+   */
+  async sendAllReady(ctx: RequestContext, now = new Date()) {
+    this.assertMail();
+    const { leads } = await this.list(ctx, now);
+    const ready = leads
+      .filter((l) => l.nextStep === 'write_first' && l.channel === 'email')
+      .slice(0, SEND_ALL_MAX);
+    let sent = 0;
+    const failed: string[] = [];
+    for (const lead of ready)
+      try {
+        const draft = await this.draft(ctx, lead.id, 'first');
+        await this.schedule(ctx, lead.id, { kind: 'first', ...draft, sendNow: true }, now);
+        sent++;
+      } catch {
+        failed.push(lead.company);
+      }
+    return { sent, failed };
+  }
+
+  private assertMail() {
+    if (!this.mail.configured)
+      throw new ServiceUnavailableException({ message: 'E-mail is not set up', code: 'mail_off' });
   }
 
   async cancel(ctx: RequestContext, id: string, messageId: string) {

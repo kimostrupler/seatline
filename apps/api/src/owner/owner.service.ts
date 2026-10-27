@@ -140,7 +140,11 @@ export class OwnerService {
     const now = Date.now();
     const [rows, stripe, azure, usage] = await Promise.all([
       this.db.ownerWorkspaces(),
-      this.billing.ownerSummary().catch(() => ({ error: 'unavailable' as const })),
+      this.billing.ownerSummary().catch((error: Error) => {
+        // Stripe's own reason (e.g. a restricted key without read access to balance/invoices)
+        this.logger.warn(`Stripe could not be read: ${error.message}`);
+        return { error: 'unavailable' as const, detail: error.message };
+      }),
       this.costs.summary(),
       this.usage(),
     ]);

@@ -1,13 +1,14 @@
 'use client';
 
-import { CircleHelp } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
 import { AccountMenu } from '@/components/workspace/account-menu';
 import { helpPath, helpTopicFor } from '@/lib/help';
+import { videoPath } from '@/lib/help/video-path';
+import { updatesPath } from '@/lib/updates/path';
 import type { Language } from '@/lib/locales';
+import { HelpMenu } from './help-menu';
 import { LanguageSelect } from './language-select';
 import { Logo } from './logo';
 import { MobileTabBar } from './mobile-tab-bar';
@@ -42,21 +43,20 @@ export function TopBar() {
               <NavLinks orientation="horizontal" />
             </div>
           </div>
-          <Button
-            asChild
-            variant="ghost"
-            size="sm"
-            className="shrink-0 max-md:hidden"
-            data-testid="help-link"
-          >
-            <Link
-              href={helpPath(language, helpTopicFor(pathname, search))}
-              target="_blank"
-              rel="noopener"
-            >
-              <CircleHelp /> <span className="max-md:sr-only">{t('help')}</span>
-            </Link>
-          </Button>
+          <HelpMenu
+            label={t('help')}
+            newTab
+            className="shrink-0 text-foreground max-md:hidden"
+            items={[
+              {
+                href: helpPath(language, helpTopicFor(pathname, search)),
+                label: t('helpPage'),
+                icon: 'help',
+              },
+              { href: videoPath(language), label: t('videoTour'), icon: 'video' },
+              { href: updatesPath(language), label: t('updates'), icon: 'updates' },
+            ]}
+          />
           <LanguageSelect compact />
           <div className="shrink-0 sm:w-52">
             <AccountMenu />

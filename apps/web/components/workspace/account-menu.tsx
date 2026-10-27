@@ -1,8 +1,8 @@
 'use client';
 
-import { FileText, LogOut, Sparkles } from 'lucide-react';
+import { FileText, LogOut } from 'lucide-react';
 import Link from 'next/link';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -13,9 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuthMode } from '@/lib/auth-mode';
-import type { Language } from '@/lib/locales';
 import { useMe } from '@/lib/queries';
-import { updatesPath } from '@/lib/updates/path';
 import { DevLogin } from './dev-login';
 import { WhoAmI } from './who-am-i';
 
@@ -24,7 +22,6 @@ export function AccountMenu() {
   const mode = useAuthMode();
   const t = useTranslations();
   const me = useMe();
-  const language = useLocale().slice(0, 2) as Language;
 
   return (
     <div className="grid gap-1">
@@ -53,12 +50,6 @@ export function AccountMenu() {
             <DropdownMenuLabel className="truncate font-normal text-muted-foreground">
               {me.data?.person.email}
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href={updatesPath(language)} target="_blank" rel="noopener">
-                <Sparkles /> {t('nav.updates')}
-              </Link>
-            </DropdownMenuItem>
             <DropdownMenuSeparator />
             {(['terms', 'privacy', 'imprint'] as const).map((doc) => (
               <DropdownMenuItem key={doc} asChild>

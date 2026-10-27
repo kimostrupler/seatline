@@ -223,3 +223,31 @@ test('what’s new: every update with its picture, in each language, linked from
   await page.goto('/updates');
   await expect(page).toHaveURL(/\/updates\/(en|de|fr)$/);
 });
+
+test('one Help menu on the website and in the app: help center, video tour, what’s new', async ({
+  page,
+}) => {
+  await page.goto('/welcome');
+  await page.getByRole('banner').getByRole('button', { name: 'Help' }).click();
+  const menu = page.getByRole('menu');
+  await expect(menu.getByRole('menuitem', { name: 'Help center' })).toHaveAttribute(
+    'href',
+    '/help/en',
+  );
+  await expect(menu.getByRole('menuitem', { name: 'Video tour' })).toHaveAttribute(
+    'href',
+    '/help/en/video-tour',
+  );
+  await menu.getByRole('menuitem', { name: 'What’s new' }).click();
+  await expect(page).toHaveURL(/\/updates\/en$/);
+
+  // the app: the same three, help opens the topic for the page you're on
+  await page.goto('/map');
+  await page.getByTestId('top-bar').getByRole('button', { name: 'Help' }).click();
+  await expect(page.getByRole('menuitem', { name: 'Help for this page' })).toHaveAttribute(
+    'href',
+    /\/help\/en\/.+/,
+  );
+  await expect(page.getByRole('menuitem', { name: 'Video tour' })).toBeVisible();
+  await expect(page.getByRole('menuitem', { name: 'What’s new' })).toBeVisible();
+});
