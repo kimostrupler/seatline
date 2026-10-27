@@ -95,7 +95,9 @@ SITE_DOMAINS=$(az containerapp show -n web -g "$RG" --query "$DOMAINS_QUERY[?nam
 kv_get() { az keyvault secret show --vault-name "$KV" -n "$1" --query value -o tsv 2>/dev/null || true; }
 STRIPE_KEY=$(kv_get stripe-secret-key)
 STRIPE_WEBHOOK=$(kv_get stripe-webhook-secret)
-STRIPE_PRICE=$(kv_get stripe-price-id)
+# the price the API uses now wins (it may have been switched without Key Vault), else Key Vault's
+STRIPE_PRICE=$(az containerapp show -n api -g "$RG" --query "properties.template.containers[0].env[?name=='STRIPE_PRICE_ID'].value | [0]" -o tsv 2>/dev/null || true)
+[ -n "$STRIPE_PRICE" ] || STRIPE_PRICE=$(kv_get stripe-price-id)
 # the owner dashboard's address, if owner-setup.sh set one (kept across runs)
 OWNER_EMAILS=$(az containerapp show -n api -g "$RG" --query "properties.template.containers[0].env[?name=='OWNER_EMAILS'].value | [0]" -o tsv 2>/dev/null || true)
 # E-mail sign-in, if mail-setup.sh stored the SMTP password (else Microsoft sign-in only)

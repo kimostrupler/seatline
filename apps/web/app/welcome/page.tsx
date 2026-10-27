@@ -16,6 +16,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { Logo } from '@/components/common/logo';
 import { LiveFloor } from '@/components/site/landing/live-floor';
 import { NoticeDemo } from '@/components/site/landing/notice-demo';
+import { PriceCalculator } from '@/components/site/landing/price-calculator';
 import { Reveal } from '@/components/site/landing/reveal';
 import { ZurichTime } from '@/components/site/landing/zurich-time';
 import '@/components/site/landing/landing.css';
@@ -125,8 +126,8 @@ export default async function Welcome() {
   const language = (await getLocale()).slice(0, 2) as Language;
   const signedIn = await looksSignedIn();
   // site.* texts stay on the server (app/layout.tsx); the two live parts get just theirs
-  const { live, notice } = (await getMessages()).site;
-  const liveMessages = { site: { live, notice } };
+  const { live, notice, calc } = (await getMessages()).site;
+  const liveMessages = { site: { live, notice, calc } };
   const jsonLd = landingJsonLd({
     base: siteUrl(webConfig().APP_URL),
     language,
@@ -521,6 +522,9 @@ export default async function Welcome() {
               {t('priceDemo')}
             </a>
           </div>
+          <NextIntlClientProvider messages={liveMessages}>
+            <PriceCalculator />
+          </NextIntlClientProvider>
         </section>
 
         {/* questions, one open at a time if you like */}
