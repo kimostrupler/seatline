@@ -1,5 +1,6 @@
 'use client';
 
+import { monthlyPrice } from '@seatline/shared/dist/pricing';
 import { CreditCard, ExternalLink, Loader2 } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
@@ -102,8 +103,16 @@ export function BillingPage() {
               <div>
                 <dt className="text-xs text-muted-foreground">{t('pricePerSeat')}</dt>
                 <dd className="text-lg font-semibold tabular-nums">
-                  {t('perMonth', { price: money(b.price.amount) })}
+                  {t('perMonth', { price: money(b.price.tiers[0]?.amount ?? 0) })}
                 </dd>
+                {b.price.tiers.slice(1).map((tier, i) => (
+                  <dd key={i} className="text-xs text-muted-foreground">
+                    {t('volumeTier', {
+                      price: money(tier.amount),
+                      from: (b.price!.tiers[i]!.upTo ?? 0) + 1,
+                    })}
+                  </dd>
+                ))}
               </div>
               <div>
                 <dt className="text-xs text-muted-foreground">{t('activeSeats')}</dt>
@@ -112,7 +121,7 @@ export function BillingPage() {
               <div>
                 <dt className="text-xs text-muted-foreground">{t('estimate')}</dt>
                 <dd className="text-lg font-semibold tabular-nums">
-                  {t('perMonth', { price: money(b.price.amount * b.seats) })}
+                  {t('perMonth', { price: money(monthlyPrice(b.seats, b.price.tiers)) })}
                 </dd>
               </div>
             </dl>

@@ -2,11 +2,10 @@
 # Switches on billing with Stripe:  bash stripe-setup.sh
 # Run in Azure Cloud Shell after setup.sh. Safe to run again. Asks for your Stripe secret key
 # (test key sk_test_… first; run again with sk_live_… when going live), then creates the price
-# (CHF 2 per seat per month, change it in Stripe any time) and the webhook, keeps the keys in
+# (CHF 2 per seat per month, CHF 0.99 from the 51st seat) and the webhook, keeps the keys in
 # Key Vault and gives them to the API. Without this, billing stays off.
 set -euo pipefail
 RG=${RG:-seatline}
-PRICE_CHF_CENTS=${PRICE_CHF_CENTS:-200}
 say() { printf '\n\033[1m%s\033[0m\n' "$*"; }
 
 SUB=$(az account show --query id -o tsv)
@@ -35,14 +34,20 @@ stripe() {
 stripe https://api.stripe.com/v1/balance >/dev/null
 OLD_KEY=$(kv_get stripe-secret-key)
 
-say "2/4 Price: CHF $(printf '%d.%02d' $((PRICE_CHF_CENTS / 100)) $((PRICE_CHF_CENTS % 100))) per seat per month"
-PRICE=$(stripe -G https://api.stripe.com/v1/prices -d 'lookup_keys[]=seatline_seat_monthly' | jq -r '.data[0].id // empty')
+say "2/4 Price: CHF 2 per seat per month for seats 1–50, CHF 0.99 from the 51st (graduated)"
+# graduated tiers (packages/shared/src/pricing.ts): a seat more never makes the bill smaller.
+# Existing subscriptions on the old flat price move to this one in the next night's seat sync.
+PRICE=$(stripe -G https://api.stripe.com/v1/prices -d 'lookup_keys[]=seatline_seat_monthly_volume' | jq -r '.data[0].id // empty')
 if [ -z "$PRICE" ]; then
-  PRODUCT=$(stripe https://api.stripe.com/v1/products -d name=Seatline \
+  PRODUCT=$(stripe -G https://api.stripe.com/v1/prices -d 'lookup_keys[]=seatline_seat_monthly' | jq -r '.data[0].product // empty')
+  [ -n "$PRODUCT" ] || PRODUCT=$(stripe https://api.stripe.com/v1/products -d name=Seatline \
     -d 'description=Office seat management, per active seat' | jq -r .id)
   PRICE=$(stripe https://api.stripe.com/v1/prices -d product="$PRODUCT" -d currency=chf \
-    -d unit_amount="$PRICE_CHF_CENTS" -d 'recurring[interval]=month' \
-    -d lookup_key=seatline_seat_monthly -d 'nickname=Per seat per month' | jq -r .id)
+    -d billing_scheme=tiered -d tiers_mode=graduated \
+    -d 'tiers[0][up_to]=50' -d 'tiers[0][unit_amount]=200' \
+    -d 'tiers[1][up_to]=inf' -d 'tiers[1][unit_amount]=99' \
+    -d 'recurring[interval]=month' -d 'recurring[usage_type]=licensed' \
+    -d lookup_key=seatline_seat_monthly_volume -d 'nickname=Per seat per month (CHF 0.99 from the 51st)' | jq -r .id)
 fi
 echo "  $PRICE"
 

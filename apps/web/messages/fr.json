@@ -1167,7 +1167,8 @@
       "pastDue": "Le dernier paiement pour Seatline a échoué.",
       "trialEnding": "{days, plural, =0 {L’essai gratuit se termine aujourd’hui.} one {L’essai gratuit se termine dans # jour.} other {L’essai gratuit se termine dans # jours.}}",
       "open": "Ouvrir la facturation"
-    }
+    },
+    "volumeTier": "{price} dès le {from}e poste"
   },
   "legal": {
     "terms": "Conditions d’utilisation",
@@ -1238,7 +1239,7 @@
     "copyright": "© {year} Seatline",
     "f11Title": "QR codes sur les places",
     "f11Body": "Imprimez une étiquette pour chaque place. En la scannant, on voit qui y est assis.",
-    "heroLead": "Qui est assis où, les déménagements planifiés et chaque changement gardé. Pour les bureaux suisses, CHF 2 par poste.",
+    "heroLead": "Qui est assis où, les déménagements planifiés et chaque changement gardé. Pour les bureaux suisses, CHF 2 par poste, CHF 0.99 dès le 51e.",
     "navHelp": "Aide",
     "live": {
       "title": "Essayez : touchez un poste vert",
@@ -1368,7 +1369,7 @@
         "price": {
           "label": "Prix",
           "usual": "« Contactez le service commercial »",
-          "us": "CHF 2 par poste et par mois, sur le site"
+          "us": "CHF 2 par poste et par mois (CHF 0.99 dès le 51e), sur le site"
         },
         "trial": {
           "label": "Essayer",
@@ -1396,7 +1397,8 @@
           "us": "Restent à Zurich"
         }
       }
-    }
+    },
+    "priceVolume": "Dès le 51e poste : CHF 0.99"
   },
   "planImport": {
     "title": "Importer un plan d’architecte",

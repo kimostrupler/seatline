@@ -150,9 +150,11 @@ active seats (updated every night).
    bash seatline/infra/azure/stripe-setup.sh
    ```
 
-   It asks for the key, creates the price (CHF 2 per seat per month — change the price in
-   Stripe any time, or run with `PRICE_CHF_CENTS=500` for CHF 5), adds the webhook and gives the
-   keys to the app (kept in Key Vault). Running `setup.sh` again later keeps them.
+   It asks for the key, creates the price (graduated: CHF 2 per seat per month for seats 1–50,
+   CHF 0.99 for every seat from the 51st; tiers in `packages/shared/src/pricing.ts`), adds the
+   webhook and gives the keys to the app (kept in Key Vault). Running `setup.sh` again later
+   keeps them. Running it again after a price change creates the new price and switches the
+   app to it; existing subscriptions move to it in the next night's seat sync.
 
 To go live: activate your Stripe account, then run the script again with the **live** key
 (`sk_live_…`). In Stripe, also turn on the **Customer portal** (Settings → Billing → Customer
