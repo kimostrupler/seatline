@@ -1654,7 +1654,7 @@
       },
       "mailOff": "L’e-mail n’est pas configuré sur le serveur : rien ne peut encore être envoyé.",
       "repliesOff": "Les réponses ne sont pas détectées automatiquement (IMAP n’est pas configuré) : marquez-les vous-même.",
-      "rules": "Une personne, un e-mail personnel. 100 mots au maximum. Les e-mails partent du mardi au jeudi à 8 h, et une réponse arrête tout ce qui est encore prévu.",
+      "rules": "Une personne, un e-mail personnel. Les e-mails partent du mardi au jeudi à 8 h, et une réponse arrête tout ce qui est encore prévu.",
       "fields": {
         "company": "Entreprise",
         "website": "Site web",
@@ -1697,7 +1697,7 @@
         "follow_up": "Écrire la relance",
         "subject": "Objet",
         "body": "Message",
-        "words": "{count} / {max} mots",
+        "words": "{count, plural, one {# mot} other {# mots}}",
         "schedule": "Planifier",
         "scheduleHint": "Part {when}.",
         "scheduled": "E-mail planifié pour {when}",
@@ -1713,7 +1713,6 @@
       "problems": {
         "no_email": "Ajoutez d’abord une adresse e-mail publiée (canal : E-mail).",
         "no_reason": "Écrivez d’abord la phrase « pourquoi maintenant » : c’est elle qui rend l’e-mail personnel.",
-        "too_long": "Plus de {max} mots : raccourcissez-le.",
         "placeholder": "Complétez tout ce qui est entre [crochets]."
       },
       "messages": "E-mails",

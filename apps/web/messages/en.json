@@ -1654,7 +1654,7 @@
       },
       "mailOff": "E-mail isn’t set up on the server, so nothing can be sent yet.",
       "repliesOff": "Replies aren’t checked automatically (IMAP isn’t set up): mark replies yourself.",
-      "rules": "One person, one personal e-mail. At most 100 words. E-mails go out Tuesday to Thursday at 8 am, and a reply stops everything still scheduled.",
+      "rules": "One person, one personal e-mail. E-mails go out Tuesday to Thursday at 8 am, and a reply stops everything still scheduled.",
       "fields": {
         "company": "Company",
         "website": "Website",
@@ -1697,7 +1697,7 @@
         "follow_up": "Write the follow-up",
         "subject": "Subject",
         "body": "Message",
-        "words": "{count} / {max} words",
+        "words": "{count, plural, one {# word} other {# words}}",
         "schedule": "Schedule",
         "scheduleHint": "Goes out {when}.",
         "scheduled": "E-mail scheduled for {when}",
@@ -1713,7 +1713,6 @@
       "problems": {
         "no_email": "Add a published e-mail address first (channel: E-mail).",
         "no_reason": "Write the “why now” sentence first: it’s what makes the e-mail personal.",
-        "too_long": "Over {max} words: shorten it.",
         "placeholder": "Fill in everything in [brackets]."
       },
       "messages": "E-mails",
