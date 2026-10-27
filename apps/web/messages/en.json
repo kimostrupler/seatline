@@ -101,7 +101,8 @@
         "title": "Nothing can go wrong",
         "body": "Every change shows a message with “Undo”. Planning several moves at once? Use “Moves” in the menu."
       }
-    }
+    },
+    "sharedSuffix": "(shared desk)"
   },
   "seat": {
     "title": "Seat {label}",
@@ -348,7 +349,10 @@
     "markerKind": "What is it?",
     "markerLabel": "Name (optional)",
     "markerLabelHint": "e.g. Cafeteria, Printer 2nd floor",
-    "deleteMarker": "Delete marker"
+    "deleteMarker": "Delete marker",
+    "shared": "Shared desk",
+    "sharedHint": "People book it by the day on the map; nobody sits here for good.",
+    "sharedOccupied": "Free the desk first: a shared desk has no permanent person."
   },
   "auth": {
     "signInTitle": "Sign in to Seatline",
@@ -818,7 +822,12 @@
       "teamRenamed": "renamed team {old} to {team}",
       "teamDeleted": "removed team {team}",
       "teamPlanSet": "expects {count} people in {team}",
-      "teamPlanRemoved": "removed the headcount plan for {team}"
+      "teamPlanRemoved": "removed the headcount plan for {team}",
+      "seatShared": "made seat {seat} a shared desk",
+      "seatUnshared": "made seat {seat} a fixed desk again",
+      "deskBooked": "booked desk {seat} for {person} on {day}",
+      "bookingCancelled": "cancelled {person}’s booking of desk {seat} on {day}",
+      "bookingCancelledLeft": "cancelled {person}’s booking of desk {seat} on {day} (left the organisation)"
     },
     "showPlan": "Open the plan",
     "search": "Search activity",
@@ -1045,7 +1054,8 @@
       "seat_blocked": "{person} → {seat}: the seat is blocked.",
       "seat_double": "{person} → {seat}: more than one person is planned for this seat.",
       "seat_missing": "{person}: the planned seat was deleted.",
-      "no_moves": "The plan has no moves left."
+      "no_moves": "The plan has no moves left.",
+      "seat_shared": "{person} → {seat}: the desk is shared (booked by the day)."
     },
     "notes": {
       "person_left": "{person} has left the organisation — their move is skipped.",
@@ -1337,7 +1347,7 @@
       },
       "seat": {
         "title": "Seat people",
-        "body": "Drag a name onto a green desk."
+        "body": "Drag a name onto a green desk, or let people book shared desks by the day."
       },
       "moves": {
         "title": "Plan moves",
@@ -1390,7 +1400,7 @@
         "focus": {
           "label": "Made for",
           "usual": "Booking hot desks",
-          "us": "Knowing who sits where"
+          "us": "Who sits where, and shared desks booked by the day"
         },
         "data": {
           "label": "Your data",
@@ -1787,5 +1797,32 @@
     "microsoftHint": "Ask your IT to approve Seatline (People › Settings).",
     "template": "No list yet? Use our <link>free Excel template</link>.",
     "later": "Show me the map first"
+  },
+  "booking": {
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "todayLower": "today",
+    "tomorrowLower": "tomorrow",
+    "dayLabel": "Show shared desks for",
+    "sharedDesk": "Shared desk · booked by the day",
+    "sharedOn": "Shared desk · {day}",
+    "free": "Free",
+    "bookedBy": "Booked by",
+    "you": "{name} (you)",
+    "book": "Book for {day}",
+    "bookFor": "Book for someone",
+    "cancelMine": "Cancel my booking",
+    "cancel": "Cancel booking",
+    "booked": "Desk {label} booked for you · {day}",
+    "bookedFor": "Desk {label} booked for {name} · {day}",
+    "cancelled": "Booking of desk {label} cancelled · {day}",
+    "error": {
+      "desk_booked": "Someone else booked this desk just now.",
+      "already_booked": "You already have a desk that day.",
+      "day_out_of_range": "Desks can be booked up to 4 weeks ahead.",
+      "not_bookable": "This desk can't be booked."
+    },
+    "myTitle": "My bookings",
+    "none": "No desk booked."
   }
 }

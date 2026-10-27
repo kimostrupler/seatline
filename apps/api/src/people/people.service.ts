@@ -19,6 +19,7 @@ import { NotifyService, openSeats } from '../mail/notify.service';
 import { zurichToday } from '../moves/moves.service';
 import { inviteMail } from '../mail/texts';
 import { readPeopleFile } from './import-file';
+import { cancelFutureBookings } from '../bookings/booking-guards';
 import { audit } from '../common/audit';
 import { loadConfig } from '../config';
 import type { RequestContext } from '../auth/request-context';
@@ -492,6 +493,7 @@ export class PeopleService {
         after: { ...closed, endNote: 'Left the organisation' },
       });
     }
+    await cancelFutureBookings(tx, actor, [person.id]);
     await audit(tx, actor, {
       action: 'person.leave',
       entityType: 'person',

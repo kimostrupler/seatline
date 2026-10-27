@@ -143,6 +143,14 @@ export const FR: HelpContent = {
           ],
         },
         {
+          title: 'Réserver un poste partagé pour une journée',
+          text: [
+            'Un éditeur ou un admin rend un poste partagé : Modifier le plan, cliquer sur le poste, activer Poste partagé. Les postes partagés ont une ligne pointillée intérieure sur le plan et personne n’y est assis en permanence.',
+            'Au-dessus du plan, choisissez le jour (aujourd’hui, demain … jusqu’à 4 semaines à l’avance). Cliquez sur un poste partagé vert et choisissez Réserver. Tout le monde peut réserver pour soi, les lecteurs aussi ; un poste par personne et par jour. Vos réservations apparaissent aussi sur l’Accueil sous Ma place.',
+            'Pour rendre le poste, cliquez dessus et choisissez Annuler ma réservation. Les éditeurs et admins peuvent réserver pour quelqu’un d’autre et annuler toute réservation.',
+          ],
+        },
+        {
           title: 'Trouver une personne ou un poste libre',
           text: [
             'Saisissez un nom dans la recherche de gauche et cliquez sur la personne : vous voyez son poste et son historique. « Trouver un poste libre » filtre les postes libres selon leur équipement — bureau debout, deux écrans, près de la fenêtre.',
@@ -151,7 +159,7 @@ export const FR: HelpContent = {
         },
       ],
       tips: [
-        'Les lecteurs voient tout mais ne modifient pas les postes ; demandez à un éditeur ou un admin.',
+        'Les lecteurs voient tout et peuvent réserver des postes partagés, mais ne modifient pas les postes ; demandez à un éditeur ou un admin.',
         'Les collaborateurs peuvent recevoir un e-mail pour leur nouveau poste (Personnes et accès → Réglages → Avis).',
       ],
     },

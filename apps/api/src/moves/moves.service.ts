@@ -154,7 +154,7 @@ export class MovesService {
         }),
         tx.seat.findMany({
           where: { tenantId: ctx.tenantId, floorId: floor.id },
-          select: { id: true, status: true, roomId: true, label: true },
+          select: { id: true, status: true, shared: true, roomId: true, label: true },
           orderBy: [{ roomId: { sort: 'asc', nulls: 'last' } }, { label: 'asc' }],
         }),
         this.seating(tx, ctx.tenantId),
@@ -481,7 +481,7 @@ export class MovesService {
 
   private async seating(tx: Tx, tenantId: string): Promise<Seating> {
     const [seats, open, people] = await Promise.all([
-      tx.seat.findMany({ where: { tenantId }, select: { id: true, status: true } }),
+      tx.seat.findMany({ where: { tenantId }, select: { id: true, status: true, shared: true } }),
       tx.seatAssignment.findMany({
         where: { tenantId, endAt: null },
         select: { id: true, seatId: true, personId: true, kind: true, reservedFor: true },
@@ -489,7 +489,7 @@ export class MovesService {
       tx.person.findMany({ where: { tenantId, active: true }, select: { id: true } }),
     ]);
     return {
-      seats: new Map(seats.map((s) => [s.id, { status: s.status }])),
+      seats: new Map(seats.map((s) => [s.id, { status: s.status, shared: s.shared }])),
       open,
       activePeople: new Set(people.map((p) => p.id)),
     };

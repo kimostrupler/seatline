@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import type { MailLanguage, MarkerKind, RoomEquipment, SeatFeature } from '@seatline/shared';
+import { addDays } from '../bookings/bookings.service';
+import { zurichToday } from '../moves/moves.service';
 import { audit } from '../common/audit';
 import { TenantDb, type Tx } from '../db/tenant-db.service';
 import { StorageService } from '../storage/storage.service';
@@ -405,6 +407,30 @@ export class DemoService {
       .slice(0, Math.min(2, targets.length))
       .map((p, i) => ({ tenantId, planId: plan.id, personId: p.id, toSeatId: targets[i]!.id }));
     if (items.length) await tx.movePlanItem.createMany({ data: items });
+
+    // a few shared desks, booked by the day: two people without a desk have one today/tomorrow
+    const shared = targets.slice(items.length, items.length + 4);
+    if (shared.length) {
+      await tx.seat.updateMany({
+        where: { id: { in: shared.map((s) => s.id) } },
+        data: { shared: true },
+      });
+      const today = zurichToday();
+      const bookings = people.slice(19, 21).flatMap((p, i) =>
+        shared[i]
+          ? [
+              {
+                tenantId,
+                seatId: shared[i].id,
+                personId: p.id,
+                day: new Date(`${i === 0 ? today : addDays(today, 1)}T00:00:00Z`),
+                bookedById: p.id,
+              },
+            ]
+          : [],
+      );
+      if (bookings.length) await tx.deskBooking.createMany({ data: bookings });
+    }
 
     await audit(
       tx,

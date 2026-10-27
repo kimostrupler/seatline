@@ -7,7 +7,7 @@ export interface PlanItem {
 }
 
 export interface Seating {
-  seats: Map<string, { status: 'active' | 'blocked' }>;
+  seats: Map<string, { status: 'active' | 'blocked'; shared?: boolean }>;
   /** open assignments and reservations (one per seat, one per person) */
   open: Array<{
     id: string;
@@ -21,7 +21,7 @@ export interface Seating {
 
 /** Stops the plan from being applied. */
 export interface Problem {
-  code: 'seat_taken' | 'seat_blocked' | 'seat_double' | 'seat_missing';
+  code: 'seat_taken' | 'seat_blocked' | 'seat_shared' | 'seat_double' | 'seat_missing';
   personId: string;
   seatId: string;
   /** seat_taken: who sits there and isn't moving away */
@@ -83,6 +83,8 @@ export function checkPlan(seating: Seating, items: PlanItem[]): PlanCheck {
     }
     if (seat.status === 'blocked')
       problems.push({ code: 'seat_blocked', personId: m.personId, seatId });
+    // shared desks are booked by the day, nobody moves onto one for good
+    if (seat.shared) problems.push({ code: 'seat_shared', personId: m.personId, seatId });
     if ((wanted.get(seatId) ?? 0) > 1)
       problems.push({ code: 'seat_double', personId: m.personId, seatId });
     const there = onSeat.get(seatId);
@@ -111,7 +113,7 @@ export function checkPlan(seating: Seating, items: PlanItem[]): PlanCheck {
 export function placeTeam(input: {
   people: Array<{ id: string; displayName: string }>;
   /** seats of the target floor, in the order to fill them */
-  floorSeats: Array<{ id: string; status: 'active' | 'blocked' }>;
+  floorSeats: Array<{ id: string; status: 'active' | 'blocked'; shared?: boolean }>;
   seating: Seating;
   items: PlanItem[];
   floorSeatIds: Set<string>;
@@ -133,7 +135,9 @@ export function placeTeam(input: {
     else if (a.personId && whereAfter(a.personId) === a.seatId) taken.add(a.seatId);
   }
   for (const i of items) if (i.toSeatId) taken.add(i.toSeatId);
-  const free = input.floorSeats.filter((s) => s.status === 'active' && !taken.has(s.id));
+  const free = input.floorSeats.filter(
+    (s) => s.status === 'active' && !s.shared && !taken.has(s.id),
+  );
 
   const placed: PlanItem[] = [];
   const unplaced: string[] = [];

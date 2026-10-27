@@ -25,7 +25,9 @@ import { useRouter } from 'next/navigation';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
 import { useState, type ReactNode } from 'react';
 import { EntryRow, mergeRefs } from '@/components/activity/activity-page';
+import { useDayName } from '@/components/booking/day-picker';
 import { StatusDot } from '@/components/map/status-dot';
+import { zurichDay, type MyBooking } from '@/lib/bookings';
 import { OccupancyBar } from '@/components/overview/overview-page';
 import { Button } from '@/components/ui/button';
 import {
@@ -40,6 +42,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   useActivity,
   useFloorMap,
+  useMyBookings,
   useMe,
   useMovePlans,
   useOverview,
@@ -381,8 +384,11 @@ function MySeat() {
   const person = usePerson(me?.person.id).data;
   const seat = person?.assignments[0]?.seat;
   const map = useFloorMap(seat?.floorId).data;
+  const bookings = useMyBookings().data ?? [];
   if (!me || !person) return <Loading />;
-  if (!seat) return <Empty>{t('noSeatMine')}</Empty>;
+  // no desk of my own: the shared desks I booked
+  if (!seat)
+    return bookings.length ? <MyBookings bookings={bookings} /> : <Empty>{t('noSeatMine')}</Empty>;
   const mine = map?.seats.find((s) => s.id === seat.id);
   const neighbours = (map?.seats ?? [])
     .filter((s) => s.id !== seat.id && mine?.roomId && s.roomId === mine.roomId)
@@ -409,6 +415,31 @@ function MySeat() {
           <MapIcon /> {t('showMySeat')}
         </Link>
       </Button>
+    </div>
+  );
+}
+
+function MyBookings({ bookings }: { bookings: MyBooking[] }) {
+  const t = useTranslations('booking');
+  const dayName = useDayName(zurichDay());
+  return (
+    <div className="grid gap-2">
+      <p className="text-sm font-medium text-muted-foreground">{t('myTitle')}</p>
+      <ul className="grid gap-1.5">
+        {bookings.slice(0, 4).map((b) => (
+          <li key={b.id}>
+            <Link
+              className="flex items-baseline justify-between gap-3 rounded-md px-1 py-0.5 text-sm hover:bg-muted"
+              href={`${mapHref({ building: b.seat.floor.building.id, floor: b.seat.floor.id, seat: b.seatId })}&day=${b.day}`}
+            >
+              <span className="first-letter:uppercase">{dayName(b.day)}</span>
+              <span className="font-medium">
+                {b.seat.label} · {b.seat.floor.name}
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

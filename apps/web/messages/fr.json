@@ -101,7 +101,8 @@
         "title": "Rien ne peut mal tourner",
         "body": "Chaque changement affiche un message avec « Annuler ». Plusieurs déménagements à la fois ? Utilisez « Déménagements » dans le menu."
       }
-    }
+    },
+    "sharedSuffix": "(poste partagé)"
   },
   "seat": {
     "title": "Place {label}",
@@ -348,7 +349,10 @@
     "markerKind": "De quoi s’agit-il ?",
     "markerLabel": "Nom (facultatif)",
     "markerLabelHint": "p. ex. Cafétéria, Imprimante 2e étage",
-    "deleteMarker": "Supprimer le repère"
+    "deleteMarker": "Supprimer le repère",
+    "shared": "Poste partagé",
+    "sharedHint": "Réservé à la journée sur le plan ; personne n’y est assis en permanence.",
+    "sharedOccupied": "Libérez d’abord le poste : un poste partagé n’a pas de personne attitrée."
   },
   "auth": {
     "signInTitle": "Se connecter à Seatline",
@@ -818,7 +822,12 @@
       "teamRenamed": "a renommé l’équipe {old} en {team}",
       "teamDeleted": "a supprimé l’équipe {team}",
       "teamPlanSet": "prévoit {count} personnes dans {team}",
-      "teamPlanRemoved": "a supprimé la prévision d’effectif de {team}"
+      "teamPlanRemoved": "a supprimé la prévision d’effectif de {team}",
+      "seatShared": "a fait du poste {seat} un poste partagé",
+      "seatUnshared": "a refait du poste {seat} un poste fixe",
+      "deskBooked": "a réservé le poste {seat} pour {person} le {day}",
+      "bookingCancelled": "a annulé la réservation du poste {seat} de {person} le {day}",
+      "bookingCancelledLeft": "a annulé la réservation du poste {seat} de {person} le {day} (a quitté l’organisation)"
     },
     "showPlan": "Ouvrir le plan",
     "search": "Rechercher dans l’activité",
@@ -1045,7 +1054,8 @@
       "seat_blocked": "{person} → {seat} : la place est bloquée.",
       "seat_double": "{person} → {seat} : plusieurs personnes sont prévues pour cette place.",
       "seat_missing": "{person} : la place prévue a été supprimée.",
-      "no_moves": "Le plan ne contient plus de déménagement."
+      "no_moves": "Le plan ne contient plus de déménagement.",
+      "seat_shared": "{person} → {seat} : le poste est partagé (réservé à la journée)."
     },
     "notes": {
       "person_left": "{person} a quitté l’organisation – son déménagement est ignoré.",
@@ -1337,7 +1347,7 @@
       },
       "seat": {
         "title": "Attribuer les postes",
-        "body": "Glissez un nom sur un poste vert."
+        "body": "Glissez un nom sur un poste vert, ou laissez réserver des postes partagés à la journée."
       },
       "moves": {
         "title": "Planifier les déménagements",
@@ -1390,7 +1400,7 @@
         "focus": {
           "label": "Conçu pour",
           "usual": "Réserver des postes partagés",
-          "us": "Savoir qui est assis où"
+          "us": "Qui est assis où, et des postes partagés réservés à la journée"
         },
         "data": {
           "label": "Vos données",
@@ -1787,5 +1797,32 @@
     "microsoftHint": "Demandez à votre service informatique d’approuver Seatline (Personnes › Réglages).",
     "template": "Pas encore de liste ? Utilisez notre <link>modèle Excel gratuit</link>.",
     "later": "Voir d’abord le plan"
+  },
+  "booking": {
+    "today": "Aujourd’hui",
+    "tomorrow": "Demain",
+    "todayLower": "aujourd’hui",
+    "tomorrowLower": "demain",
+    "dayLabel": "Afficher les postes partagés pour",
+    "sharedDesk": "Poste partagé · réservable à la journée",
+    "sharedOn": "Poste partagé · {day}",
+    "free": "Libre",
+    "bookedBy": "Réservé par",
+    "you": "{name} (vous)",
+    "book": "Réserver pour {day}",
+    "bookFor": "Réserver pour quelqu’un",
+    "cancelMine": "Annuler ma réservation",
+    "cancel": "Annuler la réservation",
+    "booked": "Poste {label} réservé pour vous · {day}",
+    "bookedFor": "Poste {label} réservé pour {name} · {day}",
+    "cancelled": "Réservation du poste {label} annulée · {day}",
+    "error": {
+      "desk_booked": "Quelqu’un d’autre vient de réserver ce poste.",
+      "already_booked": "Vous avez déjà un poste ce jour-là.",
+      "day_out_of_range": "Les postes se réservent jusqu’à 4 semaines à l’avance.",
+      "not_bookable": "Ce poste ne peut pas être réservé."
+    },
+    "myTitle": "Mes réservations",
+    "none": "Aucun poste réservé."
   }
 }

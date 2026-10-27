@@ -8,6 +8,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { api, apiUpload } from './api';
+import type { Booking, MyBooking } from './bookings';
 import type {
   ActivityKind,
   ActivityPage,
@@ -49,6 +50,8 @@ export const keys = {
   movePlan: (id: string) => ['movePlan', id] as const,
   stats: ['stats'] as const,
   planning: ['planning'] as const,
+  bookings: (floorId: string, day: string) => ['bookings', floorId, day] as const,
+  myBookings: ['bookings', 'mine'] as const,
 };
 
 export interface ActivityFilters {
@@ -601,5 +604,36 @@ export function useBillingRedirect() {
       });
       window.location.assign(url);
     },
+  });
+}
+
+// ---- Desk booking ---------------------------------------------------------------
+
+/** Who booked which shared desk on a floor on `day` (only asked when the floor has some). */
+export const useBookings = (floorId: string | undefined, day: string, enabled: boolean) =>
+  useQuery({
+    queryKey: keys.bookings(floorId ?? '', day),
+    queryFn: () => api<Booking[]>(`/bookings?floorId=${floorId}&day=${day}`),
+    enabled: !!floorId && enabled,
+  });
+
+/** My bookings from today on. */
+export const useMyBookings = () =>
+  useQuery({ queryKey: keys.myBookings, queryFn: () => api<MyBooking[]>('/bookings/mine') });
+
+export function useBookDesk() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { seatId: string; day: string; personId?: string }) =>
+      api<Booking>('/bookings', { method: 'POST', body: input }),
+    onSettled: () => qc.invalidateQueries({ queryKey: ['bookings'] }),
+  });
+}
+
+export function useCancelBooking() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api<Booking>(`/bookings/${id}/cancel`, { method: 'POST' }),
+    onSettled: () => qc.invalidateQueries({ queryKey: ['bookings'] }),
   });
 }

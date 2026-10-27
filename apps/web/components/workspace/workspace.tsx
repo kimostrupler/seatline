@@ -9,8 +9,11 @@ import { ExportMenu } from '@/components/common/export-menu';
 import { MapTour } from '@/components/map/map-tour';
 import { PlanBar, PlanSeatPanel, usePlanEdits } from '@/components/moves/plan-mode';
 import { useRouter } from 'next/navigation';
+import { DayPicker } from '@/components/booking/day-picker';
+import { bookingDays, projectBookings, zurichDay } from '@/lib/bookings';
 import { projectFloor } from '@/lib/moves';
 import {
+  useBookings,
   useBuildings,
   useFloorMap,
   useFloors,
@@ -85,7 +88,17 @@ export function Workspace() {
     () => (plan && map.data ? projectFloor(map.data, plan.items) : null),
     [plan, map.data],
   );
-  const viewMap = map.data && projected ? { ...map.data, seats: projected.seats } : map.data;
+  // shared desks: who booked them on the chosen day (today unless picked), as if seated
+  const today = zurichDay();
+  const day = params.day && bookingDays(today).includes(params.day) ? params.day : today;
+  const hasShared = !!map.data?.seats.some((s) => s.shared);
+  const bookings = useBookings(floorId, day, hasShared && !editing && !plan);
+  const viewMap =
+    map.data && projected
+      ? { ...map.data, seats: projected.seats }
+      : map.data && bookings.data
+        ? { ...map.data, seats: projectBookings(map.data.seats, bookings.data) }
+        : map.data;
 
   const seats = useMemo(() => map.data?.seats ?? [], [map.data]);
   const selectedSeat = seats.find((s) => s.id === params.seat);
@@ -137,6 +150,13 @@ export function Workspace() {
   );
   const headerEnd = (
     <>
+      {hasShared && !editing && !plan && (
+        <DayPicker
+          today={today}
+          day={day}
+          onChange={(d) => update({ day: d === today ? null : d })}
+        />
+      )}
       {map.data && !editing && !plan && (
         <ExportMenu
           compact
@@ -190,6 +210,12 @@ export function Workspace() {
         actions={actions}
         onClose={() => update({ seat: null })}
         onSelectPerson={(id) => update({ person: id, seat: null })}
+        booking={{
+          day,
+          today,
+          current: bookings.data?.find((b) => b.seatId === selectedSeat.id),
+          meId: me.data?.person.id,
+        }}
       />
     ) : params.person ? (
       <PersonPanel

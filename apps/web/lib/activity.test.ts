@@ -81,6 +81,41 @@ group('activity sentences', () => {
     expect(removed).toMatchObject({ key: 'roomRemoved', values: { room: 'Old' } });
   });
 
+  it('bookings name the desk, the person and the day', () => {
+    const booked = describe(
+      entry({
+        action: 'booking.create',
+        after: { personId: 'p1', day: '2026-11-03', label: '1.01' },
+      }),
+      refs,
+      '?',
+    );
+    expect(booked).toMatchObject({
+      key: 'deskBooked',
+      values: { seat: '1.01', person: 'Anna Meier', day: '2026-11-03' },
+      link: { seat: 's1' },
+    });
+    expect(
+      describe(
+        entry({
+          action: 'booking.cancel',
+          actorId: null,
+          before: { personId: 'p1', day: '2026-11-03' },
+          after: { reason: 'left' },
+        }),
+        refs,
+        '?',
+      ).key,
+    ).toBe('bookingCancelledLeft');
+    expect(
+      describe(
+        entry({ action: 'seat.update', before: { shared: false }, after: { shared: true } }),
+        refs,
+        '?',
+      ).key,
+    ).toBe('seatShared');
+  });
+
   it('unknown names and actions still read sensibly', () => {
     expect(
       describe(

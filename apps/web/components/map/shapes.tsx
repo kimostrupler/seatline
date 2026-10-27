@@ -173,6 +173,22 @@ export function SeatDesk({
         dash={state === 'blocked' ? [5, 4] : undefined}
         strokeScaleEnabled={false}
       />
+      {/* shared desk (booked by the day): a dotted inner line, whatever its colour */}
+      {seat.shared && state !== 'blocked' && (
+        <Rect
+          x={-w / 2 + 3 * k}
+          y={-h / 2 + 3 * k}
+          width={w - 6 * k}
+          height={h - 6 * k}
+          cornerRadius={6 * k}
+          stroke={stroke}
+          strokeWidth={1}
+          dash={[2, 3]}
+          opacity={0.8}
+          strokeScaleEnabled={false}
+          listening={false}
+        />
+      )}
       {state === 'blocked' && (
         <Line
           points={[-10, -10, 10, 10, 0, 0, 10, -10, -10, 10].map((v) => v * k)}

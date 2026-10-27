@@ -118,9 +118,29 @@ export function describe(e: ActivityEntry, refs: ActivityRefs, unknownName: stri
               ? 'seatTurned'
               : changed('type')
                 ? 'seatTypeChanged'
-                : 'seatChanged';
+                : changed('shared')
+                  ? a.shared
+                    ? 'seatShared'
+                    : 'seatUnshared'
+                  : 'seatChanged';
       return { key, values, link: seatLink(e.entityId) };
     }
+    case 'booking.create':
+    case 'booking.cancel':
+      return {
+        key:
+          e.action === 'booking.create'
+            ? 'deskBooked'
+            : a.reason === 'left'
+              ? 'bookingCancelledLeft'
+              : 'bookingCancelled',
+        values: {
+          seat: seat(e.entityId, e.action === 'booking.create' ? a : b),
+          person: person(pick('personId')),
+          day: pick('day') ?? '',
+        },
+        link: seatLink(e.entityId),
+      };
     case 'seat.room':
       return {
         key: 'seatRoom',

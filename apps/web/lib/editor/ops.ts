@@ -45,7 +45,7 @@ export function isEmpty(c: Changes): boolean {
 }
 
 const ROOM_KEYS = ['name', 'type', 'polygon', 'capacity', 'equipment', 'team'] as const;
-const SEAT_KEYS = ['label', 'x', 'y', 'rotation', 'type', 'status', 'features'] as const;
+const SEAT_KEYS = ['label', 'x', 'y', 'rotation', 'type', 'status', 'features', 'shared'] as const;
 const MARKER_KEYS = ['kind', 'x', 'y', 'label'] as const;
 
 export const toLayoutRoom = (r: Room): LayoutRoom => ({
@@ -67,6 +67,7 @@ export const toLayoutSeat = (s: Seat): LayoutSeat => ({
   type: s.type,
   status: s.status,
   ...(s.features !== undefined && { features: s.features }),
+  ...(s.shared !== undefined && { shared: s.shared }),
 });
 export const toLayoutMarker = (m: Marker): LayoutMarker => ({
   id: m.id,

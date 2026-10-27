@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import type { AppRole, Prisma } from '@prisma/client';
+import { cancelFutureBookings } from '../bookings/booking-guards';
 import { audit } from '../common/audit';
 import { TenantDb } from '../db/tenant-db.service';
 import type { Notice } from '../mail/notices';
@@ -224,6 +225,8 @@ export class PeopleSyncService {
         },
       );
     }
+
+    await cancelFutureBookings(tx, { tenantId, actorId: null }, deactivated);
 
     const counts = {
       created: created.length,

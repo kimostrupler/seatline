@@ -409,6 +409,30 @@ Clean and light, similar to Linear / Notion — not like classic facility softwa
   of small buttons. A newly added widget is scrolled into view and highlighted, plus a toast.
 - The `/api` proxy must export every HTTP method the API uses (PUT was missing once).
 
+## Desk booking (shared desks)
+
+- `seats.shared` (migration `20261103090000_desk_booking`): a shared desk has no permanent person
+  (assignments → 409 `shared_desk`, move plans → problem `seat_shared`, `placeTeam` skips it,
+  drag and drop refuses it). Turned on in the editor inspector (**Shared desk** switch, part of the
+  layout batch; `SEAT_KEYS` in ops.ts) or `PATCH /seats/:id`; refused while someone sits there.
+- `desk_bookings` (seat, person, `day` DATE, `booked_by`, `cancelled_at/by`): one per desk per
+  day and one per person per day (partial unique indexes, cancelled excluded). RLS like
+  everything; the app role has no DELETE: cancelling keeps the row, `purge_history` removes old
+  ones, `delete_tenant`/`purge_demo_tenants` include the table. Audits `booking.create` /
+  `booking.cancel` (described in `lib/activity.ts`).
+- API `bookings/` (`@OwnSettings` writes: viewers book and cancel their own; editors/admins also
+  for others): `GET /bookings?floorId=&day=`, `GET /bookings/mine`, `POST /bookings`,
+  `POST /bookings/:id/cancel`. Days: today … `BOOKING_DAYS_AHEAD` (28, `packages/shared/src/booking.ts`)
+  in Zurich time. `guardBookings` (`bookings/booking-guards.ts`): desks with bookings can't be
+  deleted, desks with coming bookings can't be unshared or blocked (409 `has_bookings`);
+  `cancelFutureBookings` runs when people leave (manual leave and the people sync).
+- Web: `?day=` on the map (`DayPicker`, working days only; shown when the floor has shared desks);
+  `projectBookings` (`lib/bookings.ts`, unit-tested) turns bookings into seating so colours, the
+  accessible list and the legend just work; shared desks get a dotted inner line (`shapes.tsx`)
+  and "(shared desk)" in the seat list. Seat panel → `BookingCard` (Book / Book for someone /
+  Cancel, toast with Undo). Home's **My seat** lists my bookings when I have no fixed desk.
+  The demo office has 4 shared desks with two bookings. e2e: `e2e/booking.spec.ts`.
+
 ## Move plans (planned moves)
 
 - `move_plans` + `move_plan_items` (person → seat, or null = gives up the seat). Editors/admins

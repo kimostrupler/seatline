@@ -22,7 +22,7 @@ export const OPERATOR = {
 };
 
 /** Date of the current legal texts (YYYY-MM-DD). Change it whenever a text changes. */
-export const LEGAL_UPDATED = '2026-10-24';
+export const LEGAL_UPDATED = '2026-10-27';
 
 /** The operator's details in a legal text's {name}, {address} and {email}. */
 export const fillLegal = (text: string) =>
