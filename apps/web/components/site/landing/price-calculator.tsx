@@ -66,7 +66,7 @@ export function PriceCalculator() {
 
   return (
     <div
-      className="mx-auto mt-6 grid max-w-xl gap-6 rounded-3xl border bg-card p-6 shadow-xl shadow-black/5 sm:p-8"
+      className="grid gap-6 rounded-3xl border bg-card p-6 shadow-xl shadow-black/5 sm:p-8"
       data-reveal
       style={{ '--i': 1 } as React.CSSProperties}
     >
