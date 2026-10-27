@@ -8,6 +8,7 @@ import { OPERATOR } from '@/lib/legal/operator';
 import { LANGUAGES, LANGUAGE_NAMES, type Language } from '@/lib/locales';
 import { helpPath } from '@/lib/help';
 import { TEMPLATE, templatePath } from '@/lib/help/template';
+import { updatesPath } from '@/lib/updates/path';
 import { SITE_LANGUAGE_PATHS } from '@/lib/site';
 import { SiteBeacon } from './site-beacon';
 import { looksSignedIn } from '@/lib/server/auth';
@@ -67,6 +68,11 @@ export async function SiteHeader({
           <Logo className="size-7" />
           Seatline
         </Link>
+        <Button asChild variant="ghost" size="sm" className="max-sm:hidden">
+          <Link href={updatesPath((await getLocale()).slice(0, 2) as Language)}>
+            {t('navUpdates')}
+          </Link>
+        </Button>
         <Button asChild variant="ghost" size="sm">
           <Link href={helpPath((await getLocale()).slice(0, 2) as Language)}>{t('navHelp')}</Link>
         </Button>
@@ -100,6 +106,9 @@ export async function SiteFooter() {
         </a>
         <a className="hover:text-foreground" href={templatePath(language)}>
           {TEMPLATE[language].title}
+        </a>
+        <a className="hover:text-foreground" href={updatesPath(language)}>
+          {t('site.navUpdates')}
         </a>
         <nav
           aria-label={t('legal.legalLinks')}

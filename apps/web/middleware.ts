@@ -37,8 +37,8 @@ async function route(req: NextRequest, csp: string) {
     headers.set(PAGE_LANGUAGE_HEADER, pathname.slice(1));
     return NextResponse.rewrite(new URL('/welcome', req.url), { request: { headers } });
   }
-  // the help center's address says its language (/help/de/…): header and footer follow it
-  const pageLanguage = /^\/help\/(en|de|fr)(\/|$)/.exec(pathname)?.[1];
+  // the help center's and updates' address says its language (/help/de/…): header and footer follow it
+  const pageLanguage = /^\/(?:help|updates)\/(en|de|fr)(\/|$)/.exec(pathname)?.[1];
   if (pageLanguage) headers.set(PAGE_LANGUAGE_HEADER, pageLanguage);
   const next = () => NextResponse.next({ request: { headers } });
   if (siteHosts(appUrl).includes(host)) {

@@ -5,6 +5,7 @@ import { HELP_TOPICS, helpAlternates, helpPath } from '@/lib/help';
 import { templatePath } from '@/lib/help/template';
 import { videoPath } from '@/lib/help/video';
 import { languageAlternates } from '@/lib/seo';
+import { POSTS, updatesPath } from '@/lib/updates';
 import { siteUrl, SITE_LANGUAGE_PATHS } from '@/lib/site';
 
 // built per request: APP_URL is only known at runtime (a build-time sitemap said localhost)
@@ -29,6 +30,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
         alternates: { languages: helpAlternates(base, topic) },
       })),
     ),
+    ...(['en', 'de', 'fr'] as const).map((language) => ({
+      url: `${base}${updatesPath(language)}`,
+      lastModified: POSTS[0]?.date,
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+      alternates: {
+        languages: Object.fromEntries(
+          (['en', 'de', 'fr'] as const).map((l) => [l, `${base}${updatesPath(l)}`]),
+        ),
+      },
+    })),
     ...[templatePath, videoPath].flatMap((path) =>
       (['en', 'de', 'fr'] as const).map((language) => ({
         url: `${base}${path(language)}`,

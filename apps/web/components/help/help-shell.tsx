@@ -9,6 +9,7 @@ import {
   MousePointerClick,
   PencilRuler,
   Rocket,
+  Sparkles,
   ShieldCheck,
   UserCog,
   Users,
@@ -20,6 +21,7 @@ import { SitePage } from '@/components/site/site-chrome';
 import { HELP, HELP_TOPICS, helpPath, type HelpTopicId } from '@/lib/help';
 import { TEMPLATE, templatePath } from '@/lib/help/template';
 import { VIDEO, videoPath } from '@/lib/help/video';
+import { UPDATES_PAGE, updatesPath } from '@/lib/updates';
 import type { Language } from '@/lib/locales';
 import { OPERATOR } from '@/lib/legal/operator';
 import { cn } from '@/lib/utils';
@@ -85,6 +87,13 @@ export async function HelpShell({
             >
               <Clapperboard className="size-4 shrink-0" aria-hidden />
               {VIDEO[language].short}
+            </a>
+            <a
+              href={updatesPath(language)}
+              className="-mt-2 mb-2 flex items-center gap-2 rounded-md px-2 py-1.5 font-medium text-primary hover:bg-muted"
+            >
+              <Sparkles className="size-4 shrink-0" aria-hidden />
+              {UPDATES_PAGE[language].title}
             </a>
             {HELP_TOPICS.map((id) => {
               const Icon = TOPIC_ICONS[id];

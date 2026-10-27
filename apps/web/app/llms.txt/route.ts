@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { HELP, HELP_TOPICS, helpPath } from '@/lib/help';
 import { TEMPLATE, templatePath } from '@/lib/help/template';
 import { VIDEO, videoPath } from '@/lib/help/video';
+import { POSTS, updatesPath } from '@/lib/updates';
 import { webConfig } from '@/lib/server/config';
 import { SITE_PRICE_CHF, SITE_VOLUME_PRICE_CHF, siteUrl } from '@/lib/site';
 
@@ -41,6 +42,17 @@ ${HELP_TOPICS.map((t) => `- [${HELP.en.topics[t].title}](${base}${helpPath('en',
 ## Video tour
 
 - [${VIDEO.en.title}](${base}${videoPath('en')}): ${VIDEO.en.intro} ${VIDEO.en.spoken} The page has chapters and the whole text. (Also with [German](${base}${videoPath('de')}) and [French](${base}${videoPath('fr')}) subtitles.)
+
+## What's new (latest first)
+
+${POSTS.slice(0, 5)
+  .map(
+    (p) =>
+      `- ${p.date}: [${p.text.en.title}](${base}${updatesPath('en', p.slug)}): ${p.text.en.summary}`,
+  )
+  .join('\n')}
+
+All updates: ${base}${updatesPath('en')}
 
 ## Free download
 

@@ -44,6 +44,9 @@ export function isPublicPath(pathname: string): boolean {
     pathname === '/help' ||
     pathname.startsWith('/help/') ||
     pathname.startsWith('/help-img/') ||
+    pathname === '/updates' ||
+    pathname.startsWith('/updates/') ||
+    pathname.startsWith('/updates-img/') ||
     pathname.startsWith('/site-img/') ||
     pathname.startsWith('/site-video/') ||
     pathname.startsWith('/templates/') ||
