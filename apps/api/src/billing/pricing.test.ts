@@ -1,4 +1,4 @@
-import { monthlyPrice } from '@seatline/shared/dist/pricing';
+import { monthlyPrice, typicalToolPrice } from '@seatline/shared/dist/pricing';
 import { describe, expect, it } from 'vitest';
 
 describe('monthlyPrice (graduated)', () => {
@@ -17,5 +17,16 @@ describe('monthlyPrice (graduated)', () => {
 
   it('a flat price is one tier', () => {
     expect(monthlyPrice(7, [{ upTo: null, amount: 3 }])).toBe(21);
+  });
+});
+
+describe('typicalToolPrice (landing page comparison)', () => {
+  it('2.50–5 per desk, at least 25 users', () => {
+    expect(typicalToolPrice(30)).toEqual({ low: 75, high: 150 });
+    expect(typicalToolPrice(5)).toEqual({ low: 62.5, high: 125 });
+  });
+
+  it('Seatline is never dearer than the low end', () => {
+    for (let n = 1; n < 2000; n++) expect(monthlyPrice(n)).toBeLessThan(typicalToolPrice(n).low);
   });
 });

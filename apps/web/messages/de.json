@@ -1422,7 +1422,11 @@
       "restHint": "Ab dem {from}. Platz: je {price}",
       "average": "pro Platz im Schnitt",
       "perYear": "pro Jahr",
-      "saving": "Dank Mengenpreis jeden Monat {price} weniger"
+      "saving": "Dank Mengenpreis jeden Monat {price} weniger",
+      "othersTitle": "Übliche Arbeitsplatz-Tools",
+      "others": "etwa {low}–{high} pro Monat für {desks} Plätze",
+      "othersSaving": "Mit Seatline jeden Monat mindestens {price} weniger",
+      "othersNote": "Öffentliche Listenpreise üblicher Arbeitsplatz- und Desk-Tools (Oktober 2026), oft mit mindestens 25 Benutzern. Tatsächliche Angebote können abweichen."
     },
     "navUpdates": "Neuigkeiten"
   },

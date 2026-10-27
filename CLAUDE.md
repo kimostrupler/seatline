@@ -536,7 +536,7 @@ folded`) so the person and the actions stand out.
   made by help-screenshots.spec.ts) → six short feature items (`site.features`, each opens its help topic) → 4 steps →
   `NoticeDemo` (short: one line, DE/FR/EN switch, the IT e-mail's subject + moves, worded like `notices.ts` via `lib/site/notice-sample.ts` — keep in
   step) → price card + `PriceCalculator` (desks in → monthly price by tier, counting-up total, tier bar;
-  `monthlyPrice` from packages/shared, texts `site.calc`) → FAQ as fold-outs → blue closing band → footer ("Zürich, Switzerland" + local
+  `monthlyPrice` from packages/shared, texts `site.calc`; under it an anonymous range of typical tools' public list prices, `typicalToolPrice`, sources + date in its comment — re-check yearly, never name them) → FAQ as fold-outs → blue closing band → footer ("Zürich, Switzerland" + local
   time). The live parts get only `site.live`/`site.notice`/`site.calc` via a nested `NextIntlClientProvider`.
 - Landing page `app/welcome` + `app/legal/[doc]` (terms, privacy, imprint) are public. The
   site domain = parent of the app's `APP_URL` host (`siteHosts` in `lib/site.ts`): there `/`

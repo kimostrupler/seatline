@@ -179,6 +179,9 @@ test('the price calculator adds up the two tiers', async ({ page }) => {
   await expect(
     page.getByText('CHF 50.50 less every month thanks to the volume price'),
   ).toBeVisible();
+  // typical tools' list prices for the same desks, never named
+  await expect(page.getByText('about CHF 250.00–CHF 500.00 per month for 100 desks')).toBeVisible();
+  await expect(page.getByText('With Seatline at least CHF 100.50 less every month')).toBeVisible();
   await page.getByRole('button', { name: 'One desk fewer' }).click();
   await expect(desks).toHaveValue('99');
   if (process.env.CALC_SHOTS) {

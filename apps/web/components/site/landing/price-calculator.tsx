@@ -1,6 +1,6 @@
 'use client';
 
-import { monthlyPrice, PRICE_TIERS } from '@seatline/shared/dist/pricing';
+import { monthlyPrice, PRICE_TIERS, typicalToolPrice } from '@seatline/shared/dist/pricing';
 import { Minus, Plus } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useEffect, useId, useRef, useState } from 'react';
@@ -61,6 +61,8 @@ export function PriceCalculator() {
   const chf = (n: number) =>
     format.number(n, { style: 'currency', currency: 'CHF', minimumFractionDigits: 2 });
   const saving = Math.round((desks * FIRST.amount - total) * 100) / 100;
+  const others = typicalToolPrice(desks);
+  const lessThanOthers = Math.round((others.low - total) * 100) / 100;
 
   return (
     <div
@@ -192,6 +194,28 @@ export function PriceCalculator() {
           {t('saving', { price: chf(saving) })}
         </p>
       )}
+
+      {/* typical tools' list prices for the same desks (never named): a range bar against ours */}
+      <div className="grid gap-2 border-t pt-4 text-sm">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+          <p className="font-medium">{t('othersTitle')}</p>
+          <p className="text-muted-foreground tabular-nums">
+            {t('others', { low: chf(others.low), high: chf(others.high), desks })}
+          </p>
+        </div>
+        <div className="relative h-3 rounded-full bg-muted" aria-hidden>
+          <div
+            className="absolute inset-y-0 rounded-full bg-muted-foreground/35 transition-[left,width] duration-500 ease-out"
+            style={{ left: `${(others.low / others.high) * 100}%`, right: 0 }}
+          />
+          <div
+            className="absolute inset-y-0 left-0 rounded-full bg-primary transition-[width] duration-500 ease-out"
+            style={{ width: `${(total / others.high) * 100}%` }}
+          />
+        </div>
+        <p className="font-medium">{t('othersSaving', { price: chf(lessThanOthers) })}</p>
+        <p className="text-xs text-muted-foreground">{t('othersNote')}</p>
+      </div>
     </div>
   );
 }
