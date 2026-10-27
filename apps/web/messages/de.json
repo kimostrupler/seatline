@@ -1398,7 +1398,21 @@
         }
       }
     },
-    "priceVolume": "Ab dem 51. Platz: CHF 0.99"
+    "priceVolume": "Ab dem 51. Platz: CHF 0.99",
+    "calc": {
+      "title": "Was kostet es Sie?",
+      "lead": "Geben Sie Ihre Anzahl Plätze ein. Gesperrte Plätze sind gratis.",
+      "desks": "Anzahl Plätze",
+      "fewer": "Ein Platz weniger",
+      "more": "Ein Platz mehr",
+      "total": "{desks} Plätze kosten {price} pro Monat",
+      "perMonth": "pro Monat",
+      "tier": "{count} × {price}",
+      "restHint": "Ab dem {from}. Platz: je {price}",
+      "average": "pro Platz im Schnitt",
+      "perYear": "pro Jahr",
+      "saving": "Dank Mengenpreis jeden Monat {price} weniger"
+    }
   },
   "planImport": {
     "title": "Architektenplan importieren",

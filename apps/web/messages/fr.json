@@ -1398,7 +1398,21 @@
         }
       }
     },
-    "priceVolume": "Dès le 51e poste : CHF 0.99"
+    "priceVolume": "Dès le 51e poste : CHF 0.99",
+    "calc": {
+      "title": "Combien cela vous coûterait-il ?",
+      "lead": "Indiquez votre nombre de postes. Les postes bloqués sont gratuits.",
+      "desks": "Nombre de postes",
+      "fewer": "Un poste de moins",
+      "more": "Un poste de plus",
+      "total": "{desks} postes coûtent {price} par mois",
+      "perMonth": "par mois",
+      "tier": "{count} × {price}",
+      "restHint": "Dès le {from}e poste : {price} chacun",
+      "average": "par poste en moyenne",
+      "perYear": "par an",
+      "saving": "{price} de moins chaque mois grâce au prix de volume"
+    }
   },
   "planImport": {
     "title": "Importer un plan d’architecte",

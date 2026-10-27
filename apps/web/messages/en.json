@@ -1398,7 +1398,21 @@
         }
       }
     },
-    "priceVolume": "From the 51st desk: CHF 0.99"
+    "priceVolume": "From the 51st desk: CHF 0.99",
+    "calc": {
+      "title": "What would it cost you?",
+      "lead": "Enter your number of desks. Blocked desks are free.",
+      "desks": "Number of desks",
+      "fewer": "One desk fewer",
+      "more": "One desk more",
+      "total": "{desks} desks cost {price} per month",
+      "perMonth": "per month",
+      "tier": "{count} × {price}",
+      "restHint": "From desk {from}: {price} each",
+      "average": "per desk on average",
+      "perYear": "per year",
+      "saving": "{price} less every month thanks to the volume price"
+    }
   },
   "planImport": {
     "title": "Import an architect plan",

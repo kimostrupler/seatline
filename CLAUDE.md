@@ -511,8 +511,9 @@ folded`) so the person and the actions stand out.
   three parts with phone pictures (`public/site-img/<lang>/`,
   made by help-screenshots.spec.ts) → six short feature items (`site.features`, each opens its help topic) → 4 steps →
   `NoticeDemo` (short: one line, DE/FR/EN switch, the IT e-mail's subject + moves, worded like `notices.ts` via `lib/site/notice-sample.ts` — keep in
-  step) → price card → FAQ as fold-outs → blue closing band → footer ("Zürich, Switzerland" + local
-  time). The live parts get only `site.live`/`site.notice` via a nested `NextIntlClientProvider`.
+  step) → price card + `PriceCalculator` (desks in → monthly price by tier, counting-up total, tier bar;
+  `monthlyPrice` from packages/shared, texts `site.calc`) → FAQ as fold-outs → blue closing band → footer ("Zürich, Switzerland" + local
+  time). The live parts get only `site.live`/`site.notice`/`site.calc` via a nested `NextIntlClientProvider`.
 - Landing page `app/welcome` + `app/legal/[doc]` (terms, privacy, imprint) are public. The
   site domain = parent of the app's `APP_URL` host (`siteHosts` in `lib/site.ts`): there `/`
   rewrites to `/welcome`, other paths redirect to the app. robots: index the site, never the app.

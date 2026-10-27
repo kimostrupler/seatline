@@ -167,3 +167,34 @@ test('short links for e-mails open the promo video; the e-mail pictures are onli
   for (const file of ['seatline-video.jpg', 'seatline-video.gif'])
     expect((await request.get(`/site-video/email/${file}`)).ok()).toBe(true);
 });
+
+test('the price calculator adds up the two tiers', async ({ page }) => {
+  await page.goto('/welcome#pricing');
+  const desks = page.getByRole('textbox', { name: 'Number of desks' });
+  await expect(desks).toHaveValue('30');
+  await expect(page.getByText('30 desks cost CHF 60.00 per month')).toBeAttached();
+  await desks.fill('100');
+  await expect(page.getByText('100 desks cost CHF 149.50 per month')).toBeAttached();
+  await expect(page.getByText('50 × CHF 0.99')).toBeVisible();
+  await expect(
+    page.getByText('CHF 50.50 less every month thanks to the volume price'),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'One desk fewer' }).click();
+  await expect(desks).toHaveValue('99');
+  if (process.env.CALC_SHOTS) {
+    const card = page
+      .getByRole('heading', { name: 'What would it cost you?' })
+      .locator('..')
+      .locator('..');
+    await page.waitForTimeout(700);
+    await card.screenshot({ path: `${process.env.CALC_SHOTS}/calc-light.png` });
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await desks.fill('20');
+    await page.waitForTimeout(700);
+    await card.screenshot({ path: `${process.env.CALC_SHOTS}/calc-dark-20.png` });
+    await page.setViewportSize({ width: 390, height: 900 });
+    await desks.fill('240');
+    await page.waitForTimeout(700);
+    await card.screenshot({ path: `${process.env.CALC_SHOTS}/calc-phone.png` });
+  }
+});
