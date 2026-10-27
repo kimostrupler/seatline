@@ -48,7 +48,7 @@ const STRIPE_STATUSES = [
 type StripeStatus = (typeof STRIPE_STATUSES)[number];
 const isStripeStatus = (s: string): s is StripeStatus =>
   (STRIPE_STATUSES as readonly string[]).includes(s);
-type Stripe = Exclude<OwnerOverview['stripe'], null | { error: 'unavailable' }>;
+type Stripe = Exclude<OwnerOverview['stripe'], null | { error: 'unavailable'; detail?: string }>;
 type Azure = Exclude<OwnerOverview['azure'], null | { error: 'unavailable'; detail?: string }>;
 
 /** The operator's dashboard: sign-ups, workspaces, Stripe and Azure, refreshed every 30 s. */
@@ -228,6 +228,11 @@ function StripePanel({ stripe }: { stripe: OwnerOverview['stripe'] }) {
     return (
       <Panel title="Stripe">
         <p className="text-sm text-destructive">{t('stripe.error')}</p>
+        {stripe.detail && (
+          <p className="mt-2 font-mono text-xs break-words text-muted-foreground">
+            {stripe.detail}
+          </p>
+        )}
       </Panel>
     );
   const s: Stripe = stripe;
