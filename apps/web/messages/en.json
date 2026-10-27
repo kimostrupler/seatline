@@ -1762,6 +1762,16 @@
         "more": "At most {max} per click: click again for the rest.",
         "done": "{count, plural, =0 {Nothing sent} one {# e-mail sent} other {# e-mails sent}}",
         "failed": "Not sent: {names}"
+      },
+      "writeAll": {
+        "open": "Write all one by one ({count})",
+        "title": "Write all e-mails",
+        "progress": "{n} of {total}",
+        "skip": "Skip",
+        "scheduleRest": "Schedule the rest as they are ({count})",
+        "scheduleRestConfirm": "Schedule the filled-in e-mail for every ready lead you haven’t written yet ({count}), without reading each one? Leads whose template isn’t complete are skipped. They go out {when}; until then you can still change or stop each one.",
+        "scheduled": "{count, plural, =0 {Nothing scheduled} one {# e-mail scheduled} other {# e-mails scheduled}}",
+        "done": "All written. They go out {when}; until then you can still change or stop each one."
       }
     }
   },

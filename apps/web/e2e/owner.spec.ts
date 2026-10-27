@@ -78,6 +78,8 @@ test('outreach leads: one personal e-mail, scheduled for the morning', async ({ 
 
 test('researched leads come in from a file and wait under To do', async ({ page }) => {
   await page.goto('/owner/leads');
+  // wait for the page to be ready before handing it the file
+  await expect(page.getByRole('group', { name: 'Where each lead is' })).toBeVisible();
   const leads = [
     {
       company: 'Muster AG',
@@ -133,5 +135,45 @@ test('leads sit in one tab per step; "send all" writes and sends to every ready 
   await expect(page.getByText('2 e-mails sent')).toBeVisible();
   await expect(page.getByText('No leads at this step.')).toBeVisible();
   await tabs.getByRole('button', { name: /^Waiting for an answer/ }).click();
+  await expect(page.getByTestId('leads')).toContainText('Beta AG');
+});
+
+test('write all: each ready lead’s e-mail one after the other, then schedule the rest', async ({
+  page,
+}) => {
+  await page.goto('/owner/leads');
+  await expect(page.getByRole('group', { name: 'Where each lead is' })).toBeVisible();
+  const leads = ['Alpha', 'Beta', 'Gamma'].map((name) => ({
+    company: `${name} AG`,
+    greeting: 'Frau Muster',
+    contactEmail: `it@${name.toLowerCase()}.example`,
+    whyNow: 'Ich habe gelesen, dass Sie umziehen.',
+  }));
+  await page.locator('input[type=file]').setInputFiles({
+    name: 'leads.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(leads)),
+  });
+  await expect(page.getByText('3 leads added')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Write all one by one (3)' }).click();
+  const sheet = page.getByRole('dialog');
+  await expect(sheet.getByText('1 of 3')).toBeVisible();
+  const body = sheet.getByLabel('Message');
+  await expect(body).toHaveValue(/Frau Muster/);
+  await body.fill(`${await body.inputValue()}\nPS: Persönlich ergänzt.`);
+  await sheet.getByRole('button', { name: 'Schedule', exact: true }).click();
+  await expect(sheet.getByText('2 of 3')).toBeVisible();
+  await sheet.getByRole('button', { name: 'Skip' }).click();
+  await expect(sheet.getByText('3 of 3')).toBeVisible();
+  // the skipped one and this one: both still waiting
+  await sheet.getByRole('button', { name: 'Schedule the rest as they are (2)' }).click();
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Schedule' }).click();
+  await expect(page.getByText('2 e-mails scheduled')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await page
+    .getByRole('group', { name: 'Where each lead is' })
+    .getByRole('button', { name: /^Scheduled 3/ })
+    .click();
   await expect(page.getByTestId('leads')).toContainText('Beta AG');
 });

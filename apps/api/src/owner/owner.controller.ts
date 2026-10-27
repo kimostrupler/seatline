@@ -98,7 +98,14 @@ export class OwnerController {
   @Post('leads/send-ready')
   async sendAllReady(@Ctx() ctx: RequestContext) {
     await this.owner.assertOwner(ctx, '/owner/leads/send-ready');
-    return this.leads.sendAllReady(ctx);
+    return this.leads.writeAllReady(ctx, true);
+  }
+
+  /** The filled-in first e-mail to every ready e-mail lead, scheduled for the next send slot. */
+  @Post('leads/schedule-ready')
+  async scheduleAllReady(@Ctx() ctx: RequestContext) {
+    await this.owner.assertOwner(ctx, '/owner/leads/schedule-ready');
+    return this.leads.writeAllReady(ctx, false);
   }
 
   @Get('leads/:id')

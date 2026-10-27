@@ -361,36 +361,37 @@ export class LeadsService {
         include: { lead: { include: { messages: { where: { kind: 'first' } } } } },
       }),
     );
-    let sent = 0;
+    let done = 0;
     const failed: string[] = [];
     for (const message of waiting)
-      if (await this.deliver(ctx, message, now)) sent++;
+      if (await this.deliver(ctx, message, now)) done++;
       else failed.push(message.lead.company);
-    return { sent, failed };
+    return { done, failed };
   }
 
   /**
-   * "Write and send to all ready": the filled-in template goes to every e-mail lead still
-   * waiting for its first e-mail. Leads whose template isn't complete (a placeholder, no
-   * reason) are skipped, so nothing half-written goes out.
+   * "Write and send to all ready" (or schedule, `sendNow` false): the filled-in template for
+   * every e-mail lead still waiting for its first e-mail. Leads whose template isn't complete
+   * (a placeholder, no reason) are skipped, so nothing half-written goes out.
    */
-  async sendAllReady(ctx: RequestContext, now = new Date()) {
-    this.assertMail();
+  async writeAllReady(ctx: RequestContext, sendNow: boolean, now = new Date()) {
+    if (sendNow) this.assertMail();
     const { leads } = await this.list(ctx, now);
     const ready = leads
       .filter((l) => l.nextStep === 'write_first' && l.channel === 'email')
-      .slice(0, SEND_ALL_MAX);
-    let sent = 0;
+      // sending waits on SMTP for each one; scheduling is only a database row
+      .slice(0, sendNow ? SEND_ALL_MAX : undefined);
+    let done = 0;
     const failed: string[] = [];
     for (const lead of ready)
       try {
         const draft = await this.draft(ctx, lead.id, 'first');
-        await this.schedule(ctx, lead.id, { kind: 'first', ...draft, sendNow: true }, now);
-        sent++;
+        await this.schedule(ctx, lead.id, { kind: 'first', ...draft, sendNow }, now);
+        done++;
       } catch {
         failed.push(lead.company);
       }
-    return { sent, failed };
+    return { done, failed };
   }
 
   private assertMail() {
