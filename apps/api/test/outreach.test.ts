@@ -361,7 +361,7 @@ describe('outreach (owner leads)', () => {
     // the page asks on opening; only the operator may
     await api(app).post('/owner/leads/check-replies').set(b.headers).expect(404);
     const res = await api(app).post('/owner/leads/check-replies').set(a.headers).expect(201);
-    expect(res.body).toEqual({ replied: 0, autoReplies: 1 });
+    expect(res.body).toEqual({ replied: 0, declined: 0, autoReplies: 1 });
     const got = (await api(app).get(`/owner/leads/${id}`).set(a.headers)).body;
     expect(got).toMatchObject({
       status: 'sent',
@@ -424,5 +424,105 @@ describe('outreach (owner leads)', () => {
         text: 'Gerne, rufen Sie mich an.',
       }),
     ]);
+  });
+
+  it('size and tags give a fit; a clear "no" moves the lead to "no"; then one thank-you asking why', async () => {
+    const leads = app.get(LeadsService);
+    const send = async (company: string, email: string) => {
+      const res = await api(app)
+        .post('/owner/leads')
+        .set(a.headers)
+        .send({
+          ...lead,
+          company,
+          contactEmail: email,
+          contactName: 'Anna Muster',
+          employees: 120,
+          tags: ['moving', 'hybrid'],
+        })
+        .expect(201);
+      const id = res.body.id as string;
+      const draft = await api(app).get(`/owner/leads/${id}/draft?kind=first`).set(a.headers);
+      const sent = await api(app)
+        .post(`/owner/leads/${id}/messages`)
+        .set(a.headers)
+        .send({ kind: 'first', ...draft.body, sendNow: true })
+        .expect(201);
+      return { id, messageId: sent.body.messageId as string, body: draft.body.body as string };
+    };
+    const no = await send('Nein AG', 'anna@nein.ch');
+    const yes = await send('Ja AG', 'anna@ja.ch');
+    const list = (await api(app).get('/owner/leads').set(a.headers)).body.leads;
+    expect(list.find((l: { id: string }) => l.id === no.id)).toMatchObject({
+      employees: 120,
+      tags: ['moving', 'hybrid'],
+      fit: 'good',
+    });
+    // tags must be known ones
+    await api(app)
+      .patch(`/owner/leads/${no.id}`)
+      .set(a.headers)
+      .send({ tags: ['huge'] })
+      .expect(400);
+
+    await mkdir(inbox(), { recursive: true });
+    const at = new Date(Date.now() + 60_000).toISOString();
+    const quote = (body: string) =>
+      body
+        .split('\n')
+        .map((l) => `> ${l}`)
+        .join('\n');
+    await writeFile(
+      join(inbox(), 'no.json'),
+      JSON.stringify({
+        from: 'anna@nein.ch',
+        date: at,
+        inReplyTo: no.messageId,
+        subject: 'AW: Wer sitzt wo?',
+        text: `Danke, aber wir haben kein Interesse.\n\n${quote(no.body)}`,
+      }),
+    );
+    // a yes that quotes our "Ein kurzes Nein danke genügt" stays a plain reply
+    await writeFile(
+      join(inbox(), 'yes.json'),
+      JSON.stringify({
+        from: 'anna@ja.ch',
+        date: at,
+        inReplyTo: yes.messageId,
+        subject: 'AW: Wer sitzt wo?',
+        text: `Spannend, rufen Sie mich an.\n${quote(yes.body)}`,
+      }),
+    );
+    expect(await leads.runOutreach(a.tenantId, new Date(Date.now() + 120_000))).toMatchObject({
+      replied: 1,
+      declined: 1,
+    });
+    const status = async (id: string) =>
+      (await api(app).get(`/owner/leads/${id}`).set(a.headers)).body.status;
+    expect(await status(no.id)).toBe('no');
+    expect(await status(yes.id)).toBe('replied');
+
+    // one short thank-you asking why, as a reply; the lead stays "no"; never a second one
+    const why = await api(app).get(`/owner/leads/${no.id}/draft?kind=ask_why`).set(a.headers);
+    await clearMails();
+    await api(app)
+      .post(`/owner/leads/${no.id}/messages`)
+      .set(a.headers)
+      .send({ kind: 'ask_why', ...why.body, sendNow: true })
+      .expect(201);
+    const [mail] = (await sentMails()) as Array<Record<string, string>>;
+    expect(mail).toMatchObject({ to: 'anna@nein.ch', inReplyTo: no.messageId });
+    expect(await status(no.id)).toBe('no');
+    await api(app)
+      .post(`/owner/leads/${no.id}/messages`)
+      .set(a.headers)
+      .send({ kind: 'ask_why', ...why.body })
+      .expect(409);
+    // and not to a lead that hasn't said no
+    await api(app)
+      .post(`/owner/leads/${yes.id}/messages`)
+      .set(a.headers)
+      .send({ kind: 'ask_why', ...why.body })
+      .expect(409);
   });
 });

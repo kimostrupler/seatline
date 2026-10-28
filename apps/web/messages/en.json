@@ -844,7 +844,8 @@
     "leadCanceled": "cancelled an e-mail to “{name}”",
     "leadSent": "sent the e-mail to “{name}”",
     "leadReplied": "noticed a reply from “{name}”",
-    "leadAutoReply": "noticed an automatic answer (out-of-office) from “{name}”"
+    "leadAutoReply": "noticed an automatic answer (out-of-office) from “{name}”",
+    "leadDeclined": "noticed a “no” from “{name}”"
   },
   "dashboard": {
     "title": "Home",
@@ -1644,7 +1645,9 @@
         "why": "Why now",
         "contact": "Contact",
         "status": "Status",
-        "next": "Next step"
+        "next": "Next step",
+        "fit": "Fit",
+        "size": "Size"
       },
       "status": {
         "research": "Research",
@@ -1686,7 +1689,9 @@
         "linkedinUrl": "LinkedIn",
         "language": "Language",
         "notes": "Notes",
-        "status": "Status"
+        "status": "Status",
+        "employees": "Employees",
+        "tags": "What fits"
       },
       "channels": {
         "email": "E-mail",
@@ -1722,7 +1727,8 @@
         "manualHint": "This lead is reached by {channel}: copy the text, send it there, then set the status to “Sent”.",
         "sendNow": "Send now",
         "sendNowConfirm": "Send it to {to} right now? This can’t be undone.",
-        "sent": "E-mail sent"
+        "sent": "E-mail sent",
+        "ask_why": "Ask why (one short reply)"
       },
       "problems": {
         "no_email": "Add a published e-mail address first (channel: E-mail).",
@@ -1732,7 +1738,8 @@
       "messages": "E-mails",
       "kind": {
         "first": "First e-mail",
-        "follow_up": "Follow-up"
+        "follow_up": "Follow-up",
+        "ask_why": "Thank-you after a no"
       },
       "sentAt": "Sent {when}",
       "scheduledFor": "Goes out {when}",
@@ -1782,6 +1789,21 @@
         "title": "Replies",
         "none": "No reply yet.",
         "failed": "The mailbox can’t be read just now."
+      },
+      "fit": {
+        "good": "Good fit",
+        "ok": "Maybe",
+        "weak": "Weak",
+        "sort": "Best fit first",
+        "goodOnly": "Good fit only"
+      },
+      "tags": {
+        "moving": "Moving",
+        "growing": "Growing",
+        "hybrid": "Hybrid",
+        "multiple_sites": "Several sites",
+        "microsoft365": "Microsoft 365",
+        "warm": "Warm contact"
       }
     }
   },

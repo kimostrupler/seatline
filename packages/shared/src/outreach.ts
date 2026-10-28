@@ -22,8 +22,19 @@ export const LEAD_CHANNELS = ['email', 'form', 'linkedin'] as const;
 export type LeadChannel = (typeof LEAD_CHANNELS)[number];
 export const LEAD_LANGUAGES = ['de', 'fr', 'en'] as const;
 export type LeadLanguage = (typeof LEAD_LANGUAGES)[number];
-export const LEAD_MESSAGE_KINDS = ['first', 'follow_up'] as const;
+/** ask_why = one short thank-you after a "no", asking what didn't fit (sent at most once) */
+export const LEAD_MESSAGE_KINDS = ['first', 'follow_up', 'ask_why'] as const;
 export type LeadMessageKind = (typeof LEAD_MESSAGE_KINDS)[number];
+/** What makes a company a good lead, set by hand or in the import file. */
+export const LEAD_TAGS = [
+  'moving',
+  'growing',
+  'hybrid',
+  'multiple_sites',
+  'microsoft365',
+  'warm',
+] as const;
+export type LeadTag = (typeof LEAD_TAGS)[number];
 
 /** at most this many e-mails per "send all" click (keeps the request short; click again) */
 export const SEND_ALL_MAX = 25;
@@ -55,6 +66,9 @@ const leadFields = {
   linkedinUrl: optional(500),
   language: z.enum(LEAD_LANGUAGES),
   notes: optional(4000),
+  /** company size (people working there) */
+  employees: z.number().int().min(1).max(1_000_000).nullable(),
+  tags: z.array(z.enum(LEAD_TAGS)).max(LEAD_TAGS.length),
   status: z.enum(LEAD_STATUSES),
 };
 export const leadUpdateSchema = z.strictObject(leadFields).partial();
@@ -98,6 +112,73 @@ export function messageProblem(
   if (!lead.whyNow) return 'no_reason';
   if (/\[[^\]]*\]/.test(body)) return 'placeholder';
   return null;
+}
+
+// --- which leads are worth writing to ---
+
+/** Addresses nobody in particular reads: a person beats these. */
+const GENERIC_INBOX =
+  /^(info|contact|kontakt|office|hello|hallo|mail|admin|welcome|empfang|reception|bonjour|sales|verkauf|service|team)@/i;
+
+export type LeadFit = 'good' | 'ok' | 'weak';
+
+/**
+ * How promising a lead is. The seating pain starts at about 40 people and is sharpest during a
+ * move, growth or hybrid work; a named person beats a shared inbox; a real "why now" matters.
+ */
+export function leadScore(lead: {
+  employees: number | null;
+  tags: readonly string[];
+  contactName: string | null;
+  contactEmail: string | null;
+  whyNow: string | null;
+}): { score: number; fit: LeadFit } {
+  let score = 0;
+  const n = lead.employees;
+  if (n != null) score += n < 20 ? -2 : n < 40 ? 1 : n <= 300 ? 3 : n <= 1000 ? 1 : 0;
+  const points: Record<string, number> = {
+    moving: 3,
+    growing: 2,
+    hybrid: 2,
+    multiple_sites: 1,
+    microsoft365: 1,
+    warm: 2,
+  };
+  for (const t of lead.tags) score += points[t] ?? 0;
+  if (lead.contactName && lead.contactEmail && !GENERIC_INBOX.test(lead.contactEmail)) score += 2;
+  if (lead.whyNow) score += 1;
+  return { score, fit: score >= 6 ? 'good' : score >= 3 ? 'ok' : 'weak' };
+}
+
+/** A clear "no" in a reply (de/fr/en). Our own quoted e-mail must be removed first. */
+const NO = [
+  /\bnein,?\s+danke\b/i,
+  /\bkein(en)?\s+(interesse|bedarf)\b/i,
+  /\bnicht\s+interessiert\b/i,
+  /\bbrauchen\s+(wir\s+)?(das\s+|so\s+etwas\s+)?nicht\b/i,
+  /\bnon,?\s+merci\b/i,
+  /\bpas\s+(int[ée]ress[ée]s?|besoin|d.int[ée]r[êe]t)\b/i,
+  /\bne\s+sommes\s+pas\s+int[ée]ress[ée]s\b/i,
+  /\bno,?\s+thanks?\b/i,
+  /\bnot\s+interested\b/i,
+  /\b(no|don.t)\s+need\b/i,
+  /\b(unsubscribe|remove\s+me|abmelden|désinscri)/i,
+  /^\s*stop\s*[.!]?\s*$/im,
+];
+export const isNo = (text: string) => NO.some((r) => r.test(text));
+
+/** The reply without the lines of our own e-mails it quotes (so our "Nein danke genügt" never counts). */
+export function ownLinesRemoved(reply: string, ours: string[]): string {
+  const own = new Set(
+    ours
+      .flatMap((b) => b.split('\n'))
+      .map((l) => l.trim())
+      .filter((l) => l.length > 3),
+  );
+  return reply
+    .split('\n')
+    .filter((l) => !own.has(l.replace(/^[>\s]+/, '').trim()))
+    .join('\n');
 }
 
 // --- time (Zurich) ---
@@ -280,6 +361,31 @@ If you’d like to take a quick look yourself, no account needed: seatline.ch �
 PS: If someone else looks after this at your company, I’d be grateful for a pointer.`,
 };
 
+/** After a "no": thanks, and one question about why (sent at most once, as a reply). */
+const ASK_WHY: Record<LeadLanguage, string> = {
+  de: `Guten Tag {greeting}
+
+Danke für Ihre Antwort, ich schreibe Ihnen nicht mehr.
+
+Nur eine kurze Frage, falls Sie eine Sekunde haben: Reicht Excel, haben Sie schon ein Tool, oder passt es gerade zeitlich nicht? Ein Wort genügt, das hilft mir sehr.
+
+{signature}`,
+  fr: `Bonjour {greeting}
+
+Merci pour votre réponse, je ne vous écrirai plus.
+
+Juste une petite question, si vous avez une seconde : Excel suffit, vous avez déjà un outil, ou ce n’est simplement pas le bon moment ? Un mot suffit, cela m’aide beaucoup.
+
+{signature}`,
+  en: `Hello {greeting}
+
+Thanks for letting me know, I won’t write again.
+
+Just one quick question, if you have a second: is Excel enough, do you already use a tool, or is it just not the right time? One word is plenty and helps me a lot.
+
+{signature}`,
+};
+
 /**
  * A draft to start from. Anything the lead doesn't have yet stays as a [placeholder], and a
  * message with a placeholder can't be scheduled (messageProblem), so nothing generic goes out.
@@ -303,6 +409,11 @@ export function draftMessage(
       .replaceAll('{whyNow}', lead.whyNow ?? '[Why now]')
       .replaceAll('{video}', videoLink(l))
       .replaceAll('{signature}', SIGNATURE[l]);
+  if (kind === 'ask_why')
+    return {
+      subject: `Re: ${firstSubject ?? fill(FIRST[l].subject)}`,
+      body: fill(ASK_WHY[l]),
+    };
   if (kind === 'follow_up')
     return {
       subject: `Re: ${firstSubject ?? fill(FIRST[l].subject)}`,

@@ -13,12 +13,15 @@ import {
   draftMessage,
   followUpDue,
   isNoAnswer,
+  isNo,
   isSendingHour,
+  leadScore,
   LEAD_RETENTION_MONTHS,
   messageProblem,
   SEND_ALL_MAX,
   nextSendSlot,
   nextStep,
+  ownLinesRemoved,
   videoLink,
   type LeadChannel,
   type LeadInput,
@@ -32,7 +35,7 @@ import type { RequestContext } from '../auth/request-context';
 import { audit } from '../common/audit';
 import { loadConfig } from '../config';
 import { BIG_BATCH, TenantDb, type Tx } from '../db/tenant-db.service';
-import { InboxService, withoutQuote } from '../mail/inbox.service';
+import { InboxService, withoutQuote, type Reply } from '../mail/inbox.service';
 import { MailService } from '../mail/mail.service';
 import { outreachReminderMail } from '../mail/texts';
 
@@ -132,6 +135,7 @@ export class LeadsService {
       repliesChecked: this.inbox.configured,
       leads: leads.map(({ messages, ...lead }) => ({
         ...lead,
+        ...leadScore(lead),
         scheduledFor: messages[0]?.scheduledFor ?? null,
         followUpDue: lead.firstSentAt ? followUpDue(lead.firstSentAt) : null,
         nextStep: nextStep(
@@ -287,7 +291,15 @@ export class LeadsService {
         throw new ConflictException({ message: 'The first e-mail is already sent', code: 'sent' });
       if (message.kind === 'follow_up' && (!first?.sentAt || lead.followUpSentAt))
         throw new ConflictException({ message: 'No follow-up possible', code: 'no_follow_up' });
-      if (['replied', 'meeting', 'customer', 'no', 'no_answer'].includes(lead.status))
+      if (message.kind === 'ask_why') {
+        // one short thank-you after a "no", never more
+        if (
+          lead.status !== 'no' ||
+          !first?.sentAt ||
+          lead.messages.some((m) => m.kind === 'ask_why')
+        )
+          throw new ConflictException({ message: 'Only once, after a “no”', code: 'no_ask_why' });
+      } else if (['replied', 'meeting', 'customer', 'no', 'no_answer'].includes(lead.status))
         throw new ConflictException({ message: 'This lead is closed', code: 'closed' });
       const scheduled = await tx.leadMessage.create({
         data: {
@@ -430,7 +442,7 @@ export class LeadsService {
    */
   async runOutreach(tenantId: string, now = new Date()) {
     const system: System = { tenantId, actorId: null };
-    const { replied, autoReplies } = await this.checkReplies(system);
+    const { replied, declined, autoReplies } = await this.checkReplies(system);
     const morning = isSendingHour(now);
     const sent = morning ? await this.sendDue(system, now) : 0;
     const reminded = morning ? await this.remindFollowUps(system, now) : 0;
@@ -460,7 +472,7 @@ export class LeadsService {
       }),
     );
     for (const lead of expired) await this.remove(system, lead.id);
-    return { replied, autoReplies, sent, reminded, closed, deleted: expired.length };
+    return { replied, declined, autoReplies, sent, reminded, closed, deleted: expired.length };
   }
 
   /**
@@ -506,7 +518,7 @@ export class LeadsService {
    */
   async checkRepliesNow(ctx: RequestContext, now = Date.now()) {
     if (now - (this.lastCheck.get(ctx.tenantId) ?? 0) < 60_000)
-      return { replied: 0, autoReplies: 0 };
+      return { replied: 0, declined: 0, autoReplies: 0 };
     this.lastCheck.set(ctx.tenantId, now);
     return this.checkReplies({ tenantId: ctx.tenantId, actorId: null });
   }
@@ -516,13 +528,15 @@ export class LeadsService {
    * ("replied", what's scheduled is cancelled); an automatic one (out-of-office…) is only noted
    * on the lead, so the follow-up still goes out.
    */
-  private async checkReplies(system: System): Promise<{ replied: number; autoReplies: number }> {
+  private async checkReplies(
+    system: System,
+  ): Promise<{ replied: number; declined: number; autoReplies: number }> {
     const waiting = await this.db.run(system.tenantId, (tx) =>
       tx.lead.findMany({
         where: { tenantId: system.tenantId, status: { in: WAITING }, contactEmail: { not: null } },
       }),
     );
-    const none = { replied: 0, autoReplies: 0 };
+    const none = { replied: 0, declined: 0, autoReplies: 0 };
     if (!waiting.length || !this.inbox.configured) return none;
     const since = new Date(
       Math.min(...waiting.map((l) => (l.firstSentAt ?? new Date()).getTime())),
@@ -540,10 +554,11 @@ export class LeadsService {
     const ours = await this.db.run(system.tenantId, (tx) =>
       tx.leadMessage.findMany({
         where: { tenantId: system.tenantId, leadId: { in: waiting.map((l) => l.id) } },
-        select: { leadId: true, messageId: true },
+        select: { leadId: true, messageId: true, body: true },
       }),
     );
     let n = 0;
+    let declined = 0;
     let autoReplies = 0;
     for (const lead of waiting) {
       const key = replyKey(lead.contactEmail!);
@@ -586,22 +601,42 @@ export class LeadsService {
             r.from === (key.exact ?? lead.contactEmail!.toLowerCase())),
       );
       if (!reply) continue;
-      n++;
+      // a clear "no" in it moves the lead to "no" at once (read, never stored)
+      const no = await this.saysNo(
+        key.domain,
+        reply,
+        ours.filter((m) => m.leadId === lead.id).map((m) => m.body),
+      );
+      if (no) declined++;
+      else n++;
       await this.db.run(system.tenantId, async (tx) => {
         await tx.lead.update({
           where: { id: lead.id },
-          data: { status: 'replied', repliedAt: reply.date },
+          data: { status: no ? 'no' : 'replied', repliedAt: reply.date },
         });
         await this.cancelScheduled(tx, system.tenantId, lead.id);
         await audit(tx, system, {
-          action: 'owner.lead.replied',
+          action: no ? 'owner.lead.declined' : 'owner.lead.replied',
           entityType: 'lead',
           entityId: lead.id,
           after: { company: lead.company },
         });
       });
     }
-    return { replied: n, autoReplies };
+    return { replied: n, declined, autoReplies };
+  }
+
+  /** Whether the person's reply clearly says no (their own words, not our quoted e-mail). */
+  private async saysNo(domain: string, reply: Reply, ours: string[]): Promise<boolean> {
+    try {
+      const found = (await this.inbox.messagesFrom(domain, reply.date)).find(
+        (m) => m.from === reply.from && m.date.getTime() === reply.date.getTime(),
+      );
+      return !!found && isNo(ownLinesRemoved(withoutQuote(found.text), ours));
+    } catch (error) {
+      this.logger.warn(`Reading a reply's text failed: ${(error as Error).message}`);
+      return false; // then it's a plain reply, to read by hand
+    }
   }
 
   private async sendDue(system: System, now: Date): Promise<number> {
@@ -641,7 +676,8 @@ export class LeadsService {
       }),
     );
     if (count === 0) return false;
-    const replyTo = message.kind === 'follow_up' ? lead.messages[0]?.messageId : undefined;
+    // the follow-up and the thank-you after a "no" answer the first e-mail
+    const replyTo = message.kind === 'first' ? undefined : lead.messages[0]?.messageId;
     const mail = {
       to: message.toAddress,
       subject: message.subject,
@@ -668,7 +704,9 @@ export class LeadsService {
         data:
           message.kind === 'first'
             ? { status: 'sent', firstSentAt: now }
-            : { status: 'followed_up', followUpSentAt: now },
+            : message.kind === 'follow_up'
+              ? { status: 'followed_up', followUpSentAt: now }
+              : {}, // ask_why: the lead stays "no"
       });
       await audit(tx, actor, {
         action: 'owner.lead.sent',
