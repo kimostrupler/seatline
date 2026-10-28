@@ -8,7 +8,9 @@ import {
   LEAD_CHANNELS,
   LEAD_LANGUAGES,
   LEAD_STATUSES,
+  LEAD_TAGS,
   SEND_ALL_MAX,
+  type LeadFit,
   type LeadMessageKind,
   type NextStep,
 } from '@seatline/shared/dist/outreach';
@@ -60,6 +62,13 @@ const TONE: Record<NextStep, string> = {
   talk: 'var(--seat-free-stroke)',
   done: 'var(--muted-foreground)',
 };
+/** A lead's fit (from size, tags, a named person, a reason): green good, amber ok, grey weak. */
+const FIT_TONE: Record<LeadFit, string> = {
+  good: 'var(--seat-free-stroke)',
+  ok: 'var(--seat-reserved-stroke)',
+  weak: 'var(--muted-foreground)',
+};
+
 /** "Send now" and the send-all buttons: green, so sending stands apart from scheduling. */
 const sendClass =
   'border-transparent bg-[var(--seat-free-fill)] text-[var(--seat-free-text)] hover:bg-[color-mix(in_oklab,var(--seat-free-fill),var(--seat-free-stroke)_20%)]';
@@ -76,7 +85,8 @@ const TEXT_FIELDS = [
   'sourceUrl',
 ] as const;
 type Draft = Partial<Record<(typeof TEXT_FIELDS)[number] | 'notes', string>> &
-  Pick<Lead, 'channel' | 'language'>;
+  Pick<Lead, 'channel' | 'language'> &
+  Partial<Pick<Lead, 'employees' | 'tags'>>;
 const textareaClass =
   'w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm dark:bg-input/30';
 const selectClass = cn(textareaClass, 'h-9 py-1');
@@ -132,8 +142,12 @@ export function LeadsPage({ initial }: { initial: LeadList | null }) {
       })
       .catch(() => undefined);
   }, [data?.repliesChecked, qc]);
+  const [bestFirst, setBestFirst] = useState(false);
+  const [goodOnly, setGoodOnly] = useState(false);
   const inTab = (l: LeadRow, t: Tab) => t === 'all' || l.nextStep === t;
-  const shown = data?.leads.filter((l) => inTab(l, tab));
+  const shown = data?.leads
+    .filter((l) => inTab(l, tab) && (!goodOnly || l.fit === 'good'))
+    .sort((x, y) => (bestFirst ? y.score - x.score : 0));
 
   return (
     <PageFrame
@@ -176,6 +190,24 @@ export function LeadsPage({ initial }: { initial: LeadList | null }) {
           );
         })}
       </div>
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        <Button
+          size="sm"
+          variant={bestFirst ? 'secondary' : 'outline'}
+          aria-pressed={bestFirst}
+          onClick={() => setBestFirst((v) => !v)}
+        >
+          {t('fit.sort')}
+        </Button>
+        <Button
+          size="sm"
+          variant={goodOnly ? 'secondary' : 'outline'}
+          aria-pressed={goodOnly}
+          onClick={() => setGoodOnly((v) => !v)}
+        >
+          {t('fit.goodOnly')}
+        </Button>
+      </div>
       {!shown ? (
         <Skeleton className="h-64" />
       ) : !data?.leads.length ? (
@@ -187,11 +219,13 @@ export function LeadsPage({ initial }: { initial: LeadList | null }) {
           <table className="w-full text-left text-sm" data-testid="leads">
             <thead className="bg-canvas text-xs text-muted-foreground">
               <tr>
-                {(['company', 'why', 'contact', 'status', 'next'] as const).map((c) => (
-                  <th key={c} scope="col" className="px-3 py-2 font-medium">
-                    {t(`columns.${c}`)}
-                  </th>
-                ))}
+                {(['company', 'fit', 'size', 'why', 'contact', 'status', 'next'] as const).map(
+                  (c) => (
+                    <th key={c} scope="col" className="px-3 py-2 font-medium">
+                      {t(`columns.${c}`)}
+                    </th>
+                  ),
+                )}
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -217,6 +251,17 @@ export function LeadsPage({ initial }: { initial: LeadList | null }) {
                       >
                         {t('autoReply.badge')}
                       </Badge>
+                    )}
+                  </td>
+                  <td className="px-3 py-2">
+                    <FitBadge fit={lead.fit} />
+                  </td>
+                  <td className="px-3 py-2 tabular-nums">
+                    {lead.employees ?? '—'}
+                    {lead.tags.length > 0 && (
+                      <span className="block text-xs text-muted-foreground">
+                        {lead.tags.map((tag) => t(`tags.${tag}`)).join(' · ')}
+                      </span>
                     )}
                   </td>
                   <td className="max-w-xs px-3 py-2 text-muted-foreground">
@@ -253,6 +298,19 @@ export function LeadsPage({ initial }: { initial: LeadList | null }) {
         </SheetContent>
       </Sheet>
     </PageFrame>
+  );
+}
+
+function FitBadge({ fit }: { fit: LeadFit }) {
+  const t = useTranslations('owner.leads');
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium"
+      style={{ background: `color-mix(in oklab, ${FIT_TONE[fit]} 14%, transparent)` }}
+    >
+      <span className="size-2 rounded-full" style={{ background: FIT_TONE[fit] }} aria-hidden />
+      {t(`fit.${fit}`)}
+    </span>
   );
 }
 
@@ -565,6 +623,47 @@ function LeadForm({
           ))}
         </select>
       </div>
+      <div className="grid gap-1">
+        <Label htmlFor="lead-employees">{t('fields.employees')}</Label>
+        <Input
+          id="lead-employees"
+          type="number"
+          min={1}
+          inputMode="numeric"
+          value={draft.employees ?? ''}
+          onChange={(e) =>
+            setDraft((d) => ({
+              ...d,
+              employees: e.target.value ? Math.max(1, Math.round(Number(e.target.value))) : null,
+            }))
+          }
+        />
+      </div>
+      <fieldset className="grid gap-1 sm:col-span-2">
+        <legend className="mb-1 text-sm font-medium">{t('fields.tags')}</legend>
+        <div className="flex flex-wrap gap-1.5">
+          {LEAD_TAGS.map((tag) => {
+            const on = draft.tags?.includes(tag) ?? false;
+            return (
+              <Button
+                key={tag}
+                type="button"
+                size="sm"
+                variant={on ? 'secondary' : 'outline'}
+                aria-pressed={on}
+                onClick={() =>
+                  setDraft((d) => ({
+                    ...d,
+                    tags: on ? (d.tags ?? []).filter((x) => x !== tag) : [...(d.tags ?? []), tag],
+                  }))
+                }
+              >
+                {t(`tags.${tag}`)}
+              </Button>
+            );
+          })}
+        </div>
+      </fieldset>
       <div className="grid gap-1 sm:col-span-2">
         <Label htmlFor="lead-notes">{t('fields.notes')}</Label>
         <textarea
@@ -643,21 +742,27 @@ function LeadPanel({ id, onDeleted }: { id: string; onDeleted: () => void }) {
   const pending = live.find((m) => !m.sentAt);
   const first = live.find((m) => m.kind === 'first');
   const closed = ['replied', 'meeting', 'customer', 'no', 'no_answer'].includes(lead.status);
-  const kind: LeadMessageKind | null =
-    pending || closed
-      ? null
-      : lead.channel !== 'email'
-        ? // reached by hand (form, LinkedIn): the text to copy follows the status
-          lead.status === 'sent'
-          ? 'follow_up'
-          : lead.status === 'followed_up'
-            ? null
-            : 'first'
-        : !first
-          ? 'first'
-          : first.sentAt && !live.some((m) => m.kind === 'follow_up')
+  const kind: LeadMessageKind | null = pending
+    ? null
+    : // after a "no": one short thank-you asking why, once
+      lead.status === 'no'
+      ? lead.channel === 'email' && first?.sentAt && !live.some((m) => m.kind === 'ask_why')
+        ? 'ask_why'
+        : null
+      : closed
+        ? null
+        : lead.channel !== 'email'
+          ? // reached by hand (form, LinkedIn): the text to copy follows the status
+            lead.status === 'sent'
             ? 'follow_up'
-            : null;
+            : lead.status === 'followed_up'
+              ? null
+              : 'first'
+          : !first
+            ? 'first'
+            : first.sentAt && !live.some((m) => m.kind === 'follow_up')
+              ? 'follow_up'
+              : null;
 
   return (
     <div className="grid gap-6 p-6 pt-12">
@@ -758,6 +863,8 @@ function LeadPanel({ id, onDeleted }: { id: string; onDeleted: () => void }) {
             ...Object.fromEntries(TEXT_FIELDS.map((k) => [k, lead[k] ?? ''])),
             notes: lead.notes ?? '',
             channel: lead.channel,
+            employees: lead.employees,
+            tags: lead.tags,
             language: lead.language,
           }}
           busy={save.isPending}
@@ -1014,6 +1121,8 @@ const IMPORT_FIELDS = [
   'linkedinUrl',
   'language',
   'notes',
+  'employees',
+  'tags',
 ] as const;
 
 /** Researched leads from a JSON file (a list, or { leads: [...] }); they start as "Research". */
@@ -1031,9 +1140,19 @@ function ImportLeads() {
         rows = null;
       }
       if (!Array.isArray(rows)) throw new Error(t('importInvalid'));
-      const leads = rows.map((row: Record<string, unknown>) =>
-        Object.fromEntries(IMPORT_FIELDS.filter((k) => row[k] != null).map((k) => [k, row[k]])),
-      );
+      const leads = rows.map((row: Record<string, unknown>) => {
+        const lead = Object.fromEntries(
+          IMPORT_FIELDS.filter((k) => row[k] != null).map((k) => [k, row[k]]),
+        );
+        // unknown tags are dropped, sizes rounded, so one odd value never fails the file
+        if (Array.isArray(lead.tags))
+          lead.tags = lead.tags.filter((x) => (LEAD_TAGS as readonly unknown[]).includes(x));
+        else delete lead.tags;
+        if (typeof lead.employees === 'number' && lead.employees >= 1)
+          lead.employees = Math.round(lead.employees);
+        else delete lead.employees;
+        return lead;
+      });
       return api<{ added: number; skipped: string[] }>('/owner/leads/import', {
         method: 'POST',
         body: { leads },

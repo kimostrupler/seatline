@@ -844,7 +844,8 @@
     "leadCanceled": "hat eine E-Mail an «{name}» abgebrochen",
     "leadSent": "hat die E-Mail an «{name}» gesendet",
     "leadReplied": "hat eine Antwort von «{name}» erkannt",
-    "leadAutoReply": "hat eine automatische Antwort (Abwesenheit) von «{name}» erkannt"
+    "leadAutoReply": "hat eine automatische Antwort (Abwesenheit) von «{name}» erkannt",
+    "leadDeclined": "hat ein «Nein» von «{name}» erkannt"
   },
   "dashboard": {
     "title": "Start",
@@ -1644,7 +1645,9 @@
         "why": "Warum jetzt",
         "contact": "Kontakt",
         "status": "Status",
-        "next": "Nächster Schritt"
+        "next": "Nächster Schritt",
+        "fit": "Passung",
+        "size": "Grösse"
       },
       "status": {
         "research": "Recherche",
@@ -1686,7 +1689,9 @@
         "linkedinUrl": "LinkedIn",
         "language": "Sprache",
         "notes": "Notizen",
-        "status": "Status"
+        "status": "Status",
+        "employees": "Mitarbeitende",
+        "tags": "Was passt"
       },
       "channels": {
         "email": "E-Mail",
@@ -1722,7 +1727,8 @@
         "manualHint": "Dieser Lead wird per {channel} erreicht: Kopieren Sie den Text, senden Sie ihn dort und setzen Sie den Status auf «Gesendet».",
         "sendNow": "Jetzt senden",
         "sendNowConfirm": "Jetzt an {to} senden? Das lässt sich nicht rückgängig machen.",
-        "sent": "E-Mail gesendet"
+        "sent": "E-Mail gesendet",
+        "ask_why": "Nach dem Grund fragen (eine kurze Antwort)"
       },
       "problems": {
         "no_email": "Erfassen Sie zuerst eine veröffentlichte E-Mail-Adresse (Kanal: E-Mail).",
@@ -1732,7 +1738,8 @@
       "messages": "E-Mails",
       "kind": {
         "first": "Erste E-Mail",
-        "follow_up": "Nachfassen"
+        "follow_up": "Nachfassen",
+        "ask_why": "Dank nach einem Nein"
       },
       "sentAt": "Gesendet {when}",
       "scheduledFor": "Geht {when} raus",
@@ -1782,6 +1789,21 @@
         "title": "Antworten",
         "none": "Noch keine Antwort.",
         "failed": "Das Postfach kann gerade nicht gelesen werden."
+      },
+      "fit": {
+        "good": "Passt gut",
+        "ok": "Vielleicht",
+        "weak": "Schwach",
+        "sort": "Beste zuerst",
+        "goodOnly": "Nur gute"
+      },
+      "tags": {
+        "moving": "Umzug",
+        "growing": "Wächst",
+        "hybrid": "Hybrid",
+        "multiple_sites": "Mehrere Standorte",
+        "microsoft365": "Microsoft 365",
+        "warm": "Warmer Kontakt"
       }
     }
   },

@@ -1,11 +1,14 @@
 import {
   draftMessage,
+  isNo,
   isNoAnswer,
   messageProblem,
   nextSendSlot,
   nextStep,
   wordCount,
   zurichTime,
+  leadScore,
+  ownLinesRemoved,
 } from '@seatline/shared/dist/outreach';
 import { describe, expect, it } from 'vitest';
 import { outreachHtml, replyKey } from './leads.service';
@@ -105,5 +108,67 @@ describe('outreach rules', () => {
       domain: 'gmail.com',
       exact: 'anna.muster@gmail.com',
     });
+  });
+});
+
+describe('which leads are worth it, and reading a "no"', () => {
+  const base = { employees: null, tags: [], contactName: null, contactEmail: null, whyNow: null };
+
+  it('scores size, tags, a named person and a reason', () => {
+    expect(leadScore(base)).toEqual({ score: 0, fit: 'weak' });
+    // 120 people moving, a named IT manager, a real reason: the best kind
+    expect(
+      leadScore({
+        employees: 120,
+        tags: ['moving', 'hybrid'],
+        contactName: 'Anna Muster',
+        contactEmail: 'anna.muster@muster.ch',
+        whyNow: 'Sie ziehen im März nach Oerlikon.',
+      }),
+    ).toEqual({ score: 11, fit: 'good' });
+    // a shared inbox gets no point for the person, a tiny office loses points
+    expect(
+      leadScore({ ...base, employees: 8, contactName: 'Team', contactEmail: 'info@x.ch' }).fit,
+    ).toBe('weak');
+    expect(leadScore({ ...base, employees: 60, tags: ['growing'] })).toEqual({
+      score: 5,
+      fit: 'ok',
+    });
+  });
+
+  it('spots a clear no in three languages, but not in our own quoted e-mail', () => {
+    for (const no of [
+      'Nein danke.',
+      'Wir haben kein Interesse.',
+      'Brauchen wir nicht, danke.',
+      'Non merci, bonne journée',
+      'Nous ne sommes pas intéressés.',
+      'No thanks!',
+      'We are not interested at the moment.',
+      'stop',
+    ])
+      expect(isNo(no)).toBe(true);
+    for (const yes of ['Gerne, rufen Sie mich an.', 'Merci, envoyez-moi une offre.', 'Sounds good'])
+      expect(isNo(yes)).toBe(false);
+
+    const ours = 'Guten Tag\n\nPS: Kein Thema? Ein kurzes "Nein danke" genügt.';
+    const reply = 'Gerne mehr dazu!\n> PS: Kein Thema? Ein kurzes "Nein danke" genügt.';
+    expect(isNo(reply)).toBe(true); // quoted naively it would look like a no
+    expect(isNo(ownLinesRemoved(reply, [ours]))).toBe(false);
+  });
+
+  it('after a no: a short thank-you that asks why, as a reply', () => {
+    const lead = {
+      company: 'Muster AG',
+      greeting: 'Frau Muster',
+      whyNow: 'x',
+      address: null,
+      language: 'de' as const,
+    };
+    const d = draftMessage('ask_why', lead, 'Wer sitzt wo bei Muster AG?');
+    expect(d.subject).toBe('Re: Wer sitzt wo bei Muster AG?');
+    expect(d.body).toContain('Guten Tag Frau Muster');
+    expect(d.body).toContain('Reicht Excel');
+    expect(draftMessage('ask_why', { ...lead, language: 'fr' }).body).toContain('Excel suffit');
   });
 });

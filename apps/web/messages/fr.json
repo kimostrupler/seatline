@@ -844,7 +844,8 @@
     "leadCanceled": "a annulé un e-mail à « {name} »",
     "leadSent": "a envoyé l’e-mail à « {name} »",
     "leadReplied": "a détecté une réponse de « {name} »",
-    "leadAutoReply": "a détecté une réponse automatique (absence) de « {name} »"
+    "leadAutoReply": "a détecté une réponse automatique (absence) de « {name} »",
+    "leadDeclined": "a détecté un « non » de « {name} »"
   },
   "dashboard": {
     "title": "Accueil",
@@ -1644,7 +1645,9 @@
         "why": "Pourquoi maintenant",
         "contact": "Contact",
         "status": "Statut",
-        "next": "Prochaine étape"
+        "next": "Prochaine étape",
+        "fit": "Pertinence",
+        "size": "Taille"
       },
       "status": {
         "research": "Recherche",
@@ -1686,7 +1689,9 @@
         "linkedinUrl": "LinkedIn",
         "language": "Langue",
         "notes": "Notes",
-        "status": "Statut"
+        "status": "Statut",
+        "employees": "Collaborateurs",
+        "tags": "Ce qui correspond"
       },
       "channels": {
         "email": "E-mail",
@@ -1722,7 +1727,8 @@
         "manualHint": "Ce prospect est joint par {channel} : copiez le texte, envoyez-le là-bas, puis mettez le statut sur « Envoyé ».",
         "sendNow": "Envoyer maintenant",
         "sendNowConfirm": "L’envoyer à {to} maintenant ? C’est définitif.",
-        "sent": "E-mail envoyé"
+        "sent": "E-mail envoyé",
+        "ask_why": "Demander pourquoi (une courte réponse)"
       },
       "problems": {
         "no_email": "Ajoutez d’abord une adresse e-mail publiée (canal : E-mail).",
@@ -1732,7 +1738,8 @@
       "messages": "E-mails",
       "kind": {
         "first": "Premier e-mail",
-        "follow_up": "Relance"
+        "follow_up": "Relance",
+        "ask_why": "Merci après un non"
       },
       "sentAt": "Envoyé {when}",
       "scheduledFor": "Part {when}",
@@ -1782,6 +1789,21 @@
         "title": "Réponses",
         "none": "Pas encore de réponse.",
         "failed": "La boîte mail ne peut pas être lue pour le moment."
+      },
+      "fit": {
+        "good": "Très pertinent",
+        "ok": "Peut-être",
+        "weak": "Faible",
+        "sort": "Les meilleurs d’abord",
+        "goodOnly": "Seulement les bons"
+      },
+      "tags": {
+        "moving": "Déménagement",
+        "growing": "En croissance",
+        "hybrid": "Hybride",
+        "multiple_sites": "Plusieurs sites",
+        "microsoft365": "Microsoft 365",
+        "warm": "Contact chaud"
       }
     }
   },

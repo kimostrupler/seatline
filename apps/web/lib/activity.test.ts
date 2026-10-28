@@ -163,6 +163,7 @@ group('activity sentences', () => {
     });
     expect(lead('owner.lead.replied').key).toBe('leadReplied');
     expect(lead('owner.lead.auto_reply').key).toBe('leadAutoReply');
+    expect(lead('owner.lead.declined').key).toBe('leadDeclined');
     expect(
       describe(
         entry({ action: 'owner.lead.delete', entityType: 'lead', before: { company: 'X' } }),

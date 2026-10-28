@@ -177,3 +177,42 @@ test('write all: each ready lead’s e-mail one after the other, then schedule t
     .click();
   await expect(page.getByTestId('leads')).toContainText('Beta AG');
 });
+
+test('leads show size, tags and fit; the best ones can be listed first', async ({ page }) => {
+  await page.goto('/owner/leads');
+  await expect(page.getByRole('group', { name: 'Where each lead is' })).toBeVisible();
+  await page.locator('input[type=file]').setInputFiles({
+    name: 'leads.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(
+      JSON.stringify([
+        { company: 'Klein GmbH', employees: 6, contactEmail: 'info@klein.example' },
+        {
+          company: 'Gross AG',
+          employees: 140,
+          tags: ['moving', 'hybrid', 'unknown-tag'],
+          contactName: 'Anna Muster',
+          contactEmail: 'anna.muster@gross.example',
+          whyNow: 'Sie ziehen im März um.',
+        },
+      ]),
+    ),
+  });
+  await expect(page.getByText('2 leads added')).toBeVisible();
+  const rows = page.getByTestId('leads').locator('tbody tr');
+  await page.getByRole('button', { name: 'Best fit first' }).click();
+  await expect(rows.first()).toContainText('Gross AG');
+  await expect(rows.first()).toContainText('Good fit');
+  await expect(rows.first()).toContainText('Moving · Hybrid');
+  await page.getByRole('button', { name: 'Good fit only' }).click();
+  await expect(rows).toHaveCount(1);
+
+  // size and tags can be changed in the lead's panel
+  await page.getByRole('button', { name: 'Gross AG' }).click();
+  const panel = page.getByRole('dialog');
+  await expect(panel.getByLabel('Employees')).toHaveValue('140');
+  await expect(panel.getByRole('button', { name: 'Moving' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+});

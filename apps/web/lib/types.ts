@@ -462,7 +462,7 @@ export interface OwnerOverview {
 /** Outreach leads (GET /owner/leads; only for OWNER_EMAILS). */
 export interface LeadMessage {
   id: string;
-  kind: 'first' | 'follow_up';
+  kind: 'first' | 'follow_up' | 'ask_why';
   subject: string;
   body: string;
   toAddress: string;
@@ -493,10 +493,15 @@ export interface Lead {
   autoReplyAt: string | null;
   autoReplySubject: string | null;
   notes: string | null;
+  employees: number | null;
+  tags: Array<'moving' | 'growing' | 'hybrid' | 'multiple_sites' | 'microsoft365' | 'warm'>;
   updatedAt: string;
 }
 
 export interface LeadRow extends Lead {
+  /** from size, tags, a named person and a reason (leadScore) */
+  score: number;
+  fit: 'good' | 'ok' | 'weak';
   scheduledFor: string | null;
   followUpDue: string | null;
   nextStep: NextStep;

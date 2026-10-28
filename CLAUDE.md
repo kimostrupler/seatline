@@ -635,7 +635,13 @@ test update-screenshots --project chromium`; `updates.test.ts` checks). **Add a 
   and the follow-up still goes out. The Leads page also checks on opening (`POST
 /owner/leads/check-replies`, at most once a minute); a lead's panel shows its **Replies** with their
   text (`GET /owner/leads/:id/replies` → `InboxService.messagesFrom`: text/plain or HTML made plain,
-  the quoted e-mail cut off by `withoutQuote`; read on demand, never stored); a message is claimed (`sent_at`) before SMTP so it never goes
+  the quoted e-mail cut off by `withoutQuote`; read on demand, never stored); a human reply that clearly says no
+  (`isNo` on the text minus our own quoted lines, `ownLinesRemoved`) sets the lead to `no` (audit
+  `owner.lead.declined`); after a "no" the panel offers ONE `ask_why` message (thank you + "Excel, a
+  tool, or bad timing?", sent as a reply, lead stays `no`; the privacy policy allows exactly this).
+  Leads carry `employees` + `tags` (`LEAD_TAGS`, also in the import file); `leadScore` (shared,
+  tested) gives the list's **Fit** (good/ok/weak: 40–300 people, moving/growing/hybrid, a named
+  person not info@, a reason) with "Best fit first" / "Good fit only"; a message is claimed (`sent_at`) before SMTP so it never goes
   out twice; 14 days after the follow-up → `no_answer`;
   "no"/"no_answer" leads are deleted after 12 months. Sent mails: plain text + HTML with the
   video GIF (`outreachHtml`, no tracking), sender "Kimo Strupler · Seatline", Message-ID kept so
