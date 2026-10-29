@@ -1825,7 +1825,10 @@
         "copy": "Copier le lien",
         "copied": "Lien copié",
         "sent": "Transmis, invitation envoyée",
-        "sendYourself": "Transmis. L’invitation n’a pas pu être envoyée : envoyez-lui le lien vous-même."
+        "sendYourself": "Transmis. L’invitation n’a pas pu être envoyée : envoyez-lui le lien vous-même.",
+        "delete": "Supprimer cet espace",
+        "deleteConfirm": "Supprimer l’espace de travail configuré pour {company}, avec tout son contenu ? C’est irréversible ; vous pourrez ensuite en configurer un nouveau.",
+        "deleted": "Espace de travail supprimé"
       }
     }
   },

@@ -601,6 +601,23 @@ export class LeadsService {
     return { workspaceId: tenantId };
   }
 
+  /** The workspace set up for this lead, while it hasn't been handed over (to delete it). */
+  async preparedWorkspace(ctx: RequestContext, id: string) {
+    const lead = await this.db.run(ctx.tenantId, (tx) => this.find(tx, ctx.tenantId, id));
+    const workspaceId = lead.workspaceId;
+    if (!workspaceId || lead.handedOverAt)
+      throw new ConflictException({ message: 'Nothing to delete', code: 'not_prepared' });
+    const tenant = await this.db.run(workspaceId, (tx) =>
+      tx.tenant.findFirst({
+        where: { id: workspaceId },
+        select: { id: true, name: true, preparedByOwner: true },
+      }),
+    );
+    if (!tenant?.preparedByOwner)
+      throw new ConflictException({ message: 'Nothing to delete', code: 'not_prepared' });
+    return tenant;
+  }
+
   /**
    * "Hand over": the lead's contact becomes the workspace's admin and gets an invitation; the
    * operator leaves it (no access afterwards) and the 30-day free trial starts now.

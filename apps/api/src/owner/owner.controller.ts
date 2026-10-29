@@ -101,6 +101,15 @@ export class OwnerController {
     return this.leads.prepareWorkspace(ctx, id);
   }
 
+  /** Set up by mistake: delete the workspace again (only before it's handed over). */
+  @Delete('leads/:id/workspace')
+  @HttpCode(204)
+  async deletePreparedWorkspace(@Ctx() ctx: RequestContext, @Param('id', IdPipe) id: string) {
+    await this.owner.assertOwner(ctx, `/owner/leads/${id}/workspace`);
+    const workspace = await this.leads.preparedWorkspace(ctx, id);
+    await this.owner.deleteWorkspace(ctx, workspace.id, workspace.name);
+  }
+
   /** "Hand over": the contact becomes admin and is invited; the operator leaves it. */
   @Post('leads/:id/handover')
   async handOver(@Ctx() ctx: RequestContext, @Param('id', IdPipe) id: string) {

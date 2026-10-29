@@ -1825,7 +1825,10 @@
         "copy": "Copy link",
         "copied": "Link copied",
         "sent": "Handed over, invitation sent",
-        "sendYourself": "Handed over. The invitation couldn’t be sent: send them the link yourself."
+        "sendYourself": "Handed over. The invitation couldn’t be sent: send them the link yourself.",
+        "delete": "Delete this workspace",
+        "deleteConfirm": "Delete the workspace set up for {company}, with everything in it? This can’t be undone; you can set up a new one afterwards.",
+        "deleted": "Workspace deleted"
       }
     }
   },

@@ -900,7 +900,16 @@ function LeadOffice({ lead, onChange }: { lead: LeadDetail; onChange: () => void
   const tl = useTranslations('owner.leads');
   const when = useWhen();
   const [ask, setAsk] = useState(false);
+  const [askDelete, setAskDelete] = useState(false);
   const [link, setLink] = useState<string | null>(null);
+  const remove = useMutation({
+    mutationFn: () => api(`/owner/leads/${lead.id}/workspace`, { method: 'DELETE' }),
+    onSuccess: () => {
+      onChange();
+      toast.success(t('deleted'));
+    },
+    onError: (error) => toast.error(tl('failed', { message: failedMessage(error) })),
+  });
   const setUp = useMutation({
     mutationFn: () =>
       api<{ workspaceId: string }>(`/owner/leads/${lead.id}/workspace`, { method: 'POST' }),
@@ -983,8 +992,34 @@ function LeadOffice({ lead, onChange }: { lead: LeadDetail; onChange: () => void
           <p className="text-xs text-muted-foreground">
             {lead.contactEmail ? t('openHint') : t('noEmail')}
           </p>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="justify-self-start text-destructive hover:bg-destructive/10 hover:text-destructive"
+            disabled={remove.isPending}
+            onClick={() => setAskDelete(true)}
+          >
+            <Trash2 aria-hidden /> {t('delete')}
+          </Button>
         </div>
       )}
+      <AlertDialog open={askDelete} onOpenChange={setAskDelete}>
+        <AlertDialogContent>
+          <AlertDialogTitle>{t('delete')}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {t('deleteConfirm', { company: lead.company })}
+          </AlertDialogDescription>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{tl('keep')}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-white hover:bg-destructive/90"
+              onClick={() => remove.mutate()}
+            >
+              {t('delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <AlertDialog open={ask} onOpenChange={setAsk}>
         <AlertDialogContent>
           <AlertDialogTitle>{t('handOver', { name })}</AlertDialogTitle>

@@ -243,6 +243,15 @@ test('a lead’s office: set up a workspace for them, then hand it over with a s
   await panel.getByRole('button', { name: 'Set up their office' }).click();
   await expect(page.getByText('Workspace created')).toBeVisible();
   await expect(panel.getByRole('button', { name: 'Open their workspace' })).toBeVisible();
+  // set up by mistake: delete it, then set it up again
+  await panel.getByRole('button', { name: 'Delete this workspace' }).click();
+  await page
+    .getByRole('alertdialog')
+    .getByRole('button', { name: 'Delete this workspace' })
+    .click();
+  await expect(page.getByText('Workspace deleted')).toBeVisible();
+  await panel.getByRole('button', { name: 'Set up their office' }).click();
+  await expect(panel.getByRole('button', { name: 'Open their workspace' })).toBeVisible();
 
   await panel.getByRole('button', { name: 'Hand over to Anna Muster' }).click();
   const confirm = page.getByRole('alertdialog');

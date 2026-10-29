@@ -662,6 +662,8 @@ test update-screenshots --project chromium`; `updates.test.ts` checks). **Add a 
   contact admin (invitation e-mail + the sign-in link shown to copy), sets the operator inactive
   (they leave), starts a fresh 30-day trial, marks onboarding done and the lead `meeting`; audits
   `owner.lead.workspace` / `owner.lead.handover` and `tenant.handover` in that workspace.
+  Set up by mistake: **Delete this workspace** in the same panel (`DELETE /owner/leads/:id/workspace`,
+  only before hand-over) → `deleteWorkspace`, which also clears the lead's `workspace_id`.
 - Azure costs that fail show Azure's own reason on the dashboard (`detail`); `owner-setup.sh` now
   reports whether the "Cost Management Reader" role could be given (needs Owner / User Access
   Administrator on the subscription).
