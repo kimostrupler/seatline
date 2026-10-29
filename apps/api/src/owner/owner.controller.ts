@@ -94,6 +94,20 @@ export class OwnerController {
     return this.leads.checkRepliesNow(ctx);
   }
 
+  /** "Set up their office": a workspace for the lead, prepared by the operator. */
+  @Post('leads/:id/workspace')
+  async prepareWorkspace(@Ctx() ctx: RequestContext, @Param('id', IdPipe) id: string) {
+    await this.owner.assertOwner(ctx, `/owner/leads/${id}/workspace`);
+    return this.leads.prepareWorkspace(ctx, id);
+  }
+
+  /** "Hand over": the contact becomes admin and is invited; the operator leaves it. */
+  @Post('leads/:id/handover')
+  async handOver(@Ctx() ctx: RequestContext, @Param('id', IdPipe) id: string) {
+    await this.owner.assertOwner(ctx, `/owner/leads/${id}/handover`);
+    return this.leads.handOver(ctx, id);
+  }
+
   /** Every scheduled e-mail goes out now (one per lead). */
   @Post('leads/send-scheduled')
   async sendAllScheduled(@Ctx() ctx: RequestContext) {

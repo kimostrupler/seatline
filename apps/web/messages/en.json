@@ -705,7 +705,8 @@
     "people": "People",
     "updates": "What’s new",
     "helpPage": "Help for this page",
-    "videoTour": "Video tour"
+    "videoTour": "Video tour",
+    "switchWorkspace": "Switch workspace"
   },
   "overview": {
     "title": "Overview",
@@ -829,7 +830,8 @@
       "seatUnshared": "made seat {seat} a fixed desk again",
       "deskBooked": "booked desk {seat} for {person} on {day}",
       "bookingCancelled": "cancelled {person}’s booking of desk {seat} on {day}",
-      "bookingCancelledLeft": "cancelled {person}’s booking of desk {seat} on {day} (left the organisation)"
+      "bookingCancelledLeft": "cancelled {person}’s booking of desk {seat} on {day} (left the organisation)",
+      "workspaceHandedOver": "handed the workspace “{name}” over"
     },
     "showPlan": "Open the plan",
     "search": "Search activity",
@@ -845,7 +847,9 @@
     "leadSent": "sent the e-mail to “{name}”",
     "leadReplied": "noticed a reply from “{name}”",
     "leadAutoReply": "noticed an automatic answer (out-of-office) from “{name}”",
-    "leadDeclined": "noticed a “no” from “{name}”"
+    "leadDeclined": "noticed a “no” from “{name}”",
+    "leadWorkspace": "set up a workspace for “{name}”",
+    "leadHandedOver": "handed the workspace over to “{name}”"
   },
   "dashboard": {
     "title": "Home",
@@ -1181,7 +1185,8 @@
       "readOnlyAdmin": "This workspace is read-only: the free trial or subscription has ended.",
       "pastDue": "The last payment for Seatline failed.",
       "trialEnding": "{days, plural, =0 {The free trial ends today.} one {The free trial ends in # day.} other {The free trial ends in # days.}}",
-      "open": "Open billing"
+      "open": "Open billing",
+      "prepared": "You’re setting up “{name}” for a lead. Import their floor plan under Edit layout → Add plan, then hand it over from Leads in your own workspace."
     },
     "volumeTier": "{price} from desk {from}"
   },
@@ -1805,6 +1810,22 @@
         "multiple_sites": "Several sites",
         "microsoft365": "Microsoft 365",
         "warm": "Warm contact"
+      },
+      "office": {
+        "title": "Their office",
+        "hint": "Creates a workspace for {company} with you as its admin. Import their floor plan there, tidy it up, then hand it over.",
+        "setUp": "Set up their office",
+        "created": "Workspace created",
+        "open": "Open their workspace",
+        "openHint": "You switch into it; the account menu takes you back.",
+        "handOver": "Hand over to {name}",
+        "handOverConfirm": "{name} ({email}) becomes the admin and gets an invitation e-mail. You leave the workspace, and their 30-day free trial starts now.",
+        "noEmail": "Add their e-mail address first.",
+        "handedOver": "Handed over on {when}. Their sign-in link:",
+        "copy": "Copy link",
+        "copied": "Link copied",
+        "sent": "Handed over, invitation sent",
+        "sendYourself": "Handed over. The invitation couldn’t be sent: send them the link yourself."
       }
     }
   },

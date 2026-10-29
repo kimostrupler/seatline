@@ -78,6 +78,8 @@ model Tenant {
   notifyPeople           Boolean   @default(true) @map("notify_people")
   /// a demo workspace (sample data for visitors; deleted after a day)
   isDemo                 Boolean   @default(false) @map("is_demo")
+  /// set up by the operator for a lead, not handed over yet (the operator is its only admin)
+  preparedByOwner        Boolean   @default(false) @map("prepared_by_owner")
   /// last trial reminder sent (days left: 7, then 1)
   trialReminded          Int?      @map("trial_reminded") @db.SmallInt
   onboardingSent         Int       @default(0) @map("onboarding_sent") @db.SmallInt
@@ -473,6 +475,9 @@ model Lead {
   /// the latest automatic answer (out-of-office…): shown on the lead, never counts as a reply
   autoReplyAt      DateTime? @map("auto_reply_at") @db.Timestamptz(3)
   autoReplySubject String?   @map("auto_reply_subject")
+  /// the workspace the operator prepared for this lead (another tenant), and when it was handed over
+  workspaceId      String?   @map("workspace_id") @db.Uuid
+  handedOverAt     DateTime? @map("handed_over_at") @db.Timestamptz(3)
   notes          String?
   /// company size (people working there)
   employees      Int?

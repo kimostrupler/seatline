@@ -164,6 +164,8 @@ group('activity sentences', () => {
     expect(lead('owner.lead.replied').key).toBe('leadReplied');
     expect(lead('owner.lead.auto_reply').key).toBe('leadAutoReply');
     expect(lead('owner.lead.declined').key).toBe('leadDeclined');
+    expect(lead('owner.lead.workspace').key).toBe('leadWorkspace');
+    expect(lead('owner.lead.handover').key).toBe('leadHandedOver');
     expect(
       describe(
         entry({ action: 'owner.lead.delete', entityType: 'lead', before: { company: 'X' } }),

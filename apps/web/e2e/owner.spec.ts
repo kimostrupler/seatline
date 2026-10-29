@@ -216,3 +216,39 @@ test('leads show size, tags and fit; the best ones can be listed first', async (
     'true',
   );
 });
+
+test('a lead’s office: set up a workspace for them, then hand it over with a sign-in link', async ({
+  page,
+}) => {
+  await page.goto('/owner/leads');
+  await expect(page.getByRole('group', { name: 'Where each lead is' })).toBeVisible();
+  await page.locator('input[type=file]').setInputFiles({
+    name: 'leads.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(
+      JSON.stringify([
+        {
+          company: 'Office AG',
+          contactName: 'Anna Muster',
+          greeting: 'Frau Muster',
+          contactEmail: 'anna.muster@office.example',
+          whyNow: 'Sie ziehen um.',
+        },
+      ]),
+    ),
+  });
+  await expect(page.getByText('1 lead added')).toBeVisible();
+  await page.getByRole('button', { name: 'Office AG' }).click();
+  const panel = page.getByRole('dialog');
+  await panel.getByRole('button', { name: 'Set up their office' }).click();
+  await expect(page.getByText('Workspace created')).toBeVisible();
+  await expect(panel.getByRole('button', { name: 'Open their workspace' })).toBeVisible();
+
+  await panel.getByRole('button', { name: 'Hand over to Anna Muster' }).click();
+  const confirm = page.getByRole('alertdialog');
+  await expect(confirm).toContainText('anna.muster@office.example');
+  await confirm.getByRole('button', { name: 'Hand over to Anna Muster' }).click();
+  await expect(page.getByText('Handed over, invitation sent')).toBeVisible();
+  await expect(panel.getByText(/signin\?email=anna\.muster%40office\.example/)).toBeVisible();
+  await expect(panel.getByLabel('Status')).toHaveValue('meeting');
+});

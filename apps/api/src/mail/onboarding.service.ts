@@ -29,7 +29,13 @@ export class OnboardingService {
     const { tenant, admins, seats, people } = await this.db.run(tenantId, async (tx) => ({
       tenant: await tx.tenant.findUniqueOrThrow({
         where: { id: tenantId },
-        select: { name: true, createdAt: true, onboardingSent: true, notifyLanguage: true },
+        select: {
+          name: true,
+          createdAt: true,
+          onboardingSent: true,
+          notifyLanguage: true,
+          preparedByOwner: true,
+        },
       }),
       admins: await tx.person.findMany({
         where: { tenantId, appRole: 'admin', active: true, forgottenAt: null },
@@ -40,7 +46,8 @@ export class OnboardingService {
     }));
     const day = Math.floor((now.getTime() - tenant.createdAt.getTime()) / 86_400_000);
     const due = onboardingDue(day, tenant.onboardingSent);
-    if (!due) return null;
+    // a workspace the operator is setting up for a lead: they get personal help, not tips
+    if (!due || tenant.preparedByOwner) return null;
     const language = tenant.notifyLanguage as MailLanguage;
     const done = (due === 1 && seats > 0) || (due === 3 && people > 1);
     const path = { 1: '/map', 3: '/people', 7: `/help/${language}` }[due];

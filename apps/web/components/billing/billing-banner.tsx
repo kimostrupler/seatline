@@ -15,6 +15,17 @@ export function BillingBanner() {
   const me = useMe().data;
   if (!me) return null;
   if (me.tenant.isDemo) return <DemoBanner />;
+  // the operator setting up a lead's office: a reminder what this workspace is
+  if (me.tenant.preparedByOwner)
+    return (
+      <div
+        role="status"
+        className="border-b bg-primary/10 px-4 py-1.5 text-center text-sm"
+        data-testid="prepared-banner"
+      >
+        {t('prepared', { name: me.tenant.name })}
+      </div>
+    );
   const { state, trialEndsAt } = me.billing;
   const admin = me.role === 'admin';
   const days = Math.max(0, Math.ceil((+new Date(trialEndsAt) - +now) / 86_400_000));
