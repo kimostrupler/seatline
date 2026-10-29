@@ -118,7 +118,9 @@ export function messageProblem(
 
 /** Addresses nobody in particular reads: a person beats these. */
 const GENERIC_INBOX =
-  /^(info|contact|kontakt|office|hello|hallo|mail|admin|welcome|empfang|reception|bonjour|sales|verkauf|service|team)@/i;
+  /^(info|contact|kontakt|office|hello|hallo|mail|admin|welcome|empfang|reception|bonjour|sales|verkauf|service|team|pr|press|presse|media|medien|mediarelations|com|communication|kommunikation|marketing|europe)([._-][^@]*)?@/i;
+/** "Mammut-Team (Medienstelle)", "Équipe Gruner": a greeting for many, not a person. */
+const TEAM_NAME = /team|équipe|medienstelle|redaktion/i;
 
 export type LeadFit = 'good' | 'ok' | 'weak';
 
@@ -145,7 +147,13 @@ export function leadScore(lead: {
     warm: 2,
   };
   for (const t of lead.tags) score += points[t] ?? 0;
-  if (lead.contactName && lead.contactEmail && !GENERIC_INBOX.test(lead.contactEmail)) score += 2;
+  if (
+    lead.contactName &&
+    !TEAM_NAME.test(lead.contactName) &&
+    lead.contactEmail &&
+    !GENERIC_INBOX.test(lead.contactEmail)
+  )
+    score += 2;
   if (lead.whyNow) score += 1;
   return { score, fit: score >= 6 ? 'good' : score >= 3 ? 'ok' : 'weak' };
 }
@@ -283,82 +291,88 @@ const SIGNATURE: Record<LeadLanguage, string> = {
   en: `Kind regards\n${OPERATOR.name}\nFounder, Seatline · seatline.ch`,
 };
 
+/**
+ * The first e-mail: short, personal, no price and no link. It asks one easy question and makes
+ * one offer that costs them nothing (send the floor plan, we set the office up), so answering
+ * is easier than ignoring it. The last line lets them say no politely.
+ */
 const FIRST: Record<LeadLanguage, { subject: string; body: string }> = {
   de: {
     subject: 'Wer sitzt wo bei {company}?',
     body: `Guten Tag {greeting}
 
-{whyNow} Genau dann wird "Wer sitzt wo?" schnell mühsam.
+{whyNow}
 
-Dafür habe ich Seatline gebaut: Sitzplan in einem Nachmittag, Personen per Drag & Drop platzieren, Team-Umzüge über Nacht. Daten in Zürich, CHF 2 pro Arbeitsplatz (ab dem 51. CHF 0.99), 30 Tage gratis.
+Darf ich kurz fragen: Wie behalten Sie heute den Überblick, wer bei {company} wo sitzt? Noch mit Excel?
 
-90-Sekunden-Video:
-{video}
+Ich habe dafür Seatline gebaut, einen Sitzplan, den alle im Browser sehen und der bei jedem Umzug mitwächst. Mein Angebot: Sie schicken mir Ihren Grundriss (ein PDF reicht), und ich richte Ihr Büro kostenlos ein. Sie schauen es sich einfach an, ohne Verpflichtung.
 
-{signature}
+Wäre das hilfreich, oder passt es gerade nicht?
 
-PS: Kein Thema? Ein kurzes "Nein danke" genügt.`,
+{signature}`,
   },
   fr: {
     subject: 'Qui est assis où chez {company} ?',
     body: `Bonjour {greeting}
 
-{whyNow} C’est souvent là que « qui est assis où ? » devient pénible.
+{whyNow}
 
-C’est pour cela que j’ai créé Seatline : un plan de bureau en un après-midi, les personnes placées par glisser-déposer, les déménagements d’équipe pendant la nuit. Données à Zurich, CHF 2 par poste (CHF 0.99 dès le 51e), 30 jours gratuits.
+Puis-je vous poser une petite question : comment savez-vous aujourd’hui qui est assis où chez {company} ? Encore avec Excel ?
 
-Vidéo de 90 secondes :
-{video}
+J’ai créé Seatline pour cela, un plan de bureau que tout le monde voit dans le navigateur et qui suit chaque déménagement. Ma proposition : vous m’envoyez votre plan d’étage (un PDF suffit) et je configure votre bureau gratuitement. Vous n’avez qu’à regarder, sans engagement.
 
-{signature}
+Est-ce que cela vous aiderait, ou ce n’est pas le bon moment ?
 
-PS : Pas pour vous ? Un simple « non merci » suffit.`,
+{signature}`,
   },
   en: {
     subject: 'Who sits where at {company}?',
     body: `Hello {greeting}
 
-{whyNow} That’s exactly when “who sits where?” gets painful.
+{whyNow}
 
-So I built Seatline: a seating plan in an afternoon, people placed by drag and drop, team moves overnight. Data in Zurich, CHF 2 per desk (CHF 0.99 from the 51st), 30 days free.
+May I ask a quick question: how do you keep track today of who sits where at {company}? Still in Excel?
 
-90-second video:
-{video}
+I built Seatline for exactly that, a seating plan everyone sees in the browser that keeps up with every move. My offer: send me your floor plan (a PDF is fine) and I’ll set up your office for free. You just take a look, no strings attached.
 
-{signature}
+Would that help, or is now not a good time?
 
-PS: Not for you? A short “no thanks” is enough.`,
+{signature}`,
   },
 };
 
+/** A week later, as a reply: the offer once more, the 90-second video, and who else to ask. */
 const FOLLOW_UP: Record<LeadLanguage, string> = {
   de: `Guten Tag {greeting}
 
-Nur ein kurzes Nachfassen zu meiner Nachricht von letzter Woche.
+Kurz nachgefasst: Mein Angebot steht. Sie schicken mir den Grundriss, ich richte Ihr Büro in Seatline kostenlos ein.
 
-Falls Sie Seatline selbst kurz ansehen möchten, ganz ohne Konto: seatline.ch → "Demo ausprobieren".
+Lieber zuerst selbst sehen? 90 Sekunden:
+{video}
 
-{signature}
+Falls jemand anderes bei Ihnen für das Büro zuständig ist, bin ich für einen Hinweis dankbar.
 
-PS: Falls jemand anderes bei Ihnen dafür zuständig ist, wäre ich für einen Hinweis dankbar.`,
+{signature}`,
   fr: `Bonjour {greeting}
 
-Je me permets de revenir brièvement sur mon message de la semaine dernière.
+Je me permets de revenir brièvement vers vous : ma proposition tient toujours. Vous m’envoyez le plan d’étage, je configure votre bureau dans Seatline gratuitement.
 
-Si vous souhaitez jeter un œil à Seatline, sans créer de compte : seatline.ch → « Essayer la démo ».
+Vous préférez d’abord voir par vous-même ? 90 secondes :
+{video}
 
-{signature}
+Si quelqu’un d’autre s’occupe des bureaux chez vous, je vous remercie de me l’indiquer.
 
-PS : Si quelqu’un d’autre s’en occupe chez vous, je vous remercie de me l’indiquer.`,
+{signature}`,
   en: `Hello {greeting}
 
-Just a short follow-up on my message from last week.
+A quick follow-up: my offer still stands. Send me the floor plan and I’ll set up your office in Seatline for free.
 
-If you’d like to take a quick look yourself, no account needed: seatline.ch → “Try the demo”.
+Rather see it yourself first? 90 seconds:
+{video}
 
-{signature}
+If someone else looks after the office at your company, I’d be grateful for a pointer.
 
-PS: If someone else looks after this at your company, I’d be grateful for a pointer.`,
+{signature}`,
 };
 
 /** After a "no": thanks, and one question about why (sent at most once, as a reply). */

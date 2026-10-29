@@ -74,8 +74,36 @@ describe('outreach (owner leads)', () => {
       .expect(201);
     expect(res.body).toEqual({
       added: 1,
+      updated: [],
       skipped: ['livingdocs', 'Other GmbH', 'muster ag'],
     });
+    // the same file again with size and tags: only those are filled in, nothing else changes
+    const again = await api(app)
+      .post('/owner/leads/import')
+      .set(a.headers)
+      .send({
+        leads: [
+          { company: 'Muster AG', whyNow: 'Anders', employees: 80, tags: ['moving'] },
+          { company: 'Livingdocs', tags: [] },
+        ],
+      })
+      .expect(201);
+    expect(again.body).toEqual({ added: 0, updated: ['Muster AG'], skipped: ['Livingdocs'] });
+    const muster = (await api(app).get('/owner/leads').set(a.headers)).body.leads.find(
+      (l: { company: string }) => l.company === 'Muster AG',
+    );
+    expect(muster).toMatchObject({ employees: 80, tags: ['moving'], whyNow: 'Ich habe gelesen …' });
+    // a size already set is kept; new tags are added to the ones there
+    const third = await api(app)
+      .post('/owner/leads/import')
+      .set(a.headers)
+      .send({ leads: [{ company: 'Muster AG', employees: 5, tags: ['moving', 'hybrid'] }] })
+      .expect(201);
+    expect(third.body.updated).toEqual(['Muster AG']);
+    const after = (await api(app).get('/owner/leads').set(a.headers)).body.leads.find(
+      (l: { company: string }) => l.company === 'Muster AG',
+    );
+    expect(after).toMatchObject({ employees: 80, tags: ['moving', 'hybrid'] });
     const list = (await api(app).get('/owner/leads').set(a.headers).expect(200)).body.leads;
     expect(list.find((l: { company: string }) => l.company === 'Muster AG')).toMatchObject({
       contactEmail: 'info@muster.ch',
@@ -142,7 +170,8 @@ describe('outreach (owner leads)', () => {
       subject: 'Wer sitzt wo bei Livingdocs?',
       fromName: 'Kimo Strupler · Seatline',
     });
-    expect(first!.html).toContain('seatline-video.gif');
+    // the first e-mail is plain words, no picture; the follow-up carries the video
+    expect(first!.html).not.toContain('seatline-video.gif');
     expect(first!.messageId).toMatch(/^<.+@seatline\.ch>$/);
     let got = await api(app).get(`/owner/leads/${id}`).set(a.headers).expect(200);
     expect(got.body).toMatchObject({ status: 'sent' });

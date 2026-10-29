@@ -45,9 +45,16 @@ describe('outreach rules', () => {
     const d = draftMessage('first', lead);
     expect(d.subject).toBe('Wer sitzt wo bei Livingdocs?');
     expect(d.body).toContain('Guten Tag Herr van der Ploeg');
-    expect(d.body).not.toContain('Grundriss');
-    expect(d.body).toContain('https://seatline.ch/de/video?utm_source=email');
+    // personal and short: a question, the free set-up offer; no price, no link
+    expect(d.body).toContain('Wie behalten Sie heute den Überblick, wer bei Livingdocs wo sitzt?');
+    expect(d.body).toContain('ich richte Ihr Büro kostenlos ein');
+    expect(d.body).not.toMatch(/CHF|https?:\/\//);
     expect(wordCount(d.body)).toBeLessThanOrEqual(100);
+    // the follow-up brings the offer again and the 90-second video
+    const f = draftMessage('follow_up', lead, d.subject);
+    expect(f.body).toContain('https://seatline.ch/de/video?utm_source=email');
+    for (const language of ['fr', 'en'] as const)
+      expect(draftMessage('first', { ...lead, language }).body).not.toMatch(/CHF|https?:\/\//);
     const blank = draftMessage('first', { ...lead, greeting: null, whyNow: null, address: null });
     expect(blank.body).toContain('[Name]');
     expect(draftMessage('follow_up', lead, d.subject).subject).toBe(`Re: ${d.subject}`);
@@ -95,7 +102,7 @@ describe('outreach rules', () => {
   });
 
   it('makes the HTML version: same words, the video as its picture, no tracking', () => {
-    const html = outreachHtml(draftMessage('first', lead).body, 'de');
+    const html = outreachHtml(draftMessage('follow_up', lead).body, 'de');
     expect(html).toContain('<img src="https://seatline.ch/site-video/email/seatline-video.gif"');
     expect(html).toContain('href="https://seatline.ch/de/video?utm_source=email"');
     expect(html).toContain('Guten Tag Herr van der Ploeg');
@@ -130,6 +137,13 @@ describe('which leads are worth it, and reading a "no"', () => {
     expect(
       leadScore({ ...base, employees: 8, contactName: 'Team', contactEmail: 'info@x.ch' }).fit,
     ).toBe('weak');
+    // a press inbox or a team name isn't a person either
+    for (const [contactName, contactEmail] of [
+      ['Mammut-Team (Medienstelle)', 'pr@mammut.example'],
+      ['Anna Muster', 'media.relations@x.example'],
+      ['Équipe Gruner', 'geneve@gruner.example'],
+    ] as const)
+      expect(leadScore({ ...base, contactName, contactEmail }).score).toBe(0);
     expect(leadScore({ ...base, employees: 60, tags: ['growing'] })).toEqual({
       score: 5,
       fit: 'ok',
