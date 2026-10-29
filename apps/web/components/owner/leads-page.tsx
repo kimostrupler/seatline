@@ -1153,17 +1153,21 @@ function ImportLeads() {
         else delete lead.employees;
         return lead;
       });
-      return api<{ added: number; skipped: string[] }>('/owner/leads/import', {
+      return api<{ added: number; updated: string[]; skipped: string[] }>('/owner/leads/import', {
         method: 'POST',
         body: { leads },
       });
     },
     onSuccess: (r) => {
       void client.invalidateQueries({ queryKey: ['owner', 'leads'] });
+      const notes = [
+        r.updated.length &&
+          t('importUpdated', { count: r.updated.length, names: r.updated.join(', ') }),
+        r.skipped.length &&
+          t('importSkipped', { count: r.skipped.length, names: r.skipped.join(', ') }),
+      ].filter(Boolean);
       toast.success(t('imported', { count: r.added }), {
-        description: r.skipped.length
-          ? t('importSkipped', { count: r.skipped.length, names: r.skipped.join(', ') })
-          : undefined,
+        description: notes.length ? notes.join(' ') : undefined,
       });
     },
     onError: (e) =>

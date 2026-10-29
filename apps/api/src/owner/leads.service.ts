@@ -181,27 +181,56 @@ export class LeadsService {
    * Adds researched leads in one go. A company or e-mail address that's already a lead (in any
    * status, "no" included) is skipped, so nobody is written to twice.
    */
+  /**
+   * Researched leads from a file. A company or address that is already a lead isn't added again;
+   * the file may only fill in what that lead still lacks: its size, and tags it doesn't have yet.
+   */
   async import(ctx: RequestContext, input: Array<LeadInput & { company: string }>) {
     return this.db.run(
       ctx.tenantId,
       async (tx) => {
         const existing = await tx.lead.findMany({
           where: { tenantId: ctx.tenantId },
-          select: { company: true, contactEmail: true },
+          select: { id: true, company: true, contactEmail: true, employees: true, tags: true },
         });
-        const seen = new Set(
-          existing.flatMap((l) => [key(l.company), l.contactEmail ?? '']).filter(Boolean),
+        const byKey = new Map(
+          existing.flatMap((l) =>
+            [key(l.company), l.contactEmail ?? ''].filter(Boolean).map((k) => [k, l] as const),
+          ),
         );
+        const inFile = new Set<string>();
         const added: string[] = [];
+        const updated: string[] = [];
         const skipped: string[] = [];
         for (const row of input) {
           const data = cleanLead(row);
           const keys = [key(data.company), data.contactEmail ?? ''].filter(Boolean);
-          if (keys.some((k) => seen.has(k))) {
-            skipped.push(data.company);
+          if (keys.some((k) => inFile.has(k))) {
+            skipped.push(data.company); // twice in the same file
             continue;
           }
-          keys.forEach((k) => seen.add(k));
+          keys.forEach((k) => inFile.add(k));
+          const old = keys.map((k) => byKey.get(k)).find(Boolean);
+          if (old) {
+            const fill: { employees?: number; tags?: string[] } = {};
+            if (old.employees == null && data.employees != null) fill.employees = data.employees;
+            const tags = [...new Set([...old.tags, ...(data.tags ?? [])])];
+            if (tags.length > old.tags.length) fill.tags = tags;
+            if (!Object.keys(fill).length) {
+              skipped.push(data.company);
+              continue;
+            }
+            await tx.lead.update({ where: { id: old.id }, data: fill });
+            await audit(tx, ctx, {
+              action: 'owner.lead.update',
+              entityType: 'lead',
+              entityId: old.id,
+              before: { company: old.company, employees: old.employees, tags: old.tags },
+              after: { company: old.company, ...fill, imported: true },
+            });
+            updated.push(old.company);
+            continue;
+          }
           const lead = await tx.lead.create({
             data: { ...data, status: 'research', tenantId: ctx.tenantId },
           });
@@ -213,7 +242,7 @@ export class LeadsService {
           });
           added.push(lead.company);
         }
-        return { added: added.length, skipped };
+        return { added: added.length, updated, skipped };
       },
       BIG_BATCH,
     );

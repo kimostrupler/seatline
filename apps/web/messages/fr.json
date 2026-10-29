@@ -1748,6 +1748,7 @@
       "keep": "Garder",
       "import": "Importer",
       "imported": "{count, plural, one {# lead ajouté} other {# leads ajoutés}}",
+      "importUpdated": "Taille ou tags complétés : {names}.",
       "importSkipped": "Déjà présents, ignorés : {names}",
       "importInvalid": "Ce fichier n’est pas une liste de leads (JSON).",
       "tabs": {

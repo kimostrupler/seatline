@@ -619,7 +619,10 @@ test update-screenshots --project chromium`; `updates.test.ts` checks). **Add a 
   scheduled ones now; `/send-ready`: the filled-in template to every e-mail lead at "write first",
   incomplete templates skipped), each with one confirmation, at most `SEND_ALL_MAX` (25) per click;
   **Write all one by one** (`WriteAll`) opens each ready lead's draft in turn (Schedule = next, Skip),
-  plus "schedule the rest as they are" (`POST /owner/leads/schedule-ready`, no cap: no SMTP); a "why now" sentence and no `[placeholder]` left (`messageProblem`). Schedule
+  plus "schedule the rest as they are" (`POST /owner/leads/schedule-ready`, no cap: no SMTP); a "why now" sentence and no `[placeholder]` left (`messageProblem`). The first e-mail is short
+  and personal: why now, one question ("how do you keep track today? Excel?"), the offer to set up
+  their office for free from their floor plan, a polite way out; no price, no link (the follow-up
+  brings the offer again + the 90 s video). Schedule
   = the next Tue–Thu 8 am Zurich (`nextSendSlot`), or **Send now** (after one confirmation;
   `sendNow` on schedule, or `POST …/messages/:id/send` for a scheduled one; a failed send waits
   for the next slot); the `nightly-sync` job now runs at 01:00 and
@@ -639,7 +642,8 @@ test update-screenshots --project chromium`; `updates.test.ts` checks). **Add a 
   (`isNo` on the text minus our own quoted lines, `ownLinesRemoved`) sets the lead to `no` (audit
   `owner.lead.declined`); after a "no" the panel offers ONE `ask_why` message (thank you + "Excel, a
   tool, or bad timing?", sent as a reply, lead stays `no`; the privacy policy allows exactly this).
-  Leads carry `employees` + `tags` (`LEAD_TAGS`, also in the import file); `leadScore` (shared,
+  Leads carry `employees` + `tags` (`LEAD_TAGS`, also in the import file; re-importing a lead that
+  exists only fills in a missing size and adds new tags, nothing else); `leadScore` (shared,
   tested) gives the list's **Fit** (good/ok/weak: 40–300 people, moving/growing/hybrid, a named
   person not info@, a reason) with "Best fit first" / "Good fit only"; a message is claimed (`sent_at`) before SMTP so it never goes
   out twice; 14 days after the follow-up → `no_answer`;

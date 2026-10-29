@@ -1748,6 +1748,7 @@
       "keep": "Keep",
       "import": "Import",
       "imported": "{count, plural, one {# lead added} other {# leads added}}",
+      "importUpdated": "Size or tags filled in: {names}.",
       "importSkipped": "Already there, skipped: {names}",
       "importInvalid": "That file isn’t a list of leads (JSON).",
       "tabs": {
