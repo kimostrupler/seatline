@@ -37,7 +37,8 @@ import { loadConfig } from '../config';
 import { BIG_BATCH, TenantDb, type Tx } from '../db/tenant-db.service';
 import { InboxService, withoutQuote, type Reply } from '../mail/inbox.service';
 import { MailService } from '../mail/mail.service';
-import { outreachReminderMail } from '../mail/texts';
+import { inviteMail, outreachReminderMail } from '../mail/texts';
+import { slugify } from '../auth/identity.service';
 
 type System = { tenantId: string; actorId: null };
 /** Statuses where we're still waiting for the lead (a reply ends it, scheduled mails stop). */
@@ -537,6 +538,178 @@ export class LeadsService {
         auto: m.auto,
         text: withoutQuote(m.text).slice(0, 20_000),
       }));
+  }
+
+  /**
+   * "Set up their office": a new workspace for the lead's company, with a building and a first
+   * floor, and the operator as its only admin, so they can import the floor plan and tidy it up
+   * before handing it over. While the operator is its admin it is never billed (owner rule).
+   */
+  async prepareWorkspace(ctx: RequestContext, id: string) {
+    const { lead, me } = await this.db.run(ctx.tenantId, async (tx) => ({
+      lead: await this.find(tx, ctx.tenantId, id),
+      me: await tx.person.findFirstOrThrow({
+        where: { id: ctx.actorId, tenantId: ctx.tenantId },
+        select: { email: true, displayName: true },
+      }),
+    }));
+    if (lead.workspaceId)
+      throw new ConflictException({ message: 'Already set up', code: 'prepared' });
+    const tenantId = randomUUID();
+    const floorName = { de: 'Erdgeschoss', fr: 'Rez-de-chaussée', en: 'Ground floor' }[
+      lead.language as LeadLanguage
+    ];
+    await this.db.run(tenantId, async (tx) => {
+      await tx.tenant.create({
+        data: {
+          id: tenantId,
+          name: lead.company,
+          slug: slugify(lead.company),
+          preparedByOwner: true,
+          notifyLanguage: lead.language,
+        },
+      });
+      const admin = await tx.person.create({
+        data: { tenantId, email: me.email, displayName: me.displayName, appRole: 'admin' },
+      });
+      const building = await tx.building.create({
+        data: { tenantId, name: lead.company, address: lead.address },
+      });
+      await tx.floor.create({
+        data: { tenantId, buildingId: building.id, name: floorName, level: 0 },
+      });
+      await audit(
+        tx,
+        { tenantId, actorId: admin.id },
+        {
+          action: 'tenant.create',
+          entityType: 'tenant',
+          entityId: tenantId,
+          after: { name: lead.company, signIn: 'email', preparedByOwner: true },
+        },
+      );
+    });
+    await this.db.run(ctx.tenantId, async (tx) => {
+      await tx.lead.update({ where: { id }, data: { workspaceId: tenantId } });
+      await audit(tx, ctx, {
+        action: 'owner.lead.workspace',
+        entityType: 'lead',
+        entityId: id,
+        after: { company: lead.company, workspaceId: tenantId },
+      });
+    });
+    return { workspaceId: tenantId };
+  }
+
+  /**
+   * "Hand over": the lead's contact becomes the workspace's admin and gets an invitation; the
+   * operator leaves it (no access afterwards) and the 30-day free trial starts now.
+   */
+  async handOver(ctx: RequestContext, id: string, now = new Date()) {
+    const { lead, me } = await this.db.run(ctx.tenantId, async (tx) => ({
+      lead: await this.find(tx, ctx.tenantId, id),
+      me: await tx.person.findFirstOrThrow({
+        where: { id: ctx.actorId, tenantId: ctx.tenantId },
+        select: { email: true, displayName: true },
+      }),
+    }));
+    if (!lead.workspaceId || lead.handedOverAt)
+      throw new ConflictException({ message: 'Nothing to hand over', code: 'not_prepared' });
+    if (!lead.contactEmail)
+      throw new BadRequestException({
+        message: 'The lead has no e-mail address',
+        code: 'no_email',
+      });
+    if (this.config.OWNER_EMAILS.includes(lead.contactEmail.toLowerCase()))
+      throw new ConflictException({ message: 'That is your own address', code: 'reserved_email' });
+    const workspaceId = lead.workspaceId;
+    const contactEmail = lead.contactEmail;
+    const workspace = await this.db.run(workspaceId, async (tx) => {
+      const tenant = await tx.tenant.findFirst({ where: { id: workspaceId } });
+      if (!tenant?.preparedByOwner)
+        throw new ConflictException({ message: 'Nothing to hand over', code: 'not_prepared' });
+      const existing = await tx.person.findFirst({
+        where: { tenantId: workspaceId, email: { equals: contactEmail, mode: 'insensitive' } },
+      });
+      const contact = existing
+        ? await tx.person.update({
+            where: { id: existing.id },
+            data: { active: true, appRole: 'admin', leftAt: null },
+          })
+        : await tx.person.create({
+            data: {
+              tenantId: workspaceId,
+              email: contactEmail,
+              displayName: lead.contactName ?? lead.greeting ?? contactEmail,
+              appRole: 'admin',
+            },
+          });
+      // the operator leaves: from now on it's theirs (and billed like any workspace)
+      const operator = await tx.person.findFirst({
+        where: { tenantId: workspaceId, email: { equals: me.email, mode: 'insensitive' } },
+      });
+      if (operator)
+        await tx.person.update({
+          where: { id: operator.id },
+          data: { active: false, leftAt: now },
+        });
+      await tx.tenant.update({
+        where: { id: workspaceId },
+        data: {
+          preparedByOwner: false,
+          trialEndsAt: new Date(now.getTime() + 30 * 86_400_000),
+          trialReminded: null,
+          // handed over in person: no generic onboarding tips
+          onboardingSent: 7,
+        },
+      });
+      await audit(
+        tx,
+        { tenantId: workspaceId, actorId: operator?.id ?? null },
+        {
+          action: 'tenant.handover',
+          entityType: 'tenant',
+          entityId: workspaceId,
+          after: { name: tenant.name, admin: contact.id },
+        },
+      );
+      return tenant;
+    });
+    const link = `${this.mail.appUrl}/signin?email=${encodeURIComponent(contactEmail)}`;
+    let invited = false;
+    if (this.mail.configured)
+      try {
+        await this.mail.send(
+          inviteMail(
+            contactEmail,
+            me.displayName,
+            workspace.name,
+            link,
+            lead.language as LeadLanguage,
+          ),
+        );
+        invited = true;
+      } catch {
+        // the link is shown to the operator too: they can send it themselves
+      }
+    await this.db.run(ctx.tenantId, async (tx) => {
+      await tx.lead.update({
+        where: { id },
+        data: {
+          handedOverAt: now,
+          ...(['research', 'ready', 'sent', 'followed_up', 'replied'].includes(lead.status)
+            ? { status: 'meeting' }
+            : {}),
+        },
+      });
+      await audit(tx, ctx, {
+        action: 'owner.lead.handover',
+        entityType: 'lead',
+        entityId: id,
+        after: { company: lead.company, workspaceId },
+      });
+    });
+    return { link, invited };
   }
 
   private readonly lastCheck = new Map<string, number>();

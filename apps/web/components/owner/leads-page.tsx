@@ -828,6 +828,8 @@ function LeadPanel({ id, onDeleted }: { id: string; onDeleted: () => void }) {
       )}
       {kind && <Composer lead={lead} kind={kind} onScheduled={refresh} />}
 
+      <LeadOffice lead={lead} onChange={refresh} />
+
       {lead.firstSentAt && <Replies leadId={lead.id} />}
 
       {lead.messages.length > 0 && (
@@ -886,6 +888,118 @@ function LeadPanel({ id, onDeleted }: { id: string; onDeleted: () => void }) {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+}
+
+/**
+ * "Their office": set up a workspace for the lead (you as admin), open it to import their floor
+ * plan, then hand it over: they become admin and get an invitation; you leave it.
+ */
+function LeadOffice({ lead, onChange }: { lead: LeadDetail; onChange: () => void }) {
+  const t = useTranslations('owner.leads.office');
+  const tl = useTranslations('owner.leads');
+  const when = useWhen();
+  const [ask, setAsk] = useState(false);
+  const [link, setLink] = useState<string | null>(null);
+  const setUp = useMutation({
+    mutationFn: () =>
+      api<{ workspaceId: string }>(`/owner/leads/${lead.id}/workspace`, { method: 'POST' }),
+    onSuccess: () => {
+      onChange();
+      toast.success(t('created'));
+    },
+    onError: (error) => toast.error(tl('failed', { message: failedMessage(error) })),
+  });
+  const handOver = useMutation({
+    mutationFn: () =>
+      api<{ link: string; invited: boolean }>(`/owner/leads/${lead.id}/handover`, {
+        method: 'POST',
+      }),
+    onSuccess: (r) => {
+      setLink(r.link);
+      onChange();
+      if (r.invited) toast.success(t('sent'));
+      else toast.warning(t('sendYourself'));
+    },
+    onError: (error) => toast.error(tl('failed', { message: failedMessage(error) })),
+  });
+  const name = lead.contactName ?? lead.greeting ?? lead.company;
+  const signInLink =
+    link ??
+    (lead.contactEmail
+      ? `${window.location.origin}/signin?email=${encodeURIComponent(lead.contactEmail)}`
+      : null);
+  return (
+    <section className="grid gap-2 rounded-xl border p-4" aria-label={t('title')}>
+      <h3 className="font-medium">{t('title')}</h3>
+      {!lead.workspaceId ? (
+        <>
+          <p className="text-sm text-muted-foreground">{t('hint', { company: lead.company })}</p>
+          <Button
+            className="justify-self-start"
+            disabled={setUp.isPending}
+            onClick={() => setUp.mutate()}
+          >
+            {t('setUp')}
+          </Button>
+        </>
+      ) : lead.handedOverAt ? (
+        <div className="grid gap-2 text-sm">
+          <p>{t('handedOver', { when: when(lead.handedOverAt) })}</p>
+          {signInLink && (
+            <div className="flex flex-wrap items-center gap-2">
+              <code className="rounded bg-muted px-2 py-1 text-xs break-all">{signInLink}</code>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() =>
+                  void navigator.clipboard
+                    .writeText(signInLink)
+                    .then(() => toast.success(t('copied')))
+                }
+              >
+                <Copy aria-hidden /> {t('copy')}
+              </Button>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="grid gap-2">
+          <div className="flex flex-wrap gap-2">
+            <form method="post" action="/auth/email/workspace">
+              <input type="hidden" name="tenantId" value={lead.workspaceId} />
+              <Button type="submit" variant="outline">
+                {t('open')}
+              </Button>
+            </form>
+            <Button
+              className={sendClass}
+              disabled={!lead.contactEmail || handOver.isPending}
+              onClick={() => setAsk(true)}
+            >
+              <Send aria-hidden /> {t('handOver', { name })}
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {lead.contactEmail ? t('openHint') : t('noEmail')}
+          </p>
+        </div>
+      )}
+      <AlertDialog open={ask} onOpenChange={setAsk}>
+        <AlertDialogContent>
+          <AlertDialogTitle>{t('handOver', { name })}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {t('handOverConfirm', { name, email: lead.contactEmail ?? '' })}
+          </AlertDialogDescription>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{tl('keep')}</AlertDialogCancel>
+            <AlertDialogAction className={sendClass} onClick={() => handOver.mutate()}>
+              {t('handOver', { name })}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </section>
   );
 }
 

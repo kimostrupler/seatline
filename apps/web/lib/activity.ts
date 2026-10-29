@@ -293,6 +293,8 @@ export function describe(e: ActivityEntry, refs: ActivityRefs, unknownName: stri
       };
     case 'tenant.create':
       return { key: 'workspaceCreated', values: { name: str(a.name) ?? '' } };
+    case 'tenant.handover':
+      return { key: 'workspaceHandedOver', values: { name: str(a.name) ?? '' } };
     case 'team_plan.set':
       return a.headcount === undefined
         ? { key: 'teamPlanRemoved', values: { team: str(b.team) ?? '' } }
@@ -364,7 +366,9 @@ export function describe(e: ActivityEntry, refs: ActivityRefs, unknownName: stri
     case 'owner.lead.sent':
     case 'owner.lead.replied':
     case 'owner.lead.auto_reply':
-    case 'owner.lead.declined': {
+    case 'owner.lead.declined':
+    case 'owner.lead.workspace':
+    case 'owner.lead.handover': {
       const key = {
         create: 'leadCreated',
         update: 'leadUpdated',
@@ -375,6 +379,8 @@ export function describe(e: ActivityEntry, refs: ActivityRefs, unknownName: stri
         replied: 'leadReplied',
         auto_reply: 'leadAutoReply',
         declined: 'leadDeclined',
+        workspace: 'leadWorkspace',
+        handover: 'leadHandedOver',
       }[e.action.slice('owner.lead.'.length)]!;
       return { key, values: { name: pick('company') ?? '' } };
     }

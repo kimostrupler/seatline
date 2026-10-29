@@ -705,7 +705,8 @@
     "people": "Personnes",
     "updates": "Nouveautés",
     "helpPage": "Aide pour cette page",
-    "videoTour": "Visite vidéo"
+    "videoTour": "Visite vidéo",
+    "switchWorkspace": "Changer d’espace de travail"
   },
   "overview": {
     "title": "Vue d’ensemble",
@@ -829,7 +830,8 @@
       "seatUnshared": "a refait du poste {seat} un poste fixe",
       "deskBooked": "a réservé le poste {seat} pour {person} le {day}",
       "bookingCancelled": "a annulé la réservation du poste {seat} de {person} le {day}",
-      "bookingCancelledLeft": "a annulé la réservation du poste {seat} de {person} le {day} (a quitté l’organisation)"
+      "bookingCancelledLeft": "a annulé la réservation du poste {seat} de {person} le {day} (a quitté l’organisation)",
+      "workspaceHandedOver": "a transmis l’espace de travail « {name} »"
     },
     "showPlan": "Ouvrir le plan",
     "search": "Rechercher dans l’activité",
@@ -845,7 +847,9 @@
     "leadSent": "a envoyé l’e-mail à « {name} »",
     "leadReplied": "a détecté une réponse de « {name} »",
     "leadAutoReply": "a détecté une réponse automatique (absence) de « {name} »",
-    "leadDeclined": "a détecté un « non » de « {name} »"
+    "leadDeclined": "a détecté un « non » de « {name} »",
+    "leadWorkspace": "a configuré un espace de travail pour « {name} »",
+    "leadHandedOver": "a transmis l’espace de travail à « {name} »"
   },
   "dashboard": {
     "title": "Accueil",
@@ -1181,7 +1185,8 @@
       "readOnlyAdmin": "Cet espace est en lecture seule : l’essai gratuit ou l’abonnement est terminé.",
       "pastDue": "Le dernier paiement pour Seatline a échoué.",
       "trialEnding": "{days, plural, =0 {L’essai gratuit se termine aujourd’hui.} one {L’essai gratuit se termine dans # jour.} other {L’essai gratuit se termine dans # jours.}}",
-      "open": "Ouvrir la facturation"
+      "open": "Ouvrir la facturation",
+      "prepared": "Vous configurez « {name} » pour un lead. Importez son plan sous Modifier le plan → Ajouter un plan, puis transmettez-le depuis Leads dans votre propre espace."
     },
     "volumeTier": "{price} dès le {from}e poste"
   },
@@ -1805,6 +1810,22 @@
         "multiple_sites": "Plusieurs sites",
         "microsoft365": "Microsoft 365",
         "warm": "Contact chaud"
+      },
+      "office": {
+        "title": "Leur bureau",
+        "hint": "Crée un espace de travail pour {company} dont vous êtes l’admin. Importez-y son plan d’étage, ajustez-le, puis transmettez-le.",
+        "setUp": "Configurer leur bureau",
+        "created": "Espace de travail créé",
+        "open": "Ouvrir leur espace",
+        "openHint": "Vous y basculez ; le menu du compte vous ramène.",
+        "handOver": "Transmettre à {name}",
+        "handOverConfirm": "{name} ({email}) devient admin et reçoit une invitation par e-mail. Vous quittez l’espace, et les 30 jours d’essai gratuit commencent maintenant.",
+        "noEmail": "Ajoutez d’abord son adresse e-mail.",
+        "handedOver": "Transmis le {when}. Son lien de connexion :",
+        "copy": "Copier le lien",
+        "copied": "Lien copié",
+        "sent": "Transmis, invitation envoyée",
+        "sendYourself": "Transmis. L’invitation n’a pas pu être envoyée : envoyez-lui le lien vous-même."
       }
     }
   },

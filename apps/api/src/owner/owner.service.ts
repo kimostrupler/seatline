@@ -55,13 +55,22 @@ export class OwnerService {
     const person = await this.db.run(ctx.tenantId, (tx) =>
       tx.person.findFirst({
         where: { id: ctx.actorId, tenantId: ctx.tenantId, active: true },
-        select: { email: true, tenant: { select: { entraTenantId: true } } },
+        select: {
+          email: true,
+          tenant: { select: { entraTenantId: true, preparedByOwner: true } },
+        },
       }),
     );
     const email = person?.email.toLowerCase();
     // Only in a workspace that signs in by e-mail link: there the address is proven (the link
     // went to it). A Microsoft directory could give any user any e-mail address.
-    if (!email || person?.tenant.entraTenantId || !this.config.OWNER_EMAILS.includes(email))
+    // …and only in the operator's own workspace, not in one being set up for a lead
+    if (
+      !email ||
+      person?.tenant.entraTenantId ||
+      person?.tenant.preparedByOwner ||
+      !this.config.OWNER_EMAILS.includes(email)
+    )
       throw new NotFoundException({
         message: `Cannot GET ${path}`,
         error: 'Not Found',

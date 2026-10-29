@@ -652,6 +652,16 @@ test update-screenshots --project chromium`; `updates.test.ts` checks). **Add a 
   the follow-up is a reply; a copy goes to the mailbox's Sent folder. IMAP: `IMAP_HOST`
   (mail-setup.sh sets imap.mail.hostpoint.ch), login = SMTP user; tests use `MAIL_INBOX` files.
   Audits `owner.lead.*`. The privacy policy (section 3) describes outreach.
+- **Their office** (lead panel; `prepareWorkspace` / `handOver` in `LeadsService`): "Set up their
+  office" creates a workspace for the lead (company name, a building, a first floor; migration
+  `20261106090000_prepared_workspaces`: `tenants.prepared_by_owner`, `leads.workspace_id` /
+  `handed_over_at`) with the operator as its only admin — so it's billing `off` (owner rule), gets
+  no onboarding tips, and `/owner` stays hidden inside it. "Open their workspace" posts to
+  `/auth/email/workspace` (same as picking a workspace at sign-in; the account menu lists all of
+  an address's e-mail workspaces via `GET /me/workspaces` to switch back). "Hand over" makes the
+  contact admin (invitation e-mail + the sign-in link shown to copy), sets the operator inactive
+  (they leave), starts a fresh 30-day trial, marks onboarding done and the lead `meeting`; audits
+  `owner.lead.workspace` / `owner.lead.handover` and `tenant.handover` in that workspace.
 - Azure costs that fail show Azure's own reason on the dashboard (`detail`); `owner-setup.sh` now
   reports whether the "Cost Management Reader" role could be given (needs Owner / User Access
   Administrator on the subscription).

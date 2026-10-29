@@ -554,4 +554,48 @@ describe('outreach (owner leads)', () => {
       .send({ kind: 'ask_why', ...why.body })
       .expect(409);
   });
+
+  it('sets up an office for a lead, then hands it over: the contact is admin, the operator leaves', async () => {
+    const id = await newLead();
+    await api(app).post(`/owner/leads/${id}/workspace`).set(b.headers).expect(404);
+    const res = await api(app).post(`/owner/leads/${id}/workspace`).set(a.headers).expect(201);
+    const workspaceId = res.body.workspaceId as string;
+    await api(app).post(`/owner/leads/${id}/workspace`).set(a.headers).expect(409);
+
+    // a workspace named after the company, a building and a floor, the operator as its admin
+    const tenant = await owner.tenant.findUniqueOrThrow({ where: { id: workspaceId } });
+    expect(tenant).toMatchObject({ name: 'Livingdocs', preparedByOwner: true });
+    expect(await owner.floor.count({ where: { tenantId: workspaceId } })).toBe(1);
+    const operator = await owner.person.findFirstOrThrow({ where: { tenantId: workspaceId } });
+    expect(operator).toMatchObject({ email: 'admin@alpha.example', appRole: 'admin' });
+    const inside = { 'x-tenant-id': workspaceId, 'x-user-id': operator.id };
+    // inside it the operator is an admin, but the owner pages stay in their own workspace
+    await api(app).get('/buildings').set(inside).expect(200);
+    await api(app).get('/owner/check').set(inside).expect(404);
+    // the account menu offers both workspaces
+    const list = (await api(app).get('/me/workspaces').set(a.headers).expect(200)).body;
+    expect(list.map((w: { name: string }) => w.name).sort()).toEqual(['Livingdocs', 'alpha']);
+    expect(list.find((w: { current: boolean }) => w.current).name).toBe('alpha');
+
+    await clearMails();
+    const hand = await api(app).post(`/owner/leads/${id}/handover`).set(a.headers).expect(201);
+    expect(hand.body.link).toContain('/signin?email=contact%40livingdocs.io');
+    const [invite] = (await sentMails()) as Array<Record<string, string>>;
+    expect(invite).toMatchObject({ to: 'contact@livingdocs.io' });
+    const people = await owner.person.findMany({ where: { tenantId: workspaceId } });
+    expect(people.find((p) => p.email === 'contact@livingdocs.io')).toMatchObject({
+      appRole: 'admin',
+      active: true,
+    });
+    expect(people.find((p) => p.id === operator.id)).toMatchObject({ active: false });
+    const after = await owner.tenant.findUniqueOrThrow({ where: { id: workspaceId } });
+    expect(after.preparedByOwner).toBe(false);
+    const days = (after.trialEndsAt.getTime() - Date.now()) / 86_400_000;
+    expect(days).toBeGreaterThan(29.9);
+    const got = (await api(app).get(`/owner/leads/${id}`).set(a.headers)).body;
+    expect(got).toMatchObject({ status: 'meeting', workspaceId });
+    expect(got.handedOverAt).not.toBeNull();
+    // only once
+    await api(app).post(`/owner/leads/${id}/handover`).set(a.headers).expect(409);
+  });
 });

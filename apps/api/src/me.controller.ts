@@ -23,7 +23,7 @@ export class MeController {
         }),
         tx.tenant.findFirst({
           where: { id: ctx.tenantId },
-          select: { id: true, name: true, trialEndsAt: true, isDemo: true },
+          select: { id: true, name: true, trialEndsAt: true, isDemo: true, preparedByOwner: true },
         }),
       ]);
       const { trialEndsAt, ...workspace } = orNotFound(tenant, 'Tenant');
@@ -35,5 +35,23 @@ export class MeController {
         billing: { state: await this.billing.state(ctx.tenantId), trialEndsAt },
       };
     });
+  }
+
+  /**
+   * The other workspaces the signed-in address belongs to (e-mail sign-in only), for the
+   * account menu's switcher. Microsoft workspaces keep their own sign-in, so none there.
+   */
+  @Get('workspaces')
+  async workspaces(@Ctx() ctx: RequestContext) {
+    const me = await this.db.run(ctx.tenantId, (tx) =>
+      tx.person.findFirst({
+        where: { id: ctx.actorId, tenantId: ctx.tenantId },
+        select: { email: true, tenant: { select: { entraTenantId: true } } },
+      }),
+    );
+    if (!me || me.tenant.entraTenantId) return [];
+    return (await this.db.emailWorkspaces(me.email))
+      .filter((w) => !w.microsoft && w.active)
+      .map((w) => ({ id: w.tenant_id, name: w.name, current: w.tenant_id === ctx.tenantId }));
   }
 }

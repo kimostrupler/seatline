@@ -18,7 +18,7 @@ import type {
 
 export interface Me {
   person: { id: string; displayName: string; email: string };
-  tenant: { id: string; name: string; isDemo?: boolean };
+  tenant: { id: string; name: string; isDemo?: boolean; preparedByOwner?: boolean };
   role: AppRole;
   billing: { state: BillingState; trialEndsAt: string };
 }
@@ -492,6 +492,9 @@ export interface Lead {
   /** the latest automatic answer (out-of-office…); never counts as a reply */
   autoReplyAt: string | null;
   autoReplySubject: string | null;
+  /** the workspace the operator set up for this lead, and when it was handed over */
+  workspaceId: string | null;
+  handedOverAt: string | null;
   notes: string | null;
   employees: number | null;
   tags: Array<'moving' | 'growing' | 'hybrid' | 'multiple_sites' | 'microsoft365' | 'warm'>;

@@ -19,7 +19,7 @@ export type Membership =
   | { status: 'no_access'; workspace: { id: string; name: string } }
   | { status: 'inactive'; workspace: { id: string; name: string } };
 
-function slugify(name: string) {
+export function slugify(name: string) {
   const base = name
     .normalize('NFKD')
     .replace(/[̀-ͯ]/g, '')

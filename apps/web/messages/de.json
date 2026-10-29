@@ -705,7 +705,8 @@
     "people": "Personen",
     "updates": "Neuigkeiten",
     "helpPage": "Hilfe zu dieser Seite",
-    "videoTour": "Video-Tour"
+    "videoTour": "Video-Tour",
+    "switchWorkspace": "Arbeitsbereich wechseln"
   },
   "overview": {
     "title": "Übersicht",
@@ -829,7 +830,8 @@
       "seatUnshared": "hat Platz {seat} wieder zu einem festen Platz gemacht",
       "deskBooked": "hat Platz {seat} für {person} am {day} gebucht",
       "bookingCancelled": "hat die Buchung von Platz {seat} für {person} am {day} storniert",
-      "bookingCancelledLeft": "hat die Buchung von Platz {seat} für {person} am {day} storniert (hat die Organisation verlassen)"
+      "bookingCancelledLeft": "hat die Buchung von Platz {seat} für {person} am {day} storniert (hat die Organisation verlassen)",
+      "workspaceHandedOver": "hat den Arbeitsbereich «{name}» übergeben"
     },
     "showPlan": "Plan öffnen",
     "search": "Aktivität durchsuchen",
@@ -845,7 +847,9 @@
     "leadSent": "hat die E-Mail an «{name}» gesendet",
     "leadReplied": "hat eine Antwort von «{name}» erkannt",
     "leadAutoReply": "hat eine automatische Antwort (Abwesenheit) von «{name}» erkannt",
-    "leadDeclined": "hat ein «Nein» von «{name}» erkannt"
+    "leadDeclined": "hat ein «Nein» von «{name}» erkannt",
+    "leadWorkspace": "hat einen Arbeitsbereich für «{name}» eingerichtet",
+    "leadHandedOver": "hat den Arbeitsbereich an «{name}» übergeben"
   },
   "dashboard": {
     "title": "Start",
@@ -1181,7 +1185,8 @@
       "readOnlyAdmin": "Dieser Arbeitsbereich ist schreibgeschützt: Testphase oder Abo sind abgelaufen.",
       "pastDue": "Die letzte Zahlung für Seatline ist fehlgeschlagen.",
       "trialEnding": "{days, plural, =0 {Die Testphase endet heute.} one {Die Testphase endet in # Tag.} other {Die Testphase endet in # Tagen.}}",
-      "open": "Abrechnung öffnen"
+      "open": "Abrechnung öffnen",
+      "prepared": "Sie richten «{name}» für einen Lead ein. Importieren Sie den Grundriss unter Layout bearbeiten → Plan hinzufügen und übergeben Sie ihn danach unter Leads in Ihrem eigenen Arbeitsbereich."
     },
     "volumeTier": "{price} ab dem {from}. Arbeitsplatz"
   },
@@ -1805,6 +1810,22 @@
         "multiple_sites": "Mehrere Standorte",
         "microsoft365": "Microsoft 365",
         "warm": "Warmer Kontakt"
+      },
+      "office": {
+        "title": "Ihr Büro",
+        "hint": "Erstellt einen Arbeitsbereich für {company} mit Ihnen als Admin. Importieren Sie dort den Grundriss, passen Sie ihn an und übergeben Sie ihn dann.",
+        "setUp": "Büro einrichten",
+        "created": "Arbeitsbereich erstellt",
+        "open": "Arbeitsbereich öffnen",
+        "openHint": "Sie wechseln hinein; über das Kontomenü kommen Sie zurück.",
+        "handOver": "An {name} übergeben",
+        "handOverConfirm": "{name} ({email}) wird Admin und erhält eine Einladung per E-Mail. Sie verlassen den Arbeitsbereich, und die 30 Tage Gratistest beginnen jetzt.",
+        "noEmail": "Erfassen Sie zuerst die E-Mail-Adresse.",
+        "handedOver": "Übergeben am {when}. Anmeldelink für sie:",
+        "copy": "Link kopieren",
+        "copied": "Link kopiert",
+        "sent": "Übergeben, Einladung gesendet",
+        "sendYourself": "Übergeben. Die Einladung konnte nicht gesendet werden: Senden Sie ihnen den Link selbst."
       }
     }
   },
