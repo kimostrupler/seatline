@@ -598,4 +598,17 @@ describe('outreach (owner leads)', () => {
     // only once
     await api(app).post(`/owner/leads/${id}/handover`).set(a.headers).expect(409);
   });
+
+  it('a workspace set up by mistake can be deleted again, then set up anew', async () => {
+    const id = await newLead();
+    await api(app).delete(`/owner/leads/${id}/workspace`).set(a.headers).expect(409);
+    const first = (await api(app).post(`/owner/leads/${id}/workspace`).set(a.headers)).body;
+    await api(app).delete(`/owner/leads/${id}/workspace`).set(b.headers).expect(404);
+    await api(app).delete(`/owner/leads/${id}/workspace`).set(a.headers).expect(204);
+    expect(await owner.tenant.count({ where: { id: first.workspaceId } })).toBe(0);
+    const got = (await api(app).get(`/owner/leads/${id}`).set(a.headers)).body;
+    expect(got.workspaceId).toBeNull();
+    // the lead can get a new one
+    await api(app).post(`/owner/leads/${id}/workspace`).set(a.headers).expect(201);
+  });
 });

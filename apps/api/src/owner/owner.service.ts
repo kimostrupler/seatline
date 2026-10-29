@@ -109,14 +109,19 @@ export class OwnerService {
       });
     // the trace first, then the rows, then the files: if Blob Storage fails, the deletion is
     // still on record and the log names the folder to clean up
-    await this.db.run(ctx.tenantId, (tx) =>
-      audit(tx, ctx, {
+    await this.db.run(ctx.tenantId, async (tx) => {
+      await audit(tx, ctx, {
         action: 'owner.workspace.delete',
         entityType: 'tenant',
         entityId: tenantId,
         before: { name: tenant.name },
-      }),
-    );
+      });
+      // a lead it was set up for can get a new one
+      await tx.lead.updateMany({
+        where: { tenantId: ctx.tenantId, workspaceId: tenantId },
+        data: { workspaceId: null, handedOverAt: null },
+      });
+    });
     await this.db.deleteTenant(tenantId);
     try {
       await this.storage.deletePrefix(`${tenantId}/`);

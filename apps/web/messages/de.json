@@ -1825,7 +1825,10 @@
         "copy": "Link kopieren",
         "copied": "Link kopiert",
         "sent": "Übergeben, Einladung gesendet",
-        "sendYourself": "Übergeben. Die Einladung konnte nicht gesendet werden: Senden Sie ihnen den Link selbst."
+        "sendYourself": "Übergeben. Die Einladung konnte nicht gesendet werden: Senden Sie ihnen den Link selbst.",
+        "delete": "Diesen Arbeitsbereich löschen",
+        "deleteConfirm": "Den für {company} eingerichteten Arbeitsbereich mit allem darin löschen? Das lässt sich nicht rückgängig machen; danach können Sie einen neuen einrichten.",
+        "deleted": "Arbeitsbereich gelöscht"
       }
     }
   },
