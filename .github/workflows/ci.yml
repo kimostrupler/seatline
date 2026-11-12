@@ -67,7 +67,7 @@ jobs:
       - name: Install Chromium for the browser tests
         run: pnpm --filter @seatline/web exec playwright install chromium
       - run: pnpm check
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-traces
