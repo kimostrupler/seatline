@@ -60,7 +60,7 @@ jobs:
       - name: Playwright version
         id: playwright
         run: echo "version=$(pnpm --filter @seatline/web exec playwright --version)" >> "$GITHUB_OUTPUT"
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
